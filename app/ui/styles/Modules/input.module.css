@@ -1,0 +1,5 @@
+@reference "../../../globals.css";
+
+.input {
+    @apply bg-white p-3 rounded border border-gray-300 placeholder:text-[14px];
+}

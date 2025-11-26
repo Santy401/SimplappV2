@@ -3,6 +3,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  --bt-color: #5037ec;
+  --bt-color-hover: #5037ec;
+
+  --input-color: #fff;
 }
 
 @theme inline {
@@ -10,12 +15,19 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-bt-color: var(--bt-color);
+  --color-bt-color-hover: var(--bt-color-hover);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff;
+    --foreground: #171717;
+
+    --bt-color: #5037ec;
+    --bt-color-hover: #5037ec;
+
+    --input-color: #ededed;
   }
 }
 
@@ -23,4 +35,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+span {
+  padding: 0;
+  margin: 0;
 }
