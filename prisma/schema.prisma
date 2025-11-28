@@ -14,43 +14,45 @@ datasource db {
 }
 
 model User {
-  id          Int    @id @default(autoincrement())
-  email       String @unique
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
   name        String
   password    String
   typeAccount String
   country     String
+  company     Company?
+  bills       Bill[]
 
-  company Company?
-  bills   Bill[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Company {
   id Int @id @default(autoincrement())
 
   userId Int  @unique
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  companyName      String
-  accountId        String?
-  commercialName   String?
-  organizationType OrganizationType
-  vatCondition     VatCondition
+  companyName      String           @default("")
+  accountId        String?          @default("")
+  commercialName   String?          @default("")
+  organizationType OrganizationType @default(COMPANY)
+  vatCondition     VatCondition     @default(SIMPLIFIED_REGIME)
 
-  identificationNumber String
-  verificationDigit    String?
+  identificationNumber String  @default("")
+  verificationDigit    String? @default("")
 
   lastAccountingClose    DateTime?
-  economicActivity       String?
-  industryAndCommerceTax Boolean   @default(false)
+  economicActivity       String?    @default("")
+  industryAndCommerceTax Boolean    @default(false)
 
-  address      String
-  department   String?
-  municipality String?
-  postalCode   String?
+  address      String  @default("")
+  department   String? @default("")
+  municipality String? @default("")
+  postalCode   String? @default("")
 
-  phone String?
-  email String?
+  phone String? @default("")
+  email String? @default("")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
