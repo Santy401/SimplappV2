@@ -1,7 +1,8 @@
-// app/layout/Breadcrumb.tsx (o donde tengas tu layout)
+// app/layout/Breadcrumb.tsx
 "use client";
 
 import { ChevronRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 const SIDEBAR_ITEMS = [
     { id: "inicio", label: "Inicio" },
@@ -11,26 +12,24 @@ const SIDEBAR_ITEMS = [
     { id: "ventas-cotizaciones", label: "Cotizaciones", parentId: "ventas" },
     { id: "ventas-remisiones", label: "Remisiones", parentId: "ventas" },
     { id: "ventas-clientes", label: "Clientes", parentId: "ventas" },
+    { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
+     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
     { id: "ventas-productos", label: "Productos De Venta", parentId: "ventas" },
-    { id: "vendedores", label: "Vendedores", icon: null },
-    { id: "notifications", label: "Notifications" },
-    { id: "market", label: "Market" },
-    { id: "news", label: "News" },
-    { id: "interactive-chart", label: "Interactive Chart" },
-    { id: "mutual-funds", label: "Mutual Funds" },
-    { id: "portfolio", label: "Portfolio" },
-    { id: "support", label: "Support" },
-    { id: "settings", label: "Settings" },
+    // ... otros items
 ];
 
 interface BreadcrumbProps {
-    activeItem: string;
+    activeItem?: string; // Hacerlo opcional para que pueda usar usePathname
 }
 
 export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
-    const currentItem = SIDEBAR_ITEMS.find(item => item.id === activeItem);
+    const pathname = usePathname();
+    
+    // Si no se pasa activeItem, lo detecta de la URL
+    const detectedItem = !activeItem ? detectActiveItem(pathname) : activeItem;
+    const currentItem = SIDEBAR_ITEMS.find(item => item.id === detectedItem);
 
-    if (!currentItem || activeItem === 'inicio') {
+    if (!currentItem || detectedItem === 'inicio') {
         return (
             <div className="text-gray-400 flex items-center">
                 <span className="text-white font-medium">Simplapp</span>
@@ -38,23 +37,52 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
         );
     }
 
-    const parentItem = currentItem.parentId
-        ? SIDEBAR_ITEMS.find(item => item.id === currentItem.parentId)
-        : null;
+    // Construir la cadena de breadcrumb
+    const breadcrumbItems = getBreadcrumbChain(currentItem);
 
     return (
-        <div className="text-gray-400 flex items-center">
+        <div className="text-gray-400 flex items-center flex-wrap gap-1">
             <span className="text-white font-medium">Simplapp</span>
-
-            {parentItem && (
-                <>
-                    <ChevronRight width={16} height={16} className="mx-2 text-gray-500" />
-                    <span className="text-gray-400">{parentItem.label}</span>
-                </>
-            )}
-
-            <ChevronRight width={16} height={16} className="mx-2 text-gray-500" />
-            <span className="text-gray-400">{currentItem.label}</span>
+            
+            {breadcrumbItems.map((item, index) => (
+                <div key={item.id} className="flex items-center">
+                    <ChevronRight width={16} height={16} className="mx-1 text-gray-500" />
+                    <span className={`${index === breadcrumbItems.length - 1 ? 'text-white font-medium' : 'text-gray-400'}`}>
+                        {item.label}
+                    </span>
+                </div>
+            ))}
         </div>
     );
+}
+
+function detectActiveItem(pathname: string): string {
+    const path = pathname.toLowerCase();
+    
+    if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
+    if (path.includes('/ventas/clientes')) return 'ventas-clientes';
+    if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
+    if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
+    if (path.includes('/ventas/venta')) return 'ventas-venta';
+    if (path.includes('/ventas')) return 'ventas';
+    if (path.includes('/dashboard')) return 'dashboard';
+    
+    return 'inicio';
+}
+
+function getBreadcrumbChain(currentItem: any): any[] {
+    const chain = [currentItem];
+    let parentId = currentItem.parentId;
+    
+    while (parentId) {
+        const parentItem = SIDEBAR_ITEMS.find(item => item.id === parentId);
+        if (parentItem) {
+            chain.unshift(parentItem);
+            parentId = parentItem.parentId;
+        } else {
+            break;
+        }
+    }
+    
+    return chain;
 }

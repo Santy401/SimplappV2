@@ -1,48 +1,46 @@
 'use client';
 
-import type { Metadata } from "next";
 import "@/app/globals.css";
 import Sidebar from "@/app/ui/components/Navbar/Sidebar";
 import { useState } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb"; 
-import Clientes from "@/app/ui/components/Ventas/Clientes/pages"
-// import { Navbar } from "@/app/ui/components/Dashboard/Navbar/Navbar";
+import Clientes from "@/app/ui/components/Ventas/Clientes/pages";
+import { CreateClient } from "@/app/ui/components/Ventas/Clientes/create/page";
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [currentView, setCurrentView] = useState('dashboard')
+  const [currentView, setCurrentView] = useState('inicio');
 
   const renderContent = () => {
     switch (currentView) {
       case 'inicio':
-        return <div className="text-white">Eres el mejor brother :D!</div>
+        return <div className="text-white">Eres el mejor brother :D!</div>;
       case 'dashboard':
-        return <Dashboard />
+        return <Dashboard />;
       case 'ventas-venta':
-        return <div className="text-white p-8">Comprobante De Venta</div>
+        return <div className="text-white p-8">Comprobante De Venta</div>;
       case 'ventas-cotizaciones':
-        return <div className="text-white p-8">Cotizaciones</div>
+        return <div className="text-white p-8">Cotizaciones</div>;
       case 'ventas-remisiones':
-        return <div className="text-white p-8">Remisiones</div>
+        return <div className="text-white p-8">Remisiones</div>;
       case 'ventas-clientes':
-        return <Clientes />
+        return <Clientes onSelect={setCurrentView} />;
+      case 'ventas-clientes-create':
+        return <CreateClient onBack={() => setCurrentView('ventas-clientes')} />;
       case 'ventas-productos':
-        return <div className="text-white p-8">Productos De Venta</div>
+        return <div className="text-white p-8">Productos De Venta</div>;
       case 'vendedores':
-        return <div>Vendedores</div>
-      case 'venta':
-        return <h1>Hola</h1>
-      case 'dashboard':
-        return <div className="text-white">GOOOOD JOOB!</div>
-      case 'dashboard':
-        return <div className="text-white">GOOOOD JOOB!</div>
+        return <div>Vendedores</div>;
+      default:
+        return <div className="text-white p-8">Selecciona una opción del menú</div>;
     }
-  }
+  };
+
   return (
     <html lang="en">
       <body>

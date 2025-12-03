@@ -36,8 +36,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onSelect }: SidebarProps) {
-  const [expandedItems, setExpandedItems] = useState<string[]>(["ventas"]) // ← Cambiado a "ventas"
-  const [activeItem, setActiveItem] = useState("dashboard")
+  const [expandedItems, setExpandedItems] = useState<string[]>(["ventas"]) 
+  const [activeItem, setActiveItem] = useState("inicio")
   const [isExpanded, setIsExpanded] = useState(true)
 
   const toggleSubmenu = (id: string) => {
@@ -113,7 +113,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                 if (item.submenu) {
                   toggleSubmenu(item.id)
                 } else {
-                  onSelect?.(item.id) // ← Solo llama onSelect si NO tiene submenu
+                  onSelect?.(item.id)
                 }
               }}
               className={cn(
@@ -154,20 +154,18 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                 </div>
               )}
             </button>
-
-            {/* Submenu */}
             {isExpanded && item.submenu && expandedItems.includes(item.id) && (
               <div className="ml-4 mt-2 space-y-1 border-l border-[#2d2d2d] pl-3">
                 {item.submenu.map((subitem) => (
                   <button
                     key={subitem.id}
                     onClick={() => {
-                      setActiveItem(subitem.id) // ← Agrega esto
-                      onSelect?.(subitem.id)     // ← Agrega esto
+                      setActiveItem(subitem.id) 
+                      onSelect?.(subitem.id) 
                     }}
                     className={cn(
                       "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200",
-                      activeItem === subitem.id // ← Agrega esto
+                      activeItem === subitem.id
                         ? "bg-slate-800 text-white"
                         : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
                     )}
