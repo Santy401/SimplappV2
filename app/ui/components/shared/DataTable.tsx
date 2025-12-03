@@ -14,7 +14,8 @@ import {
   Plus,
 } from "lucide-react";
 import { Button } from "@/app/ui/cn/components/ui/button";
-import { TableProps } from "@/domain/entities/table.entity";
+import { Checkbox } from "@/app/ui/cn/components/ui/checkbox";
+import { TableColumn, TableProps } from "@/domain/entities/table.entity";
 
 export function DataTable<T extends { id: number | string }>({
   data,
@@ -35,10 +36,9 @@ export function DataTable<T extends { id: number | string }>({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
 
-  // Filter data based on search
   const filteredData = useMemo(() => {
     if (!searchQuery) return data;
-    
+
     return data.filter((item) =>
       columns.some((column) => {
         const value = item[column.key as keyof T];
@@ -50,7 +50,6 @@ export function DataTable<T extends { id: number | string }>({
     );
   }, [data, searchQuery, columns]);
 
-  // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = pagination
     ? filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
@@ -63,28 +62,22 @@ export function DataTable<T extends { id: number | string }>({
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
 
-  // Render cell content
   const renderCell = (item: T, column: TableColumn<T>) => {
     if (column.cell) {
       return column.cell(item);
     }
-    
+
     const value = item[column.key as keyof T];
     return <>{value}</>;
   };
 
   return (
     <div className={` p-6 rounded-lg ${className}`}>
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-8">{title}</h1>
-
-        {/* Controls */}
         <div className="flex flex-col gap-4 mb-6">
-          {/* Top Row */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* View Tabs (opcional) */}
-            {actions || (
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 items-center">
+            {/* {actions || (
               <div className="flex gap-2 border border-[#2d2d2d] rounded-lg p-1 bg-card w-fit">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -98,10 +91,9 @@ export function DataTable<T extends { id: number | string }>({
                   Table
                 </Button>
               </div>
-            )}
+            )} */}
 
-            {/* Right Actions */}
-            <div className="flex gap-2 flex-wrap md:flex-nowrap">
+            <div className="flex gap-2 flex-wrap md:flex-nowrap items-center">
               {searchable && (
                 <div className="relative flex-1 md:flex-initial">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -113,46 +105,26 @@ export function DataTable<T extends { id: number | string }>({
                       setSearchQuery(e.target.value);
                       setCurrentPage(1);
                     }}
-                    className="w-full pl-10 pr-4 py-2 bg-card border border-[#2d2d2d] rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    className="w-full pl-10 pr-4 py-2 bg-card border border-[#2d2d2d] rounded-lg text-primary placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
                   />
                 </div>
               )}
-
-              {onView && (
-                <Button variant="outline" size="sm" className="gap-2 bg-transparent" onClick={() => onView}>
-                  <Eye className="w-4 h-4" />
-                  Hide
-                </Button>
-              )}
-
-              <Button variant="outline" size="sm" className="gap-2 bg-transparent">
-                <Settings className="w-4 h-4" />
-                Customize
-              </Button>
-
-              {onExport && (
-                <Button variant="outline" size="sm" onClick={onExport}>
-                  Export
-                </Button>
-              )}
-
-              {onAdd && (
-                <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary/90" onClick={onAdd}>
-                  <Plus className="w-4 h-4" />
-                  Add New
-                </Button>
-              )}
             </div>
+            {onAdd && (
+              <Button size="sm" className="gap-2 w-40 h-10 bg-card border border-border cursor-pointer text-primary hover:bg-[#2d2d2d]/90 hover:text-primary" onClick={onAdd}>
+                <Plus className="w-7 h-7" />
+                Agregar Cliente
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Table */}
         <div className="border border-[#2d2d2d] rounded-lg overflow-auto">
           <table className="w-full overflow-auto">
             <thead className="border-b border border-[#2d2d2d]">
               <tr>
                 <th className="w-10 px-4 py-4 text-left">
-                  <input type="checkbox" className="w-4 h-4 rounded border border-[#2d2d2d]" />
+                  <Checkbox/>
                 </th>
                 {columns.map((column) => (
                   <th
@@ -171,7 +143,7 @@ export function DataTable<T extends { id: number | string }>({
               {paginatedData.map((item) => (
                 <tr key={item.id} className="hover:bg-[#2d2d2d75] transition-colors">
                   <td className="w-10 px-4 py-4">
-                    <input type="checkbox" className="w-4 h-4 rounded border border-[#2d2d2d]" />
+                    <Checkbox/>
                   </td>
                   {columns.map((column) => (
                     <td
@@ -185,13 +157,13 @@ export function DataTable<T extends { id: number | string }>({
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         {onView && (
-                          <Button variant="ghost" size="sm" className="gap-2 h-8" onClick={() => onView(item)}>
+                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onView(item)}>
                             <Eye className="w-4 h-4" />
                             View
                           </Button>
                         )}
                         {onEdit && (
-                          <Button variant="ghost" size="sm" className="gap-2 h-8" onClick={() => onEdit(item)}>
+                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onEdit(item)}>
                             <Edit2 className="w-4 h-4" />
                             Edit
                           </Button>
@@ -200,7 +172,7 @@ export function DataTable<T extends { id: number | string }>({
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="gap-2 h-8 text-destructive hover:text-destructive"
+                            className="gap-2 h-8 text-destructive hover:text-destructive cursor-pointer"
                             onClick={() => onDelete(item)}
                           >
                             <Trash2 className="w-4 h-4" />
@@ -216,7 +188,6 @@ export function DataTable<T extends { id: number | string }>({
           </table>
         </div>
 
-        {/* Pagination */}
         {pagination && filteredData.length > 0 && (
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-6">
             <div className="flex items-center gap-2">
@@ -251,7 +222,6 @@ export function DataTable<T extends { id: number | string }>({
                 <ChevronLeft className="w-4 h-4" />
               </Button>
 
-              {/* Page numbers */}
               <div className="flex gap-1">
                 {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                   let pageNum;
