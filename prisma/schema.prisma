@@ -80,7 +80,11 @@ model Client {
   department   String?
   municipality String?
   postalCode   String?
-  address      String
+  address      String?
+  
+  is_supplier  Boolean @default(false)
+  it_branches  Boolean @default(false)
+  observations String?
 
   bills Bill[]
 
@@ -113,12 +117,14 @@ model Bill {
 
 enum OrganizationType {
   NATURAL_PERSON
+  PERSON_JURIDIC
   LEGAL_ENTITY
   COMPANY
 }
 
 enum IdentificationType {
   CITIZEN_ID
+  NIT
   PASSPORT
   TAX_ID
   FOREIGN_ID
