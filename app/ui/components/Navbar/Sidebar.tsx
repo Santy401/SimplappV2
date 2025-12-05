@@ -20,6 +20,7 @@ import {
   ChevronLeft,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ThemeToggle } from "../../cn/components/ui/ThemeToggle"
 
 interface NavItem {
   id: string
@@ -71,17 +72,17 @@ export default function Sidebar({ onSelect }: SidebarProps) {
   return (
     <div
       className={cn(
-        "h-screen bg-[#0C0C0C] from-slate-900 via-slate-900 to-slate-950 border-r border-[#2d2d2d] flex flex-col text-slate-300 font-sans overflow-hidden transition-all duration-300",
+        "h-screen bg-background from-slate-900 via-slate-900 to-slate-950 border-r border-sidebar-border flex flex-col text-slate-300 font-sans overflow-hidden transition-all duration-300",
         isExpanded ? "w-72" : "w-20", "sticky top-0 left-0 z-50"
       )}
     >
-      <div className={cn("border-b border-[#2d2d2d]", isExpanded ? "p-6" : "p-4")}>
+      <div className={cn("border-b border-sidebar-border", isExpanded ? "p-6" : "p-4")}>
         <div className="flex items-center justify-between gap-2 mb-6">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
               <span className="text-white font-bold text-sm">S</span>
             </div>
-            {isExpanded && <span className="text-white font-bold text-lg tracking-tight">Simplapp</span>}
+            {isExpanded && <span className="text-foreground font-bold text-lg tracking-tight">Simplapp</span>}
           </div>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
@@ -120,12 +121,12 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                 "w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg transition-all duration-200 group",
                 isExpanded ? "px-4" : "px-2 justify-center",
                 activeItem === item.id
-                  ? "bg-[#212226] text-white shadow-lg shadow-purple-500/10"
-                  : "hover:bg-[#212226] text-slate-400 hover:text-slate-300",
+                  ? "bg-ring text-purple-400 shadow-lg shadow-purple-500/10"
+                  : "hover:bg-forground text-foreground-text hover:text-purple-400",
               )}
               title={!isExpanded ? item.label : undefined}
             >
-              <div className="flex items-center gap-3 w-fit">
+              <div className="flex itemss-center gap-3 w-fit">
                 <div
                   className={cn(
                     "flex items-center justify-center flex-shrink-0",
@@ -164,10 +165,10 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                       onSelect?.(subitem.id) 
                     }}
                     className={cn(
-                      "w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-all duration-200",
+                      "w-full flex items-center gap-2 px-3 py-2 hover:bg-purple-400 text-[13px] cursor pointer rounded-lg transition-all duration-200",
                       activeItem === subitem.id
-                        ? "bg-slate-800 text-white"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+                        ? "bg-foreground-bg-bar text-secondary-foreground font-medium"
+                        : "text-foreground-text"
                     )}
                   >
                     {subitem.label}
@@ -179,7 +180,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
         ))}
       </nav>
 
-      <div className={cn("border-t border-[#2d2d2d] space-y-1", isExpanded ? "p-3" : "p-2")}>
+      <div className={cn("border-t relative border-sidebar-border space-y-1", isExpanded ? "p-3" : "p-2")}>
         <button
           className={cn(
             "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-slate-300 transition-all duration-200 group",
@@ -192,7 +193,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
         </button>
         <button
           className={cn(
-            "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-slate-300 transition-all duration-200 group",
+            "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-slate-400 z-10 hover:text-slate-300 transition-all duration-200 group",
             isExpanded ? "w-full px-4 py-3" : "w-full px-2 py-3 justify-center",
           )}
           title={!isExpanded ? "Settings" : undefined}
@@ -200,6 +201,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           <Settings size={20} className="flex-shrink-0 group-hover:text-purple-400/60" />
           {isExpanded && <span className="text-sm font-medium">Settings</span>}
         </button>
+        {isExpanded && <div><ThemeToggle /></div>}
       </div>
     </div>
   )
