@@ -45,7 +45,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en">
+    <html suppressHydrationWarning>
       <body>
         <Sidebar onSelect={setCurrentView} />
         <div className="w-full ml-7 mt-7">

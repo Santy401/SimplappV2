@@ -22,7 +22,6 @@ interface CreateClientProps {
 type ClientFormData = Omit<CreateClientDto, 'id' | 'createdAt' | 'updatedAt' | 'bills'>;
 
 export function CreateClient({ onBack, initialData, mode = 'create' }: CreateClientProps) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [opcionesOpen, setOpcionesOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -125,23 +124,6 @@ export function CreateClient({ onBack, initialData, mode = 'create' }: CreateCli
     }
     return identificationTypeOptions.filter(option => option.value !== IdentificationType.NIT);
   };
-
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else if (storedTheme === 'light') {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(systemDark);
-      if (systemDark) {
-        document.documentElement.classList.add('dark');
-      }
-    }
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -29,7 +29,6 @@ interface ClientesProps {
 }
 
 export default function ClientesPage({ onSelect, onSelectClient }: ClientesProps) {
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const { clients, isLoading, error, deleteClient } = useClients();
   const router = useRouter();
 
@@ -269,23 +268,6 @@ export default function ClientesPage({ onSelect, onSelectClient }: ClientesProps
     console.log("Exportar clientes");
     // Logic
   };
-
-  useEffect(() => {
-    const storedTheme = localStorage.getItem('theme');
-    if (storedTheme === 'dark') {
-      setIsDarkMode(true);
-      document.documentElement.classList.add('dark');
-    } else if (storedTheme === 'light') {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    } else {
-      const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setIsDarkMode(systemDark);
-      if (systemDark) {
-        document.documentElement.classList.add('dark');
-      }
-    }
-  }, []);
 
   const totalClients = validClients.length;
   const naturalPersons = validClients.filter(c => c.organizationType === OrganizationType.NATURAL_PERSON).length;
