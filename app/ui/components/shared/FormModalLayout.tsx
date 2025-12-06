@@ -56,7 +56,6 @@ export function FormModalLayout({
 
   return (
     <div className={`min-h-screen ${className}`}>
-      {/* Header */}
       <div className='mt-3'>
         <div className={`${maxWidthClass} mx-auto px-1 py-4`}>
           <div className="flex items-center justify-between">
@@ -81,17 +80,14 @@ export function FormModalLayout({
         </div>
       </div>
 
-      {/* Form Content */}
       <div className={`${maxWidthClass} mx-auto px-8 py-8`}>
         <form onSubmit={onSubmit} className="space-y-8">
-          {/* Main Form Section */}
-          <div className="border border-border rounded-lg p-6 space-y-6">
+          <div className="border border-sidebar-border rounded-lg p-6 space-y-6">
             {children}
           </div>
 
-          {/* More Options Section */}
           {showMoreOptions && moreOptionsContent && (
-            <div className="border border-border rounded-lg overflow-hidden">
+            <div className="border border-sidebar-border rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={onToggleMoreOptions}
@@ -115,7 +111,6 @@ export function FormModalLayout({
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="flex justify-end gap-3">
             {onCancel && (
               <Button

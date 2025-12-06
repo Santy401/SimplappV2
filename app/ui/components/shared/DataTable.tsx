@@ -119,12 +119,12 @@ export function DataTable<T extends { id: number | string }>({
           </div>
         </div> */}
 
-        <div className="border border-[#2d2d2d] scale-99 rounded-lg overflow-auto">
+        <div className="border border-sidebar-border scale-99 rounded-lg overflow-auto">
           <table className="w-full overflow-auto">
-            <thead className="border-b border border-[#2d2d2d]">
+            <thead className="border-b border border-sidebar-border">
               <tr>
                 <th className="w-10 px-4 py-4 text-left">
-                  <Checkbox/>
+                  <Checkbox />
                 </th>
                 {columns.map((column) => (
                   <th
@@ -139,11 +139,11 @@ export function DataTable<T extends { id: number | string }>({
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y divide-sidebar-border">
               {paginatedData.map((item) => (
-                <tr key={item.id} className="hover:bg-[#2d2d2d75] transition-colors">
+                <tr key={item.id} className="hover:bg-gray-400/15 transition-colors">
                   <td className="w-10 px-4 py-4">
-                    <Checkbox/>
+                    <Checkbox />
                   </td>
                   {columns.map((column) => (
                     <td
