@@ -45,7 +45,7 @@ export const useLogin = () => {
 
       await new Promise(resolve => setTimeout(resolve, 200))
 
-      const redirectPath = '/ui/pages/Admin/Dashboard'
+      const redirectPath = '/ui/pages/Admin/Index'
       console.log('Redirecting to:', redirectPath)
 
       window.location.href = redirectPath

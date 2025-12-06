@@ -25,6 +25,8 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
 }
 
 model Company {
@@ -119,6 +121,18 @@ model Bill {
 
   quantity  Int
   createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  
+  @@index([userId])
+  @@index([token])
 }
 
 enum OrganizationType {

@@ -1,8 +1,7 @@
 import bcrypt from 'bcryptjs';
-import { SignJWT } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/interfaces/lib/prisma';
-import { env } from '@/interfaces/lib/env';
+import { generateAccessToken, generateRefreshToken } from '@/interfaces/lib/auth/token';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
@@ -26,11 +25,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
     }
 
-    const token = await new SignJWT({ id: user.id, email: user.email})
-      .setProtectedHeader({ alg: 'HS256' })
-      .setExpirationTime('24h')
-      .setIssuedAt()
-      .sign(new TextEncoder().encode(env.JWT_SECRET));
+    const accessToken = await generateAccessToken(user.id, user.email);
+    const refreshToken = await generateRefreshToken(user.id);
 
     const response = NextResponse.json({
       message: 'Login exitoso',
@@ -38,18 +34,29 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         id: user.id,
         email: user.email,
         name: user.name
-      }
+      },
+      accessToken,
     });
 
+    // Borra cookies viejas si existen
     response.cookies.delete('token');
     response.cookies.delete('auth-token');
 
-
-    response.cookies.set('auth-token', token, {
+    // ✅ GUARDA ACCESS TOKEN (15 minutos)
+    response.cookies.set('access-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 15 * 60,
+      path: '/',
+    });
+
+    // ✅ GUARDA REFRESH TOKEN (7 días)
+    response.cookies.set('refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
       path: '/',
     });
 
