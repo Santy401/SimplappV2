@@ -2,6 +2,8 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+
 import { apiClient } from '@/interfaces/lib/api-client';
 
 interface RegisterData {
@@ -32,15 +34,16 @@ export const useRegister = () => {
       return response;
     },
     onSuccess: (data) => {
-
+      toast.success('Cuenta creada exitosamente');
       if (typeof window !== 'undefined') {
         localStorage.setItem('auth-token', data.token);
       }
-      
+
       router.push('/ui/pages/Login');
     },
     onError: (error: Error) => {
       console.error('Registration error:', error);
+      toast.error(error.message || 'Error al crear la cuenta');
     },
   });
 };
