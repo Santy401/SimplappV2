@@ -9,8 +9,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -45,8 +46,8 @@ model Company {
   verificationDigit    String? @default("")
 
   lastAccountingClose    DateTime?
-  economicActivity       String?    @default("")
-  industryAndCommerceTax Boolean    @default(false)
+  economicActivity       String?   @default("")
+  industryAndCommerceTax Boolean   @default(false)
 
   address      String  @default("")
   department   String? @default("")
@@ -83,7 +84,7 @@ model Client {
   municipality String?
   postalCode   String?
   address      String?
-  
+
   is_supplier  Boolean @default(false)
   it_branches  Boolean @default(false)
   observations String?
@@ -95,9 +96,9 @@ model Client {
 }
 
 model Seller {
-  id Int @id @default(autoincrement())
-  name  String
-  Lastname  String
+  id       Int    @id @default(autoincrement())
+  name     String
+  Lastname String
 }
 
 model Product {
@@ -130,7 +131,7 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
-  
+
   @@index([userId])
   @@index([token])
 }
