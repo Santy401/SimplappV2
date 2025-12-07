@@ -23,7 +23,7 @@ export default function RootLayout({
   const renderContent = () => {
     switch (currentView) {
       case 'inicio':
-        return <div className="text-white">Eres el mejor brother :D!</div>;
+        return <div className="text-white">Inicio</div>;
       case 'dashboard':
         return <Dashboard />;
       case 'ventas-venta':
