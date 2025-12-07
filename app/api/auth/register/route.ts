@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { createUsers } from '@/interfaces/lib/users';
 import { prisma } from '@/interfaces/lib/prisma';
+import { generateAccessToken, generateRefreshToken } from '@/interfaces/lib/auth/token';
+
 import { cookies } from 'next/headers';
 
 export async function POST(request: Request): Promise<NextResponse> {
@@ -53,27 +55,39 @@ export async function POST(request: Request): Promise<NextResponse> {
       country: ''
     });
 
-    const tokenData = {
-      userId: newUser.id,
-      email: newUser.email,
-      name: newUser.name,
-      role: 'user',
-    };
-
-    const token = Buffer.from(JSON.stringify(tokenData)).toString('base64');
+    const accessToken = await generateAccessToken(newUser.id, newUser.email);
+    const refreshToken = await generateRefreshToken(newUser.id);
 
     const cookieStore = await cookies();
-    cookieStore.set('auth-token', token, {
+
+    // Set Access Token
+    cookieStore.set('access-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 15 * 60, // 15 minutes
+    });
+
+    // Set Refresh Token
+    cookieStore.set('refresh-token', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60, // 7 days
+    });
+
+    // Set Legacy Auth Token (for compatibility if needed)
+    cookieStore.set('auth-token', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     return NextResponse.json({
       message: 'Usuario creado exitosamente',
       user: newUser,
-      token
+      token: accessToken
     }, { status: 201 });
 
   } catch (error) {
