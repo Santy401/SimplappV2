@@ -47,15 +47,16 @@ export default function RootLayout({
   };
 
   return (
-    <html suppressHydrationWarning>
-      <body>
-        <Sidebar onSelect={setCurrentView} />
-        <div className="w-full ml-7 mt-7">
-          {children}
-          <Breadcrumb activeItem={currentView} />
-          {renderContent()}
-        </div>
-      </body>
-    </html>
+<div className="flex w-full">
+  <Sidebar onSelect={setCurrentView} />
+
+  <main className="flex-1 flex justify-center ml-7 mt-7">
+    <div className="w-full max-w-[200%]">
+      <Breadcrumb activeItem={currentView} />
+      {renderContent()}
+      {children}
+    </div>
+  </main>
+</div>
   );
 }

@@ -107,12 +107,10 @@
   --color-form-input-bg: var(--form-input-bg);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bt-color: #5037ec;
-    --bt-color-hover: #5037ec;
-    --input-color: #ededed;
-  }
+:root:not(.dark) {
+  --bt-color: #5037ec;
+  --bt-color-hover: #5037ec;
+  --input-color: #ededed;
 }
 
 .dark {
@@ -158,6 +156,7 @@ body {
   background-color: var(--background);
   display: flex;
   min-height: 100vh;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 span {
