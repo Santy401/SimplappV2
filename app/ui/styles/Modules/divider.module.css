@@ -1,6 +1,0 @@
-@reference "../../../globals.css";
-
-.dividerLogin {
-    @apply bg-gray-300 h-[1px] w-full my-5;
-}
-    

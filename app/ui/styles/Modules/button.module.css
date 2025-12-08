@@ -1,9 +1,0 @@
-@reference "../../../globals.css";
-
-.loginButton {
-    @apply bg-bt-color text-white p-3 rounded cursor-pointer mt-5 hover:bg-bt-color-hover transition-colors;
-}
-
-.OptionsTargetButtons {
-    @apply p-2 bg-card w-[90px] rounded cursor-pointer text-secondary-foreground text-[14px] border border-sidebar-border
-}
