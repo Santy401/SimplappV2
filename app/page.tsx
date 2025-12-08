@@ -3,12 +3,12 @@
 import Link from "next/link"
 import { Button } from "@/app/ui/cn/components/ui/button"
 import { ArrowRight, Kanban, List, Calendar } from "lucide-react"
+import { ThemeToggle } from "@/app/ui/cn/components/ui/ThemeToggle"
 
 export default function Home() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-secondary/10 w-full">
-      {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-sm border-b border-border bg-background/80">
+      <header className="sticky top-0 z-50 backdrop-blur-sm border-b border-sidebar-border bg-background/80">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg">
@@ -38,11 +38,12 @@ export default function Home() {
                 Iniciar Sesión
               </Link>
             </Button>
-            <Button size="sm" className="bg-primary hover:bg-primary/90">
+            <Button size="sm" className="bg-foreground hover:bg-foreground/90">
               <Link href="/ui/pages/Register">
                 Empezar Gratis
               </Link>
             </Button>
+          <ThemeToggle />
           </div>
         </div>
       </header>
@@ -51,12 +52,12 @@ export default function Home() {
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="text-center space-y-8">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-purple-700 border border-sidebar-border">
             <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold">
               ✨ Novedad
             </span>
-            <span className="text-sm text-primary">Facturación Electrónica V1.0</span>
-            <ArrowRight className="w-4 h-4 text-primary" />
+            <span className="text-sm text-foreground-text-second">Facturación Electrónica V1.0</span>
+            <ArrowRight className="w-4 h-4 text-foreground" />
           </div>
 
           {/* Main Title */}
@@ -71,15 +72,15 @@ export default function Home() {
 
           {/* View Options */}
           <div className="flex flex-wrap items-center justify-center gap-3 py-6">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-primary/50 transition cursor-pointer">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-sidebar-border hover:border-black transition cursor-pointer">
               <Kanban className="w-5 h-5" />
               <span className="text-sm font-medium">Gestión de Ventas</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-primary/50 transition cursor-pointer">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-sidebar-border hover:border-black transition cursor-pointer">
               <List className="w-5 h-5" />
               <span className="text-sm font-medium">Control de Inventario</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:border-primary/50 transition cursor-pointer">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-lg border border-sidebar-border hover:border-black transition cursor-pointer">
               <Calendar className="w-5 h-5" />
               <span className="text-sm font-medium">Vencimientos</span>
             </div>
@@ -88,7 +89,7 @@ export default function Home() {
 
         {/* App Screenshot */}
         <div className="mt-16 relative">
-          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-border bg-white">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-sidebar-border bg-white">
             <img src="/task-management-dashboard-with-kanban-board--team-.jpg" alt="Simplapp Dashboard" className="w-full h-auto" />
             {/* Subtle glow effect */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
@@ -104,21 +105,21 @@ export default function Home() {
       <section className="container mx-auto px-4 py-20 md:py-32">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-purple-700 flex items-center justify-center">
               <Kanban className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-xl font-bold">Panel de Control Integral</h3>
             <p className="text-foreground/60">Visualiza el estado de tu negocio en tiempo real con gráficas y métricas precisas.</p>
           </div>
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-purple-700 flex items-center justify-center">
               <List className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-xl font-bold">Facturación Automatizada</h3>
             <p className="text-foreground/60">Genera facturas, cotizaciones y remisiones con un solo clic. Cumple con la normativa local.</p>
           </div>
           <div className="space-y-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="w-12 h-12 rounded-lg bg-purple-700 flex items-center justify-center">
               <Calendar className="w-6 h-6 text-primary" />
             </div>
             <h3 className="text-xl font-bold">Gestión de Clientes (CRM)</h3>
@@ -129,19 +130,19 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl border border-border p-12 md:p-20 text-center space-y-6">
+        <div className="bg-gradient-to-r from-purbg-purple-700 to-secondary/10 rounded-2xl border border-sidebar-border p-12 md:p-20 text-center space-y-6">
           <h2 className="text-4xl md:text-5xl font-bold text-balance">¿Listo para escalar tu negocio?</h2>
           <p className="text-lg text-foreground/60 max-w-2xl mx-auto text-balance">
             Únete a las empresas que ya simplifican su gestión con Simplapp.
           </p>
-          <Button size="lg" className="bg-primary hover:bg-primary/90 h-12 px-8">
+          <Button size="lg" className="bg-purple-700 cursor-pointer hover:bg-purple-400 h-12 px-8">
             Comenzar Prueba Gratuita
           </Button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 bg-background">
+      <footer className="border-t border-sidebar-border py-12 bg-background">
         <div className="container mx-auto px-4 text-center text-foreground/60 text-sm">
           <p>&copy; 2025 Simplapp. Todos los derechos reservados.</p>
         </div>
