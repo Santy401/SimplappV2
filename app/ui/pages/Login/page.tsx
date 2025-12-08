@@ -3,9 +3,10 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Eye, EyeOff, Zap, Apple, ArrowRight } from "lucide-react"
+import { Eye, EyeOff, Zap, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/app/ui/cn/components/ui/button"
 import { useLogin } from "@/interfaces/hooks/features/auth/use-login"
+import Link from "next/link"
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false)
@@ -17,6 +18,9 @@ export default function Login() {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-background">
+            <Link href="/">
+            <ArrowLeft className="absolute left-0 top-0 mt-5 ml-5"/>
+            </Link>
             <div className="w-full max-w-md bg-form-bg rounded-lg scale-91 shadow-sm p-8">
                 <div className="flex flex-col items-center mb-8">
                     <div className="bg-foreground text-background rounded-lg p-3 mb-6">
@@ -37,7 +41,7 @@ export default function Login() {
                             placeholder="correo@dominio.com"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-4 py-3 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                            className="w-full px-4 py-3 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                             disabled={isLoading}
                         />
                     </div>
@@ -53,7 +57,7 @@ export default function Login() {
                                 placeholder="Ingresa tu contraseña"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                className="w-full px-4 py-3 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                 required
                                 disabled={isLoading}
                             />
@@ -80,13 +84,13 @@ export default function Login() {
                 </form>
 
                 <div className="flex items-center gap-3 my-6">
-                    <div className="flex-1 h-px bg-neutral-200"></div>
+                    <div className="flex-1 h-px bg-foreground-text-second"></div>
                     <span className="text-sm text-muted-foreground">O</span>
-                    <div className="flex-1 h-px bg-neutral-200"></div>
+                    <div className="flex-1 h-px bg-foreground-text-second"></div>
                 </div>
 
                 <div className="space-y-3">
-                    <button className="w-full px-4 py-3 rounded-lg border border-neutral-300 bg-white text-card hover:bg-neutral-50 font-medium flex items-center justify-center gap-2 transition">
+                    <button disabled className="w-full px-4 py-3 rounded-lg border border-neutral-300 bg-white text-foreground-text hover:bg-neutral-50 font-medium flex items-center justify-center gap-2 transition">
                         <svg viewBox="0 0 24 24" width="18" height="18" className="inline">
                             <path
                                 fill="#4285F4"

@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Eye, EyeOff, Zap, ArrowRight } from "lucide-react"
+import { Eye, EyeOff, Zap, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from "@/app/ui/cn/components/ui/button"
 import { useRegister } from "@/interfaces/hooks/features/auth/use-register"
 import Link from "next/link"
@@ -57,8 +57,10 @@ export default function Register() {
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md bg-form-bg rounded-lg shadow-sm p-8 max-h-[90vh] overflow-y-auto">
-                {/* Header with icon */}
+            <Link href="/">
+                <ArrowLeft className="absolute left-0 top-0 mt-5 ml-5" />
+            </Link>
+            <div className="w-full max-w-md bg-form-bg rounded-lg shadow-sm p-8 max-h-[95vh] scale-91 overflow-y-auto">
                 <div className="flex flex-col items-center mb-6">
                     <div className="bg-foreground text-background rounded-lg p-3 mb-4">
                         <Zap size={24} />
@@ -73,9 +75,7 @@ export default function Register() {
                     </div>
                 )}
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Name field */}
                     <div>
                         <label htmlFor="name" className="block text-sm font-medium text-foreground-text mb-1">
                             Nombre Completo <span className="text-red-500">*</span>
@@ -86,12 +86,11 @@ export default function Register() {
                             placeholder="Juan Pérez"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                            className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                             required
                         />
                     </div>
 
-                    {/* Email fields */}
                     <div className="grid grid-cols-1 gap-4">
                         <div>
                             <label htmlFor="email" className="block text-sm font-medium text-foreground-text mb-1">
@@ -103,7 +102,7 @@ export default function Register() {
                                 placeholder="correo@dominio.com"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                 required
                             />
                         </div>
@@ -117,20 +116,19 @@ export default function Register() {
                                 placeholder="Confirmar correo"
                                 value={formData.emailConfirm}
                                 onChange={(e) => setFormData({ ...formData, emailConfirm: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* Phone field */}
                     <div>
                         <label htmlFor="phone" className="block text-sm font-medium text-foreground-text mb-1">
                             Número de Teléfono <span className="text-red-500">*</span>
                         </label>
                         <div className="flex gap-2">
                             <select
-                                className="px-2 py-2 rounded-lg bg-form-input-bg text-foreground-text-second border border-transparent focus:outline-none focus:border-neutral-300"
+                                className="px-2 py-2 rounded-lg bg-form-input-bg text-foreground-text-second border border-input focus:outline-none focus:border-neutral-300"
                                 value={formData.countryCode}
                                 onChange={(e) => setFormData({ ...formData, countryCode: e.target.value })}
                             >
@@ -145,13 +143,12 @@ export default function Register() {
                                 placeholder="300 123 4567"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="flex-1 px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                className="flex-1 px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* Password fields */}
                     <div className="grid grid-cols-1 gap-4">
                         <div>
                             <label htmlFor="password" className="block text-sm font-medium text-foreground-text mb-1">
@@ -164,7 +161,7 @@ export default function Register() {
                                     placeholder="Crear contraseña"
                                     value={formData.password}
                                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                    className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                     required
                                 />
                                 <button
@@ -186,13 +183,12 @@ export default function Register() {
                                 placeholder="Confirmar contraseña"
                                 value={formData.confirmPassword}
                                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-transparent focus:outline-none focus:border-neutral-300 transition"
+                                className="w-full px-4 py-2 rounded-lg bg-form-input-bg text-foreground-text-second placeholder-muted-foreground border border-input focus:outline-none focus:border-neutral-300 transition"
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* Terms */}
                     <div className="space-y-2 text-sm">
                         <div className="flex items-center gap-2">
                             <input
@@ -220,10 +216,9 @@ export default function Register() {
                         </div>
                     </div>
 
-                    {/* Submit button */}
                     <Button
                         type="submit"
-                        className="w-full bg-foreground text-background hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition"
+                        className="w-full bg-foreground text-background hover:bg-white/80 cursor-pointer py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition"
                         disabled={isPending}
                     >
                         {isPending ? 'Creando cuenta...' : 'Crear Cuenta'}
@@ -231,7 +226,6 @@ export default function Register() {
                     </Button>
                 </form>
 
-                {/* Login link */}
                 <p className="text-center text-muted-foreground text-sm mt-6">
                     ¿Ya tienes una cuenta?{" "}
                     <Link href="/ui/pages/Login" className="text-blue-400 font-medium hover:underline">
