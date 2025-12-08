@@ -73,7 +73,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
     <div
       className={cn(
         "h-screen bg-background from-slate-900 via-slate-900 to-slate-950 border-r border-sidebar-border flex flex-col text-slate-300 font-sans overflow-hidden transition-all duration-300",
-        isExpanded ? "w-72" : "w-20", "sticky top-0 left-0 z-50"
+        isExpanded ? "w-62" : "w-20", "sticky top-0 left-0 z-50"
       )}
     >
       <div className={cn("border-b border-sidebar-border", isExpanded ? "p-6" : "p-4")}>
@@ -122,7 +122,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                 isExpanded ? "px-4" : "px-2 justify-center",
                 activeItem === item.id
                   ? "bg-ring text-purple-200 shadow-lg shadow-purple-500/10"
-                  : "hover:bg-forground text-foreground-text hover:text-purple-400",
+                  : "hover:bg-forground text-foreground-text hover:foreground-text-second00",
               )}
               title={!isExpanded ? item.label : undefined}
             >
