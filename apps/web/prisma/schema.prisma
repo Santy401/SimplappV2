@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  email       String   @unique
+  name        String
+  password    String
+  typeAccount String
+  country     String
+  company     Company?
+  bills       Bill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+}
+
+model Company {
+  id Int @id @default(autoincrement())
+
+  userId Int  @unique
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companyName      String           @default("")
+  accountId        String?          @default("")
+  commercialName   String?          @default("")
+  organizationType OrganizationType @default(COMPANY)
+  vatCondition     VatCondition     @default(SIMPLIFIED_REGIME)
+
+  identificationNumber String  @default("")
+  verificationDigit    String? @default("")
+
+  lastAccountingClose    DateTime?
+  economicActivity       String?   @default("")
+  industryAndCommerceTax Boolean   @default(false)
+
+  address      String  @default("")
+  department   String? @default("")
+  municipality String? @default("")
+  postalCode   String? @default("")
+
+  phone String? @default("")
+  email String? @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Client {
+  id Int @id @default(autoincrement())
+
+  organizationType OrganizationType
+  firstLastName    String
+  secondLastName   String?
+  firstName        String
+  otherNames       String?
+  commercialName   String?
+  code             String?
+
+  identificationType   IdentificationType
+  identificationNumber String             @unique
+
+  email        String?
+  includeCcBcc Boolean @default(false)
+  phone        String?
+
+  country      String
+  department   String?
+  municipality String?
+  postalCode   String?
+  address      String?
+
+  is_supplier  Boolean @default(false)
+  it_branches  Boolean @default(false)
+  observations String?
+
+  bills Bill[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Seller {
+  id       Int    @id @default(autoincrement())
+  name     String
+  Lastname String
+}
+
+model Product {
+  id    Int    @id @default(autoincrement())
+  name  String
+  price Float
+
+  bills Bill[]
+}
+
+model Bill {
+  id Int @id @default(autoincrement())
+
+  userId    Int
+  clientId  Int
+  productId Int
+
+  user    User    @relation(fields: [userId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  quantity  Int
+  createdAt DateTime @default(now())
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+enum OrganizationType {
+  NATURAL_PERSON
+  PERSON_JURIDIC
+  LEGAL_ENTITY
+  COMPANY
+}
+
+enum IdentificationType {
+  CITIZEN_ID
+  NIT
+  PASSPORT
+  TAX_ID
+  FOREIGN_ID
+}
+
+enum VatCondition {
+  RESPONSABLE
+  NO_RESPONSABLE
+  EXENTO
+  SIMPLIFIED_REGIME
+}
