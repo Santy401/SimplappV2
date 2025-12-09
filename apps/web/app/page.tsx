@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Button } from "@/app/ui/cn/components/ui/button"
+import { Button } from '@simplapp/ui';
 import { ArrowRight, Kanban, List, Calendar } from "lucide-react"
 import { ThemeToggle } from "@/app/ui/cn/components/ui/ThemeToggle"
 import { Input } from '@simplapp/ui';

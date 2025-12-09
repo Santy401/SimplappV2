@@ -13,7 +13,7 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
-import { Button } from "@/app/ui/cn/components/ui/button";
+import { Button } from '@simplapp/ui';;
 import { Checkbox } from "@/app/ui/cn/components/ui/checkbox";
 import { TableColumn, TableProps } from "@/domain/entities/table.entity";
 
