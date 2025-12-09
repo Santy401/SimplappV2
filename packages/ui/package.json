@@ -7,9 +7,9 @@
         ".": "./src/index.ts"
     },
     "scripts": {
-        "lint": "eslint .",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+         "lint": "eslint ."
     },
     "peerDependencies": {
         "react": "^19.0.0",
