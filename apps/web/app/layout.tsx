@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ThemeProvider } from "./ui/components/shared/theme-provider";
+import { Button } from '@simplapp/ui';
 
 export const metadata: Metadata = {
   title: "Simplapp",
@@ -24,6 +25,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
+            <Button />
             {children}
           </Providers>
         </ThemeProvider>

@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@simplapp/packages/*": ["../../packages/*/src"]
     }
   },
   "include": [

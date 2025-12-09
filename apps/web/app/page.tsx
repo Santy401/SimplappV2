@@ -4,6 +4,7 @@ import Link from "next/link"
 import { Button } from "@/app/ui/cn/components/ui/button"
 import { ArrowRight, Kanban, List, Calendar } from "lucide-react"
 import { ThemeToggle } from "@/app/ui/cn/components/ui/ThemeToggle"
+import { Input } from '@simplapp/ui';
 
 export default function Home() {
   return (
@@ -86,7 +87,7 @@ export default function Home() {
             </div>
           </div>
         </div>
-
+        
         {/* App Screenshot */}
         <div className="mt-16 relative">
           <div className="relative rounded-xl overflow-hidden shadow-2xl border border-sidebar-border bg-white">
