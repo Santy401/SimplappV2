@@ -1,7 +1,7 @@
 "use client";
 
 import { DataTable } from "@/app/ui/components/shared/DataTable";
-import { Button } from "@/app/ui/cn/components/ui/button";
+import { Button } from '@simplapp/ui';;
 import {
   UserCheck,
   DollarSign,

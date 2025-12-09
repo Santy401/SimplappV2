@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/app/ui/cn/components/ui/button";
+import { Button } from '@simplapp/ui';;
 import { Client, OrganizationType } from "@/domain/entities/Client.entity";
 import { formatIdentificationType, getFullName } from "@/interfaces/hooks/features/Clients/utils";
 import { Hash, Mail, MapPin, Phone, Tag, Eye, Edit, Trash2 } from "lucide-react";
