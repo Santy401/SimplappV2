@@ -1,7 +1,7 @@
 "use client"
 
 import { User, Settings, LogOut, CreditCard } from "lucide-react"
-import { Button } from "./button"
+import { Button } from '@simplapp/ui';
 import {
   DropdownMenu,
   DropdownMenuContent,
