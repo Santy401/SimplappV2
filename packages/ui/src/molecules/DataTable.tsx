@@ -13,9 +13,9 @@ import {
   Settings,
   Plus,
 } from "lucide-react";
-import { Button } from '@simplapp/ui';;
-import { Checkbox } from "@/app/ui/cn/components/ui/checkbox";
-import { TableColumn, TableProps } from "@/domain/entities/table.entity";
+import { Button } from '../atoms/Button/Button';;
+import { Checkbox } from "../atoms/Checkbox/Checkbox";
+import { TableColumn, TableProps } from "../types/table.entity";
 
 export function DataTable<T extends { id: number | string }>({
   data,

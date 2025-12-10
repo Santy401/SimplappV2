@@ -1,17 +1,17 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Input } from '@/app/ui/cn/components/ui/input';
-import { Label } from '@/app/ui/cn/components/ui/label';
-import { Textarea } from '@/app/ui/cn/components/ui/textarea';
-import { Checkbox } from '@/app/ui/cn/components/ui/checkbox';
+import { Input } from '../atoms/Input/Input';
+import { Label } from '../atoms/Label/Label';
+import { Textarea } from '../atoms/Textarea/Textarea';
+import { Checkbox } from '../atoms/Checkbox/Checkbox';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/app/ui/cn/components/ui/select';
+} from '../atoms/Select/Select';
 
 interface BaseFieldProps {
   label: string;

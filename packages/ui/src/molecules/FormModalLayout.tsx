@@ -1,7 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
-import { Button } from '@simplapp/ui';
+import { Button } from '../atoms/Button/Button';
 import { Printer, Paperclip, History, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface FormModalLayoutProps {

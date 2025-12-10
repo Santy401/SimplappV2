@@ -1,15 +1,13 @@
-"use client"
-
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 
-import { Button } from '@simplapp/ui';
+import { Button } from '@ui/atoms/Button/Button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./dropdown-menu"
+} from "@ui/atoms/DropdownMenu/dropdown-menu"
 
 export function ThemeToggle() {
   const { setTheme } = useTheme()
