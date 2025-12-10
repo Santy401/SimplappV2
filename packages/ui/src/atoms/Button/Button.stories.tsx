@@ -52,14 +52,6 @@ const meta: Meta<typeof Button> = {
                 defaultValue: { summary: 'default' },
             },
         },
-        background: {
-            description: 'Color de fondo personalizado',
-            control: 'color',
-            table: {
-                type: { summary: 'string' },
-                defaultValue: { summary: 'undefined' }
-            }
-        },
         children: {
             description: 'Contenido del botón',
             control: 'text',
@@ -69,7 +61,6 @@ const meta: Meta<typeof Button> = {
             control: 'boolean',
             table: {
                 type: { summary: 'boolean' },
-                defaultValue: { summary: false },
             },
         },
         asChild: {
@@ -77,7 +68,6 @@ const meta: Meta<typeof Button> = {
             control: 'boolean',
             table: {
                 type: { summary: 'boolean' },
-                defaultValue: { summary: false },
             },
         },
     },
