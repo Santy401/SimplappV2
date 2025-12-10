@@ -1,0 +1,1 @@
+export * from './clients/Clientes.entity.props';
