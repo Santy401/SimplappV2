@@ -1,6 +1,6 @@
 import { prisma } from './prisma';
-import { User as Data } from '@/domain/entities/User.entity'
-import { Company as CompanyData, OrganizationType, VatCondition } from '@/domain/entities/Company.entity'
+import { User as Data } from '@domain/entities/User.entity'
+import { Company as CompanyData, OrganizationType, VatCondition } from '@domain/entities/Company.entity'
 
 export async function getUsers() {
     try {

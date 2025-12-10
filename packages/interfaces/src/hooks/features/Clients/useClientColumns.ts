@@ -1,4 +1,4 @@
-import { IdentificationType } from "@/domain/entities/Client.entity";
+import { IdentificationType } from "@domain/entities/Client.entity";
 
 export const useClientColumns = () => {
     const formatIdentificationType = (type: IdentificationType) => {

@@ -1,4 +1,4 @@
-import { Client, OrganizationType, IdentificationType } from "@/domain/entities/Client.entity";
+import { Client, OrganizationType, IdentificationType } from "@domain/entities/Client.entity";
 
 export const clientsData: Client[] = [
   {

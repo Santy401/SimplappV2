@@ -1,4 +1,4 @@
-import { Client, OrganizationType } from "@/domain/entities/Client.entity";
+import { Client, OrganizationType } from "@domain/entities/Client.entity";
 
 export const useClientFullName = () => {
     const getFullName = (client: Client) => {

@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-import { apiClient } from '@/interfaces/lib/api-client';
+import { apiClient } from '@interfaces/lib/api-client';
 
 interface RegisterData {
   email: string;

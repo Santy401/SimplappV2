@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/interfaces/lib/api-client';
-import { User } from '@/domain/entities/User.entity'
+import { apiClient } from '@interfaces/lib/api-client';
+import { User } from '@domain/entities/User.entity'
 
 export interface Session {
   user: User | null;

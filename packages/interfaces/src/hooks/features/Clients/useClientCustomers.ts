@@ -1,9 +1,9 @@
 import { toast } from "sonner";
 import { useClients } from "./useClient";
-import { Client } from "@/domain/entities/Client.entity";
+import { Client } from "@domain/entities/Client.entity";
 import { useClientFullName } from "./useClientFullName";
 
-import { ClientesProps } from "@/domain/entities/props/clients/Clientes.entity.props";
+import { ClientesProps } from "@domain/entities/props/clients/Clientes.entity.props";
 
 export const useClientCustomers = ({ onSelect, onSelectClient }: ClientesProps) => {
     const { deleteClient } = useClients();

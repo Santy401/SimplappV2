@@ -1,6 +1,6 @@
 import { SignJWT, jwtVerify } from 'jose';
-import { prisma } from '@/interfaces/lib/prisma';
-import { env } from '@/interfaces/lib/env';
+import { prisma } from '../prisma';
+import { env } from '../env';
 import crypto from 'crypto';
 
 const ACCESS_TOKEN_EXPIRY = '15m';

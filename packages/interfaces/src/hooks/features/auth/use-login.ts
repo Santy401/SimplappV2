@@ -1,7 +1,7 @@
 'use client';
 
-import { apiClient } from '@/interfaces/lib/api-client';
-import { LoginCredentials, LoginResponse } from '@/domain/entities/Session.entity';
+import { apiClient } from '@interfaces/lib/api-client';
+import { LoginCredentials, LoginResponse } from '@domain/entities/Session.entity';
 import { useState } from 'react';
 
 export const useLogin = () => {

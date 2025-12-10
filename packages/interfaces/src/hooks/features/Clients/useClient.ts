@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Client, CreateClientDto } from '@/domain/entities/Client.entity';
+import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);

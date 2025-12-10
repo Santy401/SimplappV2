@@ -1,4 +1,4 @@
-import { Client, OrganizationType } from "@/domain/entities/Client.entity";
+import { Client, OrganizationType } from "@domain/entities/Client.entity";
 
 export const getFullName = (client: Client): string => {
     if (client.organizationType === OrganizationType.PERSON_JURIDIC && client.commercialName) {

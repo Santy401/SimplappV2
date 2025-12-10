@@ -1,7 +1,7 @@
 'use client';
 
 import { useMutation } from '@tanstack/react-query';
-import { apiClient } from '@/interfaces/lib/api-client';
+import { apiClient } from '@interfaces/lib/api-client';
 
 interface ForgotPasswordData {
   email: string;
