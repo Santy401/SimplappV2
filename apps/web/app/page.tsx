@@ -3,8 +3,7 @@
 import Link from "next/link"
 import { Button } from '@simplapp/ui';
 import { ArrowRight, Kanban, List, Calendar } from "lucide-react"
-import { ThemeToggle } from "@/app/ui/cn/components/ui/ThemeToggle"
-import { Input } from '@simplapp/ui';
+import { ThemeToggle } from "@simplapp/ui"
 
 export default function Home() {
   return (

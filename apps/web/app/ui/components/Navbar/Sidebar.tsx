@@ -18,9 +18,9 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { ThemeToggle } from "../../cn/components/ui/ThemeToggle"
-import { ProfileDropdown } from "../../cn/components/ui/dropdown-profile"
+import { cn } from "@simplapp/ui"
+import { ThemeToggle } from "@simplapp/ui"
+import { ProfileDropdown } from "@simplapp/ui"
 
 interface NavItem {
   id: string
@@ -191,8 +191,10 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           <AlertCircle size={20} className="flex-shrink-0 group-hover:text-purple-400/60" />
           {isExpanded && <span className="text-sm font-medium">Support</span>}
         </button>
+        <div className="flex items-center gap-3">
         <ProfileDropdown isExpanded={isExpanded} />
         {isExpanded && <div><ThemeToggle /></div>}
+        </div>
       </div>
     </div>
   )

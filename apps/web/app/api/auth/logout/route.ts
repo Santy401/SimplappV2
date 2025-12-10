@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { revokeRefreshToken } from '@/interfaces/lib/auth/token';
+import { revokeRefreshToken } from '@interfaces/lib/auth/token';
 
 /**
  * POST /api/auth/logout

@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/interfaces/lib/prisma';
-import { generateAccessToken, generateRefreshToken } from '@/interfaces/lib/auth/token';
+import { prisma } from '@interfaces/lib/prisma';
+import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {

@@ -4,8 +4,8 @@ import type React from "react"
 
 import { useState } from "react"
 import { Eye, EyeOff, Zap, ArrowRight, ArrowLeft } from "lucide-react"
-import { Button } from '@simplapp/ui';
-import { useRegister } from "@/interfaces/hooks/features/auth/use-register"
+import { Button } from '@ui/index';
+import { useRegister } from "@interfaces/src/hooks/features/auth/use-register"
 import Link from "next/link"
 
 export default function Register() {

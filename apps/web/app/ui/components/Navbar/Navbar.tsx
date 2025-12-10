@@ -9,8 +9,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/app/ui/cn/components/ui/dropdown-menu"
-import { useLogout } from "@/interfaces/hooks/features/auth"
+} from "@ui/index"
+import { useLogout } from "@interfaces/src/hooks/features/auth"
 
 export const Navbar = () => {
     const { handleLogout } = useLogout();

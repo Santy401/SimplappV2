@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { verifyAccessToken } from '@/interfaces/lib/auth/token';
-import { prisma } from '@/interfaces/lib/prisma';
+import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { prisma } from '@interfaces/lib/prisma';
 
 export interface SessionResponse {
   id: number;

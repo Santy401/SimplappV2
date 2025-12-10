@@ -1,7 +1,7 @@
 "use client";
 
-import { DataTable } from "@/app/ui/components/shared/DataTable";
-import { Button } from '@simplapp/ui';;
+import { DataTable } from "@simplapp/ui";
+import { Button } from '@simplapp/ui';
 import {
   UserCheck,
   DollarSign,
@@ -9,9 +9,9 @@ import {
   UserPlus,
   MapPin,
 } from "lucide-react";
-import { Client, OrganizationType } from "@/domain/entities/Client.entity";
-import { useClients } from "@/interfaces/hooks/features/Clients/useClient";
-import { useClientTable } from "@/interfaces/hooks/features/Clients/useClientTable";
+import { Client, OrganizationType } from "@domain/entities/Client.entity";
+import { useClients } from "@interfaces/src/hooks/index"
+import { useClientTable } from "@interfaces/src/hooks/index";
 
 interface ClientesProps {
   onSelect?: (view: string) => void;
@@ -61,7 +61,7 @@ export default function ClientesPage({
             </Button>
             <Button
               onClick={handleAddCustomer}
-              className="gap-2 bg-foreground hover:bg-primary/90"
+              className="bg-foreground hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition text-background"
             >
               <UserPlus className="w-4 h-4" />
               Nuevo Cliente

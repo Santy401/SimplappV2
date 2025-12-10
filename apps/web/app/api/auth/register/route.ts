@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { createUsers } from '@/interfaces/lib/users';
-import { prisma } from '@/interfaces/lib/prisma';
-import { generateAccessToken, generateRefreshToken } from '@/interfaces/lib/auth/token';
+import { createUsers } from '@interfaces/lib/users';
+import { prisma } from '@interfaces/lib/prisma';
+import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 
 import { cookies } from 'next/headers';
 

@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Client, CreateClientDto, OrganizationType, IdentificationType } from '@/domain/entities/Client.entity';
+import { Client, CreateClientDto, OrganizationType, IdentificationType } from '@domain/entities/Client.entity';
 import {
   InputField,
   SelectField,
   CheckboxField,
   TextareaField,
-} from '@/app/ui/components/shared/FormFields.tsx';
-import { FormModalLayout } from "@/app/ui/components/shared/FormModalLayout"
-import { FormSection } from "@/app/ui/components/shared/FormSection"
-import { useClients } from '@/interfaces/hooks/features/Clients/useClient';
+} from '@simplapp/ui';
+import { FormModalLayout } from "@simplapp/ui"
+import { FormSection } from "@simplapp/ui"
+import { useClients } from '@interfaces/src/hooks/features/Clients/useClient';
 
 interface CreateClientProps {
   onBack?: () => void;

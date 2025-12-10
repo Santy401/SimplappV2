@@ -5,7 +5,7 @@ import {
     generateAccessToken,
     generateRefreshToken,
     revokeRefreshToken
-} from '@/interfaces/lib/auth/token';
+} from '@interfaces/lib/auth/token';
 
 /**
  * POST /api/auth/refresh

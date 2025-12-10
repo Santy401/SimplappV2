@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Eye, EyeOff, Zap, ArrowRight, ArrowLeft } from "lucide-react"
 import { Button } from '@simplapp/ui';
-import { useLogin } from "@/interfaces/hooks/features/auth/use-login"
+import { useLogin } from "@hooks/index"
 import Link from "next/link"
 
 export default function Login() {
