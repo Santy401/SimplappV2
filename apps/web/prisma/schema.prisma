@@ -10,8 +10,6 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -57,6 +55,10 @@ model Company {
   phone String? @default("")
   email String? @default("")
 
+  clients  Client[]
+  products Product[]
+  sellers  Seller[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -91,6 +93,9 @@ model Client {
 
   bills Bill[]
 
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -99,14 +104,35 @@ model Seller {
   id       Int    @id @default(autoincrement())
   name     String
   Lastname String
+
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+}
+
+model Store {
+  id          Int     @id @default(autoincrement())
+  name        String
+  address     String?
+  observation String?
 }
 
 model Product {
-  id    Int    @id @default(autoincrement())
-  name  String
-  price Float
+  id          Int             @id @default(autoincrement())
+  name        String
+  code        String?
+  codeBarrers String?
+  category    CategoryProduct @default(VENTA_DE_SERVICIOS)
+
+  goodExcluded   Boolean            @default(false)
+  rateIva        String
+  UnitOfMeansure UnitOfMeansureList @default(UNIDAD)
+  observation    String
+  active         Boolean            @default(true)
 
   bills Bill[]
+
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
 }
 
 model Bill {
@@ -156,4 +182,32 @@ enum VatCondition {
   NO_RESPONSABLE
   EXENTO
   SIMPLIFIED_REGIME
+}
+
+enum UnitOfMeansureList {
+  UNIDAD
+  PAR
+  CAJA
+  BOTELLA
+  CENTIMETRO
+  CENTIMETRO_CUADRADO
+  METRO_CUADRADO
+  PULGADA
+  MILILITRO
+  LITRO
+  GALON
+  METRO_CUBICO
+  GRAMO
+  KILOGRAMO
+  TONELADA
+  LIBRA
+  HORA
+  MINUTO
+  DIA
+}
+
+enum CategoryProduct {
+  VENTA_DE_SERVICIOS
+  VENTA_DE_VIENES_Y_CAMBIO
+  VENTA_DE_PROPIEDAD_PLANTA_Y_EQUIPO
 }
