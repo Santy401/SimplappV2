@@ -3,17 +3,39 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@domain/*": ["packages/domain/src/*"],
-      "@interfaces/*": ["packages/interfaces/src/*"],
-      "@hooks/*": ["packages/interfaces/src/hoooks/*"],
-      "@ui/*": ["packages/ui/src/*"],
-      "@web/*": ["apps/web/*"]
+      "@/*": [
+        "./apps/*"
+      ],
+      "@simplapp/*": [
+        "./packages/*/src"
+      ],
+      "@apps/*": [
+        "./apps/*"
+      ],
+      "@domain/*": [
+        "packages/domain/src/*"
+      ],
+      "@interfaces/*": [
+        "packages/interfaces/src/*"
+      ],
+      "@hooks/*": [
+        "packages/interfaces/src/hoooks/*"
+      ],
+      "@ui/*": [
+        "packages/ui/src/*"
+      ],
+      "@web/*": [
+        "./apps/web/app/*"
+      ],
     }
   },
-  "include": ["packages/**/*", "apps/**/*"],
-  // "references": [
-  //   { "path": "./packages/domain" },
-  //   { "path": "./packages/interfaces" },
-  //   { "path": "./packages/ui" }
-  // ]
+  "include": [
+    "packages/**/*",
+    "apps/**/*"
+  ],
+  "references": [
+    { "path": "./packages/domain" },
+    { "path": "./packages/interfaces" },
+    { "path": "./packages/ui" }
+  ]
 }

@@ -13,7 +13,8 @@
       "@domain/*": ["../../packages/domain/src/*"],
       "@interfaces/*": ["../../packages/interfaces/*"],
       "@hooks/*": ["../../packages/interfaces/src/hooks/*"],
-      "@ui/*": ["../../packages/ui/src/*"]
+      "@ui/*": ["../../packages/ui/src/*"],
+      "@web/*": ["./app/*"],
     }
   },
   "include": [
@@ -24,5 +25,5 @@
     "../../packages/**/*.ts",
     "../../packages/**/*.tsx"
 , "../../packages/ui/src/atoms/Button/Button.tsx"  ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "../../packages/**/*"]
 }

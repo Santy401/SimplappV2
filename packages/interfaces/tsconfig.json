@@ -4,19 +4,44 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
+    "noEmit": false,
+    "emitDeclarationOnly": false,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
+    "rootDir": "../..",
+    "baseUrl": ".",
     "jsx": "react-jsx",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "paths": {
-      "@domain/*": ["../../domain/src/*"],
-      "@interfaces/*": ["./*"]
+      "@/*": [
+        "apps/web/*"
+      ],
+      "@domain/*": [
+        "../domain/src/*"
+      ],
+      "@interfaces/*": [
+        "./*"
+      ],
+      "@web/*": [
+        "../../../apps/web/app/*"
+      ],
     }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": [
+    "src/**/*",
+    "../../apps/**/*",
+    "../../packages/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "references": [
-    { "path": "../domain" }
+    {
+      "path": "../domain"
+    }
   ]
 }
