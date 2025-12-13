@@ -11,6 +11,8 @@ import CreateClient from "@/app/ui/components/Ventas/Clientes/create/page";
 
 import { Client } from "@domain/entities/Client.entity";
 import Vendedores from "@/app/ui/components/Ventas/Vendedor/page"
+import { Productos } from "@/app/ui/components/Ventas/Productos/page";
+import { Bodega } from "@/app/ui/components/Ventas/Bodega/page";
 
 export default function RootLayout({
   children,
@@ -38,9 +40,11 @@ export default function RootLayout({
         return <CreateClient onBack={() => setCurrentView('ventas-clientes')} initialData={selectedClient || undefined}
           mode={selectedClient ? 'edit' : 'create'} />;
       case 'ventas-productos':
-        return <div className="text-white p-8">Productos De Venta</div>;
+        return <Productos />;
       case 'ventas-vendedor':
         return <Vendedores />;
+      case 'ventas-bodega':
+        return <Bodega />;
       default:
         return <div className="text-white p-8">Selecciona una opción del menú</div>;
     }
