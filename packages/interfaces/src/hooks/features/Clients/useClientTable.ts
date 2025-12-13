@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useClientCustomers } from "./useClientCustomers";
-import { createColumns } from "@/app/ui/components/Ventas/Clientes/config/columns";
+import { createColumns } from "@web/ui/components/Ventas/Clientes/config/columns";
 import { Client } from "@domain/entities/Client.entity";
 
 interface UseClientTableProps {
