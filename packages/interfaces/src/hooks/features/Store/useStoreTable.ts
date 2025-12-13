@@ -3,13 +3,19 @@
 import { useMemo } from "react";
 import { useStoreCustomers } from "./useStoreCustomers";
 import { createColumns } from "@interfaces/src/config/Store";
+import { Store } from "@domain/entities/Store.entity";
 
-export const useStoreTable = () => {
+interface UseStoreTableProps {
+  onSelect?: (view: string) => void;
+  onSelectStores?: (store: Store) => void;
+}
+
+export const useStoreTable = ({ onSelect, onSelectStores }: UseStoreTableProps) => {
   const {
     handleEditCustomer,
     handleAddCustomer,
     handleExportCustomers
-  } = useStoreCustomers();
+  } = useStoreCustomers({ onSelect, onSelectStores });
 
   const columns = useMemo(() =>
     createColumns(handleEditCustomer),

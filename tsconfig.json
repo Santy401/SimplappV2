@@ -32,7 +32,7 @@
   "include": [
     "packages/**/*",
     "apps/**/*"
-  ],
+, "prisma.config.ts"  ],
   "references": [
     { "path": "./packages/domain" },
     { "path": "./packages/interfaces" },

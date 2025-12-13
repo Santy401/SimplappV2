@@ -8,15 +8,19 @@
   },
   "devDependencies": {
     "@types/node": "^20.19.26",
+    "@types/pg": "^8.11.10",
     "@types/react": "^19.2.7",
     "next": "16.0.7",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.0",
+    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/client": "^7.1.0",
     "@simplapp/domain": "workspace:*",
     "@tanstack/react-query": "^5.90.12",
     "jose": "^6.1.3",
+    "lucide-react": "^0.555.0",
+    "pg": "^8.16.3",
     "react": "19.2.0",
     "sonner": "^2.0.7"
   }

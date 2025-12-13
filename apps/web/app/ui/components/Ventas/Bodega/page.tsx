@@ -1,14 +1,23 @@
 "use client";
 
+import { Store } from "@domain/entities/Store.entity";
 import { useStore } from "@interfaces/src/hooks/features/Store/useStore";
 import { useStoreTable } from "@interfaces/src/hooks/features/Store/useStoreTable";
 import { Button, DataTable } from "@simplapp/ui";
 
-export function Bodega() {
+interface StoresProps {
+  onSelect?: (view: string) => void;
+  onSelectStores?: (store: Store) => void;
+}
+
+export function Bodega({
+  onSelect = () => { }, 
+  onSelectStores = () => { }  
+}: StoresProps) {
 
   const { stores } = useStore();
     
-  const { columns, handleAddCustomer } = useStoreTable();
+  const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores });
 
   const ValidStores = stores || [];
 

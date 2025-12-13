@@ -1,11 +1,12 @@
 import { toast } from "sonner";
 import { useStore } from "./useStore";
-import { ClientesProps } from "@domain/entities/props/clients/Clientes.entity.props";
+import { StoresProps } from "@domain/entities/props/stores/Stores.entity.props";
 import { Store } from "@domain/entities/Store.entity";
+import { useStoreFullName } from "./useStoreFullName";
 
-export const useStoreCustomers = () => {
-    // const { deleteClie} = useStore();
-
+export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => {
+    const { deleteStore } = useStore();
+    const { getFullName } = useStoreFullName();
     const handleEditCustomer = (store: Store) => {
         // if (onSelect) {
         //     onSelectStore(store);
@@ -16,16 +17,16 @@ export const useStoreCustomers = () => {
         // }
     };
 
-    // const handleDeleteCustomer = async (client: Client) => {
-    //     if (confirm(`¿Estás seguro de eliminar a ${getFullName(client)}?`)) {
-    //         const result = await deleteClient(client.id);
-    //         if (result) {
-    //             toast.success('Cliente eliminado');
-    //         } else {
-    //             toast.error('Error al eliminar cliente');
-    //         }
-    //     }
-    // };
+    const handleDeleteCustomer = async (store: Store) => {
+        if (confirm(`¿Estás seguro de eliminar a ${getFullName(store)}?`)) {
+            const result = await deleteStore(store.id);
+            if (result) {
+                toast.success('Cliente eliminado');
+            } else {
+                toast.error('Error al eliminar cliente');
+            }
+        }
+    };
 
     const handleViewCustomer = (store: Store) => {
         console.log("Ver detalles de Bodega:", store);
@@ -36,9 +37,9 @@ export const useStoreCustomers = () => {
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo Bodega");
-        // if (onSelect) {
-        //     onSelect('ventas-store-create');
-        // }
+        if (onSelect) {
+            onSelect('ventas-store-create');
+        }
     };
 
     const handleExportCustomers = () => {

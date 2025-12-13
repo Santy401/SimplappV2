@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from '@simplapp/ui';;
+import { Button } from '@ui/index';
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
-import { formatIdentificationType, getFullName } from "@hooks/features/Clients/utils/index";
+import { formatIdentificationType, getFullName } from "../../hooks/features/Clients/utils/index";
 import { Hash, Mail, MapPin, Phone, Tag, Eye, Edit, Trash2 } from "lucide-react";
 
 export const createColumns = (handleEditCustomer: (client: Client) => void,
