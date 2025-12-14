@@ -58,8 +58,8 @@ export function FormModalLayout({
     <div className={`min-h-screen ${className}`}>
       <div className='mt-3'>
         <div className={`${maxWidthClass} mx-auto px-1 py-4`}>
+            <h1 className="text-3xl font-bold text-foreground mb-5">{title}</h1>
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold text-foreground">{title}</h1>
             {showHeaderActions && (
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" type="button">

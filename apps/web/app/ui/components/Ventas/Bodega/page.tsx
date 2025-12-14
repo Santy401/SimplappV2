@@ -1,13 +1,14 @@
 "use client";
 
-import { Store } from "@domain/entities/Store.entity";
+import { Store as Storee } from "@domain/entities/Store.entity";
 import { useStore } from "@interfaces/src/hooks/features/Store/useStore";
 import { useStoreTable } from "@interfaces/src/hooks/features/Store/useStoreTable";
 import { Button, DataTable } from "@simplapp/ui";
+import { Store } from "lucide-react";
 
 interface StoresProps {
   onSelect?: (view: string) => void;
-  onSelectStores?: (store: Store) => void;
+  onSelectStores?: (store: Storee) => void;
 }
 
 export function Bodega({
@@ -65,7 +66,7 @@ export function Bodega({
           </div>
         ) : (
           <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
-            {/* <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" /> */}
+            <Store className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No hay Bodegas registrados</h3>
             <p className="text-muted-foreground mb-6">
               Comienza agregando tu primera Bodega

@@ -4,6 +4,7 @@ import { Store, CreateStoreDto } from "@domain/entities/Store.entity";
 import { useEffect, useState } from "react";
 import { useStore } from "@interfaces/src/hooks/features/Store/useStore";
 import { toast } from "sonner";
+
 import {
   FormModalLayout,
   FormSection,
@@ -17,11 +18,11 @@ interface CreateStoreProps {
     mode?: 'create' | 'edit';
 }
 
-type StoresFormData = Omit<CreateStoreDto, 'id'> & { id?: string };
+type StoresFormData = Omit<CreateStoreDto, 'id'> & { id?: number };
 
 export default function CreateStore({ onBack, initialData, mode = 'create' }: CreateStoreProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const { createStore } = useStore();
+    const { createStore, updateStore } = useStore();
     const [errors, setErrors] = useState<Partial<Record<keyof Store, string>>>({});
     const [formData, setFormData] = useState<StoresFormData>({
         name: '',
@@ -55,19 +56,31 @@ export default function CreateStore({ onBack, initialData, mode = 'create' }: Cr
                 const result = await createStore(formData);
 
                 if (result) {
-                    toast.success('Cliente creado exitosamente');
+                    toast.success('Bodega creado exitosamente');
                     handleCancel();
                 } else {
-                    toast.error('Error al crear el cliente');
+                    toast.error('Error al crear la bodega');
                 }
             } else {
                 if (!initialData?.id) {
-                    toast.error('ID del cliente no encontrado');
+                    toast.error('ID de la bodega no encontrado');
                     return;
+                }
+
+                const result = await updateStore(initialData.id, formData);
+
+                if (result) {
+                    toast.success('Bodega actualizada exitosamente');
+                    handleCancel();
+                } else {
+                    toast.error('Error al actualizar la bodega');
                 }
             }
         } catch (error) {
-
+            console.error('Error:', error);
+            toast.error('Error al procesar la solicitud');
+        } finally {
+            setIsLoading(false);
         }
     }
 
