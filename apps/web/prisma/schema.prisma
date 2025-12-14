@@ -56,12 +56,14 @@ model Company {
   phone String? @default("")
   email String? @default("")
 
+  stores   Store[]
   clients  Client[]
-  products Product[]
   sellers  Seller[]
+  products Product[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
 }
 
 model Client {
@@ -115,6 +117,10 @@ model Store {
   name        String
   address     String?
   observation String?
+
+  bills Bill[]
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
 }
 
 model Product {
@@ -142,13 +148,16 @@ model Bill {
   userId    Int
   clientId  Int
   productId Int
+  storeId   Int
 
   user    User    @relation(fields: [userId], references: [id])
   client  Client  @relation(fields: [clientId], references: [id])
   product Product @relation(fields: [productId], references: [id])
+  stores  Store  @relation(fields: [storeId], references: [id])
 
   quantity  Int
   createdAt DateTime @default(now())
+
 }
 
 model RefreshToken {
