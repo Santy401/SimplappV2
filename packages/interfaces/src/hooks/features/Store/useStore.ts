@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Store, CreateStoreDto } from "@domain/entities/Store.entity"
+import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.entity"
 
 export function useStore() {
     const [stores, setStores] = useState<Store[]>([]);
@@ -69,11 +69,35 @@ export function useStore() {
         }
     };
 
+    const updateStore = async (id: number, data: UpdateStoreDto) => {
+        try {
+            const response = await fetch(`/api/stores/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) throw new Error('Error al actualizar');
+
+            const updatedStore = await response.json();
+
+            setStores(prev => prev.map(store => 
+                store.id === id ? updatedStore : store
+            ));
+
+            return updatedStore;
+        } catch (err) {
+            console.error('Error updating store:', err);
+            return null;
+        }
+    }
+
     return {
         stores,
         refresh: fetchStores,
         deleteStore,
         createStore,
+        updateStore,
         error,
         isLoading
     }
