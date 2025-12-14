@@ -1,35 +1,76 @@
 "use client";
 
 import { Store } from "@domain/entities/Store.entity"
+import { Button } from "@ui/index";
+import { Edit, Eye, Trash2 } from "lucide-react";
 
-export const createColumns = (handleEditCustomer: (client: Store) => void) => {
+export const createColumns = (
+    handleEditCustomer: (client: Store) => void,
+    handleDeleteCustomer: (client: Store) => void
+) => {
 
     return [
         {
-            key: "Info",
-            header: "Informacion Basica",
+            key: "Name",
+            header: "Nombre",
             cell: (store: Store) => (
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center font-semibold">
-                        {store.name}
-                    </div>
-                    <div className="min-w-0">
-                        <div className="font-medium text-foreground-text truncate max-w-[180px]">
-
-                        </div>
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
-                            {/* <Tag size={12} /> */}
-
-                        </div>
-                        {/* {client.code && (
-                            <div className="text-xs text-gray-400 flex items-center gap-1 mt-1">
-                                <Hash size={10} />
-                                {client.code}
-                            </div>
-                        )} */}
-                    </div>
+                    {store.name}
                 </div>
             )
-        }
+        },
+        {
+            key: "Address",
+            header: "Direccion",
+            cell: (store: Store) => (
+                <div className="flex items-center gap-3">
+                    {store.address || "No Hay Direccion"}
+                </div>
+            )
+        },
+        {
+            key: "Observations",
+            header: "Observaciones",
+            cell: (store: Store) => (
+                <div className="flex items-center gap-3">
+                    {store.observation || "No Hay Observaciones"}
+                </div>
+            )
+        },
+        {
+            key: "actions",
+            header: "Acciones",
+            cell: (store: Store) => (
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        // onClick={() => handleViewCustomer(store)}
+                        className="hover:bg-gray-800 hover:text-white"
+                        title="Ver detalles"
+                    >
+                        <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditCustomer(store)}
+                        className="hover:bg-gray-800 hover:text-white"
+                        title="Editar"
+                    >
+                        <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteCustomer(store)}
+                        className="hover:bg-red-500/20 text-red-500 hover:text-red-400"
+                        title="Eliminar"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </Button>
+                </div>
+            ),
+        },
     ]
 }
