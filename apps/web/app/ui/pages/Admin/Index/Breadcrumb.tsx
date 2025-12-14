@@ -14,7 +14,10 @@ const SIDEBAR_ITEMS = [
     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
     { id: "ventas-productos", label: "Productos De Venta", parentId: "ventas" },
-    { id: "ventas-vendedor", label: "Vendedores", parentId: "ventas" }
+    { id: "ventas-vendedor", label: "Vendedores", parentId: "ventas" },
+    { id: "ventas-vendedor-create", label: "Crear Vendedor", parentId: "ventas-vendedor" },
+    { id: "ventas-bodega", label: "Bodegas", parentId: "ventas" },
+    { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" }
 ];
 
 interface BreadcrumbProps {
@@ -56,7 +59,6 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
 function detectActiveItem(pathname: string): string {
     const path = pathname.toLowerCase();
     
-    if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
     if (path.includes('/ventas/clientes')) return 'ventas-clientes';
     if (path.includes('/ventas/Vendedores')) return 'ventas-vendedor'
     if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
@@ -65,6 +67,9 @@ function detectActiveItem(pathname: string): string {
     if (path.includes('/ventas')) return 'ventas';
     if (path.includes('/dashboard')) return 'dashboard';
     
+    if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
+    if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
+
     return 'inicio';
 }
 
