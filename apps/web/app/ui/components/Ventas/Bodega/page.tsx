@@ -11,7 +11,7 @@ interface StoresProps {
   onSelectStores?: (store: Storee) => void;
 }
 
-export function Bodega({
+export default function Bodega({
   onSelect = () => { }, 
   onSelectStores = () => { }  
 }: StoresProps) {
