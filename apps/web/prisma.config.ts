@@ -1,13 +1,12 @@
-// /home/developer/Work/Simplapp/prisma.config.ts
-import 'dotenv/config';
-import { defineConfig, env } from "prisma/config";
+import 'dotenv/config'
+import { defineConfig, env } from 'prisma/config'
 
 export default defineConfig({
-  schema: './prisma/schema.prisma', // Ruta a tu esquema
+  schema: './prisma/schema.prisma',
   migrations: {
-    path: './prisma/migrations', // Ruta a tus migraciones
+    path: './prisma/migrations',
   },
   datasource: {
-    url: env("DATABASE_URL"),           // URL para migraciones
+    url: env('DATABASE_URL'),
   },
-});
+})
