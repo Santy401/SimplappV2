@@ -19,7 +19,7 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
 
     const handleDeleteCustomer = async (store: Store) => {
         if (confirm(`¿Estás seguro de eliminar a ${getFullName(store)}?`)) {
-            const result = await deleteStore(store.id.toString());
+            const result = await deleteStore(store.id);
             if (result) {
                 toast.success('Cliente eliminado');
             } else {

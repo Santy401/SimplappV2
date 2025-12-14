@@ -31,7 +31,7 @@ export function useStore() {
         }
     }
 
-    const deleteStore = async (id: string) => {
+    const deleteStore = async (id: number) => {
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'DELETE',
