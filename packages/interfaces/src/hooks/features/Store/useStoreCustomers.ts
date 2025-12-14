@@ -8,18 +8,18 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
     const { deleteStore } = useStore();
     const { getFullName } = useStoreFullName();
     const handleEditCustomer = (store: Store) => {
-        // if (onSelect) {
-        //     onSelectStore(store);
-        // }
+        if (onSelectStores) {
+            onSelectStores(store);
+        }
 
-        // if (onSelect) {
-        //     onSelect('ventas-store-create');
-        // }
+        if (onSelect) {
+            onSelect('ventas-bodega-create');
+        }
     };
 
     const handleDeleteCustomer = async (store: Store) => {
         if (confirm(`¿Estás seguro de eliminar a ${getFullName(store)}?`)) {
-            const result = await deleteStore(store.id);
+            const result = await deleteStore(store.id.toString());
             if (result) {
                 toast.success('Cliente eliminado');
             } else {
@@ -38,7 +38,7 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo Bodega");
         if (onSelect) {
-            onSelect('ventas-store-create');
+            onSelect('ventas-bodega-create');
         }
     };
 
@@ -47,6 +47,6 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
         // Logic
     };
 
-    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers }
+    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteCustomer }
 
 }

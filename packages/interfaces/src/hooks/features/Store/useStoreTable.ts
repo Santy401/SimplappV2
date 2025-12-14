@@ -14,17 +14,19 @@ export const useStoreTable = ({ onSelect, onSelectStores }: UseStoreTableProps) 
   const {
     handleEditCustomer,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteCustomer
   } = useStoreCustomers({ onSelect, onSelectStores });
 
   const columns = useMemo(() =>
-    createColumns(handleEditCustomer),
-    [handleAddCustomer, handleExportCustomers]
+    createColumns(handleEditCustomer, handleDeleteCustomer),
+    [handleAddCustomer, handleExportCustomers, handleDeleteCustomer]
   );
 
   return {
     columns,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteCustomer
   }
 };
