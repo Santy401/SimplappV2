@@ -6,12 +6,12 @@ import { useState } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
+
 import Clientes from "@/app/ui/components/Ventas/Clientes/pages";
 import CreateClient from "@/app/ui/components/Ventas/Clientes/create/page";
-
 import Vendedores from "@/app/ui/components/Ventas/Vendedor/page"
-import { Productos } from "@/app/ui/components/Ventas/Productos/page";
-import { Bodega } from "@/app/ui/components/Ventas/Bodega/page";
+import Productos from "@/app/ui/components/Ventas/Productos/page";
+import Bodega  from "@/app/ui/components/Ventas/Bodega/page";
 import CreateStore from "@/app/ui/components/Ventas/Bodega/create/page";
 
 import { Client } from "@domain/entities/Client.entity";
