@@ -63,7 +63,6 @@ model Company {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
 }
 
 model Client {
@@ -104,12 +103,12 @@ model Client {
 }
 
 model Seller {
-  id       Int    @id @default(autoincrement())
-  name     String
-  Lastname String
-
-  companyId Int?
-  company   Company? @relation(fields: [companyId], references: [id])
+  id             Int      @id @default(autoincrement())
+  name           String
+  identification String?
+  observation    String?
+  companyId      Int?
+  company        Company? @relation(fields: [companyId], references: [id])
 }
 
 model Store {
@@ -157,7 +156,6 @@ model Bill {
 
   quantity  Int
   createdAt DateTime @default(now())
-
 }
 
 model RefreshToken {
