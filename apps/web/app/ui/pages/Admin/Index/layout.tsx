@@ -7,15 +7,17 @@ import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
 
-import Clientes from "@/app/ui/components/Ventas/Clientes/pages";
-import CreateClient from "@/app/ui/components/Ventas/Clientes/create/page";
-import Vendedores from "@/app/ui/components/Ventas/Vendedor/page"
-import Productos from "@/app/ui/components/Ventas/Productos/page";
-import Bodega  from "@/app/ui/components/Ventas/Bodega/page";
-import CreateStore from "@/app/ui/components/Ventas/Bodega/create/page";
+import Clientes from "@/app/ui/components/Sales/Clients/pages";
+import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
+import Vendedores from "@/app/ui/components/Sales/Sellers/page"
+import Productos from "@/app/ui/components/Sales/Products/page";
+import Bodega  from "@/app/ui/components/Sales/Stores/page";
+import CreateStore from "@/app/ui/components/Sales/Stores/create/page";
 
 import { Client } from "@domain/entities/Client.entity";
 import { Store } from "@domain/entities/Store.entity";
+import CreateSeller from "@/app/ui/components/Sales/Sellers/create/page";
+import { Seller } from "@domain/entities/Seller.entity";
 
 export default function RootLayout({
   children,
@@ -24,6 +26,7 @@ export default function RootLayout({
 }>) {
   const [currentView, setCurrentView] = useState('inicio');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
   const [selectedStore, setSelectedStore] = useState<Store | null>(null)
 
   const renderContent = () => {
@@ -46,14 +49,17 @@ export default function RootLayout({
       case 'ventas-productos':
         return <Productos />;
       case 'ventas-vendedor':
-        return <Vendedores />;
+        return <Vendedores onSelect={setCurrentView} onSelectSeller={setSelectedSeller}/>;
+      case 'ventas-vendedor-create':
+        return <CreateSeller onBack={() => setCurrentView('ventas-vendedor')} initialData={selectedSeller || undefined}
+          mode={selectedSeller ? 'edit' : 'create'}/>;
       case 'ventas-bodega':
         return <Bodega onSelect={setCurrentView} onSelectStores={setSelectedStore} />;
       case 'ventas-bodega-create':
         return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined} 
          mode={selectedStore ? 'edit' : 'create'} />;
       default:
-        return <div className="text-white p-8">Selecciona una opción del menú</div>;
+        return <div className="text-white p-8">NO SELECIONADO</div>;
     }
   };
 

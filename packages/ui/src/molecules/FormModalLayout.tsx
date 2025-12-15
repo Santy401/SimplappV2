@@ -55,7 +55,7 @@ export function FormModalLayout({
   }[maxWidth];
 
   return (
-    <div className={`min-h-screen ${className}`}>
+    <div className={`min-h-fit ${className}`}>
       <div className='mt-3'>
         <div className={`${maxWidthClass} mx-auto px-1 py-4`}>
             <h1 className="text-3xl font-bold text-foreground mb-5">{title}</h1>
