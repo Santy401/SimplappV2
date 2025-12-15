@@ -1,0 +1,80 @@
+"use client";
+
+import { Seller } from "@domain/entities/Seller.entity";
+import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
+import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
+import { DataTable, Button } from "@simplapp/ui";
+import { Receipt } from "lucide-react";
+
+interface SellerProps {
+    onSelect?: (view: string) => void;
+    onSelectSeller?: (seller: Seller) => void;
+}
+
+export default function Sellers({
+    onSelect = () => { },
+    onSelectSeller = () => { }
+}: SellerProps) {
+    const { sellers } = useSeller();
+    const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller });
+    const ValidSellers = sellers || [];
+
+    return (
+        <div className="min-h-fit">
+            <div className="max-w-5xl mx-auto px-4 py-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                    <div>
+                        <h1 className="text-3xl font-bold text-foreground">Vendedores</h1>
+                        <p className="text-muted-foreground mt-2">
+                            Gestiona tus Vendedores
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        <Button
+                            variant="outline"
+                            onClick={() => { }}
+                            className="gap-2"
+                        >
+                            Exportar
+                        </Button>
+                        <Button
+                            onClick={handleAddCustomer}
+                            className="bg-foreground hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition text-background"
+                        >
+                            {/* <UserPlus className="w-4 h-4" /> */}
+                            Nuevo Vendedor
+                        </Button>
+                    </div>
+                </div>
+
+                {ValidSellers.length > 0 ? (
+                    <div className="rounded-xl overflow-hidden">
+                        <DataTable
+                            data={ValidSellers}
+                            columns={columns}
+                            title=""
+                            searchable={true}
+                            pagination={true}
+                            itemsPerPage={10}
+                            onAdd={handleAddCustomer}
+                            onExport={() => { }}
+                            className="bg-transparent"
+                        />
+                    </div>
+                ) : (
+                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                        <Receipt className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-semibold mb-2">No hay Vendedores registrados</h3>
+                        <p className="text-muted-foreground mb-6">
+                            Comienza agregando tu primer Vendedor
+                        </p>
+                        <Button onClick={handleAddCustomer} className="gap-2 bg-foreground">
+                            {/* <UserPlus className="w-4 h-4" /> */}
+                            Agrega Tu Primer Vendedor
+                        </Button>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
