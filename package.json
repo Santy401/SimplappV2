@@ -18,5 +18,9 @@
         "eslint-config-next": "^14.0.0",
         "eslint-plugin-next": "^0.0.0",
         "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@hookform/resolvers": "^3.10.0",
+        "zod": "^4.2.0"
     }
 }
