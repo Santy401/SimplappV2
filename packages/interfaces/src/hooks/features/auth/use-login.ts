@@ -1,70 +1,78 @@
 'use client';
 
-import { apiClient } from '@interfaces/lib/api-client';
-import { LoginCredentials, LoginResponse } from '@domain/entities/Session.entity';
 import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+import { loginSchema, type LoginFormValues } from '../../../../lib/validations/auth.schema';
 
 export const useLogin = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent, credentials: LoginCredentials) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError('')
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError: setFormError,
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema as any),
+    defaultValues: {
+      email: '',
+      password: '',
+    },
+  });
+
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsLoading(true);
+    setError(null);
 
     try {
-      // const response = await apiClient.post<LoginResponse>('/api/auth/login', credentials);
-
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      })
-
-      console.log('Login response status:', response.status)
+        body: JSON.stringify(data),
+      });
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || 'Error al iniciar sesión')
+        const errorData = await response.json();
+
+        // Error a nivel formulario
+        setFormError('email', {
+          type: 'manual',
+          message: errorData.error || 'Credenciales inválidas',
+        });
+
+        throw new Error(errorData.error);
       }
 
-      const data = await response.json()
-      console.log('Login successful:', data)
+      const result = await response.json();
+      console.log('Login successful:', result);
 
-      console.log('Document cookies after login:', document.cookie)
-
-      await new Promise(resolve => setTimeout(resolve, 200))
-
-      console.log('Document cookies after login:', document.cookie)
-
-      await new Promise(resolve => setTimeout(resolve, 200))
-
-      const redirectPath = '/ui/pages/Admin/Index'
-      console.log('Redirecting to:', redirectPath)
-
-      window.location.href = redirectPath
+      // Redirección
+      window.location.href = '/ui/pages/Admin/Index';
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error desconocido'
-      setError(errorMessage)
-      console.error('Login error:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-  return {
-    email,
-    setEmail,
-    setPassword,
-    password,
-    isLoading,
-    handleSubmit
-  }
+      const message =
+        err instanceof Error
+          ? err.message
+          : 'Error al iniciar sesión';
 
+      setError(message);
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return {
+    register,
+    handleSubmit: handleSubmit(onSubmit),
+    errors,
+    isLoading,
+    error,
+  };
 };

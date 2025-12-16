@@ -1,10 +1,39 @@
 import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { formSchema, FormValues } from "@interfaces/lib/validations/form.schema";
 import { useEffect, useState } from "react"
+import { SubmitHandler, useForm } from "react-hook-form";
 
 export function useSeller() {
     const [sellers, setSellers] = useState<Seller[]>([]);
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<String | null>(null)
+
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setError: setFormError,
+    } = useForm<FormValues>({
+        resolver: zodResolver(formSchema as any),
+        defaultValues: {
+            name: ''
+        },
+    });
+
+    const onSubmit: SubmitHandler<FormValues> = async (values) => {
+      const dto: CreateSellerDto = {
+        // requiered
+        name: '',
+
+        // Opcionals
+        identification: null,
+        observation: null
+      };
+    
+      await createSeller(dto);
+    };
 
     useEffect(() => {
         fetchSellers();
@@ -103,7 +132,7 @@ export function useSeller() {
         isLoading,
         error,
         fetchSellers,
-        createSeller,
+        handleSubmit: handleSubmit(onSubmit),
         deleteSeller,
         updateSeller,
     }
