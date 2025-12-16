@@ -38,7 +38,7 @@ export default function Home() {
                 Iniciar Sesión
               </Link>
             </Button>
-            <Button size="sm" className="bg-foreground hover:bg-foreground/90">
+            <Button size="sm" className="bg-foreground py-1 rounded text-background text-[14px] px-1 hover:bg-foreground/90">
               <Link href="/ui/pages/Register">
                 Empezar Gratis
               </Link>
@@ -135,7 +135,7 @@ export default function Home() {
           <p className="text-lg text-foreground/60 max-w-2xl mx-auto text-balance">
             Únete a las empresas que ya simplifican su gestión con Simplapp.
           </p>
-          <Button size="lg" className="bg-purple-700 cursor-pointer hover:bg-purple-400 h-12 px-8">
+          <Button size="lg" className="bg-purple-700 cursor-pointer hover:bg-purple-400 h-12 px-8 rounded">
             Comenzar Prueba Gratuita
           </Button>
         </div>

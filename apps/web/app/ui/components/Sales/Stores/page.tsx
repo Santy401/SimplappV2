@@ -36,13 +36,13 @@ export default function Bodega({
             <Button
               variant="outline"
               onClick={() => {}}
-              className="gap-2"
+              className="gap-2 text-[15px]"
             >
               Exportar
             </Button>
             <Button
               onClick={handleAddCustomer}
-              className="bg-foreground hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition text-background"
+              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               {/* <UserPlus className="w-4 h-4" /> */}
               Nueva Bodega
@@ -71,7 +71,7 @@ export default function Bodega({
             <p className="text-muted-foreground mb-6">
               Comienza agregando tu primera Bodega
             </p>
-            <Button onClick={handleAddCustomer} className="gap-2 bg-foreground">
+            <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
               {/* <UserPlus className="w-4 h-4" /> */}
               Agrega Tu Primera Bodega
             </Button>

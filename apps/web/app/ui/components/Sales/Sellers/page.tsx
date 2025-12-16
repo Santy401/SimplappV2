@@ -4,7 +4,7 @@ import { Seller } from "@domain/entities/Seller.entity";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
 import { DataTable, Button } from "@simplapp/ui";
-import { Receipt } from "lucide-react";
+import { Receipt, UserPlus } from "lucide-react";
 
 interface SellerProps {
     onSelect?: (view: string) => void;
@@ -33,15 +33,15 @@ export default function Sellers({
                         <Button
                             variant="outline"
                             onClick={() => { }}
-                            className="gap-2"
+                            className="gap-2 text-[15px]"
                         >
                             Exportar
                         </Button>
                         <Button
                             onClick={handleAddCustomer}
-                            className="bg-foreground hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition text-background"
+                            className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
                         >
-                            {/* <UserPlus className="w-4 h-4" /> */}
+                            <UserPlus className="w-4 h-4" />
                             Nuevo Vendedor
                         </Button>
                     </div>
@@ -68,7 +68,7 @@ export default function Sellers({
                         <p className="text-muted-foreground mb-6">
                             Comienza agregando tu primer Vendedor
                         </p>
-                        <Button onClick={handleAddCustomer} className="gap-2 bg-foreground">
+                        <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
                             {/* <UserPlus className="w-4 h-4" /> */}
                             Agrega Tu Primer Vendedor
                         </Button>

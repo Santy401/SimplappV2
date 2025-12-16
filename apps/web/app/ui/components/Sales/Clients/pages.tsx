@@ -55,13 +55,13 @@ export default function ClientesPage({
             <Button
               variant="outline"
               onClick={handleExportCustomers}
-              className="gap-2"
+              className="gap-2 text-[15px] bg-input/55 cursor-pointer py-2 px-2 rounded"
             >
               Exportar
             </Button>
             <Button
               onClick={handleAddCustomer}
-              className="bg-foreground hover:bg-neutral-900 py-3 rounded-lg font-medium flex items-center justify-center gap-2 transition text-background"
+              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               Nuevo Cliente
@@ -162,7 +162,7 @@ export default function ClientesPage({
             <p className="text-muted-foreground mb-6">
               Comienza agregando tu primer cliente con datos completos
             </p>
-            <Button onClick={handleAddCustomer} className="gap-2 bg-foreground">
+            <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
               <UserPlus className="w-4 h-4" />
               Agregar Primer Cliente
             </Button>
