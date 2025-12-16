@@ -5,9 +5,10 @@ import { verifyAccessToken } from "@interfaces/lib/auth/token";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cookieSeller = await cookies();
     const accessToken = cookieSeller.get("access-token")?.value;
 
@@ -33,7 +34,7 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const sellerId = parseInt(params.id, 10);
+    const sellerId = parseInt(id, 10);
 
     if (isNaN(sellerId)) {
       return NextResponse.json(
@@ -42,7 +43,6 @@ export async function PUT(
       );
     }
 
-    // Verificar que el vendedor pertenece a la compañía del usuario
     const existingSeller = await prisma.seller.findFirst({
       where: {
         id: sellerId,
@@ -57,7 +57,6 @@ export async function PUT(
       );
     }
 
-    // Validar datos de entrada
     if (data.name && (typeof data.name !== "string" || data.name.trim() === "")) {
       return NextResponse.json(
         { error: "El nombre del vendedor no puede estar vacío" },
@@ -94,12 +93,12 @@ export async function PUT(
   }
 }
 
-
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cookieSeller = await cookies();
     const accessToken = cookieSeller.get('access-token')?.value;
 
@@ -123,8 +122,6 @@ export async function DELETE(
         { status: 404 }
       );
     }
-
-    const { id } = await params;
 
     await prisma.seller.delete({
       where: {

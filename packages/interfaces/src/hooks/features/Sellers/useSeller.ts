@@ -133,6 +133,7 @@ export function useSeller() {
         error,
         fetchSellers,
         handleSubmit: handleSubmit(onSubmit),
+        createSeller,
         deleteSeller,
         updateSeller,
     }
