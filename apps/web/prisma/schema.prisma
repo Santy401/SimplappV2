@@ -63,6 +63,8 @@ model Company {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  listPrices ListPrice[]
 }
 
 model Client {
@@ -141,6 +143,19 @@ model Product {
   company   Company? @relation(fields: [companyId], references: [id])
 }
 
+model ListPrice {
+  id            Int @id @default(autoincrement())
+  name          String
+  type          TypePrice @default(VALOR)
+  percentage    String?
+  description   String?
+  
+  companyId     Int?
+  company       Company? @relation(fields: [companyId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
 model Bill {
   id Int @id @default(autoincrement())
 
@@ -168,6 +183,11 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+enum TypePrice {
+  VALOR
+  PORCENTAJE
 }
 
 enum OrganizationType {
