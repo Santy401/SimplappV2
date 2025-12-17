@@ -6,18 +6,26 @@ import { usePathname } from "next/navigation";
 const SIDEBAR_ITEMS = [
     { id: "inicio", label: "Inicio" },
     { id: "dashboard", label: "Dashboard" },
+
     { id: "ventas", label: "Ventas" },
     { id: "ventas-venta", label: "Comprobante De Venta", parentId: "ventas" },
+
     { id: "ventas-cotizaciones", label: "Cotizaciones", parentId: "ventas" },
     { id: "ventas-remisiones", label: "Remisiones", parentId: "ventas" },
+
     { id: "ventas-clientes", label: "Clientes", parentId: "ventas" },
     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
-    { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
+
     { id: "ventas-productos", label: "Productos De Venta", parentId: "ventas" },
+
     { id: "ventas-vendedor", label: "Vendedores", parentId: "ventas" },
     { id: "ventas-vendedor-create", label: "Crear Vendedor", parentId: "ventas-vendedor" },
+
     { id: "ventas-bodega", label: "Bodegas", parentId: "ventas" },
-    { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" }
+    { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" },
+
+    { id: "ventas-precios", label: "Lista Precios", parentId: "ventas" },
+    { id: "ventas-precios-create", label: "Crear Lista De Precios", parentId: "ventas-precios" },
 ];
 
 interface BreadcrumbProps {
@@ -26,7 +34,7 @@ interface BreadcrumbProps {
 
 export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
     const pathname = usePathname();
-    
+
     const detectedItem = !activeItem ? detectActiveItem(pathname) : activeItem;
     const currentItem = SIDEBAR_ITEMS.find(item => item.id === detectedItem);
 
@@ -43,7 +51,7 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
     return (
         <div className="text-gray-400 flex items-center flex-wrap gap-1">
             <span className="text-foreground font-medium">Simplapp</span>
-            
+
             {breadcrumbItems.map((item, index) => (
                 <div key={item.id} className="flex items-center">
                     <ChevronRight width={16} height={16} className="mx-1 text-gray-500" />
@@ -57,26 +65,33 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
 }
 
 function detectActiveItem(pathname: string): string {
-    const path = pathname.toLowerCase();
-    
-    if (path.includes('/ventas/clientes')) return 'ventas-clientes';
-    if (path.includes('/ventas/Vendedores')) return 'ventas-vendedor'
-    if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
-    if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
-    if (path.includes('/ventas/venta')) return 'ventas-venta';
-    if (path.includes('/ventas')) return 'ventas';
-    if (path.includes('/dashboard')) return 'dashboard';
-    
-    if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
-    if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
+  const path = pathname.toLowerCase();
 
-    return 'inicio';
+  if (path.includes('/ventas/precios/create')) return 'ventas-precios-create';
+  if (path.includes('/ventas/precios')) return 'ventas-precios';
+
+  if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
+  if (path.includes('/ventas/clientes')) return 'ventas-clientes';
+
+  if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
+  if (path.includes('/ventas/bodega')) return 'ventas-bodega';
+
+  if (path.includes('/ventas/vendedores')) return 'ventas-vendedor';
+  if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
+  if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
+  if (path.includes('/ventas/venta')) return 'ventas-venta';
+
+  if (path.includes('/ventas')) return 'ventas';
+  if (path.includes('/dashboard')) return 'dashboard';
+
+  return 'inicio';
 }
+
 
 function getBreadcrumbChain(currentItem: any): any[] {
     const chain = [currentItem];
     let parentId = currentItem.parentId;
-    
+
     while (parentId) {
         const parentItem = SIDEBAR_ITEMS.find(item => item.id === parentId);
         if (parentItem) {
@@ -86,6 +101,6 @@ function getBreadcrumbChain(currentItem: any): any[] {
             break;
         }
     }
-    
+
     return chain;
 }

@@ -70,7 +70,6 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // 🔎 Validaciones básicas
     if (!data.name || typeof data.name !== "string" || data.name.trim() === "") {
       return NextResponse.json(
         { error: "El nombre del vendedor es requerido" },

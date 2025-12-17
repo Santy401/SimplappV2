@@ -18,6 +18,8 @@ import { Client } from "@domain/entities/Client.entity";
 import { Store } from "@domain/entities/Store.entity";
 import CreateSeller from "@/app/ui/components/Sales/Sellers/create/page";
 import { Seller } from "@domain/entities/Seller.entity";
+import ListPrices from "@/app/ui/components/Sales/ListPrice/page";
+import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
 
 export default function RootLayout({
   children,
@@ -27,7 +29,8 @@ export default function RootLayout({
   const [currentView, setCurrentView] = useState('inicio');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null)
+  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
+  const [selectedListPrice, setSelectedListPrice] = useState<Store | null>(null);
 
   const renderContent = () => {
     switch (currentView) {
@@ -58,6 +61,11 @@ export default function RootLayout({
       case 'ventas-bodega-create':
         return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined} 
          mode={selectedStore ? 'edit' : 'create'} />;
+      case 'ventas-precios':
+        return <ListPrices onSelect={setCurrentView} onSelectListPrice={setSelectedListPrice} />
+      case 'ventas-precios-create':
+        return <CreateListPrice onBack={() => setCurrentView('ventas-precios')} initialData={selectedListPrice || undefined}
+         mode={selectedListPrice ? 'edit' : 'create'} />
       default:
         return <div className="text-white p-8">NO SELECIONADO</div>;
     }

@@ -60,6 +60,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
         { id: "ventas-productos", label: "Productos De Venta", icon: null },
         { id: "ventas-vendedor", label: "Vendedores", icon: null },
         { id: "ventas-bodega", label: "Bodega", icon: null },
+        { id: "ventas-precios", label: "Lista Precios", icon: null },
       ],
     },
     { id: "notifications", label: "Notifications", icon: <Bell size={20} />, badge: "9+" },
