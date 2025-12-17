@@ -16,7 +16,7 @@ export default function ListPrices({
     onSelectListPrice = () => { }
 }: ListPriceProps) {
     const { listPrices } = useListPrice();
-    const { columns, handleAddListPrice, handleExportListPrices } = useListPriceTable({ onSelect, onSelectListPrice });
+    const { columns, handleAddCustomer, handleExportCustomers } = useListPriceTable({ onSelect, onSelectListPrice });
     const validListPrices = listPrices || [];
 
     return (
@@ -32,13 +32,13 @@ export default function ListPrices({
                     <div className="flex gap-3">
                         <Button
                             variant="outline"
-                            onClick={handleExportListPrices}
+                            onClick={handleExportCustomers}
                             className="gap-2 text-[15px]"
                         >
                             Exportar
                         </Button>
                         <Button
-                            onClick={handleAddListPrice}
+                            onClick={handleAddCustomer}
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
                         >
                             <Plus className="w-4 h-4" />
@@ -56,8 +56,8 @@ export default function ListPrices({
                             searchable={true}
                             pagination={true}
                             itemsPerPage={10}
-                            onAdd={handleAddListPrice}
-                            onExport={handleExportListPrices}
+                            onAdd={handleAddCustomer}
+                            onExport={handleExportCustomers}
                             className="bg-transparent"
                         />
                     </div>
@@ -69,7 +69,7 @@ export default function ListPrices({
                             Comienza agregando tu primera lista de precios
                         </p>
                         <Button 
-                            onClick={handleAddListPrice} 
+                            onClick={handleAddCustomer} 
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer"
                         >
                             <Plus className="w-4 h-4" />
