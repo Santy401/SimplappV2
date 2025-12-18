@@ -88,9 +88,9 @@ export default function Home() {
         </div>
         
         {/* App Screenshot */}
-        <div className="mt-16 relative">
-          <div className="relative rounded-xl overflow-hidden shadow-2xl border border-sidebar-border bg-white">
-            <img src="/task-management-dashboard-with-kanban-board--team-.jpg" alt="Simplapp Dashboard" className="w-full h-auto" />
+        <div className="mt-5 relative">
+          <div className="relative rounded-xl overflow-hidden shadow-2xl bg-white">
+            <img src="/PreviewWeb.png" alt="Simplapp Dashboard" className="w-full h-auto" />
             {/* Subtle glow effect */}
             <div className="absolute inset-0 rounded-xl bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
           </div>
@@ -102,7 +102,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
+      <section className="container mx-auto px-4 py-20 md:py-8">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="space-y-4">
             <div className="w-12 h-12 rounded-lg bg-purple-700 flex items-center justify-center">
