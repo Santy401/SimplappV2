@@ -7,16 +7,21 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": "../..",
     "baseUrl": "./src",
     "paths": {
       "@domain/*": [
         "./*"
+      ],
+      "@ui/*": [
+        "../../ui/src/*"
       ]
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "../../apps/**/*",
+    "../../packages/**/*"
   ],
   "exclude": [
     "node_modules",
