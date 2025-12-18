@@ -107,7 +107,6 @@ export async function POST(request: NextRequest) {
       data: {
         name: data.name.trim(),
         type: data.type,
-        percentage: data.percentage.toString(),
         description: data.description?.trim() || null,
         company: {
           connect: {
