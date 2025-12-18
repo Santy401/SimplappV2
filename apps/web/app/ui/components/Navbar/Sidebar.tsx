@@ -17,6 +17,7 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronLeft,
+  Inbox,
 } from "lucide-react"
 import { cn } from "@simplapp/ui"
 import { ThemeToggle } from "@simplapp/ui"
@@ -60,8 +61,15 @@ export default function Sidebar({ onSelect }: SidebarProps) {
         { id: "ventas-productos", label: "Productos De Venta", icon: null },
         { id: "ventas-vendedor", label: "Vendedores", icon: null },
         { id: "ventas-bodega", label: "Bodega", icon: null },
-        { id: "ventas-precios", label: "Lista Precios", icon: null },
       ],
+    },
+    {
+      id: "Inventario",
+      label: "Inventario",
+      icon: <Inbox size={20}/>,
+      submenu: [
+        { id: "inventario-precios", label: "Lista Precios", icon: null }
+      ]
     },
     { id: "notifications", label: "Notifications", icon: <Bell size={20} />, badge: "9+" },
     { id: "market", label: "Market", icon: <Globe size={20} /> },

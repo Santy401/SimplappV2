@@ -24,8 +24,8 @@ const SIDEBAR_ITEMS = [
     { id: "ventas-bodega", label: "Bodegas", parentId: "ventas" },
     { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" },
 
-    { id: "ventas-precios", label: "Lista Precios", parentId: "ventas" },
-    { id: "ventas-precios-create", label: "Crear Lista De Precios", parentId: "ventas-precios" },
+    { id: "inventario-precios", label: "Lista Precios", parentId: "ventas" },
+    { id: "inventario-precios-create", label: "Crear Lista De Precios", parentId: "inventario-precios" },
 ];
 
 interface BreadcrumbProps {
@@ -67,8 +67,8 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
 function detectActiveItem(pathname: string): string {
   const path = pathname.toLowerCase();
 
-  if (path.includes('/ventas/precios/create')) return 'ventas-precios-create';
-  if (path.includes('/ventas/precios')) return 'ventas-precios';
+  if (path.includes('/ventas/precios/create')) return 'inventario-precios-create';
+  if (path.includes('/ventas/precios')) return 'inventario-precios';
 
   if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
   if (path.includes('/ventas/clientes')) return 'ventas-clientes';

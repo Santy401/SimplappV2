@@ -61,10 +61,10 @@ export default function RootLayout({
       case 'ventas-bodega-create':
         return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined} 
          mode={selectedStore ? 'edit' : 'create'} />;
-      case 'ventas-precios':
+      case 'inventario-precios':
         return <ListPrices onSelect={setCurrentView} onSelectListPrice={setSelectedListPrice} />
-      case 'ventas-precios-create':
-        return <CreateListPrice onBack={() => setCurrentView('ventas-precios')} initialData={selectedListPrice || undefined}
+      case 'inventario-precios-create':
+        return <CreateListPrice onBack={() => setCurrentView('inventario-precios')} initialData={selectedListPrice || undefined}
          mode={selectedListPrice ? 'edit' : 'create'} />
       default:
         return <div className="text-white p-8">NO SELECIONADO</div>;
