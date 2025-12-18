@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useListPriceCustomers } from "./useListPriceCustomers";
-import { createColumns } from "@interfaces/src/config/ListPrice/columns";
+import { createColumns } from "../../../config/ListPrice/columns";
 import { ListPrice } from "@domain/entities/ListPrice.entity";
 
 interface UseListPriceTableProps {

@@ -14,7 +14,7 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice }: ListPrice
         }
 
         if (onSelect) {
-            onSelect('ventas-precio-create');
+            onSelect('inventario-precios-create');
         }
     };
 
@@ -32,14 +32,14 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice }: ListPrice
     const handleViewCustomer = (listPrice: ListPrice) => {
         console.log("Ver detalles de cliente:", listPrice);
         if (onSelect) {
-            onSelect('ventas-precios-view');
+            onSelect('inventario-precios-view');
         }
     };
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo cliente");
         if (onSelect) {
-            onSelect('ventas-precios-create');
+            onSelect('inventario-precios-create');
         }
     };
 
