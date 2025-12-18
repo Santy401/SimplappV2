@@ -1,8 +1,8 @@
 // This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// learn more about it in the docs: [https://pris.ly/d/prisma-schema](https://pris.ly/d/prisma-schema)
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// Try Prisma Accelerate: [https://pris.ly/cli/accelerate-init](https://pris.ly/cli/accelerate-init)
 
 generator client {
   provider   = "prisma-client-js"
@@ -12,6 +12,12 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+/**
+ * =========================================
+ * 👤 USER & AUTH MODELS
+ * =========================================
+ */
 
 model User {
   id          Int      @id @default(autoincrement())
@@ -28,6 +34,40 @@ model User {
 
   refreshTokens RefreshToken[]
 }
+
+model ProductAccounting {
+  id Int @id @default(autoincrement())
+
+  productId Int
+  companyId Int
+
+  incomeAccount    String
+  inventoryAccount String
+  costAccount      String
+
+  product Product @relation(fields: [productId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([productId, companyId])
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([token])
+}
+
+/**
+ * =========================================
+ * 🏢 COMPANY & ORGANIZATION MODELS
+ * =========================================
+ */
 
 model Company {
   id Int @id @default(autoincrement())
@@ -61,11 +101,19 @@ model Company {
   sellers  Seller[]
   products Product[]
 
+  productAccountings ProductAccounting[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   listPrices ListPrice[]
 }
+
+/**
+ * =========================================
+ * 🤝 CLIENTS & SELLERS MODELS
+ * =========================================
+ */
 
 model Client {
   id Int @id @default(autoincrement())
@@ -113,6 +161,12 @@ model Seller {
   company        Company? @relation(fields: [companyId], references: [id])
 }
 
+/**
+ * =========================================
+ * 🏬 STORES & PRODUCTS MODELS
+ * =========================================
+ */
+
 model Store {
   id          Int     @id @default(autoincrement())
   name        String
@@ -120,70 +174,149 @@ model Store {
   observation String?
 
   bills Bill[]
+
   companyId Int?
   company   Company? @relation(fields: [companyId], references: [id])
+
+  inventoryMovements InventoryMovement[]
 }
 
 model Product {
-  id          Int             @id @default(autoincrement())
+  id Int @id @default(autoincrement())
+
   name        String
-  code        String?
-  codeBarrers String?
-  category    CategoryProduct @default(VENTA_DE_SERVICIOS)
+  description String?
+  reference   String?
+  code        String? @unique
 
-  goodExcluded   Boolean            @default(false)
-  rateIva        String
-  UnitOfMeansure UnitOfMeansureList @default(UNIDAD)
-  observation    String
-  active         Boolean            @default(true)
+  type     ItemType
+  category CategoryProduct    @relation(fields: [categoryProductId], references: [id])
+  unit     UnitOfMeansureList
 
-  bills Bill[]
+  taxRate String
 
-  companyId Int?
-  company   Company? @relation(fields: [companyId], references: [id])
+  trackStock         Boolean @default(true)
+  allowNegativeStock Boolean @default(false)
+  active             Boolean @default(true)
+
+  companyId Int
+  company   Company @relation(fields: [companyId], references: [id])
+
+  images      ProductImage[]
+  prices      ProductPrice[]
+  accountings ProductAccounting[]
+
+  inventoryMovements InventoryMovement[]
+  billItems          BillItem[]
+
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  categoryProductId Int
+}
+
+model CategoryProduct {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+
+  products Product[]
+}
+
+model ProductImage {
+  id  Int    @id @default(autoincrement())
+  url String
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model InventoryMovement {
+  id Int @id @default(autoincrement())
+
+  productId Int
+  storeId   Int
+
+  quantity Int
+  type     InventoryMovementType
+
+  product Product @relation(fields: [productId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+
+  createdAt DateTime @default(now())
 }
 
 model ListPrice {
-  id            Int @id @default(autoincrement())
-  name          String
-  type          TypePrice @default(VALOR)
-  percentage    String?
-  description   String?
-  
-  companyId     Int?
-  company       Company? @relation(fields: [companyId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id Int @id @default(autoincrement())
+
+  name        String
+  type        TypePrice @default(VALOR)
+  description String?
+
+  companyId Int?
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  prices ProductPrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+model ProductPrice {
+  id Int @id @default(autoincrement())
+
+  productId   Int
+  listPriceId Int
+
+  basePrice String
+  value     String
+
+  product   Product   @relation(fields: [productId], references: [id])
+  listPrice ListPrice @relation(fields: [listPriceId], references: [id])
+}
+
+/**
+ * =========================================
+ * 🧾 BILLING MODELS
+ * =========================================
+ */
 
 model Bill {
   id Int @id @default(autoincrement())
 
-  userId    Int
-  clientId  Int
+  userId   Int
+  clientId Int
+  storeId  Int
+
+  user   User   @relation(fields: [userId], references: [id])
+  client Client @relation(fields: [clientId], references: [id])
+  store  Store  @relation(fields: [storeId], references: [id])
+
+  items BillItem[]
+
+  createdAt DateTime @default(now())
+}
+
+model BillItem {
+  id Int @id @default(autoincrement())
+
+  billId    Int
   productId Int
-  storeId   Int
 
-  user    User    @relation(fields: [userId], references: [id])
-  client  Client  @relation(fields: [clientId], references: [id])
+  quantity Int
+
+  basePrice String
+  taxAmount String
+  total     String
+
+  bill    Bill    @relation(fields: [billId], references: [id])
   product Product @relation(fields: [productId], references: [id])
-  stores  Store  @relation(fields: [storeId], references: [id])
-
-  quantity  Int
-  createdAt DateTime @default(now())
 }
 
-model RefreshToken {
-  id        String   @id @default(uuid())
-  token     String   @unique
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  expiresAt DateTime
-  createdAt DateTime @default(now())
-
-  @@index([userId])
-  @@index([token])
-}
+/**
+ * =========================================
+ * 🧩 ENUMS & CONSTANTS
+ * =========================================
+ */
 
 enum TypePrice {
   VALOR
@@ -234,8 +367,15 @@ enum UnitOfMeansureList {
   DIA
 }
 
-enum CategoryProduct {
-  VENTA_DE_SERVICIOS
-  VENTA_DE_VIENES_Y_CAMBIO
-  VENTA_DE_PROPIEDAD_PLANTA_Y_EQUIPO
+enum ItemType {
+  PRODUCT
+  SERVICE
+  COMBO
+  VARIANT
+}
+
+enum InventoryMovementType {
+  IN
+  OUT
+  ADJUSTMENT
 }
