@@ -195,6 +195,10 @@ model Product {
 
   taxRate String
 
+  cost       String?
+  basePrice  String?
+  finalPrice String?
+
   trackStock         Boolean @default(true)
   allowNegativeStock Boolean @default(false)
   active             Boolean @default(true)
