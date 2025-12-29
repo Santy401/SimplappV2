@@ -17,6 +17,7 @@ const SIDEBAR_ITEMS = [
     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
 
     { id: "ventas-productos", label: "Productos De Venta", parentId: "ventas" },
+    { id: "ventas-productos-create", label: "Crear Producto", parentId: "ventas-productos" },
 
     { id: "ventas-vendedor", label: "Vendedores", parentId: "ventas" },
     { id: "ventas-vendedor-create", label: "Crear Vendedor", parentId: "ventas-vendedor" },
@@ -80,6 +81,11 @@ function detectActiveItem(pathname: string): string {
   if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
   if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
   if (path.includes('/ventas/venta')) return 'ventas-venta';
+
+  if (path.includes('/productos/producto/create')) return 'ventas-productos-create';
+  if (path.includes('/productos/producto/edit')) return 'ventas-productos-edit';
+  if (path.includes('/productos/producto')) return 'ventas-productos';
+  if (path.includes('/productos')) return 'ventas-productos';
 
   if (path.includes('/ventas')) return 'ventas';
   if (path.includes('/dashboard')) return 'dashboard';
