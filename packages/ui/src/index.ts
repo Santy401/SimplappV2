@@ -4,6 +4,7 @@ export * from './atoms/Input/Input';
 export * from './atoms/ThemeToggle/ThemeToggle';
 export * from './atoms/DropdownProfile/dropdown-profile'
 export * from './atoms/DropdownMenu/dropdown-menu'
+export * from './atoms/Badge/badge'
 
 // MOLECULES
 export * from './molecules/FormFields.tsx';
