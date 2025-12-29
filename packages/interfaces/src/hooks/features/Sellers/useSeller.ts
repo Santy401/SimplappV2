@@ -1,6 +1,6 @@
 import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity"
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema, FormValues } from "@interfaces/lib/validations/form.schema";
+import { formSchema, FormValues } from "../../../../lib/validations/form.schema";
 import { useEffect, useState } from "react"
 import { SubmitHandler, useForm } from "react-hook-form";
 
