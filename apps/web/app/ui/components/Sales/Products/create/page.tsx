@@ -13,6 +13,7 @@ import {
 import { useProduct } from '@interfaces/src/hooks/features/Products/useProduct';
 import { DollarSign, Calculator, TrendingUp, Search } from 'lucide-react';
 import { Button } from '@ui/index';
+import { CreateProductDto, ProductCategory, UnitOfMeasure } from '@domain/entities/Product.entity';
 
 interface CreateProductProps {
     onBack: () => void;
@@ -44,22 +45,26 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
     const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
 
     const [formData, setFormData] = useState<ProductFormData>({
-        name: '',
-        description: null,
-        reference: null,
-        code: null,
-        type: 'PRODUCT',
-        categoryProductId: 1,
-        unit: 'UNIDAD',
-        taxRate: '19',
-        trackStock: true,
-        allowNegativeStock: false,
-        active: true,
-        cost: '',
-        basePrice: '',
-        finalPrice: '',
-        ...initialData
-    });
+    name: '',
+    description: null,
+    reference: null,
+    code: null,
+    type: ProductCategory.GOODS_SALE,
+    categoryProductId: 1,
+    unit: UnitOfMeasure.UNIT, 
+    taxRate: '19',
+    trackStock: true,
+    allowNegativeStock: false,
+    active: true,
+    cost: '',
+    basePrice: '',
+    finalPrice: '',
+    goodExcluded: false,
+    taxExempt: false,
+    codeBarcode: null,
+    initialAmount: '0',
+    ...initialData
+});
 
     useEffect(() => {
         if (initialData) {
@@ -129,6 +134,72 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
         setFormData(prev => ({ ...prev, code }));
     };
 
+    const transformToCreateProductDto = (formData: ProductFormData): CreateProductDto => {
+        // Mapear tipo a ProductCategory
+        const getProductCategory = (type: string): ProductCategory => {
+            switch (type) {
+                case 'SERVICE':
+                    return ProductCategory.SERVICES_SALE;
+                case 'PRODUCT':
+                    return ProductCategory.GOODS_SALE;
+                case 'COMBO':
+                case 'VARIANT':
+                default:
+                    return ProductCategory.ASSETS_SALE;
+            }
+        };
+
+        // Mapear unit a UnitOfMeasure
+        const getUnitOfMeasure = (unit: string): UnitOfMeasure => {
+            // Convertir tus opciones al enum
+            const unitMap: Record<string, UnitOfMeasure> = {
+                'UNIDAD': UnitOfMeasure.UNIT,
+                'PAR': UnitOfMeasure.PAIR,
+                'CAJA': UnitOfMeasure.BOX,
+                'BOTELLA': UnitOfMeasure.BOTTLE,
+                'CENTIMETRO': UnitOfMeasure.CENTIMETER,
+                'CENTIMETRO_CUADRADO': UnitOfMeasure.SQUARE_CENTIMETER,
+                'METRO_CUADRADO': UnitOfMeasure.SQUARE_METER,
+                'PULGADA': UnitOfMeasure.INCH,
+                'MILILITRO': UnitOfMeasure.MILLILITER,
+                'LITRO': UnitOfMeasure.LITER,
+                'GALON': UnitOfMeasure.GALLON,
+                'METRO_CUBICO': UnitOfMeasure.CUBIC_METER,
+                'GRAMO': UnitOfMeasure.GRAM,
+                'KILOGRAMO': UnitOfMeasure.KILOGRAM,
+                'TONELADA': UnitOfMeasure.TON,
+                'LIBRA': UnitOfMeasure.POUND,
+                'HORA': UnitOfMeasure.HOUR,
+                'MINUTO': UnitOfMeasure.MINUTE,
+                'DIA': UnitOfMeasure.DAY,
+            };
+            return unitMap[unit] || UnitOfMeasure.UNIT;
+        };
+
+        return {
+            name: formData.name,
+            category: getProductCategory(formData.type),
+            unitOfMeasure: getUnitOfMeasure(formData.unit),
+            reference: formData.reference,
+            codeProduct: formData.code, // Tu campo "code" es codeProduct
+            codeBarcode: null, // Puedes agregar un campo para esto si lo necesitas
+            initialAmount: formData.trackStock ? 0 : null, // Si trackStock es true, usar 0, sino null
+            costForUnit: formData.cost ? parseFloat(formData.cost) : null,
+            basePrice: parseFloat(formData.basePrice) || 0,
+            // Estos campos no están en tu formulario actual - establecer valores por defecto
+            goodExcluded: false,
+            taxRate: formData.taxRate,
+            taxExempt: parseFloat(formData.taxRate) === 0,
+            observation: formData.description, // Mapear description a observation
+            active: formData.active,
+            // Campos de arrays - establecer vacíos por defecto
+            store: [],
+            priceList: [],
+            valuePrice: parseFloat(formData.finalPrice) || 0,
+            bills: []
+        };
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -139,12 +210,11 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
 
         setIsLoading(true);
         try {
-            const productData = {
-                ...formData,
-            };
+            // Transformar los datos al formato correcto
+            const productDto = transformToCreateProductDto(formData);
 
             if (mode === 'create') {
-                const result = await createProduct(productData);
+                const result = await createProduct(productDto);
 
                 if (result) {
                     toast.success('Producto creado exitosamente');
@@ -158,7 +228,7 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
                     return;
                 }
 
-                const result = await updateProduct(initialData.id, productData);
+                const result = await updateProduct(initialData.id, productDto);
 
                 if (result) {
                     toast.success('Producto actualizado exitosamente');
@@ -183,32 +253,31 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
 
     // Options for select fields
     const typeOptions = [
-        { value: 'PRODUCT', label: 'Producto' },
-        { value: 'SERVICE', label: 'Servicio' },
-        { value: 'COMBO', label: 'Combo' },
-        { value: 'VARIANT', label: 'Variante' },
+        { value: ProductCategory.GOODS_SALE, label: 'Producto' },
+        { value: ProductCategory.SERVICES_SALE, label: 'Servicio' },
+        { value: ProductCategory.ASSETS_SALE, label: 'Activo/Combo' },
     ];
 
     const unitOptions = [
-        { value: 'UNIDAD', label: 'Unidad' },
-        { value: 'PAR', label: 'Par' },
-        { value: 'CAJA', label: 'Caja' },
-        { value: 'BOTELLA', label: 'Botella' },
-        { value: 'CENTIMETRO', label: 'Centímetro' },
-        { value: 'CENTIMETRO_CUADRADO', label: 'Centímetro²' },
-        { value: 'METRO_CUADRADO', label: 'Metro²' },
-        { value: 'PULGADA', label: 'Pulgada' },
-        { value: 'MILILITRO', label: 'Mililitro' },
-        { value: 'LITRO', label: 'Litro' },
-        { value: 'GALON', label: 'Galón' },
-        { value: 'METRO_CUBICO', label: 'Metro³' },
-        { value: 'GRAMO', label: 'Gramo' },
-        { value: 'KILOGRAMO', label: 'Kilogramo' },
-        { value: 'TONELADA', label: 'Tonelada' },
-        { value: 'LIBRA', label: 'Libra' },
-        { value: 'HORA', label: 'Hora' },
-        { value: 'MINUTO', label: 'Minuto' },
-        { value: 'DIA', label: 'Día' },
+        { value: UnitOfMeasure.UNIT, label: 'Unidad' },
+        { value: UnitOfMeasure.PAIR, label: 'Par' },
+        { value: UnitOfMeasure.BOX, label: 'Caja' },
+        { value: UnitOfMeasure.BOTTLE, label: 'Botella' },
+        { value: UnitOfMeasure.CENTIMETER, label: 'Centímetro' },
+        { value: UnitOfMeasure.SQUARE_CENTIMETER, label: 'Centímetro²' },
+        { value: UnitOfMeasure.SQUARE_METER, label: 'Metro²' },
+        { value: UnitOfMeasure.INCH, label: 'Pulgada' },
+        { value: UnitOfMeasure.MILLILITER, label: 'Mililitro' },
+        { value: UnitOfMeasure.LITER, label: 'Litro' },
+        { value: UnitOfMeasure.GALLON, label: 'Galón' },
+        { value: UnitOfMeasure.CUBIC_METER, label: 'Metro³' },
+        { value: UnitOfMeasure.GRAM, label: 'Gramo' },
+        { value: UnitOfMeasure.KILOGRAM, label: 'Kilogramo' },
+        { value: UnitOfMeasure.TON, label: 'Tonelada' },
+        { value: UnitOfMeasure.POUND, label: 'Libra' },
+        { value: UnitOfMeasure.HOUR, label: 'Hora' },
+        { value: UnitOfMeasure.MINUTE, label: 'Minuto' },
+        { value: UnitOfMeasure.DAY, label: 'Día' },
     ];
 
     const taxRateOptions = [
