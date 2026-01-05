@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable } from "@simplapp/ui";
+import { DataTable, Loading } from "@simplapp/ui";
 import { Button } from '@simplapp/ui';
 import {
     Package,
@@ -24,7 +24,7 @@ export default function Productos({
     onSelectProduct = () => { }
 }: ProductosProps) {
 
-    const { products } = useProduct();
+    const { products, isLoading, error } = useProduct();
 
     const {
         columns,
@@ -39,6 +39,33 @@ export default function Productos({
     const inactiveProducts = validProducts.filter(p => !p.active).length;
     const totalValue = 0;
 
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <Loading />
+                    {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
+                    <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
+                    <p className="mb-4">{error}</p>
+                    <Button
+                        onClick={() => window.location.reload()}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                        Reintentar
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-fit">

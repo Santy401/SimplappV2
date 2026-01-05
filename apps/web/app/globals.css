@@ -48,7 +48,7 @@
   --sidebar-border: #ddd;
   --sidebar-ring: oklch(0.708 0 0);
 
-  --form-bg: #f5f5f5;
+  --form-bg: rgba(233, 233, 233, 0);
   --form-input-bg: #fffff;
 }
 
@@ -151,13 +151,14 @@
   --sidebar-ring: oklch(0.556 0 0);
 
   --form-input-bg: #262626;
-  --form-bg: #262626;
+  --form-bg: #00000000;
 }
 
 body {
   background-color: var(--background);
   display: flex;
   min-height: 90vh;
+  /* height: 100vh; */
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 

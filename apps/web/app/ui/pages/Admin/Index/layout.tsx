@@ -53,14 +53,22 @@ export default function RootLayout({
         return <div className="text-white p-8">Cotizaciones</div>;
       case 'ventas-remisiones':
         return <div className="text-white p-8">Remisiones</div>;
+
       case 'ventas-clientes':
         return <Clientes onSelect={setCurrentView} onSelectClient={setSelectedClient} />;
       case 'ventas-clientes-create':
         return <CreateClient onBack={() => setCurrentView('ventas-clientes')} initialData={selectedClient || undefined}
           mode={selectedClient ? 'edit' : 'create'} />;
+      case 'ventas-clientes-edit':
+        return <CreateClient onBack={() => setCurrentView('ventas-clientes')} initialData={selectedClient || undefined}
+          mode={selectedClient ? 'edit' : 'create'} />;
+
       case 'ventas-productos':
         return <Productos onSelect={setCurrentView} onSelectProduct={setSelectedProduct} />;
       case 'ventas-productos-create':
+        return <CreateProduct onBack={() => setCurrentView('ventas-productos')} initialData={selectedProduct || undefined}
+          mode={selectedProduct ? 'edit' : 'create'} />;
+      case 'ventas-productos-edit':
         return <CreateProduct onBack={() => setCurrentView('ventas-productos')} initialData={selectedProduct || undefined}
           mode={selectedProduct ? 'edit' : 'create'} />;
 
@@ -69,14 +77,25 @@ export default function RootLayout({
       case 'ventas-vendedor-create':
         return <CreateSeller onBack={() => setCurrentView('ventas-vendedor')} initialData={selectedSeller || undefined}
           mode={selectedSeller ? 'edit' : 'create'} />;
+      case 'ventas-vendedor-edit':
+        return <CreateSeller onBack={() => setCurrentView('ventas-vendedor')} initialData={selectedSeller || undefined}
+          mode={selectedSeller ? 'edit' : 'create'} />;
+
       case 'ventas-bodega':
         return <Bodega onSelect={setCurrentView} onSelectStores={setSelectedStore} />;
       case 'ventas-bodega-create':
         return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
+      case 'ventas-bodega-edit':
+        return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined}
+          mode={selectedStore ? 'edit' : 'create'} />;
+
       case 'inventario-precios':
         return <ListPrices onSelect={setCurrentView} onSelectListPrice={setSelectedListPrice} />
       case 'inventario-precios-create':
+        return <CreateListPrice onBack={() => setCurrentView('inventario-precios')} initialData={selectedListPrice || undefined}
+          mode={selectedListPrice ? 'edit' : 'create'} />
+      case 'inventario-precios-edit':
         return <CreateListPrice onBack={() => setCurrentView('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
       default:

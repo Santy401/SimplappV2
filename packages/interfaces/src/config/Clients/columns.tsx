@@ -112,11 +112,11 @@ export const createColumns = (handleEditCustomer: (client: Client) => void,
             key: "type",
             header: "Tipo",
             cell: (client: Client) => (
-                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium ${client.is_supplier
+                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full justify-center text-xs font-medium ${client.is_supplier
                     ? "bg-green-500/20 text-green-500 border border-green-500/30"
                     : "bg-blue-500/20 text-blue-500 border border-blue-500/30"
                     }`}>
-                    <div className={`w-2 h-2 rounded-full ${client.is_supplier ? "bg-green-500" : "bg-blue-500"
+                    <div className={`pr-[21px] w-2 h-2 rounded-full justify-center items-center ${client.is_supplier ? "bg-green-500" : "bg-blue-500"
                         }`} />
                     {client.is_supplier ? "Proveedor" : "Cliente"}
                 </div>
@@ -128,13 +128,18 @@ export const createColumns = (handleEditCustomer: (client: Client) => void,
             cell: (client: Client) => (
                 <div className="flex flex-wrap gap-1">
                     {client.it_branches && (
-                        <span className="px-2 py-1 text-xs bg-purple-500/20 text-purple-400 rounded">
+                        <span className="px-2 py-2 w-20 text-center text-xs bg-purple-500/20 text-purple-400 rounded">
                             Sucursales
                         </span>
                     )}
                     {client.includeCcBcc && (
-                        <span className="px-2 py-1 text-xs bg-yellow-500/20 text-yellow-400 rounded">
+                        <span className="px-2 py-2 w-20 text-center text-xs bg-yellow-500/20 text-yellow-400 rounded">
                             Cc/Bcc
+                        </span>
+                    )}
+                    {!client.it_branches && !client.includeCcBcc && (
+                        <span className="px-2 py-1 text-xs bg-gray-500/20 text-gray-400 rounded">
+                            N/A
                         </span>
                     )}
                 </div>

@@ -191,7 +191,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
       </nav>
 
       <div className={cn("border-t relative border-sidebar-border space-y-1", isExpanded ? "p-3" : "p-2")}>
-        <button
+        {/* <button
           className={cn(
             "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-foreground-text hover:text-slate-300 transition-all duration-200 group",
             isExpanded ? "w-full px-4 py-3" : "w-full px-2 py-3 justify-center",
@@ -200,7 +200,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
         >
           <AlertCircle size={20} className="flex-shrink-0 group-hover:text-purple-400/60" />
           {isExpanded && <span className="text-sm font-medium">Support</span>}
-        </button>
+        </button> */}
         <div className="flex items-center gap-3">
         <ProfileDropdown isExpanded={isExpanded} />
         {isExpanded && <div><ThemeToggle /></div>}

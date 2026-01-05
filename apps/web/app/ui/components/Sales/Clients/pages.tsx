@@ -12,6 +12,8 @@ import {
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { useClients } from "@interfaces/src/hooks/index"
 import { useClientTable } from "@interfaces/src/hooks/index";
+import { Loading } from '@simplapp/ui'
+import { useState, useEffect } from "react";
 
 interface ClientesProps {
   onSelect?: (view: string) => void;
@@ -19,19 +21,24 @@ interface ClientesProps {
 }
 
 export default function ClientesPage({
-  onSelect = () => { }, 
-  onSelectClient = () => { }  
+  onSelect = () => { },
+  onSelectClient = () => { }
 }: ClientesProps) {
-  
-  const { clients } = useClients();
-  
-  const { 
-    columns,
-    handleAddCustomer, 
-    handleExportCustomers 
-  } = useClientTable({ onSelect, onSelectClient });
 
-  // const clients = customersData as unknown as Client[];
+  const { clients, isLoading, error, refetch } = useClients();
+
+  const [tableversion, setTableversion] = useState(0);
+
+  const refetchTable = () => {
+    refetch();
+    setTableversion(prev => prev + 1);
+  };
+
+  const {
+    columns,
+    handleAddCustomer,
+    handleExportCustomers
+  } = useClientTable({ onSelect, onSelectClient, onDeleteSuccess: refetchTable });
 
   const validClients = clients || [];
 
@@ -40,6 +47,34 @@ export default function ClientesPage({
   const juridicalPersons = validClients.filter(c => c.organizationType === OrganizationType.PERSON_JURIDIC).length;
   const suppliers = validClients.filter(c => c.is_supplier).length;
   const withBranches = validClients.filter(c => c.it_branches).length;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loading />
+          {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
+          <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
+          <p className="mb-4">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-fit">
@@ -144,6 +179,7 @@ export default function ClientesPage({
         {validClients.length > 0 ? (
           <div className="rounded-xl overflow-hidden">
             <DataTable
+              key={`clients-table-version-${tableversion}`}
               data={validClients}
               columns={columns}
               title=""

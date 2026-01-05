@@ -19,10 +19,10 @@ export interface ProductProps {
   active: boolean;
 
   store?: [];
-  
+
   priceList?: [];
   valuePrice?: number;
-  
+
   bills: [];
 
   createdAt?: Date;
@@ -50,68 +50,45 @@ export interface Product {
   active: boolean;
 
   store?: [];
-  
+
   priceList?: [];
   valuePrice?: number;
-  
+
   bills: [];
 
   createdAt?: Date;
   updatedAt?: Date;
 }
 
+// Revisa cómo está definido CreateProductDto:
 export interface CreateProductDto {
   name: string;
-  category: ProductCategory;
+  type: string;
+  category: number;
   unitOfMeasure: UnitOfMeasure;
-  reference?: string | null;
-  codeProduct: string | null;
-  codeBarcode?: string | null;
-
-  initialAmount: number | null;
-  costForUnit: number | null;
+  reference: string | null;
+  codeProduct: string | null;  // Mapped to 'code' in backend
+  costForUnit: number | null;  // Mapped to 'cost' in backend
   basePrice: number;
-
-  goodExcluded: boolean;
   taxRate: string;
-  taxExempt: boolean;
-  observation?: string | null;
-
+  description: string | null;
   active: boolean;
-
-  store?: [];
-  
-  priceList?: [];
-  valuePrice?: number;
-  
-  bills: [];
+  valuePrice: number;          // Mapped to 'finalPrice' in backend
 }
 
 export interface UpdateProductDto {
   name: string;
-  category: ProductCategory;
+  type?: string;
+  category: number;
   unitOfMeasure: UnitOfMeasure;
   reference?: string | null;
   codeProduct: string | null;
-  codeBarcode?: string | null;
-
-  initialAmount: number | null;
   costForUnit: number | null;
   basePrice: number;
-
-  goodExcluded: boolean;
   taxRate: string;
-  taxExempt: boolean;
-  observation?: string | null;
-
+  description: string | null;
   active: boolean;
-
-  store?: [];
-  
-  priceList?: [];
-  valuePrice?: number;
-  
-  bills: [];
+  valuePrice: number;
 }
 
 export enum ProductCategory {

@@ -13,7 +13,7 @@ import {
 import { useProduct } from '@interfaces/src/hooks/features/Products/useProduct';
 import { DollarSign, Calculator, TrendingUp, Search } from 'lucide-react';
 import { Button } from '@ui/index';
-import { CreateProductDto, ProductCategory, UnitOfMeasure } from '@domain/entities/Product.entity';
+import { CreateProductDto, UnitOfMeasure } from '@domain/entities/Product.entity';
 
 interface CreateProductProps {
     onBack: () => void;
@@ -26,8 +26,8 @@ type ProductFormData = {
     description: string | null;
     reference: string | null;
     code: string | null;
-    type: string;
-    categoryProductId: number;
+    type: string; // Este debe ser el tipo de producto (PRODUCT, SERVICE, etc.)
+    categoryProductId: number; // ID de la categoría
     unit: string;
     taxRate: string;
     trackStock: boolean;
@@ -36,6 +36,10 @@ type ProductFormData = {
     cost: string;
     basePrice: string;
     finalPrice: string;
+    goodExcluded: boolean;
+    taxExempt: boolean;
+    codeBarcode: string | null;
+    initialAmount: string;
 };
 
 export default function CreateProduct({ onBack, initialData, mode = 'create' }: CreateProductProps) {
@@ -45,26 +49,26 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
     const [categories, setCategories] = useState<Array<{ id: number; name: string }>>([]);
 
     const [formData, setFormData] = useState<ProductFormData>({
-    name: '',
-    description: null,
-    reference: null,
-    code: null,
-    type: ProductCategory.GOODS_SALE,
-    categoryProductId: 1,
-    unit: UnitOfMeasure.UNIT, 
-    taxRate: '19',
-    trackStock: true,
-    allowNegativeStock: false,
-    active: true,
-    cost: '',
-    basePrice: '',
-    finalPrice: '',
-    goodExcluded: false,
-    taxExempt: false,
-    codeBarcode: null,
-    initialAmount: '0',
-    ...initialData
-});
+        name: '',
+        description: null,
+        reference: null,
+        code: null,
+        type: 'PRODUCT', // ← Cambia esto a un string simple
+        categoryProductId: 1,
+        unit: UnitOfMeasure.UNIT,
+        taxRate: '19',
+        trackStock: true,
+        allowNegativeStock: false,
+        active: true,
+        cost: '',
+        basePrice: '',
+        finalPrice: '',
+        goodExcluded: false,
+        taxExempt: false,
+        codeBarcode: null,
+        initialAmount: '0',
+        ...initialData
+    });
 
     useEffect(() => {
         if (initialData) {
@@ -135,20 +139,6 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
     };
 
     const transformToCreateProductDto = (formData: ProductFormData): CreateProductDto => {
-        // Mapear tipo a ProductCategory
-        const getProductCategory = (type: string): ProductCategory => {
-            switch (type) {
-                case 'SERVICE':
-                    return ProductCategory.SERVICES_SALE;
-                case 'PRODUCT':
-                    return ProductCategory.GOODS_SALE;
-                case 'COMBO':
-                case 'VARIANT':
-                default:
-                    return ProductCategory.ASSETS_SALE;
-            }
-        };
-
         // Mapear unit a UnitOfMeasure
         const getUnitOfMeasure = (unit: string): UnitOfMeasure => {
             // Convertir tus opciones al enum
@@ -178,25 +168,17 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
 
         return {
             name: formData.name,
-            category: getProductCategory(formData.type),
+            type: formData.type,
+            category: formData.categoryProductId, // Use the selected category ID
             unitOfMeasure: getUnitOfMeasure(formData.unit),
             reference: formData.reference,
-            codeProduct: formData.code, // Tu campo "code" es codeProduct
-            codeBarcode: null, // Puedes agregar un campo para esto si lo necesitas
-            initialAmount: formData.trackStock ? 0 : null, // Si trackStock es true, usar 0, sino null
+            codeProduct: formData.code,
             costForUnit: formData.cost ? parseFloat(formData.cost) : null,
             basePrice: parseFloat(formData.basePrice) || 0,
-            // Estos campos no están en tu formulario actual - establecer valores por defecto
-            goodExcluded: false,
             taxRate: formData.taxRate,
-            taxExempt: parseFloat(formData.taxRate) === 0,
-            observation: formData.description, // Mapear description a observation
+            description: formData.description,
             active: formData.active,
-            // Campos de arrays - establecer vacíos por defecto
-            store: [],
-            priceList: [],
             valuePrice: parseFloat(formData.finalPrice) || 0,
-            bills: []
         };
     };
 
@@ -253,10 +235,12 @@ export default function CreateProduct({ onBack, initialData, mode = 'create' }: 
 
     // Options for select fields
     const typeOptions = [
-        { value: ProductCategory.GOODS_SALE, label: 'Producto' },
-        { value: ProductCategory.SERVICES_SALE, label: 'Servicio' },
-        { value: ProductCategory.ASSETS_SALE, label: 'Activo/Combo' },
+        { value: 'PRODUCT', label: 'Producto' },
+        { value: 'SERVICE', label: 'Servicio' },
+        { value: 'COMBO', label: 'Combo' },
+        { value: 'VARIANT', label: 'Variante' },
     ];
+
 
     const unitOptions = [
         { value: UnitOfMeasure.UNIT, label: 'Unidad' },

@@ -28,6 +28,8 @@ export function useProduct() {
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
             console.log('Error fetching Products:', err);
+        } finally {
+            setIsLoading(false)
         }
     }
 

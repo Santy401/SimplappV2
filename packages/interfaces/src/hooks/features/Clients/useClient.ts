@@ -5,6 +5,9 @@ export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [isUpdating, setIsUpdating] = useState<number | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     fetchClients();
@@ -33,6 +36,7 @@ export function useClients() {
 
   const updateClient = async (id: number, data: Partial<Client>) => {
     try {
+      setIsUpdating(id);
       console.log('Actualizando cliente:', { id, data });
 
       const response = await fetch(`/api/clients/${id}`, {
@@ -60,35 +64,48 @@ export function useClients() {
     } catch (err) {
       console.error('Error updating client:', err);
       return false;
+    } finally {
+      setIsUpdating(null);
     }
   };
 
   const deleteClient = async (id: number) => {
     try {
+      setIsDeleting(id);
       const response = await fetch(`/api/clients/${id}`, {
         method: 'DELETE',
       });
 
-      if (!response.ok) throw new Error('Error al eliminar');
+      if (!response.ok) {
+        throw new Error('Error al eliminar cliente');
+      }
 
       setClients(prev => prev.filter(client => client.id !== id));
-
+      
       return true;
     } catch (err) {
       console.error('Error deleting client:', err);
+      setError(err instanceof Error ? err.message : 'Error al eliminar cliente');
       return false;
+    } finally {
+      setIsDeleting(null);
     }
   };
 
   const createClient = async (data: CreateClientDto) => {
     try {
+      setIsCreating(true);
+      setError(null);
+
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
 
-      if (!response.ok) throw new Error('Error al crear');
+      if (!response.ok) {
+        throw new Error('Error al crear cliente');
+      }
 
       const newClient = await response.json();
 
@@ -97,7 +114,10 @@ export function useClients() {
       return newClient;
     } catch (err) {
       console.error('Error creating client:', err);
+      setError(err instanceof Error ? err.message : 'Error al crear cliente');
       return null;
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -105,9 +125,13 @@ export function useClients() {
     clients,
     isLoading,
     error,
+    isDeleting,
+    isUpdating,
+    isCreating,
     refetch: fetchClients,
     updateClient,
     deleteClient,
     createClient,
+    setError,
   };
 }

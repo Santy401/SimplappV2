@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { ItemType, UnitOfMeansureList } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
     try {
@@ -88,13 +89,44 @@ export async function POST(request: NextRequest) {
             images,
             prices,
             initialStock,
+            unitOfMeasure,
+            codeProduct,
+            codeBarcode,
+            costForUnit,
+            valuePrice,
+            initialAmount,
+            store,
+            priceList,
+            bills,
+            goodExcluded,
+            taxExempt,
+            observation,
+            basePrice,
+            type,
             ...data
         } = rawData;
+
+        const categoryId = category && typeof category === 'object' && 'id' in category ? (category as any).id : category;
+        const parsedCategoryId = Number(categoryId);
 
         const product = await prisma.product.create({
             data: {
                 ...data,
-                companyId: user.company.id,
+                description: data.description || observation,
+                company: {
+                    connect: { id: user.company.id },
+                },
+                type: type || ItemType.PRODUCT,
+                unit: unitOfMeasure || UnitOfMeansureList.UNIDAD,
+                category: {
+                    connect: {
+                        id: !isNaN(parsedCategoryId) && parsedCategoryId !== 0 ? parsedCategoryId : undefined,
+                    },
+                },
+                code: codeProduct,
+                cost: costForUnit ? String(costForUnit) : undefined,
+                basePrice: basePrice ? String(basePrice) : undefined,
+                finalPrice: valuePrice ? String(valuePrice) : undefined,
             },
             include: {
                 category: true,

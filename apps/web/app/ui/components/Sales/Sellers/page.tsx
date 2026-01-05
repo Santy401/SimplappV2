@@ -3,7 +3,7 @@
 import { Seller } from "@domain/entities/Seller.entity";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
-import { DataTable, Button } from "@simplapp/ui";
+import { DataTable, Button, Loading } from "@simplapp/ui";
 import { Receipt, UserPlus } from "lucide-react";
 
 interface SellerProps {
@@ -15,9 +15,37 @@ export default function Sellers({
     onSelect = () => { },
     onSelectSeller = () => { }
 }: SellerProps) {
-    const { sellers } = useSeller();
+    const { sellers, isLoading, error } = useSeller();
     const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller });
     const ValidSellers = sellers || [];
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center">
+                    <Loading />
+                    {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
+                    <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
+                    <p className="mb-4">{error}</p>
+                    <Button
+                        onClick={() => window.location.reload()}
+                        className="bg-red-600 hover:bg-red-700 text-white"
+                    >
+                        Reintentar
+                    </Button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-fit">

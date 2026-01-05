@@ -18,12 +18,12 @@ export default function Login() {
   } = useLogin();
 
   return (
-    <div className="min-h-90 w-full flex items-center justify-center bg-background">
+    <div className="min-h-100 w-full flex items-center justify-center bg-background">
       <Link href="/" className="absolute left-0 top-0 mt-5 ml-5">
         <ArrowLeft className="text-foreground" />
       </Link>
 
-      <div className="w-full max-w-md bg-form-bg rounded-lg scale-86 shadow-sm p-8">
+      <div className="w-full max-w-md bg-form-bg rounded-lg scale-86 p-8">
         <div className="flex flex-col items-center mb-8">
           <div className="bg-foreground text-background rounded-lg p-3 mb-6">
             <Zap size={24} />
@@ -106,9 +106,9 @@ export default function Login() {
         </form>
 
         <div className="flex items-center gap-3 my-6">
-          <div className="flex-1 h-px bg-foreground-text-second"></div>
+          <div className="flex-1 h-px bg-sidebar-border"></div>
           <span className="text-sm text-muted-foreground">O</span>
-          <div className="flex-1 h-px bg-foreground-text-second"></div>
+          <div className="flex-1 h-px bg-sidebar-border"></div>
         </div>
 
         <div className="space-y-3">

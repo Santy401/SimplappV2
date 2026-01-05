@@ -5,7 +5,7 @@ import { useClientFullName } from "./useClientFullName";
 
 import { ClientesProps } from "@domain/entities/props/clients/Clientes.entity.props";
 
-export const useClientCustomers = ({ onSelect, onSelectClient }: ClientesProps) => {
+export const useClientCustomers = ({ onSelect, onSelectClient, onDeleteSuccess }: ClientesProps) => {
     const { deleteClient } = useClients();
     const { getFullName } = useClientFullName();
 
@@ -15,7 +15,7 @@ export const useClientCustomers = ({ onSelect, onSelectClient }: ClientesProps) 
         }
 
         if (onSelect) {
-            onSelect('ventas-clientes-create');
+            onSelect('ventas-clientes-edit');
         }
     };
 
@@ -24,6 +24,9 @@ export const useClientCustomers = ({ onSelect, onSelectClient }: ClientesProps) 
             const result = await deleteClient(client.id);
             if (result) {
                 toast.success('Cliente eliminado');
+                if (onDeleteSuccess) {
+                    onDeleteSuccess();
+                }
             } else {
                 toast.error('Error al eliminar cliente');
             }
@@ -39,6 +42,11 @@ export const useClientCustomers = ({ onSelect, onSelectClient }: ClientesProps) 
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo cliente");
+        
+        if (onSelectClient) {
+            onSelectClient(null as any);
+        }
+        
         if (onSelect) {
             onSelect('ventas-clientes-create');
         }

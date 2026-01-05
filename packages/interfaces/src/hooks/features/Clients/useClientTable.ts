@@ -8,16 +8,17 @@ import { Client } from "@domain/entities/Client.entity";
 interface UseClientTableProps {
   onSelect?: (view: string) => void;
   onSelectClient?: (client: Client) => void;
+  onDeleteSuccess?: () => void;
 }
 
-export const useClientTable = ({ onSelect, onSelectClient }: UseClientTableProps) => {
+export const useClientTable = ({ onSelect, onSelectClient, onDeleteSuccess }: UseClientTableProps) => {
   const {
     handleEditCustomer,
     handleDeleteCustomer,
     handleViewCustomer,
     handleAddCustomer,
     handleExportCustomers
-  } = useClientCustomers({ onSelect, onSelectClient });
+  } = useClientCustomers({ onSelect, onSelectClient, onDeleteSuccess });
 
   const columns = useMemo(() =>
     createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer),
@@ -27,6 +28,7 @@ export const useClientTable = ({ onSelect, onSelectClient }: UseClientTableProps
   return {
     columns,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    onDeleteSuccess
   };
 };

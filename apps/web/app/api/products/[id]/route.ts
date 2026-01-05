@@ -70,11 +70,23 @@ export async function PUT(
         const rawData = await request.json();
 
         // Remove fields that shouldn't be updated
-        const { id: _, companyId, createdAt, updatedAt, category, images, prices, ...data } = rawData;
+        const { id: _, companyId, createdAt, updatedAt, category, images, prices, codeProduct, codeBarcode, costForUnit, valuePrice, unitOfMeasure, ...data } = rawData;
+
+        const categoryId = category && typeof category === 'object' && 'id' in category ? (category as any).id : category;
+        const parsedCategoryId = Number(categoryId);
 
         const product = await prisma.product.update({
             where: { id: Number(id) },
-            data,
+            data: {
+                ...data,
+                category: !isNaN(parsedCategoryId) && parsedCategoryId !== 0 ? {
+                    connect: { id: parsedCategoryId }
+                } : undefined,
+                code: codeProduct,
+                cost: costForUnit ? String(costForUnit) : undefined,
+                finalPrice: valuePrice ? String(valuePrice) : undefined,
+                unit: unitOfMeasure, // If provided
+            },
             include: {
                 category: true,
                 images: true,

@@ -3,7 +3,7 @@
 import { Store as Storee } from "@domain/entities/Store.entity";
 import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
 import { useStoreTable } from "@interfaces/src/hooks/features/Stores/useStoreTable";
-import { Button, DataTable } from "@simplapp/ui";
+import { Button, DataTable, Loading } from "@simplapp/ui";
 import { Store } from "lucide-react";
 
 interface StoresProps {
@@ -12,17 +12,45 @@ interface StoresProps {
 }
 
 export default function Bodega({
-  onSelect = () => { }, 
-  onSelectStores = () => { }  
+  onSelect = () => { },
+  onSelectStores = () => { }
 }: StoresProps) {
 
-  const { stores } = useStore();
-    
+  const { stores, isLoading, error } = useStore();
+
   const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores });
 
   const ValidStores = stores || [];
 
- return (
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loading />
+          {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
+          <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
+          <p className="mb-4">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            Reintentar
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-fit">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -35,7 +63,7 @@ export default function Bodega({
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => {}}
+              onClick={() => { }}
               className="gap-2 text-[15px]"
             >
               Exportar
@@ -60,7 +88,7 @@ export default function Bodega({
               pagination={true}
               itemsPerPage={10}
               onAdd={handleAddCustomer}
-              onExport={() => {}}
+              onExport={() => { }}
               className="bg-transparent"
             />
           </div>
