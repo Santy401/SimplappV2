@@ -1,7 +1,135 @@
+import { Client } from "./Client.entity";
+import { Company } from "./Company.entity";
+import { Product } from "./Product.entity";
+import { Store } from "./Store.entity";
+import { User } from "./User.entity";
+
+export enum BillStatus {
+    DRAFT = "DRAFT",
+    ISSUED = "ISSUED",
+    PAID = "PAID",
+    PARTIALLY_PAID = "PARTIALLY_PAID",
+    CANCELLED = "CANCELLED"
+}
+
+export enum PaymentMethod {
+    CASH = "CASH",
+    CREDIT_CARD = "CREDIT_CARD",
+    DEBIT_CARD = "DEBIT_CARD",
+    TRANSFER = "TRANSFER",
+    CHECK = "CHECK",
+    DEPOSIT = "DEPOSIT",
+    OTHER = "OTHER",
+    CREDIT = "CREDIT"
+}
+
 export interface Bill {
     id: number;
-    user_id: number;
-    client_id: number;
-    product_id: number;
+
+    userId: number;
+    clientId: number;
+    storeId: number;
+    companyId: number;
+
+    prefix?: string | null;
+    number: number;
+    legalNumber?: string | null;
+
+    status: BillStatus;
+    paymentMethod: PaymentMethod;
+
+    date: Date;
+    dueDate: Date;
+
+    subtotal: string;
+    taxTotal: string;
+    discountTotal: string;
+    total: string;
+    balance: string;
+
+    clientName?: string | null;
+    clientIdentification?: string | null;
+    clientAddress?: string | null;
+    clientPhone?: string | null;
+    clientEmail?: string | null;
+
+    notes?: string | null;
+
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface BillItem {
+    id: number;
+    billId: number;
+    productId: number;
+
     quantity: number;
+    price: string;
+
+    taxRate: string;
+    taxAmount: string;
+    discount: string;
+    total: string;
+
+    productName?: string | null;
+    productCode?: string | null;
+}
+
+export interface Payment {
+    id: number;
+    billId: number;
+
+    amount: string;
+    method: PaymentMethod;
+    date: Date;
+}
+
+// --- Interfaces compuestas (con relaciones) ---
+
+export interface BillWithItems extends Bill {
+    items: BillItem[];
+    payments?: Payment[]; // Puede tener pagos asociados
+}
+
+export interface BillDetail extends BillWithItems {
+    client?: Client;
+    store?: Store;
+    user?: User;
+    company?: Company;
+    items: (BillItem & { product?: Product })[];
+}
+
+// --- Inputs para creación y actualización ---
+
+export interface CreateBillInput {
+    userId: number;
+    clientId: number;
+    storeId: number;
+    companyId: number;
+
+    status?: BillStatus;
+    paymentMethod?: PaymentMethod;
+
+    date?: Date;
+    dueDate: Date;
+
+    notes?: string | null;
+
+    items: CreateBillItemInput[];
+}
+
+export interface CreateBillItemInput {
+    productId: number;
+    quantity: number;
+    price?: string; // Si no se envía se toma del producto
+    discount?: string;
+    taxRate?: string;
+}
+
+export interface CreatePaymentInput {
+    billId: number;
+    amount: string;
+    method: PaymentMethod;
+    date?: Date;
 }

@@ -54,6 +54,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
       label: "Ventas",
       icon: <TrendingUp size={20} />,
       submenu: [
+        { id: "ventas-facturacion", label: "Facturacion", icon: null },
         { id: "ventas-venta", label: "Comprobante De Venta", icon: null },
         { id: "ventas-cotizaciones", label: "Cotizaciones", icon: null },
         { id: "ventas-remisiones", label: "Remisiones", icon: null },

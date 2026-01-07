@@ -17,11 +17,15 @@ import CreateStore from "@/app/ui/components/Sales/Stores/create/page";
 
 import { Client } from "@domain/entities/Client.entity";
 import { Store } from "@domain/entities/Store.entity";
+import { Bill } from "@domain/entities/Bill.entity";
 import { Product } from "@domain/entities/Product.entity";
 import CreateSeller from "@/app/ui/components/Sales/Sellers/create/page";
 import { Seller } from "@domain/entities/Seller.entity";
 import ListPrices from "@/app/ui/components/Sales/ListPrice/page";
 import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
+import Bills from "@/app/ui/components/Sales/Bills/pages";
+import FormBill from "@/app/ui/components/Sales/Bills/create/page";
+
 
 export default function RootLayout({
   children,
@@ -34,6 +38,7 @@ export default function RootLayout({
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedListPrice, setSelectedListPrice] = useState<Store | null>(null);
+  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
 
   useEffect(() => {
     if (currentView === 'ventas-productos') {
@@ -53,6 +58,15 @@ export default function RootLayout({
         return <div className="text-white p-8">Cotizaciones</div>;
       case 'ventas-remisiones':
         return <div className="text-white p-8">Remisiones</div>;
+
+      case 'ventas-facturacion':
+        return <Bills onSelect={setCurrentView} onSelectBill={setSelectedBill} />;
+      case 'ventas-facturacion-create':
+        return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+          mode={selectedBill ? 'edit' : 'create'} />;
+      case 'ventas-facturacion-edit':
+        return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+          mode={selectedBill ? 'edit' : 'create'} />;
 
       case 'ventas-clientes':
         return <Clientes onSelect={setCurrentView} onSelectClient={setSelectedClient} />;
