@@ -165,6 +165,7 @@ export interface UpdateBill {
     discountTotal?: string;
     total?: string;
     balance?: string;
+    items?: BillItem[];
 
     clientName?: string | null;
     clientIdentification?: string | null;

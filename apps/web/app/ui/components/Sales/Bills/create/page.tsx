@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 
 interface BillsCreatePageProps {
     onSelect?: (view: string) => void;
-    onSelectBill?: (bill: BillDetail | UpdateBill) => void;
+    onSelectBill?: (bill: BillDetail) => void;
     initialData?: Partial<BillDetail> & { id?: number };
     mode?: 'create' | 'edit' | 'view';
     isLoading?: boolean;
