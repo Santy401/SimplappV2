@@ -1,18 +1,18 @@
 import { useBill } from "./useBill";
-import { Bill } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { BillsProps } from "@domain/entities/props/bills/Bills.entity.props";
 import { toast } from "react-toastify";
 
 export const useBillCustomers = ({ onSelect, onSelectBill, onDeleteSuccess }: BillsProps) => {
     const { deleteBill } = useBill();
 
-    const handleEditCustomer = (bill: Bill) => {
+    const handleEditCustomer = (bill: BillDetail) => {
         if (onSelectBill) {
             onSelectBill(bill);
         }
 
         if (onSelect) {
-            onSelect('ventas-bills-create');
+                onSelect('ventas-facturacion-edit');
         }
     };
 
@@ -30,17 +30,30 @@ export const useBillCustomers = ({ onSelect, onSelectBill, onDeleteSuccess }: Bi
         }
     };
 
-    const handleViewCustomer = (bill: Bill) => {
+    const handleViewCustomer = (bill: BillDetail) => {
         console.log("Ver detalles de factura:", bill);
-        if (onSelect) {
-            onSelect('ventas-bills-view');
-        }
+        
+        // // ESTAS DOS LÍNEAS SON CRÍTICAS:
+        // if (onSelectBill) {
+        //     onSelectBill(bill); // ← ¡ESTO FALTA! Actualiza selectedBill en el Layout
+        // }
+        
+        // if (onSelect) {
+        //     onSelect('ventas-facturacion-view'); // ← Esto cambia la vista
+        // }
+
+        return bill;
     };
 
     const handleAddCustomer = () => {
         console.log("Agregar nueva factura");
+
+        if (onSelectBill) {
+            onSelectBill(null as any);
+        }
+
         if (onSelect) {
-            onSelect('ventas-bills-create');
+            onSelect('ventas-facturacion-create');
         }
     };
 

@@ -1,43 +1,129 @@
 "use client";
 
 import { DataTable } from "@simplapp/ui";
-import { Button } from '@simplapp/ui';
-import {
-  UserCheck,
-  UserPlus,
-} from "lucide-react";
-import { Loading } from '@simplapp/ui'
+import { Button } from "@simplapp/ui";
+import { UserCheck, UserPlus } from "lucide-react";
+import { Loading } from "@simplapp/ui";
 import { useState, useEffect } from "react";
-import { Bill } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
+import { BillPreview } from "@ui/molecules/BillPreview";
 
 interface BillsPageProps {
   onSelect?: (view: string) => void;
-  onSelectBill?: (bill: Bill) => void;
+  onSelectBill?: (bill: BillDetail) => void;
 }
+type BillWithItems = Bill & {
+  items?: any[];
+  client?: any;
+  store?: any;
+};
 
-export default function BillsPage({ onSelect = () => { }, onSelectBill = () => { } }: BillsPageProps) {
-  // Ahora destructuramos 'bills' en lugar de 'bill'
+export default function BillsPage({
+  onSelect = () => {},
+  onSelectBill = () => {},
+}: BillsPageProps) {
   const { bills, loading, error, refetch } = useBill();
   const [tableversion, setTableversion] = useState(0);
 
-  // bills ya es un array, así que solo necesitamos asegurarnos de que no sea null/undefined
-  const validBills: Bill[] = bills ?? [];
+  // Estado para controlar el modal
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
+
+  const validBills: BillDetail[] = (bills as BillDetail[]) ?? [];
 
   const refetchTable = () => {
     setTableversion((prev) => prev + 1);
-  }
+  };
 
   const {
-    columns,
+    columns: originalColumns,
     handleAddCustomer,
-    handleExportCustomers
-  } = useBillTable({ onSelect, onSelectBill, onDeleteSuccess: refetchTable });
+    handleDeleteCustomer,
+    handleEditCustomer,
+    handleExportCustomers,
+  } = useBillTable({
+    onSelect,
+    onSelectBill,
+    onDeleteSuccess: refetchTable,
+  });
+
+  useEffect(() => {
+    if (bills.length > 0) {
+      console.log("✅ Bills recibidas:", bills.length);
+      console.log("✅ Primera bill:", bills[0]);
+      console.log("✅ Items de la primera bill:", bills[0].items);
+      console.log("✅ Tipo de items:", typeof bills[0].items);
+    }
+  }, [bills]);
+
+  const columns = originalColumns;
+
+  const handleViewBill = (bill: BillDetail) => {
+    console.log("📋 Ver factura:", bill);
+    setSelectedBill(bill);
+    setShowPreview(true);
+  };
 
   useEffect(() => {
     refetch();
   }, [tableversion]);
+
+  // Preparar datos para BillPreview
+  const preparePreviewData = (bill: BillDetail) => {
+    console.log("🔄 Preparando datos para preview:", bill);
+
+    // Debug: ver qué datos tiene la factura
+    console.log("📊 Datos de la factura:", {
+      date: bill.date,
+      clientName: bill.clientName,
+      items: (bill as any).items,
+      subtotal: bill.subtotal,
+    });
+
+    const items = (bill as any).items || [];
+
+    const formattedItems = items.map((item: any, index: number) => ({
+      id: item.id?.toString() || `item-${index}`,
+      productId: item.productId,
+      productName: item.productName,
+      name: item.productName || item.name || "",
+      reference: item.productCode || item.reference || "",
+      price: parseFloat(item.price) || 0,
+      quantity: parseFloat(item.quantity) || 0,
+      discount: parseFloat(item.discount) || 0,
+      taxRate: parseFloat(item.taxRate) || 0,
+      description: item.description || "",
+      total: parseFloat(item.total) || 0,
+    }));
+
+    return {
+      formData: {
+        date: bill.date
+          ? new Date(bill.date).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        dueDate: bill.dueDate
+          ? new Date(bill.dueDate).toISOString().split("T")[0]
+          : new Date().toISOString().split("T")[0],
+        clientName: bill.clientName || "Cliente",
+        clientId: bill.clientIdentification || "",
+        email: bill.clientEmail || "",
+        paymentMethod: bill.paymentMethod || "CASH",
+        status: bill.status || "DRAFT",
+        notes: bill.notes || "",
+        billItems: (bill as any).items || [],
+        footerNote: "",
+        terms: "",
+        logo: undefined,
+      },
+      items: formattedItems,
+      subtotal: parseFloat(bill.subtotal || "0"),
+      discountTotal: parseFloat(bill.discountTotal || "0"),
+      taxTotal: parseFloat(bill.taxTotal || "0"),
+      total: parseFloat(bill.total || "0"),
+    };
+  };
 
   if (loading) {
     return (
@@ -53,7 +139,9 @@ export default function BillsPage({ onSelect = () => { }, onSelectBill = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
-          <h3 className="text-lg font-semibold mb-2">Error al cargar facturas</h3>
+          <h3 className="text-lg font-semibold mb-2">
+            Error al cargar facturas
+          </h3>
           <p className="mb-4">{error}</p>
           <Button
             onClick={() => window.location.reload()}
@@ -71,7 +159,9 @@ export default function BillsPage({ onSelect = () => { }, onSelectBill = () => {
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Facturas De Venta</h1>
+            <h1 className="text-3xl font-bold text-foreground">
+              Facturas De Venta
+            </h1>
             <p className="text-muted-foreground mt-2">
               Gestiona tus facturas de venta
             </p>
@@ -104,7 +194,10 @@ export default function BillsPage({ onSelect = () => { }, onSelectBill = () => {
               searchable={true}
               pagination={true}
               itemsPerPage={10}
+              onView={handleViewBill}
               onAdd={handleAddCustomer}
+              onDelete={handleDeleteCustomer}
+              onEdit={handleEditCustomer}
               onExport={handleExportCustomers}
               className="bg-transparent"
             />
@@ -112,15 +205,31 @@ export default function BillsPage({ onSelect = () => { }, onSelectBill = () => {
         ) : (
           <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
             <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No hay facturas registradas</h3>
+            <h3 className="text-lg font-semibold mb-2">
+              No hay facturas registradas
+            </h3>
             <p className="text-muted-foreground mb-6">
               Comienza agregando tu primera factura con datos completos
             </p>
-            <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
+            <Button
+              onClick={handleAddCustomer}
+              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer"
+            >
               <UserPlus className="w-4 h-4" />
               Agregar Primera Factura
             </Button>
           </div>
+        )}
+
+        {/* Modal de Preview */}
+        {showPreview && selectedBill && (
+          <BillPreview
+            {...preparePreviewData(selectedBill)}
+            onClose={() => {
+              setShowPreview(false);
+              setSelectedBill(null);
+            }}
+          />
         )}
       </div>
     </div>

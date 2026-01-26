@@ -108,8 +108,15 @@ export interface CreateBillInput {
     storeId: number;
     companyId: number;
 
+    // Products: CreateBillItemInput[];
+
     status?: BillStatus;
     paymentMethod?: PaymentMethod;
+    subtotal?: string;
+    taxTotal?: string;
+    discountTotal?: string;
+    total?: string;
+    balance?: string;
 
     date?: Date;
     dueDate: Date;
@@ -122,6 +129,8 @@ export interface CreateBillInput {
 export interface CreateBillItemInput {
     productId: number;
     quantity: number;
+    ProductName?: string;
+    ProductCode?: string;
     price?: string; // Si no se envía se toma del producto
     discount?: string;
     taxRate?: string;
@@ -132,4 +141,40 @@ export interface CreatePaymentInput {
     amount: string;
     method: PaymentMethod;
     date?: Date;
+}
+
+export interface UpdateBill {
+    id: number;
+    userId: number;
+    clientId: number;
+    storeId: number;
+    companyId: number;
+
+    prefix?: string | null;
+    number?: number;
+    legalNumber?: string | null;
+
+    status?: BillStatus;
+    paymentMethod?: PaymentMethod;
+
+    date?: Date;
+    dueDate?: Date;
+
+    subtotal?: string;
+    taxTotal?: string;
+    discountTotal?: string;
+    total?: string;
+    balance?: string;
+
+    clientName?: string | null;
+    clientIdentification?: string | null;
+    clientAddress?: string | null;
+    clientPhone?: string | null;
+    clientEmail?: string | null;
+
+    notes?: string | null;
+
+
+    createdAt?: Date;
+    updatedAt?: Date;
 }

@@ -7,6 +7,9 @@ const SIDEBAR_ITEMS = [
     { id: "inicio", label: "Inicio" },
     { id: "dashboard", label: "Dashboard" },
 
+    { id: "ventas-facturacion", label: "Facturación", parentId: "ventas" },
+    { id: "ventas-facturacion-create", label: "Crear Factura", parentId: "ventas-facturacion" },
+
     { id: "ventas", label: "Ventas" },
     { id: "ventas-venta", label: "Comprobante De Venta", parentId: "ventas" },
 
@@ -66,31 +69,34 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
 }
 
 function detectActiveItem(pathname: string): string {
-  const path = pathname.toLowerCase();
+    const path = pathname.toLowerCase();
 
-  if (path.includes('/ventas/precios/create')) return 'inventario-precios-create';
-  if (path.includes('/ventas/precios')) return 'inventario-precios';
+    if (path.includes('/ventas/facturacion/create')) return 'ventas-facturacio-create';
+    if (path.includes('/ventas/facturacion')) return 'ventas-facturacio';
 
-  if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
-  if (path.includes('/ventas/clientes')) return 'ventas-clientes';
+    if (path.includes('/ventas/precios/create')) return 'inventario-precios-create';
+    if (path.includes('/ventas/precios')) return 'inventario-precios';
 
-  if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
-  if (path.includes('/ventas/bodega')) return 'ventas-bodega';
+    if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
+    if (path.includes('/ventas/clientes')) return 'ventas-clientes';
 
-  if (path.includes('/ventas/vendedores')) return 'ventas-vendedor';
-  if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
-  if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
-  if (path.includes('/ventas/venta')) return 'ventas-venta';
+    if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
+    if (path.includes('/ventas/bodega')) return 'ventas-bodega';
 
-  if (path.includes('/productos/producto/create')) return 'ventas-productos-create';
-  if (path.includes('/productos/producto/edit')) return 'ventas-productos-edit';
-  if (path.includes('/productos/producto')) return 'ventas-productos';
-  if (path.includes('/productos')) return 'ventas-productos';
+    if (path.includes('/ventas/vendedores')) return 'ventas-vendedor';
+    if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';
+    if (path.includes('/ventas/remisiones')) return 'ventas-remisiones';
+    if (path.includes('/ventas/venta')) return 'ventas-venta';
 
-  if (path.includes('/ventas')) return 'ventas';
-  if (path.includes('/dashboard')) return 'dashboard';
+    if (path.includes('/productos/producto/create')) return 'ventas-productos-create';
+    if (path.includes('/productos/producto/edit')) return 'ventas-productos-edit';
+    if (path.includes('/productos/producto')) return 'ventas-productos';
+    if (path.includes('/productos')) return 'ventas-productos';
 
-  return 'inicio';
+    if (path.includes('/ventas')) return 'ventas';
+    if (path.includes('/dashboard')) return 'dashboard';
+
+    return 'inicio';
 }
 
 

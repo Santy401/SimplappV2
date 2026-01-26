@@ -161,18 +161,6 @@ export function DataTable<T extends { id: number | string }>({
                   {(onEdit || onDelete || onView) && (
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
-                        {onView && (
-                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onView(item)}>
-                            <Eye className="w-4 h-4" />
-                            View
-                          </Button>
-                        )}
-                        {onEdit && (
-                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onEdit(item)}>
-                            <Edit2 className="w-4 h-4" />
-                            Edit
-                          </Button>
-                        )}
                         {onDelete && (
                           <Button
                             variant="ghost"
@@ -181,7 +169,16 @@ export function DataTable<T extends { id: number | string }>({
                             onClick={() => onDelete(item)}
                           >
                             <Trash2 className="w-4 h-4" />
-                            Delete
+                          </Button>
+                        )}
+                            {onEdit && (
+                              <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onEdit(item)}>
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                        {onView && (
+                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onView(item)}>
+                            <Eye className="w-4 h-4" />
                           </Button>
                         )}
                       </div>

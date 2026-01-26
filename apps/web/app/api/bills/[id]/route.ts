@@ -3,6 +3,77 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access-token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const payload = await verifyAccessToken(accessToken);
+    if (!payload || !payload.id) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: Number(payload.id) },
+      include: { company: true },
+    });
+
+    if (!user || !user.company) {
+      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
+    }
+
+    const { id } = await params;
+    const billId = parseInt(id);
+    
+    if (isNaN(billId)) {
+      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
+    }
+
+    // Obtener factura con items y relaciones
+    const bill = await prisma.bill.findFirst({
+      where: {
+        id: billId,
+        companyId: user.company.id,
+      },
+      include: {
+        items: {
+          include: {
+            product: true
+          }
+        },
+        client: true,
+        store: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        }
+      },
+    });
+
+    if (!bill) {
+      return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
+    }
+
+    return NextResponse.json(bill);
+  } catch (error) {
+    console.error('Error fetching bill:', error);
+    return NextResponse.json(
+      { error: 'Error al obtener factura' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -30,40 +101,41 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const clientId = parseInt(id);
+    const billId = parseInt(id);
     
-    if (isNaN(clientId)) {
-      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 });
+    if (isNaN(billId)) {
+      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
     }
 
-    // Check if client exists and belongs to user's company
-    const existingClient = await prisma.client.findFirst({
+    // Verificar si la factura existe
+    const existingBill = await prisma.bill.findFirst({
       where: {
-        id: clientId,
+        id: billId,
         companyId: user.company.id,
       },
     });
 
-    if (!existingClient) {
-      return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+    if (!existingBill) {
+      return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
     const data = await request.json();
 
-    const updatedClient = await prisma.client.update({
-      where: { id: clientId },
+    // Actualizar factura
+    const updatedBill = await prisma.bill.update({
+      where: { id: billId },
       data: {
         ...data,
-        // Ensure companyId remains the same
+        // Asegurar que companyId permanezca igual
         companyId: user.company.id,
       },
     });
 
-    return NextResponse.json(updatedClient);
+    return NextResponse.json(updatedBill);
   } catch (error) {
-    console.error('Error updating client:', error);
+    console.error('Error updating bill:', error);
     return NextResponse.json(
-      { error: 'Error al actualizar cliente' },
+      { error: 'Error al actualizar factura' },
       { status: 500 }
     );
   }
@@ -96,47 +168,43 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const clientId = parseInt(id);
+    const billId = parseInt(id);
     
-    if (isNaN(clientId)) {
-      return NextResponse.json({ error: 'Invalid client ID' }, { status: 400 });
+    if (isNaN(billId)) {
+      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
     }
 
-    // Check if client exists and belongs to user's company
-    const client = await prisma.client.findFirst({
+    // Verificar si la factura existe
+    const bill = await prisma.bill.findFirst({
       where: {
-        id: clientId,
+        id: billId,
         companyId: user.company.id,
       },
     });
 
-    if (!client) {
-      return NextResponse.json({ error: 'Client not found' }, { status: 404 });
+    if (!bill) {
+      return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
-    // Eliminar el cliente directamente sin verificar relaciones
-    await prisma.client.delete({
-      where: { id: clientId },
+    // Primero eliminar los items relacionados
+    await prisma.billItem.deleteMany({
+      where: { billId: billId },
+    });
+
+    // Luego eliminar la factura
+    await prisma.bill.delete({
+      where: { id: billId },
     });
 
     return NextResponse.json({ 
       success: true,
-      message: 'Cliente eliminado correctamente' 
+      message: 'Factura eliminada correctamente' 
     });
   } catch (error) {
-    console.error('Error deleting client:', error);
-    
-    // Si hay un error de integridad referencial, Prisma lanzará un error
-    // Podemos capturarlo y dar un mensaje más específico
-    if (error instanceof Error && error.message.includes('Foreign key constraint')) {
-      return NextResponse.json(
-        { error: 'No se puede eliminar el cliente porque tiene registros relacionados' },
-        { status: 400 }
-      );
-    }
+    console.error('Error deleting bill:', error);
     
     return NextResponse.json(
-      { error: 'Error al eliminar cliente' },
+      { error: 'Error al eliminar factura' },
       { status: 500 }
     );
   }

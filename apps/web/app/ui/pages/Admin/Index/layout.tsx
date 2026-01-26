@@ -25,6 +25,7 @@ import ListPrices from "@/app/ui/components/Sales/ListPrice/page";
 import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
 import Bills from "@/app/ui/components/Sales/Bills/pages";
 import FormBill from "@/app/ui/components/Sales/Bills/create/page";
+import BillsCreatePage from "@/app/ui/components/Sales/Bills/create/page";
 
 
 export default function RootLayout({
@@ -45,6 +46,10 @@ export default function RootLayout({
       setSelectedProduct(null);
     }
   }, [currentView]);
+
+  console.log('📋 Layout - selectedBill:', selectedBill);
+console.log('📋 Layout - currentView:', currentView);
+
 
   const renderContent = () => {
     switch (currentView) {
@@ -67,6 +72,10 @@ export default function RootLayout({
       case 'ventas-facturacion-edit':
         return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={selectedBill ? 'edit' : 'create'} />;
+      case 'ventas-facturacion-view':
+  // Cambia FormBill por BillsCreatePage
+  return <BillsCreatePage onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+    mode={'view'} />;
 
       case 'ventas-clientes':
         return <Clientes onSelect={setCurrentView} onSelectClient={setSelectedClient} />;
