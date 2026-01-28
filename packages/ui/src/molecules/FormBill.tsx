@@ -31,7 +31,7 @@ import { Product } from "@domain/entities/Product.entity";
 // Interfaces locales para el formulario
 export interface FormBillItem {
   id: string;
-  productId?: number;
+  productId?: string;
   productName?: string;
   name: string;
   reference: string;
@@ -76,9 +76,9 @@ interface FormBillProps {
   clients?: Client[];
   products?: Product[];
   // IDs requeridos (normalmente vendrían del contexto de usuario)
-  userId?: number;
-  storeId?: number;
-  companyId?: number;
+  userId?: string;
+  storeId?: string;
+  companyId?: string;
 }
 
 export function FormBill({
@@ -296,7 +296,7 @@ export function FormBill({
   };
 
   // Manejar selección de producto
-  const handleProductSelect = (itemId: string, productId: number) => {
+  const handleProductSelect = (itemId: string, productId: string) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
       setItems(
@@ -320,7 +320,7 @@ export function FormBill({
   };
 
   // Manejar selección de cliente
-  const handleClientSelect = (clientId: number) => {
+  const handleClientSelect = (clientId: string) => {
     const client = clients.find((c) => c.id === clientId);
     if (client) {
       setFormData((prev) => ({

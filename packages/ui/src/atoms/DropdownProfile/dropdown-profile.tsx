@@ -14,7 +14,7 @@ import { useAuth } from "@hooks/useAuth"
 import { useEffect, useState } from "react"
 
 interface UserData {
-  id: number
+  id: string
   email: string
   name: string
   typeAccount: string

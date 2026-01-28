@@ -17,7 +17,7 @@ import { Button } from '../atoms/Button/Button';;
 import { Checkbox } from "../atoms/Checkbox/Checkbox";
 import { TableColumn, TableProps } from "../types/table.entity";
 
-export function DataTable<T extends { id: number | string }>({
+export function DataTable<T extends { id: string| string }>({
   data,
   columns,
   title = "Data Table",
