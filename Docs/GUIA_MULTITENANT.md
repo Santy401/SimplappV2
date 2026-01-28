@@ -79,14 +79,14 @@ export async function GET(request: NextRequest) {
     }
 
     // 2️⃣ Verificar token y obtener usuario
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     // 3️⃣ Obtener usuario con su compañía
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -132,13 +132,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -193,13 +193,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -254,13 +254,13 @@ export async function DELETE(
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  const payload = await verifyAccessToken(accessToken);
+  const payload = await verifyAccessToken(accessToken) as {id: string};;
   if (!payload || !payload.id) {
     return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: Number(payload.id) },
+    where: { id: payload.id },
     include: { company: true },
   });
 
@@ -340,13 +340,13 @@ export async function getAuthenticatedUser() {
     return { error: NextResponse.json({ error: 'Not authenticated' }, { status: 401 }) };
   }
 
-  const payload = await verifyAccessToken(accessToken);
+  const payload = await verifyAccessToken(accessToken) as {id: string};;
   if (!payload || !payload.id) {
     return { error: NextResponse.json({ error: 'Invalid token' }, { status: 401 }) };
   }
 
   const user = await prisma.user.findUnique({
-    where: { id: Number(payload.id) },
+    where: { id: payload.id },
     include: { company: true },
   });
 
