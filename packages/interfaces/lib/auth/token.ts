@@ -9,7 +9,7 @@ const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000;
 const getAccessTokenSecret = () => new TextEncoder().encode(env.JWT_SECRET);
 const getRefreshTokenSecret = () => new TextEncoder().encode(env.JWT_REFRESH_SECRET);
 
-export async function generateAccessToken(userId: number, email: string) {
+export async function generateAccessToken(userId: string, email: string) {
   return await new SignJWT({ 
     id: userId, 
     email,
@@ -22,7 +22,7 @@ export async function generateAccessToken(userId: number, email: string) {
     .sign(getAccessTokenSecret());
 }
 
-export async function generateRefreshToken(userId: number) {
+export async function generateRefreshToken(userId: string) {
   const token = crypto.randomBytes(64).toString('hex');
   const expiresAt = new Date(Date.now() + REFRESH_TOKEN_EXPIRY);
 
@@ -80,7 +80,7 @@ export async function revokeRefreshToken(token: string) {
   }
 }
 
-export async function revokeAllUserTokens(userId: number) {
+export async function revokeAllUserTokens(userId: string) {
   try {
     await prisma.refreshToken.deleteMany({ where: { userId } });
     return true;

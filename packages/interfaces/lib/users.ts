@@ -36,7 +36,7 @@ export async function getUsers() {
     }
 }
 
-export async function createUsers(User: Data, Company?: Partial<CompanyData>) {
+export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password' | 'typeAccount' | 'country'>, Company?: Partial<CompanyData>) {
     try {
         const newUser = await prisma.$transaction(async (tx) => {
             const user = await tx.user.create({
@@ -93,7 +93,7 @@ export async function createUsers(User: Data, Company?: Partial<CompanyData>) {
     }
 }
 
-export async function validateUserHasCompany(userId: number) {
+export async function validateUserHasCompany(userId: string) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
         include: { company: true }
