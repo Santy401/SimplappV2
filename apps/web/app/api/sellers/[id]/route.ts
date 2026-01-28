@@ -9,20 +9,20 @@ export async function PUT(
 ) {
   try {
     const { id } = await params;
-    const cookieSeller = await cookies();
-    const accessToken = cookieSeller.get("access-token")?.value;
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("access-token")?.value;
 
     if (!accessToken) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: "Invalid token" }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -34,18 +34,12 @@ export async function PUT(
     }
 
     const data = await request.json();
-    const sellerId = parseInt(id, 10);
+    console.log('📥 Datos recibidos para seller:', data);
 
-    if (isNaN(sellerId)) {
-      return NextResponse.json(
-        { error: "ID de vendedor inválido" },
-        { status: 400 }
-      );
-    }
-
+    // ✅ Buscar vendedor con UUID directo
     const existingSeller = await prisma.seller.findFirst({
       where: {
-        id: sellerId,
+        id: id, // ✅ UUID directo
         companyId: user.company.id,
       },
     });
@@ -57,6 +51,7 @@ export async function PUT(
       );
     }
 
+    // ✅ Validar nombre
     if (data.name && (typeof data.name !== "string" || data.name.trim() === "")) {
       return NextResponse.json(
         { error: "El nombre del vendedor no puede estar vacío" },
@@ -64,8 +59,10 @@ export async function PUT(
       );
     }
 
+    console.log('🔄 Actualizando vendedor...');
+
     const updatedSeller = await prisma.seller.update({
-      where: { id: sellerId },
+      where: { id: id }, // ✅ UUID directo
       data: {
         name: data.name?.trim() || existingSeller.name,
         identification: data.identification?.trim() || null,
@@ -73,11 +70,15 @@ export async function PUT(
       },
     });
 
+    console.log('✅ Vendedor actualizado:', updatedSeller);
+
     return NextResponse.json(updatedSeller);
   } catch (error) {
-    console.error("Error updating seller:", error);
+    console.error("💥 Error updating seller:", error);
 
     if (error instanceof Error) {
+      console.error("💥 Error message:", error.message);
+
       if (error.message.includes("P2002")) {
         return NextResponse.json(
           { error: "Ya existe un vendedor con esos datos" },
@@ -87,7 +88,10 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { error: "Error al actualizar el vendedor" },
+      { 
+        error: "Error al actualizar el vendedor",
+        details: error instanceof Error ? error.message : "Unknown error"
+      },
       { status: 500 }
     );
   }
@@ -99,20 +103,20 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const cookieSeller = await cookies();
-    const accessToken = cookieSeller.get('access-token')?.value;
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access-token')?.value;
 
     if (!accessToken) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -123,19 +127,24 @@ export async function DELETE(
       );
     }
 
+    console.log('🗑️ Eliminando seller:', id);
+
+    // ✅ UUID directo
     await prisma.seller.delete({
       where: {
-        id: Number(id),
+        id: id,
         companyId: user.company.id,
       },
     });
+
+    console.log('✅ Seller eliminado');
 
     return NextResponse.json({
       message: 'Vendedor eliminado exitosamente'
     });
 
   } catch (error: any) {
-    console.error('Error deleting seller:', error);
+    console.error('💥 Error deleting seller:', error);
 
     if (error.code === 'P2003') {
       return NextResponse.json(
