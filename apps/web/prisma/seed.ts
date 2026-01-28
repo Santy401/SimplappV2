@@ -1,48 +1,33 @@
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+// ✅ Carga .env ANTES de importar prisma
+config({ path: resolve(__dirname, '..', '.env') });
+
 import { prisma } from '@interfaces/lib/prisma';
 
 async function main() {
     console.log('🌱 Seeding database...');
 
-    // Crear categorías de productos por defecto
     const categories = [
-        {
-            name: 'General',
-            description: 'Categoría general para productos sin clasificación específica',
-        },
-        {
-            name: 'Electrónica',
-            description: 'Productos electrónicos y tecnológicos',
-        },
-        {
-            name: 'Ropa y Accesorios',
-            description: 'Prendas de vestir y accesorios',
-        },
-        {
-            name: 'Alimentos y Bebidas',
-            description: 'Productos alimenticios y bebidas',
-        },
-        {
-            name: 'Hogar y Jardín',
-            description: 'Artículos para el hogar y jardinería',
-        },
-        {
-            name: 'Servicios',
-            description: 'Servicios profesionales y técnicos',
-        },
+        { name: 'General', description: 'Categoría general para productos sin clasificación específica' },
+        { name: 'Electrónica', description: 'Productos electrónicos y tecnológicos' },
+        { name: 'Ropa y Accesorios', description: 'Prendas de vestir y accesorios' },
+        { name: 'Alimentos y Bebidas', description: 'Productos alimenticios y bebidas' },
+        { name: 'Hogar y Jardín', description: 'Artículos para el hogar y jardinería' },
+        { name: 'Servicios', description: 'Servicios profesionales y técnicos' },
     ];
 
+    console.log(`📦 Creando ${categories.length} categorías...`);
+
     for (const category of categories) {
-        await prisma.categoryProduct.upsert({
-            where: { id: categories.indexOf(category) + 1 },
-            update: {},
-            create: {
-                ...category,
-            },
+        const created = await prisma.categoryProduct.create({
+            data: category,
         });
+        console.log(`   ✅ ${created.name}`);
     }
 
-    console.log('✅ Categorías de productos creadas');
-    console.log(`   - ${categories.length} categorías agregadas`);
+    console.log(`\n🎉 Seed completado exitosamente!`);
 }
 
 main()

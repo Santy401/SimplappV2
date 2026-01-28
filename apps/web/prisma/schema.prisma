@@ -20,7 +20,7 @@ datasource db {
  */
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String      @id @default(uuid())
   email       String   @unique
   name        String
   password    String
@@ -36,10 +36,10 @@ model User {
 }
 
 model ProductAccounting {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  productId Int
-  companyId Int
+  productId String
+  companyId String
 
   incomeAccount    String
   inventoryAccount String
@@ -54,7 +54,7 @@ model ProductAccounting {
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
-  userId    Int
+  userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
@@ -70,9 +70,9 @@ model RefreshToken {
  */
 
 model Company {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  userId Int  @unique
+  userId String  @unique
   user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   companyName      String           @default("")
@@ -118,7 +118,7 @@ model Company {
  */
 
 model Client {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
   organizationType OrganizationType
   firstLastName    String
@@ -147,7 +147,7 @@ model Client {
 
   bills Bill[]
 
-  companyId Int?
+  companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
 
   createdAt DateTime @default(now())
@@ -155,11 +155,11 @@ model Client {
 }
 
 model Seller {
-  id             Int      @id @default(autoincrement())
+  id             String      @id @default(uuid())
   name           String
   identification String?
   observation    String?
-  companyId      Int?
+  companyId      String?
   company        Company? @relation(fields: [companyId], references: [id])
 }
 
@@ -170,21 +170,21 @@ model Seller {
  */
 
 model Store {
-  id          Int     @id @default(autoincrement())
+  id          String     @id @default(uuid())
   name        String
   address     String?
   observation String?
 
   bills Bill[]
 
-  companyId Int?
+  companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
 }
 
 model Product {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
   name        String
   description String?
@@ -205,7 +205,7 @@ model Product {
   allowNegativeStock Boolean @default(false)
   active             Boolean @default(true)
 
-  companyId Int
+  companyId String
   company   Company @relation(fields: [companyId], references: [id])
 
   images      ProductImage[]
@@ -217,11 +217,11 @@ model Product {
 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  categoryProductId Int
+  categoryProductId String
 }
 
 model CategoryProduct {
-  id          Int    @id @default(autoincrement())
+  id          String    @id @default(uuid())
   name        String
   description String
 
@@ -229,18 +229,18 @@ model CategoryProduct {
 }
 
 model ProductImage {
-  id  Int    @id @default(autoincrement())
+  id  String    @id @default(uuid())
   url String
 
-  productId Int
+  productId String
   product   Product @relation(fields: [productId], references: [id])
 }
 
 model InventoryMovement {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  productId Int
-  storeId   Int
+  productId String
+  storeId   String
 
   quantity Int
   type     InventoryMovementType
@@ -252,13 +252,13 @@ model InventoryMovement {
 }
 
 model ListPrice {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
   name        String
   type        TypePrice @default(VALOR)
   description String?
 
-  companyId Int?
+  companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
 
   prices ProductPrice[]
@@ -268,10 +268,10 @@ model ListPrice {
 }
 
 model ProductPrice {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  productId   Int
-  listPriceId Int
+  productId   String
+  listPriceId String
 
   basePrice String
   value     String
@@ -287,13 +287,13 @@ model ProductPrice {
  */
 
 model Bill {
-  id          Int     @id @default(autoincrement())
+  id          String     @id @default(uuid())
   // Relaciones
-  userId      Int
-  clientId    Int
-  storeId     Int
+  userId      String
+  clientId    String
+  storeId     String
   // Opción: Vincular directamente a Company para queries más rápidas
-  companyId   Int
+  companyId   String
   user        User    @relation(fields: [userId], references: [id])
   client      Client  @relation(fields: [clientId], references: [id])
   store       Store   @relation(fields: [storeId], references: [id])
@@ -334,9 +334,9 @@ model Bill {
 }
 
 model Payment {
-  id Int @id @default(autoincrement())
+  id String @id @default(uuid())
 
-  billId Int
+  billId String
   bill   Bill @relation(fields: [billId], references: [id])
 
   amount String
@@ -345,9 +345,9 @@ model Payment {
 }
 
 model BillItem {
-  id        Int @id @default(autoincrement())
-  billId    Int
-  productId Int
+  id        String @id @default(uuid())
+  billId    String
+  productId String
   quantity  Int // O Decimal/Float si vendes por peso (kg)
 
   // Precios Unitarios
