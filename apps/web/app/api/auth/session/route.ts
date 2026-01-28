@@ -4,12 +4,12 @@ import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
 
 export interface SessionResponse {
-  id: number;
+  id: string;
   email: string;
   name: string;
   typeAccount: string;
   country: string;
-  companyId?: number;
+  companyId?: string;
 }
 
 /**
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     // ✅ VERIFICA QUE EL TOKEN SEA VÁLIDO
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};
 
     if (!payload || !payload.id) {
       return NextResponse.json(
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
 
     // ✅ OBTIENE LOS DATOS REALES DEL USUARIO
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 

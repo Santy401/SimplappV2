@@ -47,7 +47,6 @@ export async function POST(request: Request): Promise<NextResponse> {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const newUser = await createUsers({
-      id: 0,
       email,
       password: hashedPassword,
       name,
