@@ -3,112 +3,141 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access-token')?.value;
 
     if (!accessToken) {
-        return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
-        return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: Number(payload.id) },
-        include: { company: true },
+      where: { id: payload.id },
+      include: { company: true },
     });
 
     if (!user || !user.company) {
-        return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
+      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
     const { id } = await params;
 
-    const clientId = Number(id);
-
-    if (isNaN(clientId)) {
-        return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-
+    // ✅ UUID directo, sin Number()
     const client = await prisma.client.findUnique({
-        where: { id: clientId },
+      where: { id: id },
     });
 
     if (!client) {
-        return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
     }
 
     if (client.companyId !== user.company.id) {
-        return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+      return NextResponse.json({ error: "No autorizado" }, { status: 403 });
     }
 
     await prisma.client.delete({
-        where: { id: clientId },
+      where: { id: id },
     });
 
     return NextResponse.json({ message: "Cliente eliminado" }, { status: 200 });
+  } catch (error) {
+    console.error('Error deleting client:', error);
+    return NextResponse.json(
+      { 
+        error: 'Error al eliminar cliente',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
 }
 
-
 export async function PUT(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-    try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get('access-token')?.value;
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access-token')?.value;
 
-        if (!accessToken) {
-            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-        }
-
-        const payload = await verifyAccessToken(accessToken);
-        if (!payload || !payload.id) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { id: Number(payload.id) },
-            include: { company: true },
-        });
-
-        if (!user || !user.company) {
-            return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-        }
-
-        const { id } = await params;
-        const clientId = parseInt(id);
-
-        const client = await prisma.client.findUnique({
-            where: { id: clientId },
-        });
-
-        if (!client) {
-            return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
-        }
-
-        if (client.companyId !== user.company.id) {
-            return NextResponse.json({ error: "No autorizado" }, { status: 403 });
-        }
-
-        const data = await request.json();
-
-        console.log('Actualizando cliente ID:', clientId, 'Data:', data);
-
-        const updatedClient = await prisma.client.update({
-            where: { id: clientId },
-            data,
-        });
-
-        return NextResponse.json(updatedClient);
-    } catch (error) {
-        console.error('Error updating client:', error);
-        return NextResponse.json(
-            { error: 'Error al actualizar cliente' },
-            { status: 500 }
-        );
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
+
+    const payload = await verifyAccessToken(accessToken) as { id: string };
+    if (!payload || !payload.id) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      include: { company: true },
+    });
+
+    if (!user || !user.company) {
+      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
+    }
+
+    const { id } = await params;
+
+    // ✅ UUID directo, sin parseInt
+    const client = await prisma.client.findFirst({
+      where: { 
+        id: id,
+        companyId: user.company.id 
+      },
+    });
+
+    if (!client) {
+      return NextResponse.json({ error: "Cliente no encontrado" }, { status: 404 });
+    }
+
+    const data = await request.json();
+
+    console.log('📥 Actualizando cliente ID:', id, 'Data:', data);
+
+    const updatedClient = await prisma.client.update({
+      where: { id: id },
+      data: {
+        firstLastName: data.firstLastName?.trim() || client.firstLastName,
+        secondLastName: data.secondLastName?.trim() || null,
+        firstName: data.firstName?.trim() || client.firstName,
+        otherNames: data.otherNames?.trim() || null,
+        commercialName: data.commercialName?.trim() || null,
+        code: data.code?.trim() || null,
+        identificationType: data.identificationType || client.identificationType,
+        identificationNumber: data.identificationNumber?.trim() || client.identificationNumber,
+        email: data.email?.trim() || null,
+        phone: data.phone?.trim() || null,
+        country: data.country?.trim() || null,
+        department: data.department?.trim() || null,
+        municipality: data.municipality?.trim() || null,
+        postalCode: data.postalCode?.trim() || null,
+        address: data.address?.trim() || null,
+        observations: data.observations?.trim() || null,
+      },
+    });
+
+    console.log('✅ Cliente actualizado:', updatedClient);
+
+    return NextResponse.json(updatedClient);
+  } catch (error) {
+    console.error('💥 Error updating client:', error);
+    return NextResponse.json(
+      { 
+        error: 'Error al actualizar cliente',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
+  }
 }
