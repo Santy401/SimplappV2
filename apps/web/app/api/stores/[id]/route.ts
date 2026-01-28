@@ -12,13 +12,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -31,7 +31,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const store = await prisma.store.update({
       where: {
-        id: Number(id),
+        id: id,
         companyId: user.company.id,
       },
       data: {
@@ -60,13 +60,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -78,7 +78,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     await prisma.store.delete({
       where: {
-        id: Number(id),
+        id: id,
         companyId: user.company.id,
       },
     });

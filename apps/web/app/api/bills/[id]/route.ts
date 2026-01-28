@@ -15,13 +15,14 @@ export async function GET(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    // ✅ QUITA Number() - payload.id ya es string UUID
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -29,14 +30,11 @@ export async function GET(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
+    // ✅ QUITA parseInt() - billId es string UUID
     const { id } = await params;
-    const billId = parseInt(id);
-    
-    if (isNaN(billId)) {
-      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
-    }
+    const billId = id; // Ya es string UUID, NO convertir
 
-    // Obtener factura con items y relaciones
+    // ✅ Usa billId directo como string
     const bill = await prisma.bill.findFirst({
       where: {
         id: billId,
@@ -86,13 +84,14 @@ export async function PUT(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    // ✅ QUITA Number()
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -100,14 +99,10 @@ export async function PUT(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
+    // ✅ QUITA parseInt()
     const { id } = await params;
-    const billId = parseInt(id);
-    
-    if (isNaN(billId)) {
-      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
-    }
+    const billId = id; // string UUID
 
-    // Verificar si la factura existe
     const existingBill = await prisma.bill.findFirst({
       where: {
         id: billId,
@@ -121,12 +116,10 @@ export async function PUT(
 
     const data = await request.json();
 
-    // Actualizar factura
     const updatedBill = await prisma.bill.update({
       where: { id: billId },
       data: {
         ...data,
-        // Asegurar que companyId permanezca igual
         companyId: user.company.id,
       },
     });
@@ -153,13 +146,14 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
+    // ✅ QUITA Number()
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -167,14 +161,10 @@ export async function DELETE(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
+    // ✅ QUITA parseInt()
     const { id } = await params;
-    const billId = parseInt(id);
-    
-    if (isNaN(billId)) {
-      return NextResponse.json({ error: 'Invalid bill ID' }, { status: 400 });
-    }
+    const billId = id; // string UUID
 
-    // Verificar si la factura existe
     const bill = await prisma.bill.findFirst({
       where: {
         id: billId,
@@ -186,12 +176,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
-    // Primero eliminar los items relacionados
+    // ✅ billId es string
     await prisma.billItem.deleteMany({
-      where: { billId: billId },
+      where: { billId },
     });
 
-    // Luego eliminar la factura
     await prisma.bill.delete({
       where: { id: billId },
     });

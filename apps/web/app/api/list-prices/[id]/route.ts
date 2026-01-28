@@ -11,13 +11,13 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-        where: { id: Number(payload.id) },
+        where: { id: payload.id },
         include: { company: true },
     });
 
@@ -65,13 +65,13 @@ export async function PUT(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: Number(payload.id) },
+            where: { id: payload.id },
             include: { company: true },
         });
 

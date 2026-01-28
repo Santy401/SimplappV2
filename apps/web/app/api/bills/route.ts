@@ -13,13 +13,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     };
 
     if (clientId) {
-      whereClause.clientId = Number(clientId);
+      whereClause.clientId = clientId;
     }
 
     if (status) {
@@ -92,13 +92,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken);
+    const payload = await verifyAccessToken(accessToken) as {id: string};;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: Number(payload.id) },
+      where: { id: payload.id },
       include: { company: true },
     });
 
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     // We need to fetch client details for snapshot
     const client = await prisma.client.findUnique({
-      where: { id: Number(clientId) }
+      where: { id: clientId }
     });
 
     if (!client) {
@@ -185,11 +185,11 @@ export async function POST(request: NextRequest) {
       // Relations
       user: { connect: { id: user.id } },
       company: { connect: { id: user.company.id } },
-      client: { connect: { id: Number(clientId) } },
+      client: { connect: { id: String(clientId) } },
 
       items: {
         create: items.map((item: any) => ({
-          productId: Number(item.productId),
+          productId: String(item.productId),
           quantity: Number(item.quantity),
           price: String(item.price),
           total: String(item.total),
@@ -205,7 +205,7 @@ export async function POST(request: NextRequest) {
     if (storeId) {
       // Verificar que la store exista
       const store = await prisma.store.findUnique({
-        where: { id: Number(storeId) }
+        where: { id: storeId }
       });
 
       if (!store) {
