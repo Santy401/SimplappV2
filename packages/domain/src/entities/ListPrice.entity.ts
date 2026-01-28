@@ -4,7 +4,7 @@ export enum TypePrice {
 }
 
 export interface ListPrice {
-    id: number;
+    id: string;
     name: string;
     type: TypePrice;
     percentage: number;

@@ -1,5 +1,5 @@
 export interface Store {
-    id: number;
+    id: string;
     name: string;
     address?: string | null;
     observation?: string | null;

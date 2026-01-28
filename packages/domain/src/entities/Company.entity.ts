@@ -19,8 +19,8 @@ export enum VatCondition {
 }
 
 export interface Company {
-  id: number;
-  userId: number;
+  id: string;
+  userId: string;
   
   companyName: string;
   commercialName?: string | null;
@@ -48,7 +48,7 @@ export interface Company {
 }
 
 export interface CreateCompanyInput {
-  userId: number;
+  userId: string;
   companyName?: string;
   accountId?: string | null;
   commercialName?: string | null;
@@ -88,7 +88,7 @@ export interface UpdateCompanyInput {
 
 export interface CompanyWithUser extends Company {
   user: {
-    id: number;
+    id: string;
     name: string;
     email: string;
     typeAccount: string;
@@ -97,7 +97,7 @@ export interface CompanyWithUser extends Company {
 }
 
 export interface CompanyBasic {
-  id: number;
+  id: string;
   companyName: string;
   commercialName?: string | null;
   identificationNumber: string;

@@ -1,5 +1,5 @@
 export interface ProductProps {
-  id?: number;
+  id?: string;
   name: string;
   category: ProductCategory;
   unitOfMeasure: UnitOfMeasure;
@@ -30,7 +30,7 @@ export interface ProductProps {
 }
 
 export interface Product {
-  id?: number;
+  id?: string;
   name: string;
   category: ProductCategory;
   unitOfMeasure: UnitOfMeasure;
@@ -64,7 +64,7 @@ export interface Product {
 export interface CreateProductDto {
   name: string;
   type: string;
-  category: number;
+  category: string;
   unitOfMeasure: UnitOfMeasure;
   reference: string | null;
   codeProduct: string | null;  // Mapped to 'code' in backend
@@ -79,7 +79,7 @@ export interface CreateProductDto {
 export interface UpdateProductDto {
   name: string;
   type?: string;
-  category: number;
+  category: string;
   unitOfMeasure: UnitOfMeasure;
   reference?: string | null;
   codeProduct: string | null;

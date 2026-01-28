@@ -12,7 +12,7 @@ export enum IdentificationType {
 }
 
 export interface Client {
-  id: number;
+  id: string;
   
   organizationType: OrganizationType;
   firstLastName: string;

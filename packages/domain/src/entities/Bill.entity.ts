@@ -24,12 +24,12 @@ export enum PaymentMethod {
 }
 
 export interface Bill {
-    id: number;
+    id: string;
 
-    userId: number;
-    clientId: number;
-    storeId: number;
-    companyId: number;
+    userId: string;
+    clientId: string;
+    storeId: string;
+    companyId: string;
 
     prefix?: string | null;
     number: number;
@@ -60,9 +60,9 @@ export interface Bill {
 }
 
 export interface BillItem {
-    id: number;
-    billId: number;
-    productId: number;
+    id: string;
+    billId: string;
+    productId: string;
 
     quantity: number;
     price: string;
@@ -77,8 +77,8 @@ export interface BillItem {
 }
 
 export interface Payment {
-    id: number;
-    billId: number;
+    id: string;
+    billId: string;
 
     amount: string;
     method: PaymentMethod;
@@ -103,10 +103,10 @@ export interface BillDetail extends BillWithItems {
 // --- Inputs para creación y actualización ---
 
 export interface CreateBillInput {
-    userId: number;
-    clientId: number;
-    storeId: number;
-    companyId: number;
+    userId: string;
+    clientId: string;
+    storeId: string;
+    companyId: string;
 
     // Products: CreateBillItemInput[];
 
@@ -127,7 +127,7 @@ export interface CreateBillInput {
 }
 
 export interface CreateBillItemInput {
-    productId: number;
+    productId: string;
     quantity: number;
     ProductName?: string;
     ProductCode?: string;
@@ -137,19 +137,18 @@ export interface CreateBillItemInput {
 }
 
 export interface CreatePaymentInput {
-    billId: number;
+    billId: string;
     amount: string;
     method: PaymentMethod;
     date?: Date;
 }
 
 export interface UpdateBill {
-    id: number;
-    userId: number;
-    clientId: number;
-    storeId: number;
-    companyId: number;
-
+    id: string;
+    userId: string;
+    clientId: string;
+    storeId: string;
+    companyId: string;
     prefix?: string | null;
     number?: number;
     legalNumber?: string | null;
