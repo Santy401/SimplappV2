@@ -34,7 +34,7 @@ export function useClients() {
     }
   };
 
-  const updateClient = async (id: number, data: Partial<Client>) => {
+  const updateClient = async (id: string, data: Partial<Client>) => {
     try {
       setIsUpdating(id);
       console.log('Actualizando cliente:', { id, data });
@@ -69,7 +69,7 @@ export function useClients() {
     }
   };
 
-  const deleteClient = async (id: number) => {
+  const deleteClient = async (id: string) => {
     try {
       setIsDeleting(id);
       const response = await fetch(`/api/clients/${id}`, {

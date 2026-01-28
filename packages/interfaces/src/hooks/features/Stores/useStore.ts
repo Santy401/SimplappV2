@@ -31,7 +31,7 @@ export function useStore() {
         }
     }
 
-    const deleteStore = async (id: number) => {
+    const deleteStore = async (id: string) => {
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'DELETE',
@@ -69,7 +69,7 @@ export function useStore() {
         }
     };
 
-    const updateStore = async (id: number, data: UpdateStoreDto) => {
+    const updateStore = async (id: string, data: UpdateStoreDto) => {
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'PUT',

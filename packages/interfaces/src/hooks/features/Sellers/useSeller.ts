@@ -64,9 +64,9 @@ export function useSeller() {
         } finally {
             setIsLoading(false)
         }
-    }
+    };
 
-    const deleteSeller = async (id: number) => {
+    const deleteSeller = async (id: string) => {
         try {
             const response = await fetch(`/api/sellers/${id}`, {
                 method: 'DELETE',
@@ -104,7 +104,7 @@ export function useSeller() {
         }
     }
 
-    const updateSeller = async (id: number, data: UpdateSellerDto) => {
+    const updateSeller = async (id: string, data: UpdateSellerDto) => {
         try {
             const response = await fetch(`/api/sellers/${id}`, {
                 method: 'PUT',

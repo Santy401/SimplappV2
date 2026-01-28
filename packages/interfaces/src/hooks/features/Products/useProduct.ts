@@ -1,105 +1,124 @@
-import { Product, CreateProductDto, UpdateProductDto } from "@domain/entities/Product.entity";
+import {
+  Product,
+  CreateProductDto,
+  UpdateProductDto,
+} from "@domain/entities/Product.entity";
 import { useEffect, useState } from "react";
 
 export function useProduct() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<String | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<String | null>(null);
 
-    useEffect(() => {
-        fetchProducts();
-    }, []);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    const fetchProducts = async () => {
-        try {
-            setIsLoading(true)
-            setError(null)
+      const response = await fetch("/api/products");
 
-            const response = await fetch('/api/products')
+      if (!response.ok) {
+        throw new Error("Error al obtener Productos");
+      }
 
-
-            if (!response.ok) {
-                throw new Error('Error al obtener Productos');
-            }
-
-            const data = await response.json();
-            setProducts(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-            console.log('Error fetching Products:', err);
-        } finally {
-            setIsLoading(false)
-        }
+      const data = await response.json();
+      setProducts(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+      console.log("Error fetching Products:", err);
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const deleteProduct = async (id: number) => {
-        try {
-            const response = await fetch(`/api/products/${id}`, {
-                method: 'DELETE',
-            });
+  const deleteProduct = async (id: string) => {
+    try {
+      const response = await fetch(`/api/products/${id}`, {
+        method: "DELETE",
+      });
 
-            if (!response.ok) throw new Error('Error al eliminar');
+      if (!response.ok) throw new Error("Error al eliminar");
 
-            setProducts(prev => prev.filter(products => products.id !== id));
+      setProducts((prev) => prev.filter((products) => products.id !== id));
 
-            return true;
-        } catch (err) {
-            console.error('Error deleting produts:', err);
-        }
-    };
-
-    const createProduct = async (data: CreateProductDto) => {
-        try {
-            const response = await fetch('/api/products', {
-                method: 'POST',
-                headers: { 'Content-type': 'application/json' },
-                body: JSON.stringify(data),
-            })
-
-            if (!response.ok) throw new Error('Error al crear');
-
-            const newProduct = await response.json();
-
-            setProducts(prev => [...prev, newProduct]);
-
-            return newProduct;
-        } catch (err) {
-            console.error('Error creating product:', err);
-            return null;
-        }
-    };
-
-    const updateProduct = async (id: number, data: UpdateProductDto) => {
-        try {
-            const response = await fetch(`/api/products/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) throw new Error('Error al actualizar');
-
-            const updatedProduct = await response.json();
-
-            setProducts(prev => prev.map(products =>
-                products.id === id ? updatedProduct : products
-            ));
-
-            return updatedProduct;
-        } catch (err) {
-            console.error('Error updating products:', err);
-            return null;
-        }
-    };
-
-    return {
-        products,
-        refresh: fetchProducts,
-        deleteProduct,
-        createProduct,
-        updateProduct,
-        error,
-        isLoading
+      return true;
+    } catch (err) {
+      console.error("Error deleting produts:", err);
     }
+  };
+
+  const createProduct = async (data: CreateProductDto) => {
+    try {
+      console.log("📤 Enviando producto:", data);
+
+      const response = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        console.error("❌ Error API:", response.status, responseData);
+        throw new Error(responseData.error || "Error al crear producto");
+      }
+
+      console.log("✅ Producto creado:", responseData);
+
+      setProducts((prev) => [...prev, responseData]);
+
+      return responseData;
+    } catch (err) {
+      console.error("💥 Error creating product:", err);
+      throw err;
+    }
+  };
+
+ const updateProduct = async (id: string, data: UpdateProductDto) => {
+    try {
+        console.log('📤 Actualizando producto:', id, data);
+
+        const response = await fetch(`/api/products/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+
+        // ✅ Lee response primero
+        const responseData = await response.json();
+
+        if (!response.ok) {
+            console.error('❌ Error API:', response.status, responseData);
+            console.error('📦 Datos enviados:', data);
+            throw new Error(responseData.error || responseData.message || 'Error al actualizar');
+        }
+
+        console.log('✅ Producto actualizado:', responseData);
+
+        setProducts(prev => prev.map(product =>
+            product.id === id ? responseData : product
+        ));
+
+        return responseData;
+    } catch (err) {
+        console.error('💥 Error updating product:', err);
+        throw err;
+    }
+};
+
+
+  return {
+    products,
+    refresh: fetchProducts,
+    deleteProduct,
+    createProduct,
+    updateProduct,
+    error,
+    isLoading,
+  };
 }

@@ -101,7 +101,7 @@ export const useBill = () => {
         }
     };
 
-    const deleteBill = async (billId: number) => {
+    const deleteBill = async (billId: string) => {
         setLoading(true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billId}`, {
@@ -120,7 +120,7 @@ export const useBill = () => {
         }
     };
 
-    const getBill = async (billId: number) => {
+    const getBill = async (billId: string) => {
     setLoading(true);
     try {
         const response = await fetchWithAuth(`/api/bills/${billId}`);

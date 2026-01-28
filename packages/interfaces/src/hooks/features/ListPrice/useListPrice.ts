@@ -31,7 +31,7 @@ export function useListPrice() {
         }
     };
 
-    const deleteListPrice = async (id: number) => {
+    const deleteListPrice = async (id: string) => {
         try {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'DELETE',
@@ -66,7 +66,7 @@ export function useListPrice() {
         }
     };
 
-    const updateListPrice = async (id: number, data: UpdateListPriceDto) => {
+    const updateListPrice = async (id: string, data: UpdateListPriceDto) => {
         try {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'PUT',
