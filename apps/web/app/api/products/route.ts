@@ -13,13 +13,13 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: Number(payload.id) },
+            where: { id: payload.id },
             include: { company: true },
         });
 
@@ -64,13 +64,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { id: Number(payload.id) },
+            where: { id: payload.id },
             include: { company: true },
         });
 
@@ -106,23 +106,28 @@ export async function POST(request: NextRequest) {
             ...data
         } = rawData;
 
-        const categoryId = category && typeof category === 'object' && 'id' in category ? (category as any).id : category;
-        const parsedCategoryId = Number(categoryId);
+       const categoryId = category && typeof category === 'object' && 'id' in category 
+            ? (category as any).id 
+            : category;
+        const parsedCategoryId = categoryId;
+
+        console.log('🏷️ categoryId recibido:', categoryId, typeof categoryId);
+
+        if (!categoryId || typeof categoryId !== 'string') {
+            return NextResponse.json(
+                { error: 'categoryId es requerido y debe ser un UUID válido' },
+                { status: 400 }
+            );
+        }
 
         const product = await prisma.product.create({
-            data: {
+           data: {
                 ...data,
                 description: data.description || observation,
-                company: {
-                    connect: { id: user.company.id },
-                },
+                companyId: user.company.id,
                 type: type || ItemType.PRODUCT,
                 unit: unitOfMeasure || UnitOfMeansureList.UNIDAD,
-                category: {
-                    connect: {
-                        id: !isNaN(parsedCategoryId) && parsedCategoryId !== 0 ? parsedCategoryId : undefined,
-                    },
-                },
+                categoryProductId: categoryId,
                 code: codeProduct,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 basePrice: basePrice ? String(basePrice) : undefined,
@@ -139,10 +144,18 @@ export async function POST(request: NextRequest) {
             },
         });
 
+        console.log('✅ Producto creado:', product.id);
 
         return NextResponse.json(product, { status: 201 });
     } catch (error) {
         console.error('Error creating product:', error);
+        if (error instanceof Error) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: 500 }
+            );
+        }
+
         return NextResponse.json(
             { error: 'Error al crear producto' },
             { status: 500 }

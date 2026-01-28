@@ -15,7 +15,7 @@ export async function GET(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -23,7 +23,7 @@ export async function GET(
         const { id } = await params;
 
         const product = await prisma.product.findUnique({
-            where: { id: Number(id) },
+            where: { id: id },
             include: {
                 category: true,
                 images: true,
@@ -61,7 +61,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -69,23 +69,71 @@ export async function PUT(
         const { id } = await params;
         const rawData = await request.json();
 
-        // Remove fields that shouldn't be updated
-        const { id: _, companyId, createdAt, updatedAt, category, images, prices, codeProduct, codeBarcode, costForUnit, valuePrice, unitOfMeasure, ...data } = rawData;
+        console.log('📥 Datos recibidos:', rawData);
 
-        const categoryId = category && typeof category === 'object' && 'id' in category ? (category as any).id : category;
-        const parsedCategoryId = Number(categoryId);
+        // Remove fields that shouldn't be updated
+        const { 
+            id: _, 
+            companyId, 
+            createdAt, 
+            updatedAt, 
+            category, 
+            images, 
+            prices, 
+            codeProduct, 
+            codeBarcode, 
+            costForUnit, 
+            valuePrice, 
+            unitOfMeasure,
+            taxRate, // ✅ Agregar taxRate aquí
+            basePrice, // ✅ Agregar basePrice aquí
+            ...data 
+        } = rawData;
+
+        // ✅ Manejo correcto de category (puede ser UUID o número)
+        let categoryConnect = undefined;
+        
+        if (category) {
+            const categoryId = typeof category === 'object' && 'id' in category 
+                ? (category as any).id 
+                : category;
+            
+            // ✅ Si es UUID, busca el ID numérico
+            if (typeof categoryId === 'string' && categoryId.includes('-')) {
+                const foundCategory = await prisma.categoryProduct.findUnique({
+                    where: { id: categoryId },
+                    select: { id: true }
+                });
+                
+                if (foundCategory) {
+                    categoryConnect = { connect: { id: foundCategory.id } };
+                }
+            } else {
+                const parsedCategoryId = Number(categoryId);
+                if (!isNaN(parsedCategoryId) && parsedCategoryId !== 0) {
+                    categoryConnect = { connect: { id: parsedCategoryId } };
+                }
+            }
+        }
+
+        console.log('🔄 Actualizando con:', {
+            ...data,
+            category: categoryConnect,
+            code: codeProduct,
+            cost: costForUnit ? String(costForUnit) : undefined,
+            finalPrice: valuePrice ? String(valuePrice) : undefined,
+            unit: unitOfMeasure,
+        });
 
         const product = await prisma.product.update({
-            where: { id: Number(id) },
+            where: { id },
             data: {
                 ...data,
-                category: !isNaN(parsedCategoryId) && parsedCategoryId !== 0 ? {
-                    connect: { id: parsedCategoryId }
-                } : undefined,
-                code: codeProduct,
+                category: categoryConnect,
+                code: codeProduct || undefined,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
-                unit: unitOfMeasure, // If provided
+                unit: unitOfMeasure || undefined,
             },
             include: {
                 category: true,
@@ -98,16 +146,21 @@ export async function PUT(
             },
         });
 
+        console.log('✅ Producto actualizado:', product);
 
         return NextResponse.json(product);
     } catch (error) {
-        console.error('Error updating product:', error);
+        console.error('💥 Error updating product:', error);
         return NextResponse.json(
-            { error: 'Error al actualizar producto' },
+            { 
+                error: 'Error al actualizar producto',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         );
     }
 }
+
 
 export async function DELETE(
     request: NextRequest,
@@ -121,7 +174,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken);
+        const payload = await verifyAccessToken(accessToken) as {id: string};;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -129,7 +182,7 @@ export async function DELETE(
         const { id } = await params;
 
         await prisma.product.delete({
-            where: { id: Number(id) },
+            where: { id: id },
         });
 
         return NextResponse.json({ message: 'Product deleted successfully' });
