@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -212,21 +212,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Store not found' }, { status: 404 });
       }
 
-      billData.store = { connect: { id: Number(storeId) } };
+      billData.store = { connect: { id: String(storeId) } };
     } else {
-      // Si store no es requerido, puedes conectar a una store por defecto
-      // o dejar que Prisma use el valor por defecto del schema
-      // Por ejemplo, buscar la primera store de la compañía
-      const defaultStore = await prisma.store.findFirst({
+      let defaultStore = await prisma.store.findFirst({
         where: {
           companyId: user.company.id,
         },
       });
 
-      if (defaultStore) {
-        billData.store = { connect: { id: defaultStore.id } };
+      if (!defaultStore) {
+        // Create a default store if none exists
+        defaultStore = await prisma.store.create({
+          data: {
+            name: "Principal",
+            companyId: user.company.id
+          }
+        });
       }
-      // Si no hay store y no es requerido, simplemente no incluyas el campo
+
+      billData.store = { connect: { id: defaultStore.id } };
     }
 
     const bill = await prisma.bill.create({

@@ -129,8 +129,8 @@ export interface CreateBillInput {
 export interface CreateBillItemInput {
     productId: string;
     quantity: number;
-    ProductName?: string;
-    ProductCode?: string;
+    productName?: string;
+    productCode?: string;
     price?: string; // Si no se envía se toma del producto
     discount?: string;
     taxRate?: string;

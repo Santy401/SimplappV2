@@ -13,7 +13,7 @@ export enum IdentificationType {
 
 export interface Client {
   id: string;
-  
+
   organizationType: OrganizationType;
   firstLastName: string;
   secondLastName?: string | null;
@@ -21,26 +21,26 @@ export interface Client {
   otherNames?: string | null;
   commercialName?: string | null;
   code?: string | null;
-  
+
   identificationType: IdentificationType;
   identificationNumber: string;
-  
+
   email?: string | null;
   includeCcBcc: boolean;
   phone?: string | null;
-  
+
   country: string;
   department?: string | null;
   municipality?: string | null;
   postalCode?: string | null;
   address?: string | null;
-  
+
   is_supplier: boolean;
   it_branches: boolean;
   observations?: string | null;
-  
+
   bills: [];
-  
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,20 +53,20 @@ export interface CreateClientDto {
   otherNames?: string | null;
   commercialName?: string | null;
   code?: string | null;
-  
+
   identificationType: IdentificationType;
   identificationNumber: string;
-  
+
   email?: string | null;
   includeCcBcc?: boolean;
   phone?: string | null;
-  
+
   country: string;
   department?: string | null;
   municipality?: string | null;
   postalCode?: string | null;
   address?: string | null;
-  
+
   is_supplier?: boolean;
   it_branches?: boolean;
   observations?: string | null;
@@ -80,27 +80,27 @@ export interface UpdateClientDto {
   otherNames?: string | null;
   commercialName?: string | null;
   code?: string | null;
-  
+
   identificationType?: IdentificationType;
   identificationNumber?: string;
-  
+
   email?: string | null;
   includeCcBcc?: boolean;
   phone?: string | null;
-  
+
   country?: string;
   department?: string | null;
   municipality?: string | null;
   postalCode?: string | null;
   address?: string | null;
-  
+
   is_supplier?: boolean;
   it_branches?: boolean;
   observations?: string | null;
 }
 
 export interface ClientFilter {
-  id?: number;
+  id?: string;
   organizationType?: OrganizationType;
   firstName?: string;
   firstLastName?: string;
@@ -112,7 +112,7 @@ export interface ClientFilter {
   municipality?: string;
   is_supplier?: boolean;
   it_branches?: boolean;
-  
+
   page?: number;
   limit?: number;
   sortBy?: string;

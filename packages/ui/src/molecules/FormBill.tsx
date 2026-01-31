@@ -51,7 +51,7 @@ interface FormBillData {
   clientType: string;
   clientId: string;
   clientName: string;
-  selectedClientId?: number;
+  selectedClientId?: string;
   email: string;
   date: string;
   dueDate: string;
@@ -69,7 +69,7 @@ interface FormBillProps {
   onSubmit?: (data: CreateBillInput) => void;
   onSelect?: (view: string) => void;
   onSelectBill?: (bill: BillDetail) => void;
-  initialData?: Partial<BillDetail> & { id?: number };
+  initialData?: Partial<BillDetail> & { id?: string };
   mode?: "create" | "edit" | "view";
   isLoading?: boolean;
   // Datos externos para selects
@@ -90,9 +90,9 @@ export function FormBill({
   isLoading = false,
   clients = [],
   products = [],
-  userId = 1,
-  storeId = 1,
-  companyId = 1,
+  userId = "",
+  storeId = "",
+  companyId = "",
 }: FormBillProps) {
   const [items, setItems] = useState<FormBillItem[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -503,7 +503,7 @@ export function FormBill({
                   clients
                     .filter((client) => client.is_supplier)
                     .map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
+                      <SelectItem key={client.id} value={client.id}>
                         {client.firstName} {client.firstLastName}
                       </SelectItem>
                     ))
@@ -533,9 +533,8 @@ export function FormBill({
             />
             <div
               onClick={handleLogoClick}
-              className={`flex items-center cursor-pointer justify-center border-2 border-dashed rounded-lg text-muted-foreground w-full max-w-xs h-32 overflow-hidden relative hover:bg-muted/10 transition-colors ${
-                formData.logo ? "border-none p-0" : "p-8"
-              }`}
+              className={`flex items-center cursor-pointer justify-center border-2 border-dashed rounded-lg text-muted-foreground w-full max-w-xs h-32 overflow-hidden relative hover:bg-muted/10 transition-colors ${formData.logo ? "border-none p-0" : "p-8"
+                }`}
             >
               {formData.logo ? (
                 <div className="relative w-full h-full group">
@@ -589,8 +588,8 @@ export function FormBill({
                 <span className="text-destructive">*</span>
               </Label>
               <Select
-                value={formData.selectedClientId?.toString() || ""}
-                onValueChange={(v) => handleClientSelect(parseInt(v))}
+                value={formData.selectedClientId || ""}
+                onValueChange={(v) => handleClientSelect(v)}
                 disabled={clients.length === 0}
               >
                 <SelectTrigger>
@@ -605,7 +604,7 @@ export function FormBill({
                 <SelectContent>
                   {clients.length > 0 ? (
                     clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
+                      <SelectItem key={client.id} value={client.id}>
                         {client.firstName} {client.firstLastName} -{" "}
                         {client.identificationNumber}
                       </SelectItem>
@@ -790,9 +789,9 @@ export function FormBill({
                   <tr key={item.id} className="border-b hover:bg-muted/20">
                     <td className="p-2">
                       <Select
-                        value={item.productId?.toString() || ""}
+                        value={item.productId || ""}
                         onValueChange={(v) =>
-                          handleProductSelect(item.id, parseInt(v))
+                          handleProductSelect(item.id, v)
                         }
                         disabled={products.length === 0}
                       >
@@ -810,7 +809,7 @@ export function FormBill({
                             products.map((product) => (
                               <SelectItem
                                 key={product.id}
-                                value={product.id!.toString()}
+                                value={product.id!}
                               >
                                 {product.name} - ${product.basePrice}
                               </SelectItem>
@@ -953,9 +952,8 @@ export function FormBill({
           />
           <div
             onClick={handleSignatureClick}
-            className={`flex flex-col justify-start border-2 border-dashed rounded-lg text-muted-foreground cursor-pointer w-full max-w-xs h-32 m-auto overflow-hidden relative hover:bg-muted/10 transition-colors ${
-              formData.signature ? "border-none p-0" : "p-8"
-            }`}
+            className={`flex flex-col justify-start border-2 border-dashed rounded-lg text-muted-foreground cursor-pointer w-full max-w-xs h-32 m-auto overflow-hidden relative hover:bg-muted/10 transition-colors ${formData.signature ? "border-none p-0" : "p-8"
+              }`}
           >
             {formData.signature ? (
               <div className="relative w-full h-full group">

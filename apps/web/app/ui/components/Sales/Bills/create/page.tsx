@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react';
 interface BillsCreatePageProps {
     onSelect?: (view: string) => void;
     onSelectBill?: (bill: BillDetail) => void;
-    initialData?: Partial<BillDetail> & { id?: number };
+    initialData?: Partial<BillDetail> & { id?: string };
     mode?: 'create' | 'edit' | 'view';
     isLoading?: boolean;
 }
@@ -24,17 +24,17 @@ export default function BillsCreatePage({
     mode = 'create',
     isLoading = false,
 }: BillsCreatePageProps) {
-    
+
     // DEBUG: Verificar qué datos llegan
     console.log("🚀 BillsCreatePage render - mode:", mode);
     console.log("🚀 BillsCreatePage - initialData:", initialData);
     console.log("🚀 BillsCreatePage - initialData items:", (initialData as any)?.items);
     console.log("🚀 BillsCreatePage - initialData items count:", (initialData as any)?.items?.length || 0);
-    
+
     const { clients, isLoading: clientsLoading } = useClients();
     const { products, isLoading: productsLoading } = useProduct();
     const { createBill, updateBill, loading: billLoading, getBill } = useBill();
-    
+
     // Estado para la factura completa en modo view
     const [fullBill, setFullBill] = useState<Bill | null>(null);
     const [isFetchingBill, setIsFetchingBill] = useState(false);
@@ -66,7 +66,7 @@ export default function BillsCreatePage({
             let result;
 
             if (mode === 'edit' && initialData?.id) {
-                const billToUpdate: BillDetail  = {
+                const billToUpdate: BillDetail = {
                     id: initialData.id,
                     userId: data.userId,
                     clientId: data.clientId,
@@ -115,7 +115,7 @@ export default function BillsCreatePage({
     if (mode === 'view') {
         // Usar initialData directamente (ya viene completa del backend)
         const billToShow = initialData;
-        
+
         if (!billToShow) {
             return (
                 <div className="flex items-center justify-center h-screen">
@@ -133,7 +133,7 @@ export default function BillsCreatePage({
         }
 
         console.log('✅ Using initialData directly:', billToShow);
-        
+
         // Preparar datos para BillPreview
         const previewData = {
             formData: {
@@ -157,7 +157,7 @@ export default function BillsCreatePage({
         };
 
         return (
-            <BillPreview 
+            <BillPreview
                 {...previewData}
                 onClose={() => onSelect?.('ventas-facturacion')}
             />
@@ -174,9 +174,6 @@ export default function BillsCreatePage({
             isLoading={isLoading || clientsLoading || productsLoading || billLoading}
             clients={clients}
             products={products}
-            userId={1}
-            storeId={1}
-            companyId={1}
         />
     );
 }
