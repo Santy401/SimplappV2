@@ -115,16 +115,63 @@ export async function PUT(
     }
 
     const data = await request.json();
+    const {
+      items,
+      id: _id,
+      companyId: _companyId,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      userId: _userId,
+      storeId: _storeId,
+      client: _client,
+      user: _user,
+      company: _company,
+      store: _store,
+      ...billData
+    } = data;
 
-    const updatedBill = await prisma.bill.update({
-      where: { id: billId },
-      data: {
-        ...data,
-        companyId: user.company.id,
-      },
+    // Clean items data for creation
+    const cleanItems = items?.map((item: any) => ({
+      productId: item.productId,
+      quantity: item.quantity,
+      price: String(item.price),
+      total: String(item.total),
+      taxRate: String(item.taxRate || 0),
+      taxAmount: String(item.taxAmount || 0),
+      discount: String(item.discount || 0),
+      productName: item.productName || item.name || "",
+      productCode: item.productCode || item.reference || "",
+    })) || [];
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. Delete existing items
+      await tx.billItem.deleteMany({
+        where: { billId: billId }
+      });
+
+      // 2. Update bill & create new items
+      const updatedBill = await tx.bill.update({
+        where: { id: billId },
+        data: {
+          ...billData,
+          companyId: user.company.id,
+          // Handle client change if provided (and not empty)
+          ...(data.clientId ? { clientId: data.clientId } : {}),
+          // Handle store change if provided (and not empty)
+          ...(data.storeId ? { storeId: data.storeId } : {}),
+          items: {
+            create: cleanItems
+          }
+        },
+        include: {
+          items: true
+        }
+      });
+
+      return updatedBill;
     });
 
-    return NextResponse.json(updatedBill);
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error updating bill:', error);
     return NextResponse.json(
@@ -185,13 +232,13 @@ export async function DELETE(
       where: { id: billId },
     });
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
-      message: 'Factura eliminada correctamente' 
+      message: 'Factura eliminada correctamente'
     });
   } catch (error) {
     console.error('Error deleting bill:', error);
-    
+
     return NextResponse.json(
       { error: 'Error al eliminar factura' },
       { status: 500 }
