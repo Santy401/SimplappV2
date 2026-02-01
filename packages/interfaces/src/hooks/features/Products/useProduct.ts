@@ -36,6 +36,7 @@ export function useProduct() {
   };
 
   const deleteProduct = async (id: string) => {
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/products/${id}`, {
         method: "DELETE",
@@ -48,6 +49,8 @@ export function useProduct() {
       return true;
     } catch (err) {
       console.error("Error deleting produts:", err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,42 +82,42 @@ export function useProduct() {
     }
   };
 
- const updateProduct = async (id: string, data: UpdateProductDto) => {
+  const updateProduct = async (id: string, data: UpdateProductDto) => {
     try {
-        console.log('📤 Actualizando producto:', id, data);
+      console.log('📤 Actualizando producto:', id, data);
 
-        const response = await fetch(`/api/products/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-        });
+      const response = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
 
-        // ✅ Lee response primero
-        const responseData = await response.json();
+      // ✅ Lee response primero
+      const responseData = await response.json();
 
-        if (!response.ok) {
-            console.error('❌ Error API:', response.status, responseData);
-            console.error('📦 Datos enviados:', data);
-            throw new Error(responseData.error || responseData.message || 'Error al actualizar');
-        }
+      if (!response.ok) {
+        console.error('❌ Error API:', response.status, responseData);
+        console.error('📦 Datos enviados:', data);
+        throw new Error(responseData.error || responseData.message || 'Error al actualizar');
+      }
 
-        console.log('✅ Producto actualizado:', responseData);
+      console.log('✅ Producto actualizado:', responseData);
 
-        setProducts(prev => prev.map(product =>
-            product.id === id ? responseData : product
-        ));
+      setProducts(prev => prev.map(product =>
+        product.id === id ? responseData : product
+      ));
 
-        return responseData;
+      return responseData;
     } catch (err) {
-        console.error('💥 Error updating product:', err);
-        throw err;
+      console.error('💥 Error updating product:', err);
+      throw err;
     }
-};
+  };
 
 
   return {
     products,
-    refresh: fetchProducts,
+    refetch: fetchProducts,
     deleteProduct,
     createProduct,
     updateProduct,

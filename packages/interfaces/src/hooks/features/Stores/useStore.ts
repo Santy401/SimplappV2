@@ -32,6 +32,7 @@ export function useStore() {
     }
 
     const deleteStore = async (id: string) => {
+        setIsLoading(true)
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'DELETE',
@@ -45,6 +46,8 @@ export function useStore() {
         } catch (err) {
             console.error('Error deleting store:', err);
             return false;
+        } finally {
+            setIsLoading(false)
         }
     };
 
@@ -94,7 +97,7 @@ export function useStore() {
 
     return {
         stores,
-        refresh: fetchStores,
+        refrech: fetchStores,
         deleteStore,
         createStore,
         updateStore,

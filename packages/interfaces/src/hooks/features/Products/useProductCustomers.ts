@@ -3,7 +3,7 @@ import { Product } from "@domain/entities/Product.entity";
 import { useProduct } from "./useProduct";
 import { ProductsProps } from "@domain/entities/props/products/Product.entity.props";
 
-export const useProductCustomers = ({ onSelect, onSelectProduct }: ProductsProps) => {
+export const useProductCustomers = ({ onSelect, onSelectProduct, onDeleteSuccess }: ProductsProps) => {
     const { deleteProduct } = useProduct();
 
     const handleEditCustomer = (product: Product) => {
@@ -22,6 +22,9 @@ export const useProductCustomers = ({ onSelect, onSelectProduct }: ProductsProps
             const result = await deleteProduct(product.id!);
             if (result) {
                 toast.success('Producto eliminado correctamente');
+                if (onDeleteSuccess) {
+                    onDeleteSuccess();
+                }
             } else {
                 toast.error('Error al eliminar el producto');
             }
@@ -40,6 +43,11 @@ export const useProductCustomers = ({ onSelect, onSelectProduct }: ProductsProps
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo producto");
+
+        if (onSelectProduct) {
+            onSelectProduct(null as any);
+        }
+
         if (onSelect) {
             onSelect('ventas-productos-create');
         }

@@ -67,6 +67,7 @@ export function useSeller() {
     };
 
     const deleteSeller = async (id: string) => {
+        setIsLoading(true)
         try {
             const response = await fetch(`/api/sellers/${id}`, {
                 method: 'DELETE',
@@ -80,6 +81,8 @@ export function useSeller() {
         } catch (err) {
             console.error('Error deleting seller:', err);
             return false;
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -131,7 +134,7 @@ export function useSeller() {
         sellers,
         isLoading,
         error,
-        fetchSellers,
+        refetch: fetchSellers,
         handleSubmit: handleSubmit(onSubmit),
         createSeller,
         deleteSeller,

@@ -12,11 +12,11 @@ import {
 
 interface CreateSellerProps {
     onBack: () => void;
-    initialData?: Partial<Seller> & { id?: number };
+    initialData?: Partial<Seller> & { id?: string };
     mode?: 'create' | 'edit';
 }
 
-type SellerFormData = Omit<CreateSellerDto, 'id'> & { id?: number };
+type SellerFormData = Omit<CreateSellerDto, 'id'> & { id?: string };
 
 export default function CreateSeller({ onBack, initialData, mode = 'create' }: CreateSellerProps) {
     const [isLoading, setIsLoading] = useState(false);

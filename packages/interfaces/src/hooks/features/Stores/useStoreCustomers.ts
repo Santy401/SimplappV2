@@ -4,7 +4,7 @@ import { StoresProps } from "@domain/entities/props/stores/Stores.entity.props";
 import { Store } from "@domain/entities/Store.entity";
 import { useStoreFullName } from "./useStoreFullName";
 
-export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => {
+export const useStoreCustomers = ({ onSelect, onSelectStores, onDeleteSuccess }: StoresProps) => {
     const { deleteStore } = useStore();
     const { getFullName } = useStoreFullName();
     const handleEditCustomer = (store: Store) => {
@@ -22,6 +22,7 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
             const result = await deleteStore(store.id);
             if (result) {
                 toast.success('Cliente eliminado');
+                if (onDeleteSuccess) onDeleteSuccess();
             } else {
                 toast.error('Error al eliminar cliente');
             }
@@ -37,6 +38,11 @@ export const useStoreCustomers = ({ onSelect, onSelectStores }: StoresProps) => 
 
     const handleAddCustomer = () => {
         console.log("Agregar nueva Bodega");
+
+        if (onSelectStores) {
+            onSelectStores(null as any);
+        }
+
         if (onSelect) {
             onSelect('ventas-bodega-create');
         }

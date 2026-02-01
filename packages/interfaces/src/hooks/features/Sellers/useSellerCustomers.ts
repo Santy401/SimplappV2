@@ -4,7 +4,7 @@ import { SellersProps } from "@domain/entities/props/sellers/Seller.entity.props
 import { Seller } from "@domain/entities/Seller.entity";
 import { useSellerFullName } from "./useSellerFullName";
 
-export const useSellerCustomers = ({ onSelect, onSelectSeller }: SellersProps) => {
+export const useSellerCustomers = ({ onSelect, onSelectSeller, onDeleteSuccess }: SellersProps) => {
     const { deleteSeller } = useSeller();
     useSellerFullName();
     const handleEditCustomer = (seller: Seller) => {
@@ -22,6 +22,7 @@ export const useSellerCustomers = ({ onSelect, onSelectSeller }: SellersProps) =
             const result = await deleteSeller(seller.id);
             if (result) {
                 toast.success('Vendedor eliminado');
+                if (onDeleteSuccess) onDeleteSuccess();
             } else {
                 toast.error('Error al eliminar vendedor');
             }
@@ -37,6 +38,11 @@ export const useSellerCustomers = ({ onSelect, onSelectSeller }: SellersProps) =
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo Vendedor");
+
+        if (onSelectSeller) {
+            onSelectSeller(null as any);
+        }
+
         if (onSelect) {
             onSelect('ventas-vendedor-create');
         }

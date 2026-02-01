@@ -13,6 +13,7 @@ import {
 import { Product } from "@domain/entities/Product.entity";
 import { useProduct } from "@interfaces/src/hooks/features/Products/useProduct";
 import { useProductTable } from "@interfaces/src/hooks/index";
+import { useEffect, useState } from "react";
 
 interface ProductosProps {
     onSelect?: (view: string) => void;
@@ -24,20 +25,32 @@ export default function Productos({
     onSelectProduct = () => { }
 }: ProductosProps) {
 
-    const { products, isLoading, error } = useProduct();
+    const { products, isLoading, error, refetch } = useProduct();
 
-    const {
-        columns,
-        handleAddCustomer,
-        handleExportCustomers
-    } = useProductTable({ onSelect, onSelectProduct });
-
+    
     const validProducts = products || [];
 
     const totalProducts = validProducts.length;
     const activeProducts = validProducts.filter(p => p.active).length;
     const inactiveProducts = validProducts.filter(p => !p.active).length;
     const totalValue = 0;
+
+    const [tableversion, setTableversion] = useState(0);
+
+    const refetchTable = () => {
+        setTableversion((prev) => prev + 1);
+    };
+
+    const {
+        columns,
+        handleAddCustomer,
+        handleExportCustomers
+    } = useProductTable({ onSelect, onSelectProduct, onDeleteSuccess: refetchTable });
+
+    useEffect(() => {
+        refetch();
+    }, [tableversion]);
+
 
     if (isLoading) {
         return (

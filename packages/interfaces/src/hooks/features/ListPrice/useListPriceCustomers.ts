@@ -4,7 +4,7 @@ import { ListPriceProps } from "@domain/entities/props/listPrice/ListPrice.entit
 import { ListPrice } from "@domain/entities/ListPrice.entity";
 import { useListPriceFullName } from "./useListPriceFullName";
 
-export const useListPriceCustomers = ({ onSelect, onSelectListPrice }: ListPriceProps) => {
+export const useListPriceCustomers = ({ onSelect, onSelectListPrice, onDeleteSuccess }: ListPriceProps) => {
     const { deleteListPrice } = useListPrice();
     const { getFullName } = useListPriceFullName();
 
@@ -19,12 +19,15 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice }: ListPrice
     };
 
     const handleDeleteCustomer = async (listPrice: ListPrice) => {
-        if (confirm(`¿Estás seguro de eliminar a ${getFullName(listPrice)}?`)) {
+        if (confirm(`¿Estás seguro de eliminar la lista de precios ${getFullName(listPrice)}?`)) {
             const result = await deleteListPrice(listPrice.id);
             if (result) {
-                toast.success('Precio eliminado');
+                toast.success("Lista de precios eliminada");
+                if (onDeleteSuccess) {
+                    onDeleteSuccess();
+                }
             } else {
-                toast.error('Error al eliminar Precio');
+                toast.error("Error al eliminar lista de precios");
             }
         }
     };
@@ -38,6 +41,11 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice }: ListPrice
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo cliente");
+
+        if (onSelectListPrice) {
+            onSelectListPrice(null as any);
+        }
+
         if (onSelect) {
             onSelect('inventario-precios-create');
         }

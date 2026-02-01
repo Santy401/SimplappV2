@@ -257,6 +257,7 @@ model ListPrice {
   name        String
   type        TypePrice @default(VALOR)
   description String?
+  percentage  String?
 
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])

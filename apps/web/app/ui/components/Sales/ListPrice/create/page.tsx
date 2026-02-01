@@ -12,11 +12,11 @@ import {
 
 interface CreateListPriceProps {
     onBack: () => void;
-    initialData?: Partial<ListPrice> & { id?: number };
+    initialData?: Partial<ListPrice> & { id?: string };
     mode?: 'create' | 'edit';
 }
 
-type ListPriceFormData = Omit<CreateListPriceDto, 'id'> & { id?: number };
+type ListPriceFormData = Omit<CreateListPriceDto, 'id'> & { id?: string };
 
 const TYPE_PRICE_OPTIONS = [
     { value: TypePrice.PORCENTAJE, label: 'Porcentaje' },
@@ -31,7 +31,7 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
         name: '',
         description: null,
         type: TypePrice.PORCENTAJE,
-        percentage: 0,
+        percentage: '',
         ...initialData
     })
 
@@ -61,16 +61,19 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
             newErrors.name = 'El nombre es requerido';
         }
 
-        // Solo validar porcentaje si el tipo es PORCENTAJE
         if (formData.type === TypePrice.PORCENTAJE) {
-            if (formData.percentage !== undefined && formData.percentage < 0) {
-                newErrors.percentage = 'El porcentaje no puede ser negativo';
-            }
+    const percentageValue = formData.percentage 
+        ? parseFloat(formData.percentage) 
+        : 0;
 
-            if (formData.percentage !== undefined && formData.percentage > 1000) {
-                newErrors.percentage = 'El porcentaje no puede ser mayor a 1000%';
-            }
-        }
+    if (percentageValue < 0) {  // ← Comparar números, no strings
+        newErrors.percentage = 'El porcentaje no puede ser negativo';
+    }
+
+    if (percentageValue > 1000) {  // ← Comparar números
+        newErrors.percentage = 'El porcentaje no puede ser mayor a 1000%';
+    }
+}
 
         // Si es VALOR, podemos establecer el porcentaje en 0 o mantenerlo según tu lógica de negocio
         if (formData.type === TypePrice.VALOR) {
@@ -116,19 +119,19 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
         }
     }
 
-    const handlePercentageChange = (value: string) => {
-        const numValue = value === '' ? 0 : parseFloat(value);
-        if (!isNaN(numValue)) {
-            setFormData(prev => ({ ...prev, percentage: numValue }));
-        }
-    }
+    // const handlePercentageChange = (value: string) => {
+    //     const numValue = value === '' ? 0 : parseFloat(value);
+    //     if (!isNaN(numValue)) {
+    //         setFormData(prev => ({ ...prev, percentage: numValue }));
+    //     }
+    // }
 
     const handleTypeChange = (value: TypePrice) => {
         setFormData(prev => ({ 
             ...prev, 
             type: value,
             // Opcional: resetear porcentaje si cambia de PORCENTAJE a VALOR
-            percentage: value === TypePrice.VALOR ? 0 : prev.percentage
+            percentage: value === TypePrice.VALOR ? '' : prev.percentage
         }));
     }
 
@@ -198,7 +201,7 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
                                     const value = e.target.value === '' ? '0' : e.target.value;
                                     const numValue = parseFloat(value);
                                     if (!isNaN(numValue)) {
-                                        setFormData(prev => ({ ...prev, percentage: numValue }));
+                                        setFormData(prev => ({ ...prev, percentage: numValue.toString() }));
                                     }
                                 }}
                                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-foreground focus:border-foreground outline-none ${errors.percentage ? 'border-red-500' : 'border-gray-300'

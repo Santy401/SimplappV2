@@ -14,11 +14,11 @@ import {
 
 interface CreateStoreProps {
     onBack: () => void;
-    initialData?: Partial<Store> & { id?: number };
+    initialData?: Partial<Store> & { id?: string };
     mode?: 'create' | 'edit';
 }
 
-type StoresFormData = Omit<CreateStoreDto, 'id'> & { id?: number };
+type StoresFormData = Omit<CreateStoreDto, 'id'> & { id?: string };
 
 export default function CreateStore({ onBack, initialData, mode = 'create' }: CreateStoreProps) {
     const [isLoading, setIsLoading] = useState(false);

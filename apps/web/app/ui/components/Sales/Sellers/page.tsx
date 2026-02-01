@@ -5,6 +5,7 @@ import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
 import { DataTable, Button, Loading } from "@simplapp/ui";
 import { Receipt, UserPlus } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface SellerProps {
     onSelect?: (view: string) => void;
@@ -15,11 +16,22 @@ export default function Sellers({
     onSelect = () => { },
     onSelectSeller = () => { }
 }: SellerProps) {
-    const { sellers, isLoading, error } = useSeller();
-    const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller });
+    const { sellers, isLoading, error, refetch } = useSeller();
+    const [ tableVersion, setTableVersion ] = useState(0);
+    
+    const refetchTable = () =>{
+        setTableVersion(prev => prev + 1);
+    }
+    
+    useEffect(() => {
+        refetch();
+    }, [tableVersion]);
+    
+    const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetch });
+    
     const ValidSellers = sellers || [];
 
-    if (isLoading) {
+    if (isLoading) {    
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">

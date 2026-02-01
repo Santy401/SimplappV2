@@ -5,6 +5,7 @@ import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
 import { useStoreTable } from "@interfaces/src/hooks/features/Stores/useStoreTable";
 import { Button, DataTable, Loading } from "@simplapp/ui";
 import { Store } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface StoresProps {
   onSelect?: (view: string) => void;
@@ -16,9 +17,17 @@ export default function Bodega({
   onSelectStores = () => { }
 }: StoresProps) {
 
-  const { stores, isLoading, error } = useStore();
+  const { stores, isLoading, error, refrech } = useStore();
 
-  const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores });
+  const refetchTable = () =>{
+    setTableVersion(prev => prev + 1);
+  }
+  const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores, onDeleteSuccess: refetchTable });
+  const [ tableVersion, setTableVersion ] = useState(0);
+  
+  useEffect(() => {
+    refrech();
+  }, [tableVersion]);
 
   const ValidStores = stores || [];
 

@@ -8,15 +8,16 @@ import { Store } from "@domain/entities/Store.entity";
 interface UseStoreTableProps {
   onSelect?: (view: string) => void;
   onSelectStores?: (store: Store) => void;
+  onDeleteSuccess?: () => void;
 }
 
-export const useStoreTable = ({ onSelect, onSelectStores }: UseStoreTableProps) => {
+export const useStoreTable = ({ onSelect, onSelectStores, onDeleteSuccess }: UseStoreTableProps) => {
   const {
     handleEditCustomer,
     handleAddCustomer,
     handleExportCustomers,
     handleDeleteCustomer
-  } = useStoreCustomers({ onSelect, onSelectStores });
+  } = useStoreCustomers({ onSelect, onSelectStores, onDeleteSuccess });
 
   const columns = useMemo(() =>
     createColumns(handleEditCustomer, handleDeleteCustomer),

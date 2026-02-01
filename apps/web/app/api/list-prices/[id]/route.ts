@@ -27,11 +27,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     const { id } = await params;
 
-    const listPricetId = Number(id);
-
-    if (isNaN(listPricetId)) {
-        return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
+    const listPricetId = (id);
 
     const listPrice = await prisma.listPrice.findUnique({
         where: { id: listPricetId },
@@ -80,7 +76,7 @@ export async function PUT(
         }
 
         const { id } = await params;
-        const listPriceId = parseInt(id);
+        const listPriceId = (id);
 
         const listPrice = await prisma.listPrice.findUnique({
             where: { id: listPriceId },
@@ -95,12 +91,30 @@ export async function PUT(
         }
 
         const data = await request.json();
+        const {
+            name: name, 
+            description: description, 
+            type: type,
+            percentage: percentage,
+            companyId: _companyId,
+            ...updateData
+        } = data;
 
-        console.log('Actualizando Precio ID:', listPriceId, 'Data:', data);
-
-        const updatedClient = await prisma.client.update({
+        if (data.percentage !== undefined) {
+            data.percentage = String(data.percentage);
+        }
+                
+        const updatedClient = await prisma.listPrice.update({
             where: { id: listPriceId },
-            data,
+            data: {
+                ...updateData,
+                name: name,
+                description: description,
+                type: type,
+                percentage: percentage,
+                companyId: _companyId,
+            },
+
         });
 
         return NextResponse.json(updatedClient);

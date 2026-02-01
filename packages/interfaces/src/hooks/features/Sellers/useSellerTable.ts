@@ -8,15 +8,16 @@ import { Seller } from "@domain/entities/Seller.entity";
 interface UseSellerTableProps {
     onSelect?: (view: string) => void;
     onSelectSeller?: (seller: Seller) => void;
+    onDeleteSuccess?: () => void;
 }
 
-export const useSellerTable = ({ onSelect, onSelectSeller }: UseSellerTableProps) => {
+export const useSellerTable = ({ onSelect, onSelectSeller, onDeleteSuccess }: UseSellerTableProps) => {
     const {
         handleEditCustomer,
         handleAddCustomer,
         handleExportCustomers,
         handleDeleteCustomer
-    } = useSellerCustomers({ onSelect, onSelectSeller });
+    } = useSellerCustomers({ onSelect, onSelectSeller, onDeleteSuccess });
 
     const columns = useMemo(() =>
         createColumns(handleEditCustomer, handleEditCustomer, handleDeleteCustomer),

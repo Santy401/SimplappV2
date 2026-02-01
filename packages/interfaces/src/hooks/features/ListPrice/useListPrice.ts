@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ListPrice, CreateListPriceDto, UpdateListPriceDto } from "@domain/entities/ListPrice.entity";
+import { set } from "zod";
 
 export function useListPrice() {
     const [listPrices, setListPrices] = useState<ListPrice[]>([]);
@@ -32,6 +33,7 @@ export function useListPrice() {
     };
 
     const deleteListPrice = async (id: string) => {
+        setIsLoading(true);
         try {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'DELETE',
@@ -44,6 +46,8 @@ export function useListPrice() {
         } catch (err) {
             console.error('Error deleting list price:', err);
             return false;
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -89,7 +93,7 @@ export function useListPrice() {
 
     return {
         listPrices,
-        refresh: fetchListPrices,
+        refrech: fetchListPrices,
         deleteListPrice,
         createListPrice,
         updateListPrice,

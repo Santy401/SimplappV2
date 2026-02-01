@@ -15,7 +15,7 @@ import { useClients } from '@interfaces/src/hooks/features/Clients/useClient';
 
 interface CreateClientProps {
   onBack?: () => void;
-  initialData?: Partial<Client> & { id?: number };
+  initialData?: Partial<Client> & { id?: string };
   mode?: 'create' | 'edit';
 }
 

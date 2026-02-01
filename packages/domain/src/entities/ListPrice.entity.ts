@@ -7,20 +7,20 @@ export interface ListPrice {
     id: string;
     name: string;
     type: TypePrice;
-    percentage: number;
+    percentage: string;
     description: string | null;
 }
 
 export interface CreateListPriceDto {
     name: string;
     type: TypePrice;
-    percentage: number;
+    percentage: string;
     description: string | null;
 }
 
 export interface UpdateListPriceDto {
     name: string | null;
     type: TypePrice;
-    percentage: number;
+    percentage: string;
     description: string | null;
 }

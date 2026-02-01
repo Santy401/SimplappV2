@@ -8,15 +8,16 @@ import { Product } from "@domain/entities/Product.entity";
 interface UseProductTableProps {
     onSelect?: (view: string) => void;
     onSelectProduct?: (product: Product) => void;
+    onDeleteSuccess?: () => void;
 }
 
-export const useProductTable = ({ onSelect, onSelectProduct }: UseProductTableProps) => {
+export const useProductTable = ({ onSelect, onSelectProduct, onDeleteSuccess }: UseProductTableProps) => {
     const {
         handleEditCustomer,
         handleAddCustomer,
         handleExportCustomers,
         handleDeleteCustomer
-    } = useProductCustomers({ onSelect, onSelectProduct });
+    } = useProductCustomers({ onSelect, onSelectProduct, onDeleteSuccess });
 
     const columns = useMemo(() => 
         createColumns(handleEditCustomer, handleEditCustomer, handleDeleteCustomer),
