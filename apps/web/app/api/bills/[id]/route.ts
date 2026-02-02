@@ -154,7 +154,6 @@ export async function PUT(
         where: { id: billId },
         data: {
           ...billData,
-          companyId: user.company.id,
           // Handle client change if provided (and not empty)
           ...(data.clientId ? { clientId: data.clientId } : {}),
           // Handle store change if provided (and not empty)
