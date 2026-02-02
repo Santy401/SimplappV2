@@ -9,6 +9,7 @@ import {
     InputField,
     TextareaField
 } from "@simplapp/ui";
+import { CircleAlert } from "lucide-react";
 
 interface CreateListPriceProps {
     onBack: () => void;
@@ -72,6 +73,10 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
 
     if (percentageValue > 1000) {  // ← Comparar números
         newErrors.percentage = 'El porcentaje no puede ser mayor a 1000%';
+    }  
+
+    if (percentageValue === 0) {
+        newErrors.percentage = 'El porcentaje no puede ser 0';
     }
 }
 
@@ -223,8 +228,8 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
 
                 {/* Opcional: Mostrar mensaje cuando es VALOR */}
                 {formData.type === TypePrice.VALOR && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p className="text-sm text-blue-800">
+                    <div className="p-3 bg-sidebar-50 border border-sidebar-border rounded-lg flex items-center gap-2">
+                      <CircleAlert width={30} height={30} className="text-blue-700"/>  <p className="text-sm text-blue-700">
                             Para listas de precios de tipo "Valor Fijo", se utiliza el valor fijo definido 
                             en el producto. Este campo no requiere porcentaje.
                         </p>

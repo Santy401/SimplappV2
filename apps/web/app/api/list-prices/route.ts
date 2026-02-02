@@ -109,10 +109,20 @@ export async function POST(request: NextRequest) {
       data.percentage = String(data.percentage);
     }
 
+    if (data.type === TypePrice.PORCENTAJE) {
+      if (Number(data.percentage) <= 0) {
+        return NextResponse.json(
+          { error: "El porcentaje debe ser mayor a 0" },
+          { status: 400 },
+        );
+      }
+    }
+
     const listPrice = await prisma.listPrice.create({
       data: {
         name: data.name.trim(),
         type: data.type,
+        percentage: data.percentage || 0,
         description: data.description?.trim() || null,
         company: {
           connect: {
