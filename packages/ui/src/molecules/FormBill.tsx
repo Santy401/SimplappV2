@@ -27,6 +27,9 @@ import {
 } from "@domain/entities/Bill.entity";
 import { Client, IdentificationType } from "@domain/entities/Client.entity";
 import { Product } from "@domain/entities/Product.entity";
+import { Store } from "@domain/entities/Store.entity";
+import { Seller } from "@domain/entities/Seller.entity";
+import { ListPrice } from "@domain/entities/ListPrice.entity";
 
 // Interfaces locales para el formulario
 export interface FormBillItem {
@@ -45,9 +48,9 @@ export interface FormBillItem {
 
 interface FormBillData {
   documentType: "invoice" | "ticket";
-  warehouse: string;
-  priceList: string;
-  seller: string;
+  storeId?: string; // almacena el id de la bodega seleccionada
+  priceList?: string; // almacena el id de la lista de precios seleccionada
+  seller?: string; // id del vendedor seleccionado
   clientType: string;
   clientId: string;
   clientName: string;
@@ -63,7 +66,7 @@ interface FormBillData {
   status: BillStatus;
   logo?: string;
   signature?: string;
-}
+} 
 
 interface FormBillProps {
   onSubmit?: (data: CreateBillInput) => void;
@@ -75,11 +78,14 @@ interface FormBillProps {
   // Datos externos para selects
   clients?: Client[];
   products?: Product[];
+  stores?: Store[];
+  sellers?: Seller[];
+  listPrices?: ListPrice[];
   // IDs requeridos (normalmente vendrían del contexto de usuario)
   userId?: string;
   storeId?: string;
   companyId?: string;
-}
+} 
 
 export function FormBill({
   onSubmit,
@@ -93,14 +99,17 @@ export function FormBill({
   userId = "",
   storeId = "",
   companyId = "",
+  stores = [],
+  sellers = [],
+  listPrices = [],
 }: FormBillProps) {
   const [items, setItems] = useState<FormBillItem[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const signatureInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<FormBillData>({
     documentType: "invoice",
-    warehouse: "principal",
-    priceList: "general",
+    storeId: storeId || (stores[0]?.id ?? ""),
+    priceList: "",
     seller: "",
     clientType: "CC",
     clientId: "",
@@ -144,6 +153,8 @@ export function FormBill({
         clientName: initialData.clientName || "",
         email: initialData.clientEmail || "",
         clientId: initialData.clientIdentification || "",
+        storeId: initialData.storeId || prev.storeId,
+        priceList: (initialData as any).priceList || prev.priceList,
       }));
 
       // Inicializar items si existen
@@ -352,9 +363,9 @@ export function FormBill({
     }
 
     const billData: CreateBillInput = {
-      userId,
+      userId: formData.seller || userId,
       clientId: formData.selectedClientId,
-      storeId,
+      storeId: formData.storeId || storeId,
       companyId,
       status: formData.status,
       paymentMethod: formData.paymentMethod,
@@ -407,7 +418,7 @@ export function FormBill({
       const imageUrl = URL.createObjectURL(file);
       setFormData((prev) => ({ ...prev, logo: imageUrl }));
     }
-  };
+  }; 
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
@@ -424,9 +435,9 @@ export function FormBill({
       </div>
 
       <div className="bg-card border rounded-lg p-6 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3">
           {/* Tipo de documento */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <Label>Tipo de documento</Label>
             <div className="flex gap-2">
               <Button
@@ -452,21 +463,26 @@ export function FormBill({
                 Tiquete
               </Button>
             </div>
-          </div>
+          </div> */}
 
           {/* Bodega */}
           <div className="space-y-2">
             <Label>Bodega</Label>
             <Select
-              value={formData.warehouse}
-              onValueChange={(v) => setFormData({ ...formData, warehouse: v })}
+              value={formData.storeId}
+              onValueChange={(v) => setFormData({ ...formData, storeId: v })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Principal" />
+                <SelectValue placeholder="Seleccionar bodega" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="principal">Principal</SelectItem>
-                <SelectItem value="sucursal">Sucursal</SelectItem>
+                {stores && stores.length > 0 ? (
+                  stores.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>No hay bodegas disponibles</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -479,11 +495,16 @@ export function FormBill({
               onValueChange={(v) => setFormData({ ...formData, priceList: v })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="General" />
+                <SelectValue placeholder="Seleccionar Precio" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="general">General</SelectItem>
-                <SelectItem value="mayorista">Mayorista</SelectItem>
+                {listPrices && listPrices.length > 0 ? (
+                  listPrices.map((lp) => (
+                    <SelectItem key={lp.id} value={lp.id}>{lp.name}</SelectItem>
+                  ))
+                ) : (
+                  <SelectItem value="none" disabled>No hay listas de precios disponibles</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -499,22 +520,16 @@ export function FormBill({
                 <SelectValue placeholder="Seleccionar vendedor..." />
               </SelectTrigger>
               <SelectContent>
-                {clients.length > 0 ? (
-                  clients
-                    .filter((client) => client.is_supplier)
-                    .map((client) => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.firstName} {client.firstLastName}
-                      </SelectItem>
-                    ))
+                {sellers && sellers.length > 0 ? (
+                  sellers.map((s) => (
+                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  ))
                 ) : (
-                  <SelectItem value="none" disabled>
-                    No hay vendedores disponibles
-                  </SelectItem>
+                  <SelectItem value="none" disabled>No hay vendedores disponibles</SelectItem>
                 )}
               </SelectContent>
             </Select>
-          </div>
+          </div> 
         </div>
       </div>
 

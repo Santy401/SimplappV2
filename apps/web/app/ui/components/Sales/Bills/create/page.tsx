@@ -4,6 +4,9 @@ import { Bill, BillDetail, CreateBillInput, UpdateBill } from "@domain/entities/
 import { FormBill } from "@ui/molecules/FormBill";
 import { useClients } from "@hooks/features/Clients/useClient";
 import { useProduct } from "@hooks/features/Products/useProduct";
+import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
+import { useListPrice } from "@interfaces/src/hooks/features/ListPrice/useListPrice";
+import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useBill } from "@hooks/features/Bills/useBill";
 import { toast } from "react-toastify";
 import { BillPreview } from "@ui/molecules/BillPreview";
@@ -33,6 +36,9 @@ export default function BillsCreatePage({
 
     const { clients, isLoading: clientsLoading } = useClients();
     const { products, isLoading: productsLoading } = useProduct();
+    const { stores, isLoading: storesLoading } = useStore();
+    const { listPrices, isLoading: listPricesLoading } = useListPrice();
+    const { sellers, isLoading: sellersLoading } = useSeller();
     const { createBill, updateBill, loading: billLoading, getBill } = useBill();
 
     // Estado para la factura completa en modo view
@@ -171,9 +177,12 @@ export default function BillsCreatePage({
             onSelectBill={onSelectBill}
             initialData={initialData}
             mode={mode}
-            isLoading={isLoading || clientsLoading || productsLoading || billLoading}
+            isLoading={isLoading || clientsLoading || productsLoading || billLoading || storesLoading || listPricesLoading || sellersLoading}
             clients={clients}
             products={products}
+            stores={stores}
+            listPrices={listPrices}
+            sellers={sellers}
         />
     );
 }
