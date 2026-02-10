@@ -10,7 +10,7 @@
     "@types/node": "^20.19.26",
     "@types/pg": "^8.11.10",
     "@types/react": "^19.2.7",
-    "next": "16.0.7",
+    "next": "16.0.10",
     "typescript": "^5.9.3"
   },
   "dependencies": {
