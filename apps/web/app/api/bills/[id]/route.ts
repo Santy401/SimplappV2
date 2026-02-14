@@ -20,7 +20,6 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // ✅ QUITA Number() - payload.id ya es string UUID
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       include: { company: true },
@@ -30,11 +29,9 @@ export async function GET(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    // ✅ QUITA parseInt() - billId es string UUID
     const { id } = await params;
-    const billId = id; // Ya es string UUID, NO convertir
+    const billId = id;
 
-    // ✅ Usa billId directo como string
     const bill = await prisma.bill.findFirst({
       where: {
         id: billId,
@@ -89,7 +86,6 @@ export async function PUT(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // ✅ QUITA Number()
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       include: { company: true },
@@ -99,9 +95,8 @@ export async function PUT(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    // ✅ QUITA parseInt()
     const { id } = await params;
-    const billId = id; // string UUID
+    const billId = id;
 
     const existingBill = await prisma.bill.findFirst({
       where: {
@@ -130,7 +125,6 @@ export async function PUT(
       ...billData
     } = data;
 
-    // Clean items data for creation
     const cleanItems = items?.map((item: any) => ({
       productId: item.productId,
       quantity: item.quantity,
@@ -144,19 +138,15 @@ export async function PUT(
     })) || [];
 
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Delete existing items
       await tx.billItem.deleteMany({
         where: { billId: billId }
       });
 
-      // 2. Update bill & create new items
       const updatedBill = await tx.bill.update({
         where: { id: billId },
         data: {
           ...billData,
-          // Handle client change if provided (and not empty)
           ...(data.clientId ? { clientId: data.clientId } : {}),
-          // Handle store change if provided (and not empty)
           ...(data.storeId ? { storeId: data.storeId } : {}),
           items: {
             create: cleanItems
@@ -197,7 +187,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    // ✅ QUITA Number()
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       include: { company: true },
@@ -207,9 +196,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    // ✅ QUITA parseInt()
     const { id } = await params;
-    const billId = id; // string UUID
+    const billId = id;
 
     const bill = await prisma.bill.findFirst({
       where: {
@@ -222,7 +210,6 @@ export async function DELETE(
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
-    // ✅ billId es string
     await prisma.billItem.deleteMany({
       where: { billId },
     });

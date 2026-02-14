@@ -38,11 +38,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       accessToken,
     });
 
-    // Borra cookies viejas si existen
     response.cookies.delete('token');
     response.cookies.delete('auth-token');
 
-    // ✅ GUARDA ACCESS TOKEN (15 minutos)
     response.cookies.set('access-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -51,7 +49,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       path: '/',
     });
 
-    // ✅ GUARDA REFRESH TOKEN (7 días)
     response.cookies.set('refresh-token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

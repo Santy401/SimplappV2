@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    // Opcional: obtener parámetros de query para filtrar
     const { searchParams } = new URL(request.url);
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
     const data = await request.json();
     const {
       clientId,
-      storeId, // Puede ser undefined/null si no se proporciona
+      storeId,
       items,
       date,
       dueDate,
@@ -123,7 +122,6 @@ export async function POST(request: NextRequest) {
       notes
     } = data;
 
-    // Validaciones requeridas
     if (!clientId || !items || items.length === 0 || !date || !subtotal || !total) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: clientId, items, date, subtotal, total' },
@@ -131,7 +129,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Calculate next number
     const lastBill = await prisma.bill.findFirst({
       where: {
         companyId: user.company.id,
@@ -143,7 +140,6 @@ export async function POST(request: NextRequest) {
 
     const nextNumber = (lastBill?.number ?? 0) + 1;
 
-    // We need to fetch client details for snapshot
     const client = await prisma.client.findUnique({
       where: { id: clientId }
     });
@@ -152,14 +148,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
-    // Opción 1: Si storeId es requerido, validar que exista
-    if (!storeId) {
-      // Si store es opcional en tu schema, omítelo completamente
-      // Si es requerido, devuelve error
-      // return NextResponse.json({ error: 'Store ID is required' }, { status: 400 });
-    }
-
-    // Crear objeto de datos base
     const billData: any = {
       number: nextNumber,
       date: new Date(date),
@@ -175,14 +163,12 @@ export async function POST(request: NextRequest) {
 
       notes: notes,
 
-      // Snapshot
       clientName: `${client.firstName} ${client.firstLastName}`,
       clientIdentification: client.identificationNumber,
       clientAddress: client.address,
       clientPhone: client.phone,
       clientEmail: client.email,
 
-      // Relations
       user: { connect: { id: user.id } },
       company: { connect: { id: user.company.id } },
       client: { connect: { id: String(clientId) } },
@@ -201,9 +187,7 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    // Opción 2: Manejar storeId condicionalmente
     if (storeId) {
-      // Verificar que la store exista
       const store = await prisma.store.findUnique({
         where: { id: storeId }
       });
@@ -221,7 +205,6 @@ export async function POST(request: NextRequest) {
       });
 
       if (!defaultStore) {
-        // Create a default store if none exists
         defaultStore = await prisma.store.create({
           data: {
             name: "Principal",

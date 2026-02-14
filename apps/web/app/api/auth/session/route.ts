@@ -28,7 +28,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // ✅ VERIFICA QUE EL TOKEN SEA VÁLIDO
     const payload = await verifyAccessToken(accessToken) as {id: string};
 
     if (!payload || !payload.id) {
@@ -38,7 +37,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // ✅ OBTIENE LOS DATOS REALES DEL USUARIO
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
       include: { company: true },

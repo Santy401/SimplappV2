@@ -59,23 +59,20 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const cookieStore = await cookies();
 
-    // Set Access Token
     cookieStore.set('access-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 15 * 60, // 15 minutes
+      maxAge: 15 * 60,
     });
 
-    // Set Refresh Token
     cookieStore.set('refresh-token', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60, 
     });
 
-    // Set Legacy Auth Token (for compatibility if needed)
     cookieStore.set('auth-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

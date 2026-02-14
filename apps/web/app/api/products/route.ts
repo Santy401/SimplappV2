@@ -111,8 +111,6 @@ export async function POST(request: NextRequest) {
             : category;
         const parsedCategoryId = categoryId;
 
-        console.log('🏷️ categoryId recibido:', categoryId, typeof categoryId);
-
         if (!categoryId || typeof categoryId !== 'string') {
             return NextResponse.json(
                 { error: 'categoryId es requerido y debe ser un UUID válido' },
@@ -143,8 +141,6 @@ export async function POST(request: NextRequest) {
                 },
             },
         });
-
-        console.log('✅ Producto creado:', product.id);
 
         return NextResponse.json(product, { status: 201 });
     } catch (error) {

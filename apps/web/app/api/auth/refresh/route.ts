@@ -22,8 +22,7 @@ export async function POST(req: NextRequest) {
         { status: 401 },
       );
     }
-
-    // Verifica que el refresh token sea válido
+  
     const tokenData = await verifyRefreshToken(refreshToken);
 
     const refreshTokenRecord = await verifyRefreshToken(refreshToken);
@@ -41,14 +40,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Genera un NUEVO access token
     const newAccessToken = await generateAccessToken(
       refreshTokenRecord.user.id,
       refreshTokenRecord.user.email
     );
 
-    // OPCIONAL: Rotación de refresh token (más seguro)
-    // Revoca el refresh token viejo y crea uno nuevo
     await revokeRefreshToken(refreshToken);
     const newRefreshToken = await generateRefreshToken(tokenData.user.id);
 
@@ -62,12 +58,11 @@ export async function POST(req: NextRequest) {
       accessToken: newAccessToken,
     });
 
-    // Actualiza las cookies
     response.cookies.set("access-token", newAccessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 15 * 60, // 15 minutos
+      maxAge: 15 * 60, 
       path: "/",
     });
 
@@ -75,7 +70,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 días
+      maxAge: 7 * 24 * 60 * 60, 
       path: "/",
     });
 

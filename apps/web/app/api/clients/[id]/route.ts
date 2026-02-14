@@ -31,7 +31,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // ✅ UUID directo, sin Number()
     const client = await prisma.client.findUnique({
       where: { id: id },
     });
@@ -89,7 +88,6 @@ export async function PUT(
 
     const { id } = await params;
 
-    // ✅ UUID directo, sin parseInt
     const client = await prisma.client.findFirst({
       where: { 
         id: id,
@@ -102,8 +100,6 @@ export async function PUT(
     }
 
     const data = await request.json();
-
-    console.log('📥 Actualizando cliente ID:', id, 'Data:', data);
 
     const updatedClient = await prisma.client.update({
       where: { id: id },
@@ -126,8 +122,6 @@ export async function PUT(
         observations: data.observations?.trim() || null,
       },
     });
-
-    console.log('✅ Cliente actualizado:', updatedClient);
 
     return NextResponse.json(updatedClient);
   } catch (error) {

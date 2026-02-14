@@ -14,11 +14,6 @@ interface BillsPageProps {
   onSelect?: (view: string) => void;
   onSelectBill?: (bill: BillDetail) => void;
 }
-type BillWithItems = Bill & {
-  items?: any[];
-  client?: any;
-  store?: any;
-};
 
 export default function BillsPage({
   onSelect = () => {},
@@ -26,8 +21,6 @@ export default function BillsPage({
 }: BillsPageProps) {
   const { bills, loading, error, refetch } = useBill();
   const [tableversion, setTableversion] = useState(0);
-
-  // Estado para controlar el modal
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
 
@@ -49,19 +42,9 @@ export default function BillsPage({
     onDeleteSuccess: refetchTable,
   });
 
-  useEffect(() => {
-    if (bills.length > 0) {
-      console.log("✅ Bills recibidas:", bills.length);
-      console.log("✅ Primera bill:", bills[0]);
-      console.log("✅ Items de la primera bill:", bills[0].items);
-      console.log("✅ Tipo de items:", typeof bills[0].items);
-    }
-  }, [bills]);
-
   const columns = originalColumns;
 
   const handleViewBill = (bill: BillDetail) => {
-    console.log("📋 Ver factura:", bill);
     setSelectedBill(bill);
     setShowPreview(true);
   };
@@ -70,18 +53,7 @@ export default function BillsPage({
     refetch();
   }, [tableversion]);
 
-  // Preparar datos para BillPreview
   const preparePreviewData = (bill: BillDetail) => {
-    console.log("🔄 Preparando datos para preview:", bill);
-
-    // Debug: ver qué datos tiene la factura
-    console.log("📊 Datos de la factura:", {
-      date: bill.date,
-      clientName: bill.clientName,
-      items: (bill as any).items,
-      subtotal: bill.subtotal,
-    });
-
     const items = (bill as any).items || [];
 
     const formattedItems = items.map((item: any, index: number) => ({
@@ -221,7 +193,6 @@ export default function BillsPage({
           </div>
         )}
 
-        {/* Modal de Preview */}
         {showPreview && selectedBill && (
           <BillPreview
             {...preparePreviewData(selectedBill)}

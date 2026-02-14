@@ -34,12 +34,10 @@ export async function PUT(
     }
 
     const data = await request.json();
-    console.log('📥 Datos recibidos para seller:', data);
 
-    // ✅ Buscar vendedor con UUID directo
     const existingSeller = await prisma.seller.findFirst({
       where: {
-        id: id, // ✅ UUID directo
+        id: id,
         companyId: user.company.id,
       },
     });
@@ -51,7 +49,6 @@ export async function PUT(
       );
     }
 
-    // ✅ Validar nombre
     if (data.name && (typeof data.name !== "string" || data.name.trim() === "")) {
       return NextResponse.json(
         { error: "El nombre del vendedor no puede estar vacío" },
@@ -62,7 +59,7 @@ export async function PUT(
     console.log('🔄 Actualizando vendedor...');
 
     const updatedSeller = await prisma.seller.update({
-      where: { id: id }, // ✅ UUID directo
+      where: { id: id },
       data: {
         name: data.name?.trim() || existingSeller.name,
         identification: data.identification?.trim() || null,
@@ -127,9 +124,6 @@ export async function DELETE(
       );
     }
 
-    console.log('🗑️ Eliminando seller:', id);
-
-    // ✅ UUID directo
     await prisma.seller.delete({
       where: {
         id: id,

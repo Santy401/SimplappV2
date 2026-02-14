@@ -90,19 +90,11 @@ export default function CreateProduct({
     }
   }, [initialData]);
 
-  // ✅ Cargar categorías con DEBUG mejorado
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setIsCategoriesLoading(true);
-        console.log("📂 Fetching categories..."); // DEBUG
-
         const categoriesResponse = await fetch("/api/categories");
-
-        console.log(
-          "📂 Categories response status:",
-          categoriesResponse.status,
-        ); // DEBUG
 
         if (!categoriesResponse.ok) {
           const errorText = await categoriesResponse.text();
@@ -111,34 +103,29 @@ export default function CreateProduct({
         }
 
         const categoriesData = await categoriesResponse.json();
-        console.log("✅ Categories loaded:", categoriesData); // DEBUG
 
         setCategories(categoriesData);
 
         if (categoriesData.length > 0 && !formData.categoryProductId) {
-          console.log("🏷️ Setting first category:", categoriesData[0].id); // DEBUG
           setFormData((prev) => ({
             ...prev,
             categoryProductId: categoriesData[0].id,
           }));
         } else if (categoriesData.length === 0) {
-          console.warn("⚠️ No categories found"); // DEBUG
           toast.warning("No hay categorías disponibles. Crea una primero.");
         }
       } catch (error) {
         console.error("💥 Error loading categories:", error);
         toast.error(
           "Error al cargar categorías: " +
-            (error instanceof Error ? error.message : "Unknown"),
+          (error instanceof Error ? error.message : "Unknown"),
         );
       } finally {
         setIsCategoriesLoading(false);
       }
     };
     fetchCategories();
-  }, []); // ✅ Sin formData.categoryProductId en deps
-
-  // Calcular precio final automáticamente
+  }, []);
   useEffect(() => {
     const basePrice = parseFloat(formData.basePrice) || 0;
     const taxRate = parseFloat(formData.taxRate) || 0;
@@ -334,18 +321,18 @@ export default function CreateProduct({
           }
           options={
             isCategoriesLoading
-              ? [{ value: "loading", label: "Cargando categorías..." }] // ✅ value NO vacío
+              ? [{ value: "loading", label: "Cargando categorías..." }]
               : categories.length === 0
                 ? [
-                    {
-                      value: "no-categories",
-                      label: "No hay categorías disponibles",
-                    },
-                  ] // ✅ value NO vacío
+                  {
+                    value: "no-categories",
+                    label: "No hay categorías disponibles",
+                  },
+                ] 
                 : categories.map((cat) => ({
-                    value: cat.id,
-                    label: cat.name,
-                  }))
+                  value: cat.id,
+                  label: cat.name,
+                }))
           }
           error={errors.categoryProductId}
           disabled={isCategoriesLoading || categories.length === 0}

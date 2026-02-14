@@ -55,7 +55,6 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validación
         const newErrors: Partial<Record<keyof ListPrice, string>> = {};
 
         if (!formData.name?.trim()) {

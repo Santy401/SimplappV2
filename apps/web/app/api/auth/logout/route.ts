@@ -10,19 +10,15 @@ export async function POST() {
   try {
     const cookieStore = await cookies();
 
-    // Obtiene el refresh token antes de borrarlo
     const refreshToken = cookieStore.get('refresh-token')?.value;
 
-    // ✅ REVOCA EL REFRESH TOKEN EN LA BASE DE DATOS
     if (refreshToken) {
       await revokeRefreshToken(refreshToken);
     }
 
-    // ✅ BORRA AMBAS COOKIES
     cookieStore.delete('access-token');
     cookieStore.delete('refresh-token');
 
-    // También borra la cookie vieja por si acaso
     cookieStore.delete('auth-token');
 
     return NextResponse.json({

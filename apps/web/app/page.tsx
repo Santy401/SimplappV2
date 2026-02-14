@@ -7,7 +7,7 @@ import { ThemeToggle } from "@simplapp/ui"
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-secondary/10 w-full">
+    <main className="min-h-screen mx-30 bg-gradient-to-b from-background to-secondary/10 w-full">
       <header className="sticky top-0 z-50 backdrop-blur-sm border-b border-sidebar-border bg-background/80">
         <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <div className="flex items-center gap-2">

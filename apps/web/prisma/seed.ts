@@ -1,7 +1,6 @@
 import { config } from 'dotenv';
 import { resolve } from 'path';
 
-// ✅ Carga .env ANTES de importar prisma
 config({ path: resolve(__dirname, '..', '.env') });
 
 import { prisma } from '@interfaces/lib/prisma';

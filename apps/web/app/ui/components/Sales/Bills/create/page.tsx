@@ -27,13 +27,6 @@ export default function BillsCreatePage({
     mode = 'create',
     isLoading = false,
 }: BillsCreatePageProps) {
-
-    // DEBUG: Verificar qué datos llegan
-    console.log("🚀 BillsCreatePage render - mode:", mode);
-    console.log("🚀 BillsCreatePage - initialData:", initialData);
-    console.log("🚀 BillsCreatePage - initialData items:", (initialData as any)?.items);
-    console.log("🚀 BillsCreatePage - initialData items count:", (initialData as any)?.items?.length || 0);
-
     const { clients, isLoading: clientsLoading } = useClients();
     const { products, isLoading: productsLoading } = useProduct();
     const { stores, isLoading: storesLoading } = useStore();
@@ -137,8 +130,6 @@ export default function BillsCreatePage({
                 </div>
             );
         }
-
-        console.log('✅ Using initialData directly:', billToShow);
 
         const previewData = {
             formData: {

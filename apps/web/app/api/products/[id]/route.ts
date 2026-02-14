@@ -104,7 +104,6 @@ export async function PUT(
                     categoryConnect = { connect: { id: foundCategory.id } };
                 }
             } else {
-                // Convertir a string SIEMPRE para Prisma
                 const categoryIdString = String(categoryId);
                 if (categoryIdString && categoryIdString !== '0') {
                     categoryConnect = { connect: { id: categoryIdString } };
