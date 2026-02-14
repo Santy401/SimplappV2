@@ -9,27 +9,34 @@ const SIDEBAR_ITEMS = [
 
     { id: "ventas-facturacion", label: "Facturación", parentId: "ventas" },
     { id: "ventas-facturacion-create", label: "Crear Factura", parentId: "ventas-facturacion" },
+    { id: "ventas-facturacion-edit", label: "Editar Factura", parentId: "ventas-facturacion" },
 
     { id: "ventas", label: "Ventas" },
     { id: "ventas-venta", label: "Comprobante De Venta", parentId: "ventas" },
+    { id: "ventas-venta-edit", label: "Editar Comprobante De Venta", parentId: "ventas" },
 
     { id: "ventas-cotizaciones", label: "Cotizaciones", parentId: "ventas" },
     { id: "ventas-remisiones", label: "Remisiones", parentId: "ventas" },
 
     { id: "ventas-clientes", label: "Clientes", parentId: "ventas" },
     { id: "ventas-clientes-create", label: "Crear Cliente", parentId: "ventas-clientes" },
+    { id: "ventas-clientes-edit", label: "Editar Cliente", parentId: "ventas-clientes" },
 
     { id: "ventas-productos", label: "Productos De Venta", parentId: "ventas" },
     { id: "ventas-productos-create", label: "Crear Producto", parentId: "ventas-productos" },
+    { id: "ventas-productos-edit", label: "Editar Producto", parentId: "ventas-productos" },
 
     { id: "ventas-vendedor", label: "Vendedores", parentId: "ventas" },
     { id: "ventas-vendedor-create", label: "Crear Vendedor", parentId: "ventas-vendedor" },
+    { id: "ventas-vendedor-edit", label: "Editar Vendedor", parentId: "ventas-vendedor" },
 
     { id: "ventas-bodega", label: "Bodegas", parentId: "ventas" },
     { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" },
+    { id: "ventas-bodega-edit", label: "Editar Bodega", parentId: "ventas-bodega" },
 
     { id: "inventario-precios", label: "Lista Precios", parentId: "ventas" },
     { id: "inventario-precios-create", label: "Crear Lista De Precios", parentId: "inventario-precios" },
+    { id: "inventario-precios-edit", label: "Editar Lista De Precios", parentId: "inventario-precios" },
 ];
 
 interface BreadcrumbProps {

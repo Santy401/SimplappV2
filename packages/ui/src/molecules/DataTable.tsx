@@ -139,9 +139,9 @@ export function DataTable<T extends { id: string| string }>({
                     {column.header}
                   </th>
                 ))}
-                {(onEdit || onDelete || onView) && (
+                {/* {(onEdit || onDelete || onView) && (
                   <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Actions</th>
-                )}
+                )} */}
               </tr>
             </thead>
             <tbody className="divide-y divide-sidebar-border">
@@ -158,7 +158,7 @@ export function DataTable<T extends { id: string| string }>({
                       {renderCell(item, column)}
                     </td>
                   ))}
-                  {(onEdit || onDelete || onView) && (
+                  {/* {(onEdit || onDelete || onView) && (
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-2">
                         {onDelete && (
@@ -183,7 +183,7 @@ export function DataTable<T extends { id: string| string }>({
                         )}
                       </div>
                     </td>
-                  )}
+                  )} */}
                 </tr>
               ))}
             </tbody>

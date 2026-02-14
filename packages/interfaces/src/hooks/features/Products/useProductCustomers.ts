@@ -12,7 +12,7 @@ export const useProductCustomers = ({ onSelect, onSelectProduct, onDeleteSuccess
         }
 
         if (onSelect) {
-            onSelect('ventas-productos-create');
+            onSelect('ventas-productos-edit');
         }
     };
 

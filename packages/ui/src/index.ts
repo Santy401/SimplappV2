@@ -13,6 +13,7 @@ export * from './molecules/DataTable';
 export * from './molecules/FormModalLayout';
 export * from './molecules/theme-provider';
 export * from './molecules/FormSection';
+export * from './molecules/TableActionsDropdown';
 
 // UTILS
 export * from './utils/utils'

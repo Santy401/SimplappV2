@@ -110,19 +110,23 @@ export async function POST(request: NextRequest) {
     }
 
     if (data.type === TypePrice.PORCENTAJE) {
-      if (Number(data.percentage) <= 0) {
+      const percentage = Number(data.percentage);
+
+      if (isNaN(percentage) || percentage <= 0) {
         return NextResponse.json(
-          { error: "El porcentaje debe ser mayor a 0" },
+          { error: "El porcentaje debe ser un número mayor a 0" },
           { status: 400 },
         );
       }
+
+      data.percentage = String(percentage);
     }
 
     const listPrice = await prisma.listPrice.create({
       data: {
         name: data.name.trim(),
         type: data.type,
-        percentage: data.percentage || 0,
+        percentage: data.type === TypePrice.PORCENTAJE ? String(data.percentage) : null,
         description: data.description?.trim() || null,
         company: {
           connect: {

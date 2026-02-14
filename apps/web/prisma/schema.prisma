@@ -289,11 +289,11 @@ model ProductPrice {
 
 model Bill {
   id          String     @id @default(uuid())
-  // Relaciones
   userId      String
   clientId    String
   storeId     String
-  // Opción: Vincular directamente a Company para queries más rápidas
+  listPriceId String? 
+  sellerId    String? 
   companyId   String
   user        User    @relation(fields: [userId], references: [id])
   client      Client  @relation(fields: [clientId], references: [id])
@@ -301,37 +301,35 @@ model Bill {
   company     Company @relation(fields: [companyId], references: [id])
   // --- 1. Control Legal y Numeración ---
   prefix      String? @default("") // Ejemplo: "SETT"
-  number      Int // El consecutivo fiscal visible (ej: 1001)
-  legalNumber String? // Concatenación o código completo (ej: "SETT-1001")
+  number      Int 
+  legalNumber String?
 
   // --- 2. Estados y Fechas ---
   status        BillStatus    @default(DRAFT)
   paymentMethod PaymentMethod @default(CASH)
 
-  date    DateTime @default(now()) // Fecha de emisión
-  dueDate DateTime // Fecha de vencimiento (clave para cartera)
+  date    DateTime @default(now())
+  dueDate DateTime 
 
   // --- 3. Totales (Cálculos guardados) ---
-  // Usamos String o Decimal. Manteniendo tu estándar de String:
   subtotal             String     @default("0")
   taxTotal             String     @default("0")
   discountTotal        String     @default("0")
   total                String     @default("0")
-  balance              String     @default("0") // Lo que falta por pagar
+  balance              String     @default("0")
   // --- 4. Snapshot (Datos del cliente al momento de facturar) ---
-  // Importante por si el cliente cambia datos en el futuro
   clientName           String?
   clientIdentification String?
   clientAddress        String?
   clientPhone          String?
   clientEmail          String?
   items                BillItem[]
-  payments             Payment[] // Relación nueva sugerida para abonos
-  notes                String? // Observaciones de la factura
+  payments             Payment[] 
+  notes                String?
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
-  @@unique([companyId, prefix, number]) // Evitar duplicar números en una misma empresa
+  @@unique([companyId, prefix, number])
 }
 
 model Payment {
@@ -349,19 +347,15 @@ model BillItem {
   id        String @id @default(uuid())
   billId    String
   productId String
-  quantity  Int // O Decimal/Float si vendes por peso (kg)
+  quantity  Int
 
-  // Precios Unitarios
-  price String // Precio unitario base
+  price String 
 
-  // Impuestos y Descuentos del Item
-  taxRate   String @default("0") // Ej: "19.00"
-  taxAmount String @default("0") // El valor monetario del impuesto
+  taxRate   String @default("0") 
+  taxAmount String @default("0") 
   discount  String @default("0")
-  // Total de la línea
   total     String
 
-  // Snapshot del producto por si cambia de nombre/código
   productName String?
   productCode String?
   bill        Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
@@ -437,11 +431,12 @@ enum InventoryMovementType {
 }
 
 enum BillStatus {
-  DRAFT // Borrador, no afecta inventario ni contabilidad
-  ISSUED // Emitida/Validada
-  PAID // Pagada totalmente
+  DRAFT
+  ISSUED 
+  PAID 
   PARTIALLY_PAID
-  CANCELLED // Anulada (Nota crédito)
+  CANCELLED
+  TO_PAY 
 }
 
 enum PaymentMethod {
@@ -453,5 +448,5 @@ enum PaymentMethod {
   CHECK
   DEPOSIT
   OTHER
-  CREDIT // Venta a crédito
+  CREDIT 
 }

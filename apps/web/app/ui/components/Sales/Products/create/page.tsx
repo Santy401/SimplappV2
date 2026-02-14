@@ -66,7 +66,7 @@ export default function CreateProduct({
     type: "PRODUCT",
     categoryProductId: "",
     unit: UnitOfMeasure.UNIT,
-    taxRate: "19",
+    taxRate: "0",
     trackStock: true,
     allowNegativeStock: false,
     active: true,

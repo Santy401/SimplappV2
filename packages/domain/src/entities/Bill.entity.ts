@@ -1,6 +1,8 @@
 import { Client } from "./Client.entity";
 import { Company } from "./Company.entity";
+import { ListPrice } from "./ListPrice.entity";
 import { Product } from "./Product.entity";
+import { Seller } from "./Seller.entity";
 import { Store } from "./Store.entity";
 import { User } from "./User.entity";
 
@@ -9,7 +11,8 @@ export enum BillStatus {
     ISSUED = "ISSUED",
     PAID = "PAID",
     PARTIALLY_PAID = "PARTIALLY_PAID",
-    CANCELLED = "CANCELLED"
+    CANCELLED = "CANCELLED",
+    ToPay = "TO_PAY"
 }
 
 export enum PaymentMethod {
@@ -29,6 +32,8 @@ export interface Bill {
     userId: string;
     clientId: string;
     storeId: string;
+    listPriceId: string;
+    sellerId: string;
     companyId: string;
 
     prefix?: string | null;
@@ -95,6 +100,8 @@ export interface BillWithItems extends Bill {
 export interface BillDetail extends BillWithItems {
     client?: Client;
     store?: Store;
+    listPrice?: ListPrice;
+    seller?: Seller;
     user?: User;
     company?: Company;
     items: (BillItem & { product?: Product })[];
@@ -106,6 +113,8 @@ export interface CreateBillInput {
     userId: string;
     clientId: string;
     storeId: string;
+    listPriceId: string;
+    sellerId: string;
     companyId: string;
 
     // Products: CreateBillItemInput[];
@@ -134,6 +143,8 @@ export interface CreateBillItemInput {
     price?: string; // Si no se envía se toma del producto
     discount?: string;
     taxRate?: string;
+    taxAmount?: string;
+    total?: string;
 }
 
 export interface CreatePaymentInput {

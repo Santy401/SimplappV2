@@ -15,7 +15,7 @@ export async function GET(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};;
+        const payload = await verifyAccessToken(accessToken) as {id: string};
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -69,9 +69,6 @@ export async function PUT(
         const { id } = await params;
         const rawData = await request.json();
 
-        console.log('📥 Datos recibidos:', rawData);
-
-        // Remove fields that shouldn't be updated
         const { 
             id: _, 
             companyId, 
@@ -85,12 +82,11 @@ export async function PUT(
             costForUnit, 
             valuePrice, 
             unitOfMeasure,
-            taxRate, // ✅ Agregar taxRate aquí
-            basePrice, // ✅ Agregar basePrice aquí
+            taxRate,
+            basePrice,
             ...data 
         } = rawData;
 
-        // ✅ Manejo correcto de category (puede ser UUID o número)
         let categoryConnect = undefined;
         
         if (category) {
@@ -98,7 +94,6 @@ export async function PUT(
                 ? (category as any).id 
                 : category;
             
-            // ✅ Si es UUID, busca el ID numérico
             if (typeof categoryId === 'string' && categoryId.includes('-')) {
                 const foundCategory = await prisma.categoryProduct.findUnique({
                     where: { id: categoryId },
@@ -109,21 +104,13 @@ export async function PUT(
                     categoryConnect = { connect: { id: foundCategory.id } };
                 }
             } else {
-                const parsedCategoryId = Number(categoryId);
-                if (!isNaN(parsedCategoryId) && parsedCategoryId !== 0) {
-                    categoryConnect = { connect: { id: parsedCategoryId } };
+                // Convertir a string SIEMPRE para Prisma
+                const categoryIdString = String(categoryId);
+                if (categoryIdString && categoryIdString !== '0') {
+                    categoryConnect = { connect: { id: categoryIdString } };
                 }
             }
         }
-
-        console.log('🔄 Actualizando con:', {
-            ...data,
-            category: categoryConnect,
-            code: codeProduct,
-            cost: costForUnit ? String(costForUnit) : undefined,
-            finalPrice: valuePrice ? String(valuePrice) : undefined,
-            unit: unitOfMeasure,
-        });
 
         const product = await prisma.product.update({
             where: { id },
@@ -132,6 +119,7 @@ export async function PUT(
                 category: categoryConnect,
                 code: codeProduct || undefined,
                 cost: costForUnit ? String(costForUnit) : undefined,
+                taxRate: taxRate != null && taxRate !== '' ? String(taxRate) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
                 unit: unitOfMeasure || undefined,
             },
@@ -146,11 +134,9 @@ export async function PUT(
             },
         });
 
-        console.log('✅ Producto actualizado:', product);
-
         return NextResponse.json(product);
     } catch (error) {
-        console.error('💥 Error updating product:', error);
+        console.error('Error updating product:', error);
         return NextResponse.json(
             { 
                 error: 'Error al actualizar producto',
@@ -160,7 +146,6 @@ export async function PUT(
         );
     }
 }
-
 
 export async function DELETE(
     request: NextRequest,
@@ -174,7 +159,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};;
+        const payload = await verifyAccessToken(accessToken) as {id: string};
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }

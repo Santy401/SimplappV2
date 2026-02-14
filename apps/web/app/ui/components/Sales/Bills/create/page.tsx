@@ -77,6 +77,8 @@ export default function BillsCreatePage({
                     userId: data.userId,
                     clientId: data.clientId,
                     storeId: data.storeId,
+                    listPriceId: data.listPriceId,
+                    sellerId: data.sellerId,
                     companyId: data.companyId,
                     prefix: initialData.prefix || null,
                     number: initialData.number || 0,
@@ -117,9 +119,7 @@ export default function BillsCreatePage({
         }
     };
 
-    // Si estamos en modo view y tenemos la factura completa, mostrar preview
     if (mode === 'view') {
-        // Usar initialData directamente (ya viene completa del backend)
         const billToShow = initialData;
 
         if (!billToShow) {
@@ -140,7 +140,6 @@ export default function BillsCreatePage({
 
         console.log('✅ Using initialData directly:', billToShow);
 
-        // Preparar datos para BillPreview
         const previewData = {
             formData: {
                 date: billToShow.date ? new Date(billToShow.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
@@ -155,7 +154,7 @@ export default function BillsCreatePage({
                 footerNote: '',
                 logo: undefined,
             },
-            items: (billToShow as any).items || [], // Los items ya vienen en initialData
+            items: (billToShow as any).items || [],
             subtotal: parseFloat(billToShow.subtotal || '0'),
             discountTotal: parseFloat(billToShow.discountTotal || '0'),
             taxTotal: parseFloat(billToShow.taxTotal || '0'),

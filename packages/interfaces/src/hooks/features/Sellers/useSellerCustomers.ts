@@ -13,7 +13,7 @@ export const useSellerCustomers = ({ onSelect, onSelectSeller, onDeleteSuccess }
         }
 
         if (onSelect) {
-            onSelect('ventas-vendedor-create')
+            onSelect('ventas-vendedor-edit')
         }
     };
 

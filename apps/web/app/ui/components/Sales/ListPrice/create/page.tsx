@@ -31,7 +31,7 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
     const [formData, setFormData] = useState<ListPriceFormData>({
         name: '',
         description: null,
-        type: TypePrice.PORCENTAJE,
+        type: TypePrice.VALOR,
         percentage: '',
         ...initialData
     })

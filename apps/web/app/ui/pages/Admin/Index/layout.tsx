@@ -73,9 +73,8 @@ console.log('📋 Layout - currentView:', currentView);
         return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={selectedBill ? 'edit' : 'create'} />;
       case 'ventas-facturacion-view':
-  // Cambia FormBill por BillsCreatePage
-  return <BillsCreatePage onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
-    mode={'view'} />;
+        return <BillsCreatePage onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+          mode={'view'} />;
 
       case 'ventas-clientes':
         return <Clientes onSelect={setCurrentView} onSelectClient={setSelectedClient} />;

@@ -42,6 +42,7 @@ export interface FormBillItem {
   quantity: number;
   discount: number;
   taxRate: number;
+  taxAmount: number;
   description: string;
   total: number;
 }
@@ -125,7 +126,7 @@ export function FormBill({
     terms: "",
     notes: "",
     footerNote: "",
-    status: BillStatus.DRAFT,
+    status: BillStatus.ToPay,
     logo: undefined,
     signature: undefined,
   });
@@ -135,9 +136,26 @@ export function FormBill({
   // Inicializar con datos existentes si estamos editando o viendo
   useEffect(() => {
     if (initialData && (mode === "edit" || mode === "view")) {
-      console.log("🔍 FormBill - initialData recibido:", initialData);
-      console.log("🔍 FormBill - initialData.items:", initialData.items);
+      const extractId = (val: any) => {
+        if (val == null) return undefined;
+        if (typeof val === "string" || typeof val === "number") return String(val);
+        if (typeof val === "object") return String(val.id ?? val._id ?? "");
+        return undefined;
+      };
 
+      const sellerId =
+        extractId((initialData as any).sellerId) ||
+        extractId((initialData as any).seller) ||
+        extractId((initialData as any).sellerObj);
+      // también aceptar userId / user como posible campo que contiene el vendedor
+      const sellerFromUser = extractId((initialData as any).userId) || extractId((initialData as any).user);
+      const finalSellerId = sellerId || sellerFromUser;
+
+      const priceListId =
+        extractId((initialData as any).listPriceId) ||
+        extractId((initialData as any).priceList) ||
+        extractId((initialData as any).listPrice);
+      
       setFormData((prev) => ({
         ...prev,
         date: initialData.date
@@ -149,12 +167,14 @@ export function FormBill({
         paymentMethod: initialData.paymentMethod || PaymentMethod.CASH,
         notes: initialData.notes || "",
         status: initialData.status || BillStatus.DRAFT,
-        selectedClientId: initialData.clientId,
+        selectedClientId: extractId((initialData as any).clientId) || prev.selectedClientId,
         clientName: initialData.clientName || "",
         email: initialData.clientEmail || "",
         clientId: initialData.clientIdentification || "",
         storeId: initialData.storeId || prev.storeId,
-        priceList: (initialData as any).priceList || prev.priceList,
+        // usar ids normalizados (string) y no sobreescribir si ya hay valor
+        priceList: priceListId ?? prev.priceList,
+        seller: finalSellerId ?? prev.seller,
       }));
 
       // Inicializar items si existen
@@ -172,6 +192,7 @@ export function FormBill({
             quantity: parseFloat(item.quantity) || 0,
             discount: parseFloat(item.discount) || 0,
             taxRate: parseFloat(item.taxRate) || 0,
+            taxAmount: parseFloat(item.taxAmount) || 0,
             description: item.description || "",
             total: parseFloat(item.total) || 0,
           }),
@@ -193,6 +214,7 @@ export function FormBill({
               quantity: 0,
               discount: 0,
               taxRate: 0,
+              taxAmount: 0,
               description: "",
               total: 0,
               productId: undefined,
@@ -214,6 +236,7 @@ export function FormBill({
           quantity: 0,
           discount: 0,
           taxRate: 0,
+          taxAmount: 0,
           description: "",
           total: 0,
           productId: undefined,
@@ -276,6 +299,7 @@ export function FormBill({
         quantity: 0,
         discount: 0,
         taxRate: 0,
+        taxAmount: 0,
         description: "",
         total: 0,
         productId: undefined,
@@ -298,7 +322,11 @@ export function FormBill({
       items.map((item) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-          updatedItem.total = calculateItemTotal(updatedItem);
+          const subtotal = updatedItem.price * updatedItem.quantity;
+          const discountAmount = subtotal * (updatedItem.discount / 100);
+          const subtotalAfterDiscount = subtotal - discountAmount;
+          updatedItem.taxAmount = subtotalAfterDiscount * (updatedItem.taxRate / 100);
+          updatedItem.total = subtotalAfterDiscount + updatedItem.taxAmount;
           return updatedItem;
         }
         return item;
@@ -321,7 +349,11 @@ export function FormBill({
               price: product.basePrice,
               taxRate: parseFloat(product.taxRate) || 0,
             };
-            updatedItem.total = calculateItemTotal(updatedItem);
+            const subtotal = updatedItem.price * updatedItem.quantity;
+            const discountAmount = subtotal * (updatedItem.discount / 100);
+            const subtotalAfterDiscount = subtotal - discountAmount;
+            updatedItem.taxAmount = subtotalAfterDiscount * (updatedItem.taxRate / 100);
+            updatedItem.total = subtotalAfterDiscount + updatedItem.taxAmount;
             return updatedItem;
           }
           return item;
@@ -364,6 +396,8 @@ export function FormBill({
 
     const billData: CreateBillInput = {
       userId: formData.seller || userId,
+      listPriceId: formData.priceList || "",
+      sellerId: formData.seller || "",
       clientId: formData.selectedClientId,
       storeId: formData.storeId || storeId,
       companyId,
@@ -387,6 +421,7 @@ export function FormBill({
             total: item.total.toString(),
             discount: item.discount.toString(),
             taxRate: item.taxRate.toString(),
+            taxAmount: (item.taxAmount || 0).toString(),
           }) as CreateBillItemInput,
       ),
     };
@@ -434,7 +469,7 @@ export function FormBill({
         </Button>
       </div>
 
-      <div className="bg-card border rounded-lg p-6 space-y-4">
+      <div className="bg-card border border-sidebar-border rounded-lg p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3">
           {/* Tipo de documento */}
           {/* <div className="space-y-2">
@@ -534,7 +569,7 @@ export function FormBill({
       </div>
 
       {/* Header con configuración */}
-      <div className="bg-card border rounded-lg p-6 space-y-4">
+      <div className="bg-card border border-sidebar-border rounded-lg p-6 space-y-4">
         {/* Logo placeholder */}
         <div className="flex items-center w-full pb-6">
           {/* IZQUIERDA */}
@@ -772,10 +807,10 @@ export function FormBill({
       </div>
 
       {/* Tabla de items */}
-      <div className="bg-card border rounded-lg overflow-hidden">
+      <div className="bg-card border border-sidebar-border rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-muted/50 border-b">
+            <thead className="bg-muted/50 border-b border-sidebar-border">
               <tr>
                 <th className="text-left p-3 text-sm font-medium">Item</th>
                 <th className="text-left p-3 text-sm font-medium">
@@ -801,7 +836,7 @@ export function FormBill({
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-muted/20">
+                  <tr key={item.id} className="border-b border-sidebar-border hover:bg-muted/20">
                     <td className="p-2">
                       <Select
                         value={item.productId || ""}
@@ -945,7 +980,7 @@ export function FormBill({
             <Button
               variant="link"
               onClick={handleAddItem}
-              className="text-primary flex items-center cursor-pointer"
+              className="text-foreground hover:text-foreground/80 hover:underline flex items-center cursor-pointer"
             >
               <Plus className="w-4 h-4 mr-1" />
               Agregar línea
@@ -996,7 +1031,7 @@ export function FormBill({
           </span>
         </div>
 
-        <div className="w-1/3 flex flex-col border rounded-lg p-4 space-y-3">
+        <div className="w-1/3 flex flex-col border border-sidebar-border rounded-lg p-4 space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-muted-foreground">Subtotal</span>
             <span className="font-medium">
@@ -1027,7 +1062,7 @@ export function FormBill({
               })}
             </span>
           </div>
-          <div className="border-t pt-3 flex justify-between items-center">
+          <div className="border-t border-sidebar-border pt-3 flex justify-between items-center">
             <span className="text-lg font-semibold">Total</span>
             <span className="text-2xl font-bold">
               ${" "}

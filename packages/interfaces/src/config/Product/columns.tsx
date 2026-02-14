@@ -1,8 +1,8 @@
 "use client";
 
 import { Product, ProductCategory, UnitOfMeasure } from "@domain/entities/Product.entity";
-import { Button } from "@ui/index";
-import { Edit, Eye, Trash2, Package, Tag, DollarSign, Percent, Check, X } from "lucide-react";
+import { TableActionsDropdown } from "@ui/index";
+import { Package, Tag, DollarSign, Percent, Check, X } from "lucide-react";
 import { Badge } from "@ui/index";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/atoms/CardHover/hover-card";
 import { ToastContainer, toast } from "react-toastify";
@@ -185,35 +185,11 @@ export const createColumns = (
             header: "Acciones",
             className: "w-36",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewProduct(product)}
-                        className="hover:bg-blue-500/20 hover:text-blue-600"
-                        title="Ver producto"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditProduct(product)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Editar"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteProduct(product)}
-                        className="hover:bg-red-500/20 text-red-500 hover:text-red-400"
-                        title="Eliminar"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+                <TableActionsDropdown
+                    onView={() => handleViewProduct(product)}
+                    onEdit={() => handleEditProduct(product)}
+                    onDelete={() => handleDeleteProduct(product)}
+                />
             ),
         },
     ]
@@ -356,35 +332,11 @@ export const createCompactProductColumns = (
             key: "actions",
             header: "Acciones",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewProduct(product)}
-                        className="hover:bg-blue-500/20 hover:text-blue-600"
-                        title="Ver producto"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditProduct(product)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Editar"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteProduct(product)}
-                        className="hover:bg-red-500/20 text-red-500 hover:text-red-400"
-                        title="Eliminar"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+                <TableActionsDropdown
+                    onView={() => handleViewProduct(product)}
+                    onEdit={() => handleEditProduct(product)}
+                    onDelete={() => handleDeleteProduct(product)}
+                />
             ),
         },
     ];

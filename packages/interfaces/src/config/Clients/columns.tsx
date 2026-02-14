@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from '@ui/index';
+import { TableActionsDropdown } from '@ui/index';
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { formatIdentificationType, getFullName } from "../../hooks/features/Clients/utils/index";
 import { Hash, Mail, MapPin, Phone, Tag, Eye, Edit, Trash2 } from "lucide-react";
@@ -149,35 +149,11 @@ export const createColumns = (handleEditCustomer: (client: Client) => void,
             key: "actions",
             header: "Acciones",
             cell: (client: Client) => (
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewCustomer(client)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Ver detalles"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditCustomer(client)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Editar"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteCustomer(client)}
-                        className="hover:bg-red-500/20 text-red-500 hover:text-red-400"
-                        title="Eliminar"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+                <TableActionsDropdown
+                    onView={() => handleViewCustomer(client)}
+                    onEdit={() => handleEditCustomer(client)}
+                    onDelete={() => handleDeleteCustomer(client)}
+                />
             ),
         },
     ];

@@ -1,7 +1,7 @@
 "use client";
 
 import { Seller } from "@domain/entities/Seller.entity";
-import { Button } from "@ui/index";
+import { TableActionsDropdown } from "@ui/index";
 import { Edit, Eye, Trash2 } from "lucide-react";
 
 export const createColumns = (
@@ -40,36 +40,12 @@ export const createColumns = (
         {
             key: "actions",
             header: "Acciones",
-            cell: (Seller: Seller) => (
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleViewCustomer(Seller)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Ver cliente"
-                    >
-                        <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditCustomer(Seller)}
-                        className="hover:bg-gray-800 hover:text-white"
-                        title="Editar"
-                    >
-                        <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteCustomer(Seller)}
-                        className="hover:bg-red-500/20 text-red-500 hover:text-red-400"
-                        title="Eliminar"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                </div>
+            cell: (seller: Seller) => (
+                <TableActionsDropdown
+                    onView={() => handleViewCustomer(seller)}
+                    onEdit={() => handleEditCustomer(seller)}
+                    onDelete={() => handleDeleteCustomer(seller)}
+                />
             ),
         },
     ]

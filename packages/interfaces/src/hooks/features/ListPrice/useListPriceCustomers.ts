@@ -14,7 +14,7 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice, onDeleteSuc
         }
 
         if (onSelect) {
-            onSelect('inventario-precios-create');
+            onSelect('inventario-precios-edit');
         }
     };
 

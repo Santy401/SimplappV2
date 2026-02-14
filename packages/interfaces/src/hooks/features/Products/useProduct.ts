@@ -86,18 +86,29 @@ export function useProduct() {
     try {
       console.log('📤 Actualizando producto:', id, data);
 
+      // Asegurar que category sea string si es un número
+      const formattedData = {
+        ...data,
+        category: data.category ? String(data.category) : data.category,
+        costForUnit: data.costForUnit ? Number(data.costForUnit) : null,
+        valuePrice: data.valuePrice ? Number(data.valuePrice) : 0,
+        taxRate: data.taxRate != null && data.taxRate !== '' ? Number(data.taxRate) : null,
+        basePrice: data.basePrice ? Number(data.basePrice) : 0,
+      };
+
+      console.log('📦 Datos formateados para API:', formattedData);
+
       const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
-      // ✅ Lee response primero
       const responseData = await response.json();
 
       if (!response.ok) {
         console.error('❌ Error API:', response.status, responseData);
-        console.error('📦 Datos enviados:', data);
+        console.error('📦 Datos enviados:', formattedData);
         throw new Error(responseData.error || responseData.message || 'Error al actualizar');
       }
 
@@ -113,7 +124,6 @@ export function useProduct() {
       throw err;
     }
   };
-
 
   return {
     products,

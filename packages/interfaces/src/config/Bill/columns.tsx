@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@ui/index";
+import { TableActionsDropdown } from "@ui/index";
 import { Bill } from "@domain/entities";
 import { Eye, Edit, Trash2 } from "lucide-react";
 
@@ -71,43 +71,16 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
                 </span>
             ),
         },
-        // {
-        //     key: "actions",
-        //     header: "Acciones",
-        //     cell: (bill: Bill) => (
-        //         <div className="flex items-center gap-2">
-        //             <Button
-        //                 variant="ghost"
-        //                 size="sm"
-        //                 onClick={() => handleViewCustomer(bill)}
-        //                 className="hover:bg-blue-500/10 text-blue-600 hover:text-blue-700"
-        //                 title="Ver detalle"
-        //             >
-        //                 <Eye className="w-4 h-4" />
-        //             </Button>
-        //             {/* <button className="p-2 hover:bg-gray-100 rounded-full text-gray-600" title="Pagos">
-        //                 <DollarSign className="w-4 h-4" />
-        //             </button> */}
-        //             <Button
-        //                 variant="ghost"
-        //                 size="sm"
-        //                 onClick={() => handleEditCustomer(bill)}
-        //                 className="hover:bg-gray-100 text-gray-600"
-        //                 title="Editar"
-        //             >
-        //                 <Edit className="w-4 h-4" />
-        //             </Button>
-        //             <Button
-        //                 variant="ghost"
-        //                 size="sm"
-        //                 onClick={() => handleDeleteCustomer(bill)}
-        //                 className="hover:bg-red-500/10 text-red-500 hover:text-red-600"
-        //                 title="Eliminar"
-        //             >
-        //                 <Trash2 className="w-4 h-4" />
-        //             </Button>
-        //         </div>
-        //     ),
-        // },
+        {
+            key: "actions",
+            header: "Acciones",
+            cell: (bill: Bill) => (
+                <TableActionsDropdown
+                    onView={() => handleViewCustomer(bill)}
+                    onEdit={() => handleEditCustomer(bill)}
+                    onDelete={() => handleDeleteCustomer(bill)}
+                />
+            ),
+        }
     ]
 }
