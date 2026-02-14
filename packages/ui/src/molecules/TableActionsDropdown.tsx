@@ -40,7 +40,7 @@ export function TableActionsDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="h-8 w-8 flex items-center justify-center" size="icon" variant="ghost" title="Acciones">
+        <Button className="h-8 w-8 flex items-center justify-center cursor-pointer" size="icon" variant="ghost" title="Acciones">
           <MoreHorizontal className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>

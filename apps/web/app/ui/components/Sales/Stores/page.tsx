@@ -33,7 +33,7 @@ export default function Bodega({
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[90vh] screen flex items-center justify-center">
         <div className="text-center">
           <Loading />
           {/* <p className="text-gray-600 ">Cargando clientes...</p> */}

@@ -127,7 +127,7 @@ export default function BillsPage({
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[90vh] flex items-center justify-center">
         <div className="text-center">
           <Loading />
         </div>

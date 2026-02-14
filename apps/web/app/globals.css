@@ -176,25 +176,84 @@ span {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
-
-  ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: var(--background);
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: var(--radius);
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--foreground);
-  }
 }
+
+/* Minimal, modern scrollbar — pill-shaped, semi-transparent */
+/* Firefox - scrollbar delgada y moderna */
+:root:not(.dark) html,
+:root:not(.dark) body,
+:root:not(.dark) * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.dark html,
+.dark body,
+.dark * {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* WebKit (Chrome/Edge/Safari) - scrollbar más delgada */
+body.antialiased::-webkit-scrollbar,
+body.antialiased *::-webkit-scrollbar,
+[data-nextjs-scrollable-content]::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+body.antialiased::-webkit-scrollbar-track,
+body.antialiased *::-webkit-scrollbar-track,
+[data-nextjs-scrollable-content]::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0; /* espacio en extremos */
+}
+
+/* Thumb con diseño pill moderno */
+body.antialiased::-webkit-scrollbar-thumb,
+body.antialiased *::-webkit-scrollbar-thumb,
+[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px; /* completamente redondeado */
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  min-height: 40px;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+/* Dark theme */
+.dark body.antialiased::-webkit-scrollbar-thumb,
+.dark body.antialiased *::-webkit-scrollbar-thumb,
+.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Hover - más visible */
+body.antialiased::-webkit-scrollbar-thumb:hover,
+body.antialiased *::-webkit-scrollbar-thumb:hover,
+[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.dark body.antialiased::-webkit-scrollbar-thumb:hover,
+.dark body.antialiased *::-webkit-scrollbar-thumb:hover,
+.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* Active state */
+body.antialiased::-webkit-scrollbar-thumb:active,
+body.antialiased *::-webkit-scrollbar-thumb:active,
+[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.dark body.antialiased::-webkit-scrollbar-thumb:active,
+.dark body.antialiased *::-webkit-scrollbar-thumb:active,
+.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.3);
+}
+
 
 @layer utilities {
   .animate-in {
