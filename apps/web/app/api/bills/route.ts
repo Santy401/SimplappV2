@@ -4,6 +4,10 @@ import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { BillStatus } from '@prisma/client';
 
+/**
+ * GET /api/bills
+ * Obtiene el listado de facturas con filtros opcionales
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -82,6 +86,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/bills
+ * Crea una nueva factura
+ */
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();

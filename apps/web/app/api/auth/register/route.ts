@@ -6,6 +6,10 @@ import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/
 
 import { cookies } from 'next/headers';
 
+/**
+ * POST /api/auth/register
+ * Registra un nuevo usuario en la plataforma
+ */
 export async function POST(request: Request): Promise<NextResponse> {
   try {
     const body = await request.json();
@@ -70,7 +74,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, 
+      maxAge: 7 * 24 * 60 * 60,
     });
 
     cookieStore.set('auth-token', accessToken, {

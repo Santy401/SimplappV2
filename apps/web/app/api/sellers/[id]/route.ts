@@ -3,6 +3,10 @@ import { prisma } from "@interfaces/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@interfaces/lib/auth/token";
 
+/**
+ * PUT /api/sellers/[id]
+ * Actualiza la información de un vendedor
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -85,7 +89,7 @@ export async function PUT(
     }
 
     return NextResponse.json(
-      { 
+      {
         error: "Error al actualizar el vendedor",
         details: error instanceof Error ? error.message : "Unknown error"
       },
@@ -94,6 +98,10 @@ export async function PUT(
   }
 }
 
+/**
+ * DELETE /api/sellers/[id]
+ * Elimina un vendedor
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -3,6 +3,10 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+/**
+ * GET /api/clients
+ * Obtiene el listado de clientes de la empresa
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -12,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -45,6 +49,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/clients
+ * Crea un nuevo cliente
+ */
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -54,7 +62,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};
+    const payload = await verifyAccessToken(accessToken) as { id: string };
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }

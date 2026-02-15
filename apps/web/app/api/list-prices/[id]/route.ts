@@ -3,6 +3,10 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+/**
+ * DELETE /api/list-prices/[id]
+ * Elimina una lista de precios
+ */
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
     const cookieListPrice = await cookies();
     const accessToken = cookieListPrice.get('access-token')?.value;
@@ -11,7 +15,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
         return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
         return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -49,6 +53,10 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 }
 
 
+/**
+ * PUT /api/list-prices/[id]
+ * Actualiza una lista de precios existente
+ */
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -61,7 +69,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};;
+        const payload = await verifyAccessToken(accessToken) as { id: string };;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -92,8 +100,8 @@ export async function PUT(
 
         const data = await request.json();
         const {
-            name: name, 
-            description: description, 
+            name: name,
+            description: description,
             type: type,
             percentage: percentage,
             companyId: _companyId,
@@ -103,7 +111,7 @@ export async function PUT(
         if (data.percentage !== undefined) {
             data.percentage = String(data.percentage);
         }
-                
+
         const updatedClient = await prisma.listPrice.update({
             where: { id: listPriceId },
             data: {

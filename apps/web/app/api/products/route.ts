@@ -4,6 +4,10 @@ import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { ItemType, UnitOfMeansureList } from '@prisma/client';
 
+/**
+ * GET /api/products
+ * Obtiene el listado de productos de la empresa
+ */
 export async function GET(request: NextRequest) {
     try {
         const cookieStore = await cookies();
@@ -13,7 +17,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};;
+        const payload = await verifyAccessToken(accessToken) as { id: string };;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -55,6 +59,10 @@ export async function GET(request: NextRequest) {
     }
 }
 
+/**
+ * POST /api/products
+ * Crea un nuevo producto
+ */
 export async function POST(request: NextRequest) {
     try {
         const cookieStore = await cookies();
@@ -64,7 +72,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};;
+        const payload = await verifyAccessToken(accessToken) as { id: string };;
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -106,8 +114,8 @@ export async function POST(request: NextRequest) {
             ...data
         } = rawData;
 
-       const categoryId = category && typeof category === 'object' && 'id' in category 
-            ? (category as any).id 
+        const categoryId = category && typeof category === 'object' && 'id' in category
+            ? (category as any).id
             : category;
         const parsedCategoryId = categoryId;
 
@@ -119,7 +127,7 @@ export async function POST(request: NextRequest) {
         }
 
         const product = await prisma.product.create({
-           data: {
+            data: {
                 ...data,
                 description: data.description || observation,
                 companyId: user.company.id,

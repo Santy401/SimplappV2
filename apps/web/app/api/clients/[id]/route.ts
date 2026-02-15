@@ -3,8 +3,12 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+/**
+ * DELETE /api/clients/[id]
+ * Elimina un cliente
+ */
 export async function DELETE(
-  req: Request, 
+  req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -51,7 +55,7 @@ export async function DELETE(
   } catch (error) {
     console.error('Error deleting client:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Error al eliminar cliente',
         details: error instanceof Error ? error.message : 'Unknown error'
       },
@@ -60,6 +64,10 @@ export async function DELETE(
   }
 }
 
+/**
+ * PUT /api/clients/[id]
+ * Actualiza la información de un cliente
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -89,9 +97,9 @@ export async function PUT(
     const { id } = await params;
 
     const client = await prisma.client.findFirst({
-      where: { 
+      where: {
         id: id,
-        companyId: user.company.id 
+        companyId: user.company.id
       },
     });
 
@@ -127,7 +135,7 @@ export async function PUT(
   } catch (error) {
     console.error('💥 Error updating client:', error);
     return NextResponse.json(
-      { 
+      {
         error: 'Error al actualizar cliente',
         details: error instanceof Error ? error.message : 'Unknown error'
       },

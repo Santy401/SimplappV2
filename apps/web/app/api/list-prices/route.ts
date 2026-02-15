@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { verifyAccessToken } from "@interfaces/lib/auth/token";
 import { TypePrice } from "@domain/entities/ListPrice.entity";
 
+/**
+ * GET /api/list-prices
+ * Obtiene el listado de listas de precios de la empresa
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieListPrice = await cookies();
@@ -49,6 +53,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/list-prices
+ * Crea una nueva lista de precios
+ */
 export async function POST(request: NextRequest) {
   try {
     const cookieListPrice = await cookies();

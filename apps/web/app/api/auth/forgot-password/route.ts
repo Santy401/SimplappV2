@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+/**
+ * POST /api/auth/forgot-password
+ * Envía un correo electrónico para restablecer la contraseña
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const { email } = body;
 
     if (!email) {
@@ -14,7 +18,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Password reset email sent to: ${email}`);
-    
+
     return NextResponse.json({
       message: 'Si el email existe, recibirás instrucciones para resetear tu contraseña'
     });

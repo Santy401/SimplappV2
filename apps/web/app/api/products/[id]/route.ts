@@ -3,6 +3,10 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+/**
+ * GET /api/products/[id]
+ * Obtiene un producto específico por su ID
+ */
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -15,7 +19,7 @@ export async function GET(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};
+        const payload = await verifyAccessToken(accessToken) as { id: string };
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -49,6 +53,10 @@ export async function GET(
     }
 }
 
+/**
+ * PUT /api/products/[id]
+ * Actualiza un producto existente
+ */
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -61,7 +69,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};
+        const payload = await verifyAccessToken(accessToken) as { id: string };
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }
@@ -69,37 +77,37 @@ export async function PUT(
         const { id } = await params;
         const rawData = await request.json();
 
-        const { 
-            id: _, 
-            companyId, 
-            createdAt, 
-            updatedAt, 
-            category, 
-            images, 
-            prices, 
-            codeProduct, 
-            codeBarcode, 
-            costForUnit, 
-            valuePrice, 
+        const {
+            id: _,
+            companyId,
+            createdAt,
+            updatedAt,
+            category,
+            images,
+            prices,
+            codeProduct,
+            codeBarcode,
+            costForUnit,
+            valuePrice,
             unitOfMeasure,
             taxRate,
             basePrice,
-            ...data 
+            ...data
         } = rawData;
 
         let categoryConnect = undefined;
-        
+
         if (category) {
-            const categoryId = typeof category === 'object' && 'id' in category 
-                ? (category as any).id 
+            const categoryId = typeof category === 'object' && 'id' in category
+                ? (category as any).id
                 : category;
-            
+
             if (typeof categoryId === 'string' && categoryId.includes('-')) {
                 const foundCategory = await prisma.categoryProduct.findUnique({
                     where: { id: categoryId },
                     select: { id: true }
                 });
-                
+
                 if (foundCategory) {
                     categoryConnect = { connect: { id: foundCategory.id } };
                 }
@@ -137,7 +145,7 @@ export async function PUT(
     } catch (error) {
         console.error('Error updating product:', error);
         return NextResponse.json(
-            { 
+            {
                 error: 'Error al actualizar producto',
                 details: error instanceof Error ? error.message : 'Unknown error'
             },
@@ -146,6 +154,10 @@ export async function PUT(
     }
 }
 
+/**
+ * DELETE /api/products/[id]
+ * Elimina un producto
+ */
 export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
@@ -158,7 +170,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as {id: string};
+        const payload = await verifyAccessToken(accessToken) as { id: string };
         if (!payload || !payload.id) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
         }

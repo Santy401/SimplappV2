@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 
+/**
+ * POST /api/auth/login
+ * Inicia sesión de usuario y devuelve tokens de acceso
+ */
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const { email, password } = await req.json();

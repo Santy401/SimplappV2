@@ -3,6 +3,10 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
+/**
+ * GET /api/bills/[id]
+ * Obtiene una factura específica por su ID
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -69,6 +73,10 @@ export async function GET(
   }
 }
 
+/**
+ * PUT /api/bills/[id]
+ * Actualiza una factura existente
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -170,6 +178,10 @@ export async function PUT(
   }
 }
 
+/**
+ * DELETE /api/bills/[id]
+ * Elimina una factura
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

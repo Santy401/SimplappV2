@@ -11,6 +11,10 @@ const users = [
   }
 ];
 
+/**
+ * GET /api/company
+ * Obtiene la información de la empresa del usuario actual
+ */
 export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
@@ -57,6 +61,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
+/**
+ * POST /api/company
+ * Crea una nueva empresa asociada al usuario
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -73,17 +81,17 @@ export async function POST(request: NextRequest) {
     const tokenData = JSON.parse(Buffer.from(token.value, 'base64').toString());
     const userId = tokenData.userId;
 
-    const { 
-      companyName, 
-      legalName, 
-      taxId, 
-      address, 
-      phone, 
-      email, 
-      industry, 
+    const {
+      companyName,
+      legalName,
+      taxId,
+      address,
+      phone,
+      email,
+      industry,
       currency,
       website,
-      country 
+      country
     } = body;
 
     if (!companyName || !legalName || !taxId) {
@@ -149,6 +157,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * PUT /api/company
+ * Actualiza la información de la empresa existente
+ */
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();

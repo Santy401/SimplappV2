@@ -3,6 +3,10 @@ import { prisma } from "@interfaces/lib/prisma";
 import { cookies } from 'next/headers'
 import { verifyAccessToken } from "@interfaces/lib/auth/token";
 
+/**
+ * PUT /api/stores/[id]
+ * Actualiza la información de una bodega
+ */
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
@@ -12,7 +16,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
@@ -51,6 +55,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   }
 }
 
+/**
+ * DELETE /api/stores/[id]
+ * Elimina una bodega
+ */
 export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
@@ -60,7 +68,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};;
+    const payload = await verifyAccessToken(accessToken) as { id: string };;
     if (!payload || !payload.id) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
