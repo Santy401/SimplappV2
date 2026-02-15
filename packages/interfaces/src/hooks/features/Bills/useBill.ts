@@ -3,8 +3,30 @@ import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/
 
 export const useBill = () => {
     const [bills, setBills] = useState<BillDetail[]>([]);
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loadingState, setLoadingState] = useState({
+        fetch: false,
+        create: false,
+        update: false,
+        delete: false,
+        export: false,
+        view: false,
+        rowId: null,
+    });
+
+    const isLoading = {
+        fetch: loadingState.fetch,
+        create: loadingState.create,
+        update: loadingState.update,
+        delete: loadingState.delete,
+        export: loadingState.export,
+        view: loadingState.view,
+        rowId: loadingState.rowId,
+    };
+
+    const setLoading = (key: keyof typeof loadingState, value: boolean) => {
+        setLoadingState(prev => ({ ...prev, [key]: value }));
+    };
 
     const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
         const fetchOptions = {
@@ -36,7 +58,7 @@ export const useBill = () => {
     }, []);
 
     const fetchBills = async () => {
-        setLoading(true);
+        setLoading('fetch', true);
         try {
             const response = await fetchWithAuth('/api/bills');
             if (!response.ok) {
@@ -47,12 +69,12 @@ export const useBill = () => {
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Unknown error');
         } finally {
-            setLoading(false);
+            setLoading('fetch', false);
         }
     };
 
     const createBill = async (billData: CreateBillInput) => {
-        setLoading(true);
+        setLoading('create', true);
         try {
             const response = await fetchWithAuth('/api/bills', {
                 method: 'POST',
@@ -71,12 +93,12 @@ export const useBill = () => {
             setError(error instanceof Error ? error.message : 'Unknown error');
             return null;
         } finally {
-            setLoading(false);
+            setLoading('create', false);
         }
     };
 
     const updateBill = async (billData: UpdateBill) => {
-        setLoading(true);
+        setLoading('update', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billData.id}`, {
                 method: 'PUT',
@@ -97,12 +119,12 @@ export const useBill = () => {
             setError(error instanceof Error ? error.message : 'Unknown error');
             return null;
         } finally {
-            setLoading(false);
+            setLoading('update', false);
         }
     };
 
     const deleteBill = async (billId: string) => {
-        setLoading(true);
+        setLoading('delete', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billId}`, {
                 method: 'DELETE',
@@ -116,12 +138,12 @@ export const useBill = () => {
             setError(error instanceof Error ? error.message : 'Unknown error');
             return false;
         } finally {
-            setLoading(false);
+            setLoading('delete', false);
         }
     };
 
     const getBill = async (billId: string) => {
-        setLoading(true);
+        setLoading('view', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billId}`);
             if (!response.ok) {
@@ -133,13 +155,13 @@ export const useBill = () => {
             setError(error instanceof Error ? error.message : 'Unknown error');
             return null;
         } finally {
-            setLoading(false);
+            setLoading('view', false);
         }
     };
 
     return {
         bills,
-        loading,
+        isLoading,
         error,
         getBill,
         createBill,
