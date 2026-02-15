@@ -29,6 +29,17 @@ export default function ClientesPage({
 
   const [tableversion, setTableversion] = useState(0);
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [localLoading, setLocalLoading] = useState({
+    export: false,
+    delete: false,
+    create: false,
+    update: false,
+    get: false,
+  });
+
+
   const refetchTable = () => {
     refetch();
     setTableversion(prev => prev + 1);
@@ -48,7 +59,7 @@ export default function ClientesPage({
   const suppliers = validClients.filter(c => c.is_supplier).length;
   const withBranches = validClients.filter(c => c.it_branches).length;
 
-  if (isLoading) {
+  if (isLoading.fetch && clients.length === 0) {
     return (
       <div className="min-h-[90vh] flex items-center justify-center">
         <div className="text-center">
@@ -96,9 +107,10 @@ export default function ClientesPage({
             </Button>
             <Button
               onClick={handleAddCustomer}
+              disabled={localLoading.create}
               className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
-              <UserPlus className="w-4 h-4" />
+              {localLoading.create ? <Loading /> : <UserPlus className="w-4 h-4" />}
               Nuevo Cliente
             </Button>
           </div>
@@ -189,6 +201,16 @@ export default function ClientesPage({
               onAdd={handleAddCustomer}
               onExport={handleExportCustomers}
               className="bg-transparent"
+              isLoading={{
+                fetch: isLoading.fetch,
+                create: isLoading.create,
+                update: isLoading.update,
+                deleteId: deletingId,
+                deleteMany: false,
+                export: localLoading.export,
+                view: false,
+                rowId: deletingId,
+              }}
             />
           </div>
         ) : (

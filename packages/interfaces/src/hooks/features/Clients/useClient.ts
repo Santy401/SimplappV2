@@ -3,11 +3,33 @@ import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [LoadingState, setLoadingState] = useState({
+    fetch: true,
+    create: false,
+    update: false,
+    delete: false,
+    export: false,
+    view: false,
+    rowId: null,
+  });
+
+  const isLoading = {
+    fetch: LoadingState.fetch,
+    create: LoadingState.create,
+    update: LoadingState.update,
+    delete: LoadingState.delete,
+    export: LoadingState.export,
+    view: LoadingState.view,
+    rowId: LoadingState.rowId,
+  }
+
+  const setLoading = (key: keyof typeof LoadingState, value: boolean) => {
+    setLoadingState(prev => ({ ...prev, [key]: value }));
+  }
 
   useEffect(() => {
     fetchClients();
@@ -15,7 +37,7 @@ export function useClients() {
 
   const fetchClients = async () => {
     try {
-      setIsLoading(true);
+      setLoading('fetch', true);
       setError(null);
 
       const response = await fetch('/api/clients');
@@ -30,13 +52,13 @@ export function useClients() {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       console.error('Error fetching clients:', err);
     } finally {
-      setIsLoading(false);
+      setLoading('fetch', false);
     }
   };
 
   const updateClient = async (id: string, data: Partial<Client>) => {
     try {
-      setIsUpdating(id);
+      setLoading('update', true);
       console.log('Actualizando cliente:', { id, data });
 
       const response = await fetch(`/api/clients/${id}`, {
@@ -65,13 +87,13 @@ export function useClients() {
       console.error('Error updating client:', err);
       return false;
     } finally {
-      setIsUpdating(null);
+      setLoading('update', false);
     }
   };
 
   const deleteClient = async (id: string) => {
     try {
-      setIsDeleting(id);
+      setLoading('delete', true);
       const response = await fetch(`/api/clients/${id}`, {
         method: 'DELETE',
       });
@@ -81,20 +103,20 @@ export function useClients() {
       }
 
       setClients(prev => prev.filter(client => client.id !== id));
-      
+
       return true;
     } catch (err) {
       console.error('Error deleting client:', err);
       setError(err instanceof Error ? err.message : 'Error al eliminar cliente');
       return false;
     } finally {
-      setIsDeleting(null);
+      setLoading('delete', false);
     }
   };
 
   const createClient = async (data: CreateClientDto) => {
     try {
-      setIsCreating(true);
+      setLoading('create', true);
       setError(null);
 
       const response = await fetch('/api/clients', {
@@ -117,7 +139,7 @@ export function useClients() {
       setError(err instanceof Error ? err.message : 'Error al crear cliente');
       return null;
     } finally {
-      setIsCreating(false);
+      setLoading('create', false);
     }
   };
 
