@@ -114,6 +114,10 @@ export default function CreateClient({ onBack, initialData, mode = 'create' }: C
       newErrors.country = 'País es obligatorio';
     }
 
+    if (!formData.email?.trim()) {
+      newErrors.email = 'Email es obligatorio';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -355,6 +359,7 @@ export default function CreateClient({ onBack, initialData, mode = 'create' }: C
         <InputField
           label="Email"
           type="email"
+          required
           value={formData.email || ''}
           onChange={(value) =>
             setFormData(prev => ({ ...prev, email: value }))

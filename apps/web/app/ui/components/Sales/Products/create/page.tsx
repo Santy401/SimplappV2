@@ -50,6 +50,7 @@ export default function CreateProduct({
 }: CreateProductProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { createProduct, updateProduct } = useProduct();
+  const [isService, setIsService] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
   >({});
@@ -67,7 +68,7 @@ export default function CreateProduct({
     categoryProductId: "",
     unit: UnitOfMeasure.UNIT,
     taxRate: "0",
-    trackStock: true,
+    trackStock: false,
     allowNegativeStock: false,
     active: true,
     cost: "",
@@ -202,6 +203,14 @@ export default function CreateProduct({
       valuePrice: parseFloat(formData.finalPrice) || 0,
     };
   };
+
+  const hiddenChecks = () => {
+    if (formData.type === "SERVICE") {
+      setIsService(true);
+    } else {
+      setIsService(false);
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -439,11 +448,13 @@ export default function CreateProduct({
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">Opciones de Inventario</h3>
         <FormSection columns={3} gap="md">
-          <CheckboxField
-            label="Controlar Stock"
-            checked={formData.trackStock}
-            onChange={(checked) =>
-              setFormData((prev) => ({ ...prev, trackStock: checked }))
+          {formData.type === "PRODUCT" && (
+            <>
+            <CheckboxField
+              label="Controlar Stock"
+              checked={formData.trackStock}
+              onChange={(checked) =>
+                setFormData((prev) => ({ ...prev, trackStock: checked }))
             }
           />
 
@@ -454,7 +465,10 @@ export default function CreateProduct({
               setFormData((prev) => ({ ...prev, allowNegativeStock: checked }))
             }
           />
-
+          </>
+          ) || (
+            <></>
+          )}
           <CheckboxField
             label="Producto Activo"
             checked={formData.active}
