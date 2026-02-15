@@ -6,9 +6,35 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 export function useSeller() {
     const [sellers, setSellers] = useState<Seller[]>([]);
-    const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<String | null>(null)
+    const [LoadingStates, setIsLoadingStates] = useState({
+        fetch: true,
+        create: false,
+        update: false,
+        delete: false,
+        deleteId: false,
+        export: false,
+        view: false,
+        rowId: false,
+    });
 
+    const isLoading = {
+        fetch: LoadingStates.fetch,
+        create: LoadingStates.create,
+        update: LoadingStates.update,
+        delete: LoadingStates.delete,
+        deleteId: LoadingStates.deleteId,
+        export: LoadingStates.export,
+        view: LoadingStates.view,
+        rowId: LoadingStates.rowId,
+    }
+
+    const setIsLoading = (state: keyof typeof LoadingStates, value: boolean) => {
+        setIsLoadingStates(prev => ({
+            ...prev,
+            [state]: value,
+        }));
+    }
 
     const {
         register,
@@ -42,7 +68,7 @@ export function useSeller() {
 
     const fetchSellers = async () => {
         try {
-            setIsLoading(true)
+            setIsLoading('fetch', true)
             setError(null)
 
             const respose = await fetch('/api/sellers', {
@@ -62,12 +88,12 @@ export function useSeller() {
             setError(err instanceof Error ? err.message : 'Error desconocido')
             console.log('Error fetching Sellers:', err)
         } finally {
-            setIsLoading(false)
+            setIsLoading('fetch', false)
         }
     };
 
     const deleteSeller = async (id: string) => {
-        setIsLoading(true)
+        setIsLoading('deleteId', true)
         try {
             const response = await fetch(`/api/sellers/${id}`, {
                 method: 'DELETE',
@@ -82,11 +108,12 @@ export function useSeller() {
             console.error('Error deleting seller:', err);
             return false;
         } finally {
-            setIsLoading(false)
+            setIsLoading('deleteId', false)
         }
     }
 
     const createSeller = async (data: CreateSellerDto) => {
+        setIsLoading('create', true)
         try {
             const response = await fetch(`/api/sellers`, {
                 method: 'POST',
@@ -104,10 +131,13 @@ export function useSeller() {
         } catch (err) {
             console.error('Error creating seller', err);
             return null;
+        } finally {
+            setIsLoading('create', false)
         }
     }
 
     const updateSeller = async (id: string, data: UpdateSellerDto) => {
+        setIsLoading('update', true)
         try {
             const response = await fetch(`/api/sellers/${id}`, {
                 method: 'PUT',
@@ -127,6 +157,8 @@ export function useSeller() {
         } catch (err) {
             console.error('Error updating store:', err);
             return null;
+        } finally {
+            setIsLoading('update', false)
         }
     }
 

@@ -17,21 +17,29 @@ export default function Sellers({
     onSelectSeller = () => { }
 }: SellerProps) {
     const { sellers, isLoading, error, refetch } = useSeller();
-    const [ tableVersion, setTableVersion ] = useState(0);
-    
-    const refetchTable = () =>{
+    const [tableVersion, setTableVersion] = useState(0);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [localLoading, setLocalLoading] = useState({
+        export: false,
+        delete: false,
+        create: false,
+        update: false,
+        get: false,
+    });
+
+    const refetchTable = () => {
         setTableVersion(prev => prev + 1);
     }
-    
+
     useEffect(() => {
         refetch();
     }, [tableVersion]);
-    
+
     const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetch });
-    
+
     const ValidSellers = sellers || [];
 
-    if (isLoading) {    
+    if (isLoading.fetch && sellers.length === 0) {
         return (
             <div className="min-h-[90vh] flex items-center justify-center">
                 <div className="text-center">
@@ -79,10 +87,11 @@ export default function Sellers({
                         </Button>
                         <Button
                             onClick={handleAddCustomer}
+                            disabled={localLoading.create}
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
                         >
                             <UserPlus className="w-4 h-4" />
-                            Nuevo Vendedor
+                            {localLoading.create ? 'Creando...' : 'Nuevo Vendedor'}
                         </Button>
                     </div>
                 </div>
@@ -99,6 +108,16 @@ export default function Sellers({
                             onAdd={handleAddCustomer}
                             onExport={() => { }}
                             className="bg-transparent"
+                            isLoading={{
+                                fetch: isLoading.fetch,
+                                create: isLoading.create,
+                                update: isLoading.update,
+                                deleteId: deletingId,
+                                deleteMany: false,
+                                export: localLoading.export,
+                                view: false,
+                                rowId: deletingId,
+                            }}
                         />
                     </div>
                 ) : (
