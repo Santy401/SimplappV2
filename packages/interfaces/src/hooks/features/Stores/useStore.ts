@@ -3,8 +3,30 @@ import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.en
 
 export function useStore() {
     const [stores, setStores] = useState<Store[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<String | null>(null)
+    const [loadingStates, setLoadingStates] = useState({
+        fetch: false,
+        delete: false,
+        create: false,
+        update: false,
+        get: false,
+    });
+
+    const isLoading = {
+        fetch: loadingStates.fetch,
+        delete: loadingStates.delete,
+        create: loadingStates.create,
+        update: loadingStates.update,
+        get: loadingStates.get,
+        any: Object.values(loadingStates).some(Boolean),
+    }
+
+    const setLoading = (key: keyof typeof loadingStates, value: boolean) => {
+        setLoadingStates({
+            ...loadingStates,
+            [key]: value,
+        })
+    }
 
     useEffect(() => {
         fetchStores();
@@ -12,7 +34,7 @@ export function useStore() {
 
     const fetchStores = async () => {
         try {
-            setIsLoading(true)
+            setLoading('fetch', true)
             setError(null)
 
             const response = await fetch('/api/stores');
@@ -27,12 +49,12 @@ export function useStore() {
             setError(err instanceof Error ? err.message : 'Error desconocido')
             console.log('Error fetching Stores:', err)
         } finally {
-            setIsLoading(false)
+            setLoading('fetch', false)
         }
     }
 
     const deleteStore = async (id: string) => {
-        setIsLoading(true)
+        setLoading('delete', true)
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'DELETE',
@@ -47,11 +69,12 @@ export function useStore() {
             console.error('Error deleting store:', err);
             return false;
         } finally {
-            setIsLoading(false)
+            setLoading('delete', false)
         }
     };
 
     const createStore = async (data: CreateStoreDto) => {
+        setLoading('create', true)
         try {
             const response = await fetch('/api/stores', {
                 method: 'POST',
@@ -67,12 +90,15 @@ export function useStore() {
 
             return newStore;
         } catch (err) {
-            console.error('Error creating client:', err);
+            console.error('Error creating store:', err);
             return null;
+        } finally {
+            setLoading('create', false)
         }
     };
 
     const updateStore = async (id: string, data: UpdateStoreDto) => {
+        setLoading('update', true)
         try {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'PUT',
@@ -92,6 +118,8 @@ export function useStore() {
         } catch (err) {
             console.error('Error updating store:', err);
             return null;
+        } finally {
+            setLoading('update', false)
         }
     }
 
