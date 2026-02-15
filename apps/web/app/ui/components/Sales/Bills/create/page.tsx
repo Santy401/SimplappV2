@@ -195,8 +195,8 @@ export default function BillsCreatePage({
 
     const handleEmitBill = async (data: CreateBillInput) => {
         try {
-            // Asegurar que el estado sea ISSUED
-            const issuedData = { ...data, status: BillStatus.ISSUED };
+            // Asegurar que el estado sea TO_PAY
+            const issuedData = { ...data, status: BillStatus.TO_PAY };
 
             if (currentBillId) {
                 await updateBill({ ...issuedData, id: currentBillId });

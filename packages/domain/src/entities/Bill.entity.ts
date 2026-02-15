@@ -12,7 +12,7 @@ export enum BillStatus {
     PAID = "PAID",
     PARTIALLY_PAID = "PARTIALLY_PAID",
     CANCELLED = "CANCELLED",
-    ToPay = "TO_PAY"
+    TO_PAY = "TO_PAY"
 }
 
 export enum PaymentMethod {

@@ -126,13 +126,13 @@ export function FormBill({
     date: new Date().toISOString().split("T")[0],
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
-      .split("T")[0], // 30 días después
+      .split("T")[0],
     paymentMethod: PaymentMethod.CASH,
     paymentType: "",
     terms: "",
     notes: "",
     footerNote: "",
-    status: BillStatus.ToPay,
+    status: BillStatus.TO_PAY,
     logo: undefined,
     signature: undefined,
   });
@@ -479,7 +479,7 @@ export function FormBill({
     }
   };
   const handleEmitBill = () => {
-    setFormData((prev) => ({ ...prev, status: BillStatus.ISSUED }));
+    setFormData((prev) => ({ ...prev, status: BillStatus.TO_PAY }));
     const validItems = items.filter(
       (item) => item.productId && item.quantity > 0,
     );
@@ -487,7 +487,7 @@ export function FormBill({
       alert("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
       return;
     }
-    const data = prepareBillData(BillStatus.ISSUED);
+    const data = prepareBillData(BillStatus.TO_PAY);
     if (data) {
       // Llama a una función específica para emitir
       onEmitBill?.(data); // ← Nuevo prop
@@ -502,9 +502,9 @@ export function FormBill({
     }
   };
 
-  function handleLogoClick(event: MouseEvent<HTMLDivElement, MouseEvent>): void {
-    throw new Error("Function not implemented.");
-  }
+  // function handleLogoClick(event: MouseEvent<HTMLDivElement, MouseEvent>): void {
+  //   throw new Error("Function not implemented.");
+  // }
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
@@ -633,7 +633,6 @@ export function FormBill({
               onChange={handleLogoChange}
             />
             <div
-              onClick={handleLogoClick}
               className={`flex items-center cursor-pointer justify-center border-2 border-dashed rounded-lg text-muted-foreground w-full max-w-xs h-32 overflow-hidden relative hover:bg-muted/10 transition-colors ${formData.logo ? "border-none p-0" : "p-8"
                 }`}
             >
@@ -848,6 +847,9 @@ export function FormBill({
                     </SelectItem>
                     <SelectItem value={BillStatus.CANCELLED}>
                       Cancelada
+                    </SelectItem>
+                    <SelectItem value={BillStatus.TO_PAY}>
+                      Por Pagar
                     </SelectItem>
                   </SelectContent>
                 </Select>

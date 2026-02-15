@@ -86,7 +86,7 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
                     onView={() => handleViewCustomer(bill)}
                     onEdit={() => handleEditCustomer(bill)}
                     onDelete={() => handleDeleteCustomer(bill)}
-                    onMarkAsPaid={bill.status === BillStatus.ToPay ? () => handleMarkAsPaid(bill) : undefined}
+                    onMarkAsPaid={bill.status === BillStatus.TO_PAY ? () => handleMarkAsPaid(bill) : undefined}
                 />
             ),
         }
