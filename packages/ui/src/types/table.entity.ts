@@ -15,11 +15,13 @@ export interface TableProps<T> {
   itemsPerPage?: number;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
+  onDeleteMany?: (items: T[]) => Promise<void>;
   onView?: (item: T) => void;
   onAdd?: () => void;
   onExport?: () => void;
   actions?: React.ReactNode;
   className?: string;
+  isBillView?: boolean;
 }
 
 export interface User {

@@ -16,8 +16,8 @@ interface BillsPageProps {
 }
 
 export default function BillsPage({
-  onSelect = () => {},
-  onSelectBill = () => {},
+  onSelect = () => { },
+  onSelectBill = () => { },
 }: BillsPageProps) {
   const { bills, loading, error, refetch } = useBill();
   const [tableversion, setTableversion] = useState(0);
@@ -34,6 +34,7 @@ export default function BillsPage({
     columns: originalColumns,
     handleAddCustomer,
     handleDeleteCustomer,
+    handleDeleteManyCustomers,
     handleEditCustomer,
     handleExportCustomers,
   } = useBillTable({
@@ -161,6 +162,8 @@ export default function BillsPage({
             <DataTable
               key={`bills-table-version-${tableversion}`}
               data={validBills}
+              isBillView={true}
+              actions={true}
               columns={columns}
               title=""
               searchable={true}
@@ -169,6 +172,7 @@ export default function BillsPage({
               onView={handleViewBill}
               onAdd={handleAddCustomer}
               onDelete={handleDeleteCustomer}
+              onDeleteMany={handleDeleteManyCustomers}
               onEdit={handleEditCustomer}
               onExport={handleExportCustomers}
               className="bg-transparent"

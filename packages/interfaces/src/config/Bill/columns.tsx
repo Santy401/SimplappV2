@@ -1,12 +1,13 @@
 "use client";
 
 import { TableActionsDropdown } from "@ui/index";
-import { Bill } from "@domain/entities";
+import { Bill, BillStatus } from "@domain/entities";
 import { Eye, Edit, Trash2 } from "lucide-react";
 
 export const createColumns = (handleEditCustomer: (bill: Bill) => void,
     handleDeleteCustomer: (bill: Bill) => Promise<void>,
-    handleViewCustomer: (bill: Bill) => void) => {
+    handleViewCustomer: (bill: Bill) => void,
+    handleMarkAsPaid: (bill: Bill) => Promise<void>) => {
     return [
         {
             key: "basicInfo",
@@ -67,7 +68,13 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
                         bill.status === 'DRAFT' ? 'bg-gray-100 text-gray-700' :
                             bill.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
                                 'bg-yellow-100 text-yellow-700'}`}>
-                    {bill.status}
+                    {bill.status === 'PAID' ? 'Pagada' :
+                        bill.status === 'DRAFT' ? 'Borrador' :
+                            bill.status === 'TO_PAY' ? 'Por Pagar' :
+                                bill.status === 'CANCELLED' ? 'Cancelada' :
+                                    bill.status === 'ISSUED' ? 'Emitida' :
+                                        bill.status === 'PARTIALLY_PAID' ? 'Pago Parcial' :
+                                            bill.status}
                 </span>
             ),
         },
@@ -79,6 +86,7 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
                     onView={() => handleViewCustomer(bill)}
                     onEdit={() => handleEditCustomer(bill)}
                     onDelete={() => handleDeleteCustomer(bill)}
+                    onMarkAsPaid={bill.status === BillStatus.ToPay ? () => handleMarkAsPaid(bill) : undefined}
                 />
             ),
         }

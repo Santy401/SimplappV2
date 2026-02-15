@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Bill, CreateBillInput, BillDetail } from '@domain/entities/Bill.entity';
+import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
 
 export const useBill = () => {
     const [bills, setBills] = useState<BillDetail[]>([]);
@@ -75,7 +75,7 @@ export const useBill = () => {
         }
     };
 
-    const updateBill = async (billData: BillDetail) => {
+    const updateBill = async (billData: UpdateBill) => {
         setLoading(true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billData.id}`, {
@@ -121,21 +121,21 @@ export const useBill = () => {
     };
 
     const getBill = async (billId: string) => {
-    setLoading(true);
-    try {
-        const response = await fetchWithAuth(`/api/bills/${billId}`);
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
+        setLoading(true);
+        try {
+            const response = await fetchWithAuth(`/api/bills/${billId}`);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const bill = await response.json();
+            return bill;
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Unknown error');
+            return null;
+        } finally {
+            setLoading(false);
         }
-        const bill = await response.json();
-        return bill;
-    } catch (error) {
-        setError(error instanceof Error ? error.message : 'Unknown error');
-        return null;
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     return {
         bills,

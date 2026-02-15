@@ -1,6 +1,6 @@
 'use client';
 
-import { Bill, BillDetail, CreateBillInput, UpdateBill } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail, BillStatus, CreateBillInput, UpdateBill } from "@domain/entities/Bill.entity";
 import { FormBill } from "@ui/molecules/FormBill";
 import { useClients } from "@hooks/features/Clients/useClient";
 import { useProduct } from "@hooks/features/Products/useProduct";
@@ -13,6 +13,9 @@ import { BillPreview } from "@ui/molecules/BillPreview";
 import { useState, useEffect } from 'react';
 
 interface BillsCreatePageProps {
+    onSaveDraft?: (data: CreateBillInput) => Promise<void>;
+    onEmitBill?: (data: CreateBillInput) => Promise<void>;
+    onAutoSave?: (data: CreateBillInput) => Promise<string | undefined | null | void>;
     onSelect?: (view: string) => void;
     onSelectBill?: (bill: BillDetail) => void;
     initialData?: Partial<BillDetail> & { id?: string };
@@ -21,6 +24,9 @@ interface BillsCreatePageProps {
 }
 
 export default function BillsCreatePage({
+    onSaveDraft,
+    onEmitBill,
+    onAutoSave,
     onSelect,
     onSelectBill,
     initialData,
@@ -33,6 +39,13 @@ export default function BillsCreatePage({
     const { listPrices, isLoading: listPricesLoading } = useListPrice();
     const { sellers, isLoading: sellersLoading } = useSeller();
     const { createBill, updateBill, loading: billLoading, getBill } = useBill();
+
+    const [currentBillId, setCurrentBillId] = useState<string | undefined>(initialData?.id);
+
+    // Update currentBillId if initialData changes (e.g. switching views)
+    useEffect(() => {
+        if (initialData?.id) setCurrentBillId(initialData.id);
+    }, [initialData?.id]);
 
     // Estado para la factura completa en modo view
     const [fullBill, setFullBill] = useState<Bill | null>(null);
@@ -60,34 +73,82 @@ export default function BillsCreatePage({
         loadFullBill();
     }, [mode, initialData?.id, getBill]);
 
-    const handleSubmit = async (data: CreateBillInput) => {
-        try {
-            let result;
+    const handleAutoSave = async (data: CreateBillInput) => {
+        // Prevent auto-save if in view mode
+        if (mode === 'view') return;
 
-            if (mode === 'edit' && initialData?.id) {
-                const billToUpdate: BillDetail = {
-                    id: initialData.id,
+        try {
+            if (currentBillId) {
+                const billToUpdate: UpdateBill = {
+                    id: currentBillId,
                     userId: data.userId,
                     clientId: data.clientId,
                     storeId: data.storeId,
                     listPriceId: data.listPriceId,
                     sellerId: data.sellerId,
                     companyId: data.companyId,
-                    prefix: initialData.prefix || null,
-                    number: initialData.number || 0,
-                    legalNumber: initialData.legalNumber || null,
+                    prefix: initialData?.prefix || null,
+                    number: initialData?.number || 0,
+                    legalNumber: initialData?.legalNumber || null,
                     status: data.status!,
                     paymentMethod: data.paymentMethod!,
                     date: data.date || new Date(),
                     dueDate: data.dueDate,
-                    subtotal: initialData.subtotal || '0',
-                    taxTotal: initialData.taxTotal || '0',
-                    discountTotal: initialData.discountTotal || '0',
-                    total: initialData.total || '0',
-                    balance: initialData.balance || '0',
+                    subtotal: data.subtotal || initialData?.subtotal || '0',
+                    taxTotal: data.taxTotal || initialData?.taxTotal || '0',
+                    discountTotal: data.discountTotal || initialData?.discountTotal || '0',
+                    total: data.total || initialData?.total || '0',
+                    balance: data.balance || initialData?.balance || '0',
                     notes: data.notes,
-                    items: initialData.items || [],
-                    createdAt: initialData.createdAt || new Date(),
+                    items: (data.items as any) || [],
+                    createdAt: initialData?.createdAt || new Date(),
+                    updatedAt: new Date(),
+                };
+
+                await updateBill(billToUpdate);
+                console.log("Draft auto-saved", currentBillId);
+
+            } else {
+                // Create new bill
+                const result = await createBill(data);
+                if (result && result.id) {
+                    setCurrentBillId(result.id);
+                    console.log("Draft created via auto-save", result.id);
+                }
+            }
+        } catch (error) {
+            console.error('Error auto-saving draft:', error);
+        }
+    };
+
+    const handleSubmit = async (data: CreateBillInput) => {
+        try {
+            let result;
+
+            if (currentBillId) {
+                const billToUpdate: UpdateBill = {
+                    id: currentBillId,
+                    userId: data.userId,
+                    clientId: data.clientId,
+                    storeId: data.storeId,
+                    listPriceId: data.listPriceId,
+                    sellerId: data.sellerId,
+                    companyId: data.companyId,
+                    prefix: initialData?.prefix || null,
+                    number: initialData?.number || 0,
+                    legalNumber: initialData?.legalNumber || null,
+                    status: data.status!,
+                    paymentMethod: data.paymentMethod!,
+                    date: data.date || new Date(),
+                    dueDate: data.dueDate,
+                    subtotal: data.subtotal || '0',
+                    taxTotal: data.taxTotal || '0',
+                    discountTotal: data.discountTotal || '0',
+                    total: data.total || '0',
+                    balance: data.balance || '0',
+                    notes: data.notes,
+                    items: (initialData?.items as any) || [],
+                    createdAt: initialData?.createdAt || new Date(),
                     updatedAt: new Date(),
                 };
                 result = await updateBill(billToUpdate);
@@ -109,6 +170,49 @@ export default function BillsCreatePage({
         } catch (error) {
             console.error('Error al procesar factura:', error);
             toast.error('Error al procesar la factura');
+        }
+    };
+
+    const handleSaveDraft = async (data: CreateBillInput) => {
+        try {
+            // Asegurar que el estado sea DRAFT
+            const draftData = { ...data, status: BillStatus.DRAFT };
+
+            if (currentBillId) {
+                await updateBill({ ...draftData, id: currentBillId });
+                toast.success('Borrador actualizado');
+            } else {
+                const result = await createBill(draftData);
+                if (result?.id) {
+                    setCurrentBillId(result.id);
+                    toast.success('Borrador creado');
+                }
+            }
+        } catch (error) {
+            toast.error('Error al guardar borrador');
+        }
+    };
+
+    const handleEmitBill = async (data: CreateBillInput) => {
+        try {
+            // Asegurar que el estado sea ISSUED
+            const issuedData = { ...data, status: BillStatus.ISSUED };
+
+            if (currentBillId) {
+                await updateBill({ ...issuedData, id: currentBillId });
+                toast.success('Factura actualizada y emitida');
+            } else {
+                const result = await createBill(issuedData);
+                if (result?.id) {
+                    setCurrentBillId(result.id);
+                    toast.success('Factura emitida exitosamente');
+                }
+            }
+
+            // Navegar de vuelta después de emitir
+            onSelect?.('ventas-facturacion');
+        } catch (error) {
+            toast.error('Error al emitir factura');
         }
     };
 
@@ -162,7 +266,10 @@ export default function BillsCreatePage({
 
     return (
         <FormBill
+            onSaveDraft={handleSaveDraft}
+            onEmitBill={handleEmitBill}
             onSubmit={handleSubmit}
+            onAutoSave={handleAutoSave}
             onSelect={onSelect}
             onSelectBill={onSelectBill}
             initialData={initialData}

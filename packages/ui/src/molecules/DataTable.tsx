@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import {
   Search,
   ChevronLeft,
@@ -12,12 +12,15 @@ import {
   Eye,
   Settings,
   Plus,
+  X,
+  Loader2,
 } from "lucide-react";
 import { Button } from '../atoms/Button/Button';;
 import { Checkbox } from "../atoms/Checkbox/Checkbox";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../molecules/Tabs";
 import { TableColumn, TableProps } from "../types/table.entity";
 
-export function DataTable<T extends { id: string| string }>({
+export function DataTable<T extends { id: string | string }>({
   data,
   columns,
   title = "Data Table",
@@ -26,22 +29,54 @@ export function DataTable<T extends { id: string| string }>({
   itemsPerPage: initialItemsPerPage = 10,
   onEdit,
   onDelete,
+  onDeleteMany,
   onView,
   onAdd,
   onExport,
   actions,
   className = "",
+  isBillView,
 }: TableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  // Multi-select state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const filteredData = useMemo(() => {
-    if (!searchQuery) return data;
+    let processedData = data;
+
+    if (isBillView && statusFilter !== 'all') {
+      processedData = processedData.filter((item: any) => {
+        const status = item.status;
+        const dueDate = item.dueDate ? new Date(item.dueDate) : null;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        switch (statusFilter) {
+          case 'active':
+            return ['ISSUED', 'TO_PAY', 'PARTIALLY_PAID'].includes(status);
+          case 'pay':
+            return status === 'PAID';
+          case 'overdue':
+            if (!dueDate) return false;
+            return dueDate < today && status !== 'PAID' && status !== 'CANCELLED' && status !== 'DRAFT';
+          case 'draft':
+            return status === 'DRAFT';
+          default:
+            return true;
+        }
+      });
+    }
+
+    if (!searchQuery) return processedData;
 
     const searchLower = searchQuery.toLowerCase();
 
-    return data.filter((item) =>
+    return processedData.filter((item) =>
       columns.some((column) => {
         const value = item[column.key as keyof T];
 
@@ -60,7 +95,7 @@ export function DataTable<T extends { id: string| string }>({
         return searchableValue.toLowerCase().includes(searchLower);
       })
     );
-  }, [data, searchQuery, columns]);
+  }, [data, searchQuery, columns, isBillView, statusFilter]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = pagination
@@ -74,6 +109,69 @@ export function DataTable<T extends { id: string| string }>({
   const startIndex = (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, filteredData.length);
 
+  // --- Multi-select logic ---
+  const hasSelection = selectedIds.size > 0;
+
+  const allCurrentPageSelected = useMemo(() => {
+    if (paginatedData.length === 0) return false;
+    return paginatedData.every((item) => selectedIds.has(item.id));
+  }, [paginatedData, selectedIds]);
+
+  const someCurrentPageSelected = useMemo(() => {
+    if (paginatedData.length === 0) return false;
+    const someSelected = paginatedData.some((item) => selectedIds.has(item.id));
+    return someSelected && !allCurrentPageSelected;
+  }, [paginatedData, selectedIds, allCurrentPageSelected]);
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allCurrentPageSelected) {
+        // Deselect all on current page
+        paginatedData.forEach((item) => next.delete(item.id));
+      } else {
+        // Select all on current page
+        paginatedData.forEach((item) => next.add(item.id));
+      }
+      return next;
+    });
+  }, [paginatedData, allCurrentPageSelected]);
+
+  const toggleSelectItem = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  const handleBulkDelete = useCallback(async () => {
+    if (!onDeleteMany || selectedIds.size === 0) return;
+
+    const selectedItems = data.filter((item) => selectedIds.has(item.id));
+    if (selectedItems.length === 0) return;
+
+    if (!confirm(`¿Estás seguro de eliminar ${selectedItems.length} elemento(s)?`)) return;
+
+    setIsBulkDeleting(true);
+    try {
+      await onDeleteMany(selectedItems);
+      clearSelection();
+    } catch (error) {
+      console.error('Error deleting items:', error);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  }, [onDeleteMany, selectedIds, data, clearSelection]);
+
   const renderCell = (item: T, column: TableColumn<T>) => {
     if (column.cell) {
       return column.cell(item);
@@ -84,26 +182,54 @@ export function DataTable<T extends { id: string| string }>({
   };
 
   return (
-    <div className={`rounded-lg ${className}`}>
+    <div className={`rounded-lg ${className} relative`}>
+      {/* Bulk loading overlay */}
+      {isBulkDeleting && (
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
+          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-lg">
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <p className="text-sm text-foreground font-medium">Eliminando {selectedIds.size} elemento(s)...</p>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-white ml-4 mb-4">{title}</h1>
         <div className="flex flex-col gap-4 mx-1 my-2">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 items-center">
-            {actions || (
-              <div className="flex gap-2 border border-sidebar-border rounded-lg p-2">
-                <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                    />
-                  </svg>
-                  Table
-                </Button>
-              </div>
-            )}
+            <div className="flex gap-5">
+              {actions || (
+                <>
+                  <div className="flex gap-2 border border-sidebar-border rounded-lg p-2">
+                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                        />
+                      </svg>
+                      Table
+                    </Button>
+                  </div>
+                  <div>
+                  </div>
+                </>
+              )}
+              {/* Only show bill view tabs when there is NO selection */}
+              {isBillView && !hasSelection && (
+                <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
+                  <TabsList>
+                    <TabsTrigger value="all">Todas</TabsTrigger>
+                    <TabsTrigger value="active">Por Pagar</TabsTrigger>
+                    <TabsTrigger value="pay">Pagadas</TabsTrigger>
+                    <TabsTrigger value="overdue">Vencidas</TabsTrigger>
+                    <TabsTrigger value="draft">Borradores</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+              )}
+            </div>
             <div className="flex gap-2 flex-wrap md:flex-nowrap items-center">
               {searchable && (
                 <div className="relative flex-1 md:flex-initial">
@@ -124,12 +250,53 @@ export function DataTable<T extends { id: string| string }>({
           </div>
         </div>
 
+        {/* Selection action bar */}
+        {hasSelection && (
+          <div className="flex items-center justify-between gap-4 mx-1 my-3 px-4 py-3 bg-primary/10 border border-primary/30 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-foreground">
+                {selectedIds.size} seleccionado
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={clearSelection}
+                className="gap-1 h-7 text-xs flex items-center text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-3 h-3" />
+                Deseleccionar
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              {onDeleteMany && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleBulkDelete}
+                  disabled={isBulkDeleting}
+                  className="gap-2 h-8 cursor-pointer"
+                >
+                  {isBulkDeleting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                  Eliminar ({selectedIds.size})
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="border border-sidebar-border scale-99 rounded-lg overflow-auto">
           <table className="w-full overflow-auto">
             <thead className="border-b border border-sidebar-border">
               <tr>
                 <th className="w-10 px-4 py-4 text-left">
-                  <Checkbox />
+                  <Checkbox
+                    checked={allCurrentPageSelected ? true : someCurrentPageSelected ? "indeterminate" : false}
+                    onCheckedChange={toggleSelectAll}
+                  />
                 </th>
                 {columns.map((column) => (
                   <th
@@ -139,53 +306,37 @@ export function DataTable<T extends { id: string| string }>({
                     {column.header}
                   </th>
                 ))}
-                {/* {(onEdit || onDelete || onView) && (
-                  <th className="px-4 py-4 text-left text-sm font-medium text-muted-foreground">Actions</th>
-                )} */}
               </tr>
             </thead>
             <tbody className="divide-y divide-sidebar-border">
-              {paginatedData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-400/15 transition-colors">
-                  <td className="w-10 px-4 py-4">
-                    <Checkbox />
-                  </td>
-                  {columns.map((column) => (
-                    <td
-                      key={String(column.key)}
-                      className={`px-4 py-1 ${column.className || ""}`}
-                    >
-                      {renderCell(item, column)}
+              {paginatedData.map((item) => {
+                const isSelected = selectedIds.has(item.id);
+                return (
+                  <tr
+                    key={item.id}
+                    className={`transition-colors cursor-pointer ${isSelected
+                        ? "bg-primary/10 hover:bg-primary/15"
+                        : "hover:bg-gray-400/15"
+                      }`}
+                    onClick={() => toggleSelectItem(item.id)}
+                  >
+                    <td className="w-10 px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleSelectItem(item.id)}
+                      />
                     </td>
-                  ))}
-                  {/* {(onEdit || onDelete || onView) && (
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-2">
-                        {onDelete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="gap-2 h-8 text-destructive hover:text-destructive cursor-pointer"
-                            onClick={() => onDelete(item)}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                            {onEdit && (
-                              <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onEdit(item)}>
-                                <Edit2 className="w-4 h-4" />
-                              </Button>
-                            )}
-                        {onView && (
-                          <Button variant="ghost" size="sm" className="gap-2 h-8 text-white cursor-pointer" onClick={() => onView(item)}>
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </td>
-                  )} */}
-                </tr>
-              ))}
+                    {columns.map((column) => (
+                      <td
+                        key={String(column.key)}
+                        className={`px-4 py-1 ${column.className || ""}`}
+                      >
+                        {renderCell(item, column)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -15,22 +15,26 @@ export const useBillTable = ({ onSelect, onSelectBill, onDeleteSuccess }: UseBil
     const {
         handleEditCustomer,
         handleDeleteCustomer,
+        handleDeleteManyCustomers,
         handleViewCustomer,
         handleAddCustomer,
         handleExportCustomers,
+        handleMarkAsPaid,
     } = useBillCustomers({ onSelect, onSelectBill, onDeleteSuccess });
 
     const columns = useMemo(() =>
-     createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer),
-    [handleEditCustomer, handleDeleteCustomer, handleViewCustomer]
+        createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleMarkAsPaid),
+        [handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleMarkAsPaid]
     );
 
     return {
         columns,
         handleAddCustomer,
         handleDeleteCustomer,
+        handleDeleteManyCustomers,
         handleEditCustomer,
         handleExportCustomers,
+        handleMarkAsPaid,
         onDeleteSuccess
     };
 };

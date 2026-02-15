@@ -2,6 +2,7 @@
 
 import {
   Archive,
+  CheckCircle,
   Copy,
   Edit,
   Eye,
@@ -25,6 +26,7 @@ export type TableActionsDropdownProps = {
   onDuplicate?: () => void
   onExport?: () => void
   onArchive?: () => void
+  onMarkAsPaid?: () => void
   className?: string
 }
 
@@ -35,6 +37,7 @@ export function TableActionsDropdown({
   onDuplicate,
   onExport,
   onArchive,
+  onMarkAsPaid,
   className,
 }: TableActionsDropdownProps) {
   return (
@@ -78,6 +81,13 @@ export function TableActionsDropdown({
           <DropdownMenuItem onClick={onArchive}>
             <Archive className="mr-2 size-4" />
             Archivar
+          </DropdownMenuItem>
+        )}
+
+        {onMarkAsPaid && (
+          <DropdownMenuItem onClick={onMarkAsPaid}>
+            <CheckCircle className="mr-2 size-4 text-green-600" />
+            Marcar como pagada
           </DropdownMenuItem>
         )}
 

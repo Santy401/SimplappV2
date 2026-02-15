@@ -159,6 +159,8 @@ export interface UpdateBill {
     userId: string;
     clientId: string;
     storeId: string;
+    listPriceId?: string;
+    sellerId?: string;
     companyId: string;
     prefix?: string | null;
     number?: number;
@@ -175,7 +177,7 @@ export interface UpdateBill {
     discountTotal?: string;
     total?: string;
     balance?: string;
-    items?: BillItem[];
+    items?: (BillItem | CreateBillItemInput)[];
 
     clientName?: string | null;
     clientIdentification?: string | null;

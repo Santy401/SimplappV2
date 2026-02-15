@@ -67,11 +67,14 @@ interface FormBillData {
   status: BillStatus;
   logo?: string;
   signature?: string;
-} 
+}
 
 interface FormBillProps {
   onSubmit?: (data: CreateBillInput) => void;
+  onSaveDraft?: (data: CreateBillInput) => void;
+  onEmitBill?: (data: CreateBillInput) => void;
   onSelect?: (view: string) => void;
+  onAutoSave?: (data: CreateBillInput) => Promise<string | undefined | null | void>;
   onSelectBill?: (bill: BillDetail) => void;
   initialData?: Partial<BillDetail> & { id?: string };
   mode?: "create" | "edit" | "view";
@@ -86,10 +89,13 @@ interface FormBillProps {
   userId?: string;
   storeId?: string;
   companyId?: string;
-} 
+}
 
 export function FormBill({
   onSubmit,
+  onSaveDraft,
+  onEmitBill,
+  onAutoSave,
   onSelect,
   onSelectBill,
   initialData,
@@ -132,8 +138,8 @@ export function FormBill({
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formLoaded = useRef(false);
 
-  // Inicializar con datos existentes si estamos editando o viendo
   useEffect(() => {
     if (initialData && (mode === "edit" || mode === "view")) {
       const extractId = (val: any) => {
@@ -155,7 +161,7 @@ export function FormBill({
         extractId((initialData as any).listPriceId) ||
         extractId((initialData as any).priceList) ||
         extractId((initialData as any).listPrice);
-      
+
       setFormData((prev) => ({
         ...prev,
         date: initialData.date
@@ -172,12 +178,10 @@ export function FormBill({
         email: initialData.clientEmail || "",
         clientId: initialData.clientIdentification || "",
         storeId: initialData.storeId || prev.storeId,
-        // usar ids normalizados (string) y no sobreescribir si ya hay valor
         priceList: priceListId ?? prev.priceList,
         seller: finalSellerId ?? prev.seller,
       }));
 
-      // Inicializar items si existen
       if (initialData.items && initialData.items.length > 0) {
         console.log("📦 Inicializando items desde initialData");
 
@@ -221,12 +225,10 @@ export function FormBill({
             },
           ]);
         } else {
-          // En modo view, dejar vacío si no hay items
           setItems([]);
         }
       }
     } else if (mode === "create") {
-      // En modo create, iniciar con un item vacío
       setItems([
         {
           id: Date.now().toString(),
@@ -243,9 +245,8 @@ export function FormBill({
         },
       ]);
     }
+    setTimeout(() => { formLoaded.current = true; }, 500);
   }, [initialData, mode]);
-
-  // Calcular totales
   const calculateItemTotal = (item: FormBillItem) => {
     const subtotal = item.price * item.quantity;
     const discountAmount = subtotal * (item.discount / 100);
@@ -334,7 +335,6 @@ export function FormBill({
     );
   };
 
-  // Manejar selección de producto
   const handleProductSelect = (itemId: string, productId: string) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
@@ -361,8 +361,6 @@ export function FormBill({
       );
     }
   };
-
-  // Manejar selección de cliente
   const handleClientSelect = (clientId: string) => {
     const client = clients.find((c) => c.id === clientId);
     if (client) {
@@ -378,20 +376,12 @@ export function FormBill({
     }
   };
 
-  // Preparar datos para submit según CreateBillInput
-  const handleSubmit = () => {
+  const prepareBillData = (statusOverride?: BillStatus): CreateBillInput | null => {
     const validItems = items.filter(
       (item) => item.productId && item.quantity > 0,
     );
-
-    if (validItems.length === 0) {
-      alert("Debe agregar al menos un producto con cantidad mayor a 0");
-      return;
-    }
-
     if (!formData.selectedClientId) {
-      alert("Debe seleccionar un cliente");
-      return;
+      return null;
     }
 
     const billData: CreateBillInput = {
@@ -401,7 +391,7 @@ export function FormBill({
       clientId: formData.selectedClientId,
       storeId: formData.storeId || storeId,
       companyId,
-      status: formData.status,
+      status: statusOverride ?? formData.status,
       paymentMethod: formData.paymentMethod,
       date: new Date(formData.date),
       dueDate: new Date(formData.dueDate),
@@ -426,25 +416,82 @@ export function FormBill({
       ),
     };
 
-    onSubmit?.(billData);
+    return billData;
+  }
+
+  // Auto-save effect
+  useEffect(() => {
+    // Only auto-save if mode is not view and form is loaded
+    if (mode === 'view' || !formLoaded.current || !onAutoSave) return;
+
+    const timer = setTimeout(() => {
+      const data = prepareBillData(formData.status);
+      if (data) {
+        onAutoSave(data);
+      }
+    }, 2000); // 2 second debounce
+
+    return () => clearTimeout(timer);
+  }, [items, formData, mode, onAutoSave]);
+
+  // Preparar datos para submit según CreateBillInput
+  const handleSubmit = () => {
+    const validItems = items.filter(
+      (item) => item.productId && item.quantity > 0,
+    );
+
+    if (validItems.length === 0) {
+      alert("Debe agregar al menos un producto con cantidad mayor a 0");
+      return;
+    }
+
+    if (!formData.selectedClientId) {
+      alert("Debe seleccionar un cliente");
+      return;
+    }
+
+    const billData = prepareBillData();
+    if (billData) onSubmit?.(billData);
   };
 
   const handleBack = () => {
+    if (onAutoSave && mode !== 'view') {
+      const data = prepareBillData(BillStatus.DRAFT);
+      if (data) {
+        onAutoSave(data).catch(console.error);
+      }
+    }
     onSelect?.("ventas-facturacion");
   };
 
   const handleSaveDraft = () => {
     setFormData((prev) => ({ ...prev, status: BillStatus.DRAFT }));
-    handleSubmit();
-  };
 
+    if (!formData.selectedClientId) {
+      alert("Debe seleccionar un cliente para guardar el borrador");
+      return;
+    }
+
+    const data = prepareBillData(BillStatus.DRAFT);
+    if (data) {
+      // Llama a una función específica para borradores
+      onSaveDraft?.(data); // ← Nuevo prop
+    }
+  };
   const handleEmitBill = () => {
     setFormData((prev) => ({ ...prev, status: BillStatus.ISSUED }));
-    handleSubmit();
-  };
-
-  const handleLogoClick = () => {
-    fileInputRef.current?.click();
+    const validItems = items.filter(
+      (item) => item.productId && item.quantity > 0,
+    );
+    if (validItems.length === 0) {
+      alert("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
+      return;
+    }
+    const data = prepareBillData(BillStatus.ISSUED);
+    if (data) {
+      // Llama a una función específica para emitir
+      onEmitBill?.(data); // ← Nuevo prop
+    }
   };
 
   const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -453,7 +500,11 @@ export function FormBill({
       const imageUrl = URL.createObjectURL(file);
       setFormData((prev) => ({ ...prev, logo: imageUrl }));
     }
-  }; 
+  };
+
+  function handleLogoClick(event: MouseEvent<HTMLDivElement, MouseEvent>): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
@@ -564,7 +615,7 @@ export function FormBill({
                 )}
               </SelectContent>
             </Select>
-          </div> 
+          </div>
         </div>
       </div>
 
@@ -1134,7 +1185,7 @@ export function FormBill({
             <Button
               variant="outline"
               onClick={handleSaveDraft}
-              disabled={isLoading || items.length === 0}
+              disabled={isLoading}
             >
               {isLoading ? "Guardando..." : "Guardar como borrador"}
             </Button>
