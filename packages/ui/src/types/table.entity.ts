@@ -22,6 +22,17 @@ export interface TableProps<T> {
   actions?: React.ReactNode;
   className?: string;
   isBillView?: boolean;
+
+  isLoading?: {
+    fetch: boolean;
+    create: boolean;
+    update: boolean;
+    deleteId: string | null;
+    deleteMany: boolean;
+    export: boolean;
+    view: boolean;
+    rowId: string | null;
+  }
 }
 
 export interface User {

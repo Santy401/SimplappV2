@@ -4,8 +4,27 @@ import { set } from "zod";
 
 export function useListPrice() {
     const [listPrices, setListPrices] = useState<ListPrice[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [loadingStates, setLoadingStates] = useState({
+        fetch: false,
+        create: false,
+        update: false,
+        delete: false,
+        get: false,
+    });
+
+    const isLoading = {
+        fetch: loadingStates.fetch,
+        create: loadingStates.create,
+        update: loadingStates.update,
+        delete: loadingStates.delete,
+        get: loadingStates.get,
+        any: Object.values(loadingStates).some(Boolean),
+    }
+
+    const setLoading = (key: keyof typeof loadingStates, value: boolean) => {
+        setLoadingStates(prev => ({ ...prev, [key]: value }));
+    }
 
     useEffect(() => {
         fetchListPrices();
@@ -13,7 +32,7 @@ export function useListPrice() {
 
     const fetchListPrices = async () => {
         try {
-            setIsLoading(true);
+            setLoading('fetch', true);
             setError(null);
 
             const response = await fetch('/api/list-prices');
@@ -28,12 +47,12 @@ export function useListPrice() {
             setError(err instanceof Error ? err.message : 'Error desconocido');
             console.error('Error fetching List Prices:', err);
         } finally {
-            setIsLoading(false);
+            setLoading('fetch', false);
         }
     };
 
     const deleteListPrice = async (id: string) => {
-        setIsLoading(true);
+        setLoading('delete', true);
         try {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'DELETE',
@@ -47,11 +66,12 @@ export function useListPrice() {
             console.error('Error deleting list price:', err);
             return false;
         } finally {
-            setIsLoading(false);
+            setLoading('delete', false);
         }
     };
 
     const createListPrice = async (data: CreateListPriceDto) => {
+        setLoading('create', true);
         try {
             const response = await fetch('/api/list-prices', {
                 method: 'POST',
@@ -67,10 +87,13 @@ export function useListPrice() {
         } catch (err) {
             console.error('Error creating list price:', err);
             return null;
+        } finally {
+            setLoading('create', false);
         }
     };
 
     const updateListPrice = async (id: string, data: UpdateListPriceDto) => {
+        setLoading('update', true);
         try {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'PUT',
@@ -88,6 +111,8 @@ export function useListPrice() {
         } catch (err) {
             console.error('Error updating list price:', err);
             return null;
+        } finally {
+            setLoading('update', false);
         }
     };
 
