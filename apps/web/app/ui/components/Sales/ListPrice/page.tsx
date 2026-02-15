@@ -6,6 +6,7 @@ import { useListPriceTable } from "@interfaces/src/hooks/features/ListPrice/useL
 import { DataTable, Button, Loading } from "@simplapp/ui";
 import { Tag, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 interface ListPriceProps {
     onSelect?: (view: string) => void;
@@ -16,18 +17,49 @@ export default function ListPrices({
     onSelect = () => { },
     onSelectListPrice = () => { }
 }: ListPriceProps) {
-    const { listPrices, isLoading, error, refrech } = useListPrice();
+    const { listPrices, isLoading: hookLoading, error, refrech, deleteListPrice } = useListPrice();
     const [tableversion, setTableversion] = useState(0);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+    const [localLoading, setLocalLoading] = useState({
+        export: false,
+        create: false,
+    });
 
     const refetchTable = () => {
         setTableversion((prev) => prev + 1);
     };
 
-    const { columns, handleAddCustomer, handleExportCustomers, handleDeleteCustomer } = useListPriceTable({
+    const { columns, handleAddCustomer, handleExportCustomers } = useListPriceTable({
         onSelect,
         onSelectListPrice,
         onDeleteSuccess: refetchTable
     });
+
+    // ✅ HANDLE DELETE CORREGIDO - Recibe el ITEM completo, no solo el ID
+    const handleDelete = async (item: ListPrice) => {
+        // 1. Marcar para eliminar INMEDIATAMENTE (feedback visual)
+        setDeletingId(item.id);
+        
+        // 2. Eliminar en segundo plano
+        try {
+            const success = await deleteListPrice(item.id);
+            
+            if (!success) {
+                // Si falla, quitar el estado de eliminación
+                setDeletingId(null);
+                toast.error("Error al eliminar la lista de precios");
+            } else {
+                // Si éxito, la fila ya no está en data porque el hook actualizó listPrices
+                toast.success("Lista de precios eliminada");
+                // No necesitas refetchTable aquí porque el hook ya actualizó el estado
+            }
+        } catch (error) {
+            setDeletingId(null);
+            toast.error("Error al eliminar la lista de precios");
+            console.error('Error:', error);
+        }
+    };
 
     const validListPrices = listPrices || [];
 
@@ -35,12 +67,23 @@ export default function ListPrices({
         refrech();
     }, [tableversion]);
 
-    if (isLoading) {
+    const handleExportWithLoading = async () => {
+        setLocalLoading(prev => ({ ...prev, export: true }));
+        await handleExportCustomers();
+        setLocalLoading(prev => ({ ...prev, export: false }));
+    };
+
+    const handleAddWithLoading = () => {
+        setLocalLoading(prev => ({ ...prev, create: true }));
+        handleAddCustomer();
+        // El create loading se reseteará cuando navegue a otra página
+    };
+
+    if (hookLoading.fetch && listPrices.length === 0) {
         return (
             <div className="min-h-[90vh] flex items-center justify-center">
                 <div className="text-center">
                     <Loading />
-                    {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
                 </div>
             </div>
         );
@@ -50,7 +93,7 @@ export default function ListPrices({
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
-                    <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
+                    <h3 className="text-lg font-semibold mb-2">Error al cargar listas de precios</h3>
                     <p className="mb-4">{error}</p>
                     <Button
                         onClick={() => window.location.reload()}
@@ -76,17 +119,19 @@ export default function ListPrices({
                     <div className="flex gap-3">
                         <Button
                             variant="outline"
-                            onClick={handleExportCustomers}
+                            onClick={handleExportWithLoading}
+                            disabled={localLoading.export}
                             className="gap-2 text-[15px]"
                         >
-                            Exportar
+                            {localLoading.export ? 'Exportando...' : 'Exportar'}
                         </Button>
                         <Button
-                            onClick={handleAddCustomer}
+                            onClick={handleAddWithLoading}
+                            disabled={localLoading.create}
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
                         >
                             <Plus className="w-4 h-4" />
-                            Nueva Lista de Precios
+                            {localLoading.create ? 'Creando...' : 'Nueva Lista de Precios'}
                         </Button>
                     </div>
                 </div>
@@ -103,7 +148,18 @@ export default function ListPrices({
                             itemsPerPage={10}
                             onAdd={handleAddCustomer}
                             onExport={handleExportCustomers}
+                            onDelete={handleDelete} 
                             className="bg-transparent"
+                            isLoading={{
+                                fetch: hookLoading.fetch,
+                                create: hookLoading.create,
+                                update: hookLoading.update,
+                                deleteId: deletingId,
+                                deleteMany: false,
+                                export: localLoading.export,
+                                view: false,
+                                rowId: deletingId,
+                            }}
                         />
                     </div>
                 ) : (
@@ -114,15 +170,16 @@ export default function ListPrices({
                             Comienza agregando tu primera lista de precios
                         </p>
                         <Button
-                            onClick={handleAddCustomer}
+                            onClick={handleAddWithLoading}
+                            disabled={localLoading.create}
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer"
                         >
                             <Plus className="w-4 h-4" />
-                            Agrega Tu Primera Lista de Precios
+                            {localLoading.create ? 'Creando...' : 'Agrega Tu Primera Lista de Precios'}
                         </Button>
                     </div>
                 )}
             </div>
         </div>
-    )
+    );
 }

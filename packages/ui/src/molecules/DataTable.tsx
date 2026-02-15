@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   Search,
   ChevronLeft,
@@ -36,6 +36,7 @@ export function DataTable<T extends { id: string | string }>({
   actions,
   className = "",
   isBillView,
+  isLoading,
 }: TableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +46,9 @@ export function DataTable<T extends { id: string | string }>({
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+
+  const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [lastClickedId, setLastClickedId] = useState<string | null>(null);
 
   const filteredData = useMemo(() => {
     let processedData = data;
@@ -148,6 +152,42 @@ export function DataTable<T extends { id: string | string }>({
       return next;
     });
   }, []);
+
+  const handleRowClick = useCallback((id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+
+    // Si hay un timeout previo, lo limpiamos
+    if (clickTimeout) {
+      clearTimeout(clickTimeout);
+      setClickTimeout(null);
+    }
+
+    // Si el click es en la misma fila que el anterior, es un doble click
+    if (lastClickedId === id) {
+      // DOBLE CLICK - Seleccionar/deseleccionar
+      toggleSelectItem(id);
+      setLastClickedId(null); // Resetear para el próximo ciclo
+    } else {
+      // PRIMER CLICK - Guardar el ID y esperar
+      setLastClickedId(id);
+
+      // Configurar timeout para resetear después de 300ms
+      const timeout = setTimeout(() => {
+        setLastClickedId(null);
+      }, 300);
+
+      setClickTimeout(timeout);
+    }
+  }, [clickTimeout, lastClickedId, toggleSelectItem]);
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (clickTimeout) {
+        clearTimeout(clickTimeout);
+      }
+    };
+  }, [clickTimeout]);
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
@@ -314,11 +354,12 @@ export function DataTable<T extends { id: string | string }>({
                 return (
                   <tr
                     key={item.id}
-                    className={`transition-colors cursor-pointer ${isSelected
-                        ? "bg-primary/10 hover:bg-primary/15"
-                        : "hover:bg-gray-400/15"
-                      }`}
-                    onClick={() => toggleSelectItem(item.id)}
+                    className={`
+          transition-all duration-300 cursor-pointer
+          ${isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-gray-400/15"}
+          ${isLoading?.deleteId === item.id ? 'opacity-50 pointer-events-none' : ''}
+        `}
+                    onClick={(e) => handleRowClick(item.id, e)}
                   >
                     <td className="w-10 px-4 py-4" onClick={(e) => e.stopPropagation()}>
                       <Checkbox

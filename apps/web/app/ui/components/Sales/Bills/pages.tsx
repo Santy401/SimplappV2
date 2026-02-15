@@ -19,10 +19,21 @@ export default function BillsPage({
   onSelect = () => { },
   onSelectBill = () => { },
 }: BillsPageProps) {
-  const { bills, loading, error, refetch } = useBill();
+  const { bills, isLoading, error, refetch } = useBill();
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const [localLoading, setLocalLoading] = useState({
+    export: false,
+    delete: false,
+    create: false,
+    update: false,
+    get: false,
+  });
+
 
   const validBills: BillDetail[] = (bills as BillDetail[]) ?? [];
 
@@ -98,7 +109,7 @@ export default function BillsPage({
     };
   };
 
-  if (loading) {
+  if (isLoading.fetch && bills.length === 0) {
     return (
       <div className="min-h-[90vh] flex items-center justify-center">
         <div className="text-center">
@@ -149,10 +160,11 @@ export default function BillsPage({
             </Button>
             <Button
               onClick={handleAddCustomer}
+              disabled={localLoading.create}
               className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
-              Nueva Factura De Venta
+              {localLoading.create ? "Creando..." : "Nueva Factura De Venta"}
             </Button>
           </div>
         </div>
@@ -176,6 +188,16 @@ export default function BillsPage({
               onEdit={handleEditCustomer}
               onExport={handleExportCustomers}
               className="bg-transparent"
+              isLoading={{
+                fetch: isLoading.fetch,
+                create: isLoading.create,
+                update: isLoading.update,
+                deleteId: deletingId,
+                deleteMany: false,
+                export: localLoading.export,
+                view: false,
+                rowId: deletingId,
+              }}
             />
           </div>
         ) : (

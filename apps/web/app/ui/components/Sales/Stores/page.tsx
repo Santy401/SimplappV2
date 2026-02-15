@@ -19,19 +19,27 @@ export default function Bodega({
 
   const { stores, isLoading, error, refrech } = useStore();
 
-  const refetchTable = () =>{
+  const refetchTable = () => {
     setTableVersion(prev => prev + 1);
   }
   const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores, onDeleteSuccess: refetchTable });
-  const [ tableVersion, setTableVersion ] = useState(0);
-  
+  const [tableVersion, setTableVersion] = useState(0);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [localLoading, setLocalLoading] = useState({
+    export: false,
+    delete: false,
+    create: false,
+    update: false,
+    get: false,
+  });
+
   useEffect(() => {
     refrech();
   }, [tableVersion]);
 
   const ValidStores = stores || [];
 
-  if (isLoading) {
+  if (isLoading.fetch && stores.length === 0) {
     return (
       <div className="min-h-[90vh] screen flex items-center justify-center">
         <div className="text-center">
@@ -78,7 +86,8 @@ export default function Bodega({
               Exportar
             </Button>
             <Button
-              onClick={handleAddCustomer}
+              onClick={localLoading.create ? () => { } : handleAddCustomer}
+              disabled={localLoading.create}
               className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               {/* <UserPlus className="w-4 h-4" /> */}
@@ -99,6 +108,16 @@ export default function Bodega({
               onAdd={handleAddCustomer}
               onExport={() => { }}
               className="bg-transparent"
+              isLoading={{
+                fetch: isLoading.fetch,
+                create: isLoading.create,
+                update: isLoading.update,
+                deleteId: deletingId,
+                deleteMany: false,
+                export: localLoading.export,
+                view: false,
+                rowId: deletingId,
+              }}
             />
           </div>
         ) : (

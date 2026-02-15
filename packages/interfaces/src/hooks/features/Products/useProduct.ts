@@ -7,8 +7,27 @@ import { useEffect, useState } from "react";
 
 export function useProduct() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<String | null>(null);
+  const [loadingStates, setLoadingStates] = useState({
+    fetch: false,
+    create: false,
+    update: false,
+    delete: false,
+  });
+
+  const isLoading = {
+    fetch: loadingStates.fetch,
+    create: loadingStates.create,
+    update: loadingStates.update,
+    delete: loadingStates.delete,
+  }
+
+  const setIsLoading = (state: keyof typeof loadingStates, value: boolean) => {
+        setLoadingStates(prev => ({
+            ...prev,
+            [state]: value,
+        }));
+    }
 
   useEffect(() => {
     fetchProducts();
@@ -16,7 +35,7 @@ export function useProduct() {
 
   const fetchProducts = async () => {
     try {
-      setIsLoading(true);
+      setIsLoading('fetch', true);
       setError(null);
 
       const response = await fetch("/api/products");
@@ -31,12 +50,12 @@ export function useProduct() {
       setError(err instanceof Error ? err.message : "Error desconocido");
       console.log("Error fetching Products:", err);
     } finally {
-      setIsLoading(false);
+      setIsLoading('fetch', false);
     }
   };
 
   const deleteProduct = async (id: string) => {
-    setIsLoading(true);
+    setIsLoading('delete', true);
     try {
       const response = await fetch(`/api/products/${id}`, {
         method: "DELETE",
@@ -50,11 +69,12 @@ export function useProduct() {
     } catch (err) {
       console.error("Error deleting produts:", err);
     } finally {
-      setIsLoading(false);
+      setIsLoading('delete', false);
     }
   };
 
   const createProduct = async (data: CreateProductDto) => {
+    setIsLoading('create', true)
     try {
       console.log("📤 Enviando producto:", data);
 
@@ -79,10 +99,13 @@ export function useProduct() {
     } catch (err) {
       console.error("💥 Error creating product:", err);
       throw err;
+    } finally {
+      setIsLoading('create', false)
     }
   };
 
   const updateProduct = async (id: string, data: UpdateProductDto) => {
+    setIsLoading('update', true)
     try {
       console.log('📤 Actualizando producto:', id, data);
 
@@ -122,6 +145,8 @@ export function useProduct() {
     } catch (err) {
       console.error('💥 Error updating product:', err);
       throw err;
+    } finally {
+      setIsLoading('update', false)
     }
   };
 

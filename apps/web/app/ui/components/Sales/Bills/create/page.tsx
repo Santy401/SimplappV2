@@ -38,7 +38,7 @@ export default function BillsCreatePage({
     const { stores, isLoading: storesLoading } = useStore();
     const { listPrices, isLoading: listPricesLoading } = useListPrice();
     const { sellers, isLoading: sellersLoading } = useSeller();
-    const { createBill, updateBill, loading: billLoading, getBill } = useBill();
+    const { createBill, updateBill, isLoading: billLoading, getBill } = useBill();
 
     const [currentBillId, setCurrentBillId] = useState<string | undefined>(initialData?.id);
 
@@ -274,7 +274,7 @@ export default function BillsCreatePage({
             onSelectBill={onSelectBill}
             initialData={initialData}
             mode={mode}
-            isLoading={isLoading || clientsLoading || productsLoading || billLoading || storesLoading || listPricesLoading || sellersLoading}
+            //isLoading={isLoading || clientsLoading || productsLoading || billLoading || storesLoading || listPricesLoading || sellersLoading}
             clients={clients}
             products={products}
             stores={stores}
