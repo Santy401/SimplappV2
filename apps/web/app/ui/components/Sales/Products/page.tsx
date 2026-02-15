@@ -27,7 +27,7 @@ export default function Productos({
 
     const { products, isLoading, error, refetch } = useProduct();
 
-    
+
     const validProducts = products || [];
 
     const totalProducts = validProducts.length;
@@ -36,6 +36,15 @@ export default function Productos({
     const totalValue = 0;
 
     const [tableversion, setTableversion] = useState(0);
+
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [localLoading, setLocalLoading] = useState({
+        export: false,
+        delete: false,
+        create: false,
+        update: false,
+        get: false,
+    });
 
     const refetchTable = () => {
         setTableversion((prev) => prev + 1);
@@ -52,7 +61,7 @@ export default function Productos({
     }, [tableversion]);
 
 
-    if (isLoading) {
+    if (isLoading.fetch && products.length === 0) {
         return (
             <div className="min-h-[90vh] flex items-center justify-center">
                 <div className="text-center">
@@ -100,10 +109,11 @@ export default function Productos({
                         </Button>
                         <Button
                             onClick={handleAddCustomer}
+                            disabled={localLoading.create}
                             className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
                         >
                             <Plus className="w-4 h-4" />
-                            Nuevo Producto
+                            {localLoading.create ? 'Creando...' : 'Nuevo Producto'}
                         </Button>
                     </div>
                 </div>
@@ -178,6 +188,16 @@ export default function Productos({
                             onAdd={handleAddCustomer}
                             onExport={handleExportCustomers}
                             className="bg-transparent"
+                            isLoading={{ 
+                                fetch: isLoading.fetch,
+                                create: isLoading.create,
+                                update: isLoading.update,
+                                deleteId: deletingId,
+                                deleteMany: false,
+                                export: localLoading.export,
+                                view: false,
+                                rowId: deletingId,
+                            }}
                         />
                     </div>
                 ) : (
