@@ -274,7 +274,13 @@ export default function BillsCreatePage({
             onSelectBill={onSelectBill}
             initialData={initialData}
             mode={mode}
-            //isLoading={isLoading || clientsLoading || productsLoading || billLoading || storesLoading || listPricesLoading || sellersLoading}
+            loadingStates={{
+                clients: clientsLoading.fetch,
+                products: productsLoading.fetch,
+                stores: storesLoading.fetch,
+                sellers: sellersLoading.fetch,
+                listPrices: listPricesLoading.fetch,
+            }}
             clients={clients}
             products={products}
             stores={stores}
