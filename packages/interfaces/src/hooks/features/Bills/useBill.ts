@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
+import { apiClient } from '@interfaces/lib/api-client';
 
 export const useBill = () => {
     const [bills, setBills] = useState<BillDetail[]>([]);
@@ -28,43 +29,10 @@ export const useBill = () => {
         setLoadingState(prev => ({ ...prev, [key]: value }));
     };
 
-    const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
-        const fetchOptions = {
-            ...options,
-            credentials: 'include' as RequestCredentials,
-        };
-
-        let response = await fetch(url, fetchOptions);
-
-        if (response.status === 401) {
-            try {
-                const refreshResponse = await fetch('/api/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include',
-                });
-                const data = await refreshResponse.json();
-
-                if (refreshResponse.ok) {
-                    // Retry original request
-                    response = await fetch(url, fetchOptions);
-                }
-                setBills(data);
-            } catch (err) {
-                console.error('Error refreshing token:', err);
-            }
-        }
-
-        return response;
-    }, []);
-
     const fetchBills = async () => {
         setLoading('fetch', true);
         try {
-            const response = await fetchWithAuth('/api/bills');
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
+            const data = await apiClient.get<BillDetail[]>('/api/bills');
             setBills(data);
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Unknown error');
@@ -76,17 +44,7 @@ export const useBill = () => {
     const createBill = async (billData: CreateBillInput) => {
         setLoading('create', true);
         try {
-            const response = await fetchWithAuth('/api/bills', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(billData),
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const newBill = await response.json();
+            const newBill = await apiClient.post<BillDetail>('/api/bills', billData);
             setBills(prev => [...prev, newBill]);
             return newBill;
         } catch (error) {
@@ -100,17 +58,7 @@ export const useBill = () => {
     const updateBill = async (billData: UpdateBill) => {
         setLoading('update', true);
         try {
-            const response = await fetchWithAuth(`/api/bills/${billData.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(billData),
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const updatedBill = await response.json();
+            const updatedBill = await apiClient.put<BillDetail>(`/api/bills/${billData.id}`, billData);
             setBills(prev => prev.map(bill =>
                 bill.id === updatedBill.id ? updatedBill : bill
             ));
@@ -126,12 +74,7 @@ export const useBill = () => {
     const deleteBill = async (billId: string) => {
         setLoading('delete', true);
         try {
-            const response = await fetchWithAuth(`/api/bills/${billId}`, {
-                method: 'DELETE',
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
+            await apiClient.delete(`/api/bills/${billId}`);
             setBills(prev => prev.filter(bill => bill.id !== billId));
             return true;
         } catch (error) {
@@ -145,11 +88,7 @@ export const useBill = () => {
     const getBill = async (billId: string) => {
         setLoading('view', true);
         try {
-            const response = await fetchWithAuth(`/api/bills/${billId}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const bill = await response.json();
+            const bill = await apiClient.get<BillDetail>(`/api/bills/${billId}`);
             return bill;
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Unknown error');

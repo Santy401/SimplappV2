@@ -52,6 +52,16 @@ export default function BillsPage({
     onSelect,
     onSelectBill,
     onDeleteSuccess: refetchTable,
+    isLoading: {
+      deleteId: deletingId,
+      fetch: isLoading.fetch,
+      create: isLoading.create,
+      update: isLoading.update,
+      deleteMany: false,
+      export: localLoading.export,
+      view: false,
+      rowId: deletingId,
+    },
   });
 
   const columns = originalColumns;

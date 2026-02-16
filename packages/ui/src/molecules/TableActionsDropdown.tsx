@@ -9,6 +9,7 @@ import {
   MoreHorizontal,
   Share2,
   Trash2,
+  Loader2,
 } from "lucide-react"
 import { Button } from "../atoms/Button/Button"
 import {
@@ -27,6 +28,7 @@ export type TableActionsDropdownProps = {
   onExport?: () => void
   onArchive?: () => void
   onMarkAsPaid?: () => void
+  isDeleting?: boolean
   className?: string
 }
 
@@ -38,8 +40,18 @@ export function TableActionsDropdown({
   onExport,
   onArchive,
   onMarkAsPaid,
+  isDeleting = false,
   className,
 }: TableActionsDropdownProps) {
+  // Si está eliminando, mostrar solo el loader
+  if (isDeleting) {
+    return (
+      <div className="h-8 w-8 flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-red-400" />
+      </div>
+    )
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

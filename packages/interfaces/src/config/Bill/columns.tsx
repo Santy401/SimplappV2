@@ -4,10 +4,16 @@ import { TableActionsDropdown } from "@ui/index";
 import { Bill, BillStatus } from "@domain/entities";
 import { Eye, Edit, Trash2 } from "lucide-react";
 
-export const createColumns = (handleEditCustomer: (bill: Bill) => void,
+export const createColumns = (
+    handleEditCustomer: (bill: Bill) => void,
     handleDeleteCustomer: (bill: Bill) => Promise<void>,
     handleViewCustomer: (bill: Bill) => void,
-    handleMarkAsPaid: (bill: Bill) => Promise<void>) => {
+    handleMarkAsPaid: (bill: Bill) => Promise<void>,
+    isLoading?: {
+        deleteId: string | null;
+        [key: string]: any;
+    }
+) => {
     return [
         {
             key: "basicInfo",
@@ -87,6 +93,7 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
                     onEdit={() => handleEditCustomer(bill)}
                     onDelete={() => handleDeleteCustomer(bill)}
                     onMarkAsPaid={bill.status === BillStatus.TO_PAY ? () => handleMarkAsPaid(bill) : undefined}
+                    isDeleting={isLoading?.deleteId === bill.id}
                 />
             ),
         }
