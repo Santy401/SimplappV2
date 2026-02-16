@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../atoms/Select/Select";
-import { X, Plus, Settings, ArrowLeft } from "lucide-react";
+import { X, Plus, Settings, ArrowLeft, Loader2 } from "lucide-react";
 
 // Importar interfaces desde domain
 import {
@@ -79,6 +79,14 @@ interface FormBillProps {
   initialData?: Partial<BillDetail> & { id?: string };
   mode?: "create" | "edit" | "view";
   isLoading?: boolean;
+  // Estados de carga individuales
+  loadingStates?: {
+    clients?: boolean;
+    products?: boolean;
+    stores?: boolean;
+    sellers?: boolean;
+    listPrices?: boolean;
+  };
   // Datos externos para selects
   clients?: Client[];
   products?: Product[];
@@ -101,6 +109,7 @@ export function FormBill({
   initialData,
   mode = "create",
   isLoading = false,
+  loadingStates = {},
   clients = [],
   products = [],
   userId = "",
@@ -113,6 +122,14 @@ export function FormBill({
   const [items, setItems] = useState<FormBillItem[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const signatureInputRef = useRef<HTMLInputElement>(null);
+
+  // Estados de carga específicos
+  const [actionLoading, setActionLoading] = useState({
+    savingDraft: false,
+    emitting: false,
+    submitting: false,
+  });
+
   const [formData, setFormData] = useState<FormBillData>({
     documentType: "invoice",
     storeId: storeId || (stores[0]?.id ?? ""),
@@ -247,6 +264,10 @@ export function FormBill({
     }
     setTimeout(() => { formLoaded.current = true; }, 500);
   }, [initialData, mode]);
+
+  // Variable para verificar si hay alguna acción en proceso
+  const isProcessing = actionLoading.savingDraft || actionLoading.emitting || actionLoading.submitting;
+
   const calculateItemTotal = (item: FormBillItem) => {
     const subtotal = item.price * item.quantity;
     const discountAmount = subtotal * (item.discount / 100);
@@ -464,33 +485,112 @@ export function FormBill({
     onSelect?.("ventas-facturacion");
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = async () => {
+    // Prevenir doble click
+    if (actionLoading.savingDraft) {
+      console.log('Ya se está guardando el borrador');
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, status: BillStatus.DRAFT }));
 
+    // Validaciones
     if (!formData.selectedClientId) {
       alert("Debe seleccionar un cliente para guardar el borrador");
       return;
     }
 
+    if (!formData.storeId) {
+      alert("Debe seleccionar una bodega");
+      return;
+    }
+
     const data = prepareBillData(BillStatus.DRAFT);
-    if (data) {
-      // Llama a una función específica para borradores
-      onSaveDraft?.(data); // ← Nuevo prop
+    if (!data) {
+      alert("Error al preparar los datos de la factura");
+      return;
+    }
+
+    // Validar que los campos requeridos no estén vacíos
+    if (!data.userId || !data.clientId || !data.storeId || !data.companyId) {
+      console.error('Datos faltantes:', {
+        userId: data.userId,
+        clientId: data.clientId,
+        storeId: data.storeId,
+        companyId: data.companyId
+      });
+      alert("Faltan datos requeridos. Por favor complete todos los campos obligatorios.");
+      return;
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, savingDraft: true }));
+      await onSaveDraft?.(data);
+    } catch (error: any) {
+      console.error('Error al guardar borrador:', error);
+      const errorMessage = error?.message || 'Error desconocido';
+      alert(`Error al guardar el borrador: ${errorMessage}`);
+    } finally {
+      setActionLoading(prev => ({ ...prev, savingDraft: false }));
     }
   };
-  const handleEmitBill = () => {
+
+  const handleEmitBill = async () => {
+    // Prevenir doble click
+    if (actionLoading.emitting) {
+      console.log('Ya se está emitiendo la factura');
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, status: BillStatus.TO_PAY }));
+
     const validItems = items.filter(
       (item) => item.productId && item.quantity > 0,
     );
+
+    // Validaciones
     if (validItems.length === 0) {
       alert("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
       return;
     }
+
+    if (!formData.selectedClientId) {
+      alert("Debe seleccionar un cliente");
+      return;
+    }
+
+    if (!formData.storeId) {
+      alert("Debe seleccionar una bodega");
+      return;
+    }
+
     const data = prepareBillData(BillStatus.TO_PAY);
-    if (data) {
-      // Llama a una función específica para emitir
-      onEmitBill?.(data); // ← Nuevo prop
+    if (!data) {
+      alert("Error al preparar los datos de la factura");
+      return;
+    }
+
+    // Validar que los campos requeridos no estén vacíos
+    if (!data.userId || !data.clientId || !data.storeId || !data.companyId) {
+      console.error('Datos faltantes:', {
+        userId: data.userId,
+        clientId: data.clientId,
+        storeId: data.storeId,
+        companyId: data.companyId
+      });
+      alert("Faltan datos requeridos. Por favor complete todos los campos obligatorios.");
+      return;
+    }
+
+    try {
+      setActionLoading(prev => ({ ...prev, emitting: true }));
+      await onEmitBill?.(data);
+    } catch (error: any) {
+      console.error('Error al emitir factura:', error);
+      const errorMessage = error?.message || 'Error desconocido';
+      alert(`Error al emitir la factura: ${errorMessage}`);
+    } finally {
+      setActionLoading(prev => ({ ...prev, emitting: false }));
     }
   };
 
@@ -507,7 +607,7 @@ export function FormBill({
   // }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background relative">
       {/* Header con navegación */}
       <div className="flex items-center gap-4 mb-4">
         <Button
@@ -557,9 +657,17 @@ export function FormBill({
             <Select
               value={formData.storeId}
               onValueChange={(v) => setFormData({ ...formData, storeId: v })}
+              disabled={isProcessing || loadingStates.stores}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar bodega" />
+                {loadingStates.stores ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Cargando bodegas...</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Seleccionar bodega" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {stores && stores.length > 0 ? (
@@ -579,9 +687,17 @@ export function FormBill({
             <Select
               value={formData.priceList}
               onValueChange={(v) => setFormData({ ...formData, priceList: v })}
+              disabled={isProcessing || loadingStates.listPrices}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar Precio" />
+                {loadingStates.listPrices ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Cargando precios...</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Seleccionar Precio" />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {listPrices && listPrices.length > 0 ? (
@@ -601,9 +717,17 @@ export function FormBill({
             <Select
               value={formData.seller}
               onValueChange={(v) => setFormData({ ...formData, seller: v })}
+              disabled={isProcessing || loadingStates.sellers}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar vendedor..." />
+                {loadingStates.sellers ? (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Cargando vendedores...</span>
+                  </div>
+                ) : (
+                  <SelectValue placeholder="Seleccionar vendedor..." />
+                )}
               </SelectTrigger>
               <SelectContent>
                 {sellers && sellers.length > 0 ? (
@@ -690,16 +814,23 @@ export function FormBill({
               <Select
                 value={formData.selectedClientId || ""}
                 onValueChange={(v) => handleClientSelect(v)}
-                disabled={clients.length === 0}
+                disabled={isProcessing || loadingStates.clients || clients.length === 0}
               >
                 <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      clients.length === 0
-                        ? "No hay clientes disponibles"
-                        : "Seleccionar cliente"
-                    }
-                  />
+                  {loadingStates.clients ? (
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Cargando clientes...</span>
+                    </div>
+                  ) : (
+                    <SelectValue
+                      placeholder={
+                        clients.length === 0
+                          ? "No hay clientes disponibles"
+                          : "Seleccionar cliente"
+                      }
+                    />
+                  )}
                 </SelectTrigger>
                 <SelectContent>
                   {clients.length > 0 ? (
@@ -896,16 +1027,23 @@ export function FormBill({
                         onValueChange={(v) =>
                           handleProductSelect(item.id, v)
                         }
-                        disabled={products.length === 0}
+                        disabled={isProcessing || loadingStates.products || products.length === 0}
                       >
                         <SelectTrigger className="w-full min-w-[200px]">
-                          <SelectValue
-                            placeholder={
-                              products.length === 0
-                                ? "No hay productos disponibles"
-                                : "Buscar ítem facturable"
-                            }
-                          />
+                          {loadingStates.products ? (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>Cargando productos...</span>
+                            </div>
+                          ) : (
+                            <SelectValue
+                              placeholder={
+                                products.length === 0
+                                  ? "No hay productos disponibles"
+                                  : "Buscar ítem facturable"
+                              }
+                            />
+                          )}
                         </SelectTrigger>
                         <SelectContent>
                           {products.length > 0 ? (
@@ -1033,6 +1171,7 @@ export function FormBill({
             <Button
               variant="link"
               onClick={handleAddItem}
+              disabled={isProcessing}
               className="text-foreground hover:text-foreground/80 hover:underline flex items-center cursor-pointer"
             >
               <Plus className="w-4 h-4 mr-1" />
@@ -1171,14 +1310,17 @@ export function FormBill({
 
       {/* Botones de acción */}
       <div className="flex justify-end gap-3">
-        <Button variant="outline" onClick={handleBack} disabled={isLoading}>
+        <Button
+          variant="outline"
+          onClick={handleBack}
+          disabled={actionLoading.savingDraft || actionLoading.emitting || actionLoading.submitting}
+        >
           Cancelar
         </Button>
         <Button
           variant="outline"
-          className="gap-2"
           onClick={() => setShowPreview(true)}
-          disabled={isLoading || items.length === 0}
+          disabled={actionLoading.savingDraft || actionLoading.emitting || actionLoading.submitting || items.length === 0}
         >
           Previsualizar
         </Button>
@@ -1187,15 +1329,15 @@ export function FormBill({
             <Button
               variant="outline"
               onClick={handleSaveDraft}
-              disabled={isLoading}
+              disabled={actionLoading.savingDraft || actionLoading.emitting || actionLoading.submitting}
             >
-              {isLoading ? "Guardando..." : "Guardar como borrador"}
+              {actionLoading.savingDraft ? "Guardando..." : "Guardar como borrador"}
             </Button>
             <Button
               onClick={handleEmitBill}
-              disabled={isLoading || items.length === 0}
+              disabled={actionLoading.savingDraft || actionLoading.emitting || actionLoading.submitting || items.length === 0}
             >
-              {isLoading
+              {actionLoading.emitting
                 ? "Emitiendo..."
                 : mode === "edit"
                   ? "Actualizar factura"

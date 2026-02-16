@@ -47,6 +47,10 @@ export function DataTable<T extends { id: string | string }>({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
+  // Animation states
+  const [deletingIds, setDeletingIds] = useState<Set<string>>(new Set());
+  const [fadingOutIds, setFadingOutIds] = useState<Set<string>>(new Set());
+
   const [clickTimeout, setClickTimeout] = useState<NodeJS.Timeout | null>(null);
   const [lastClickedId, setLastClickedId] = useState<string | null>(null);
 
@@ -201,12 +205,25 @@ export function DataTable<T extends { id: string | string }>({
 
     if (!confirm(`¿Estás seguro de eliminar ${selectedItems.length} elemento(s)?`)) return;
 
+    // Marcar como eliminando
+    setDeletingIds(new Set(selectedIds));
     setIsBulkDeleting(true);
+
+    // Iniciar animación de fade-out
+    setFadingOutIds(new Set(selectedIds));
+
     try {
+      // Esperar la animación antes de eliminar
+      await new Promise(resolve => setTimeout(resolve, 400));
+
       await onDeleteMany(selectedItems);
       clearSelection();
+      setDeletingIds(new Set());
+      setFadingOutIds(new Set());
     } catch (error) {
       console.error('Error deleting items:', error);
+      setDeletingIds(new Set());
+      setFadingOutIds(new Set());
     } finally {
       setIsBulkDeleting(false);
     }
@@ -225,10 +242,11 @@ export function DataTable<T extends { id: string | string }>({
     <div className={`rounded-lg ${className} relative`}>
       {/* Bulk loading overlay */}
       {isBulkDeleting && (
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
-          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-lg">
+        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg animate-in fade-in duration-200">
+          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-lg animate-in zoom-in-95 duration-300">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
             <p className="text-sm text-foreground font-medium">Eliminando {selectedIds.size} elemento(s)...</p>
+            <p className="text-xs text-muted-foreground">Por favor espera...</p>
           </div>
         </div>
       )}
@@ -295,13 +313,14 @@ export function DataTable<T extends { id: string | string }>({
           <div className="flex items-center justify-between gap-4 mx-1 my-3 px-4 py-3 bg-primary/10 border border-primary/30 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-foreground">
-                {selectedIds.size} seleccionado
+                {selectedIds.size} seleccionado{selectedIds.size > 1 ? 's' : ''}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearSelection}
-                className="gap-1 h-7 text-xs flex items-center text-muted-foreground hover:text-foreground"
+                disabled={isBulkDeleting}
+                className="gap-1 h-7 text-xs flex items-center text-muted-foreground hover:text-foreground disabled:opacity-50"
               >
                 <X className="w-3 h-3" />
                 Deseleccionar
@@ -314,7 +333,7 @@ export function DataTable<T extends { id: string | string }>({
                   size="sm"
                   onClick={handleBulkDelete}
                   disabled={isBulkDeleting}
-                  className="gap-2 h-8 cursor-pointer"
+                  className="gap-2 h-8 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isBulkDeleting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -328,14 +347,15 @@ export function DataTable<T extends { id: string | string }>({
           </div>
         )}
 
-        <div className="border border-sidebar-border scale-99 rounded-lg overflow-auto">
-          <table className="w-full overflow-auto">
-            <thead className="border-b border border-sidebar-border">
+        <div className="border border-sidebar-border scale-99 rounded-lg overflow-hidden">
+          <table className="w-full">
+            <thead className="border-b border-sidebar-border bg-card/50">
               <tr>
                 <th className="w-10 px-4 py-4 text-left">
                   <Checkbox
                     checked={allCurrentPageSelected ? true : someCurrentPageSelected ? "indeterminate" : false}
                     onCheckedChange={toggleSelectAll}
+                    disabled={isBulkDeleting}
                   />
                 </th>
                 {columns.map((column) => (
@@ -351,26 +371,40 @@ export function DataTable<T extends { id: string | string }>({
             <tbody className="divide-y divide-sidebar-border">
               {paginatedData.map((item) => {
                 const isSelected = selectedIds.has(item.id);
+                const isDeleting = deletingIds.has(item.id);
+                const isFadingOut = fadingOutIds.has(item.id);
+                const isSingleDeleting = isLoading?.deleteId === item.id;
+
                 return (
                   <tr
                     key={item.id}
                     className={`
-          transition-all duration-300 cursor-pointer
-          ${isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-gray-400/15"}
-          ${isLoading?.deleteId === item.id ? 'opacity-50 pointer-events-none' : ''}
-        `}
-                    onClick={(e) => handleRowClick(item.id, e)}
+                      transition-all duration-400 cursor-pointer relative
+                      ${isSelected && !isDeleting && !isSingleDeleting ? "bg-primary/10 hover:bg-primary/15" : ""}
+                      ${!isSelected && !isDeleting && !isSingleDeleting ? "hover:bg-gray-400/15" : ""}
+                      ${(isDeleting || isSingleDeleting) ? 'bg-red-500/20 hover:bg-red-500/25' : ''}
+                      ${isFadingOut ? 'animate-out fade-out slide-out-to-right-2 duration-400' : 'animate-in fade-in duration-200'}
+                      ${(isDeleting || isSingleDeleting) ? 'pointer-events-none' : ''}
+                    `}
+                    onClick={(e) => !isDeleting && !isSingleDeleting && handleRowClick(item.id, e)}
                   >
                     <td className="w-10 px-4 py-4" onClick={(e) => e.stopPropagation()}>
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleSelectItem(item.id)}
-                      />
+                      <div className="flex items-center gap-2">
+                        {(isDeleting || isSingleDeleting) ? (
+                          <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                        ) : (
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleSelectItem(item.id)}
+                            disabled={isBulkDeleting}
+                          />
+                        )}
+                      </div>
                     </td>
                     {columns.map((column) => (
                       <td
                         key={String(column.key)}
-                        className={`px-4 py-1 ${column.className || ""}`}
+                        className={`px-4 py-1 ${column.className || ""} ${(isDeleting || isSingleDeleting) ? 'text-muted-foreground' : ''}`}
                       >
                         {renderCell(item, column)}
                       </td>
