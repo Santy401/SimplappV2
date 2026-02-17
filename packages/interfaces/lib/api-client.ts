@@ -5,7 +5,7 @@ class ApiClient {
   private refreshPromise: Promise<boolean> | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'https://simplapp.vercel.app';
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };
