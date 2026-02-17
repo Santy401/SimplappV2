@@ -29,7 +29,7 @@ export const SessionExpiredModal = ({ isOpen, onLogin }: SessionExpiredModalProp
           </p>
           <Button
             onClick={onLogin}
-            className="w-full bg-primary hover:bg-primary/90"
+            className="w-full bg-primary hover:bg-primary/90 rounded py-1 cursor-pointer"
           >
             Iniciar Sesión
           </Button>
