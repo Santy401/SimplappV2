@@ -2,7 +2,7 @@
 
 import "@/app/globals.css";
 import Sidebar from "@/app/ui/components/Navbar/Sidebar";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
@@ -14,42 +14,44 @@ import Productos from "@/app/ui/components/Sales/Products/page";
 import CreateProduct from "@/app/ui/components/Sales/Products/create/page";
 import Bodega from "@/app/ui/components/Sales/Stores/page";
 import CreateStore from "@/app/ui/components/Sales/Stores/create/page";
-
-import { Client } from "@domain/entities/Client.entity";
-import { Store } from "@domain/entities/Store.entity";
-import { Bill } from "@domain/entities/Bill.entity";
-import { Product } from "@domain/entities/Product.entity";
 import CreateSeller from "@/app/ui/components/Sales/Sellers/create/page";
-import { Seller } from "@domain/entities/Seller.entity";
 import ListPrices from "@/app/ui/components/Sales/ListPrice/page";
 import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
 import Bills from "@/app/ui/components/Sales/Bills/pages";
 import FormBill from "@/app/ui/components/Sales/Bills/create/page";
 import BillsCreatePage from "@/app/ui/components/Sales/Bills/create/page";
 
+import { ProtectedRoute } from "@/app/ui/components/ProtectedRoute";
+import { SessionProvider } from "@/app/context/SessionContext";
+import { NavigationProvider, useNavigation } from "@/app/context/NavigationContext";
+import { AppStateProvider, useAppState } from "@/app/context/AppStateContext";
+import { LoadingProvider } from "@/app/context/LoadingContext";
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  const [currentView, setCurrentView] = useState('inicio');
-  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [selectedSeller, setSelectedSeller] = useState<Seller | null>(null);
-  const [selectedStore, setSelectedStore] = useState<Store | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedListPrice, setSelectedListPrice] = useState<Store | null>(null);
-  const [selectedBill, setSelectedBill] = useState<Bill | null>(null);
+function AdminContent({ children }: { children: React.ReactNode }) {
+  const { currentView, navigateTo } = useNavigation();
+  const {
+    selectedClient,
+    selectedSeller,
+    selectedStore,
+    selectedProduct,
+    selectedListPrice,
+    selectedBill,
+    setSelectedClient,
+    setSelectedSeller,
+    setSelectedStore,
+    setSelectedProduct,
+    setSelectedListPrice,
+    setSelectedBill,
+  } = useAppState();
 
   useEffect(() => {
     if (currentView === 'ventas-productos') {
       setSelectedProduct(null);
     }
-  }, [currentView]);
+  }, [currentView, setSelectedProduct]);
 
   console.log('📋 Layout - selectedBill:', selectedBill);
-console.log('📋 Layout - currentView:', currentView);
-
+  console.log('📋 Layout - currentView:', currentView);
 
   const renderContent = () => {
     switch (currentView) {
@@ -65,60 +67,60 @@ console.log('📋 Layout - currentView:', currentView);
         return <div className="text-white p-8">Remisiones</div>;
 
       case 'ventas-facturacion':
-        return <Bills onSelect={setCurrentView} onSelectBill={setSelectedBill} />;
+        return <Bills onSelect={navigateTo} onSelectBill={setSelectedBill} />;
       case 'ventas-facturacion-create':
-        return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+        return <FormBill onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={selectedBill ? 'edit' : 'create'} />;
       case 'ventas-facturacion-edit':
-        return <FormBill onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+        return <FormBill onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={selectedBill ? 'edit' : 'create'} />;
       case 'ventas-facturacion-view':
-        return <BillsCreatePage onSelect={setCurrentView} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+        return <BillsCreatePage onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={'view'} />;
 
       case 'ventas-clientes':
-        return <Clientes onSelect={setCurrentView} onSelectClient={setSelectedClient} />;
+        return <Clientes onSelect={navigateTo} onSelectClient={setSelectedClient} />;
       case 'ventas-clientes-create':
-        return <CreateClient onBack={() => setCurrentView('ventas-clientes')} initialData={selectedClient || undefined}
+        return <CreateClient onBack={() => navigateTo('ventas-clientes')} initialData={selectedClient || undefined}
           mode={selectedClient ? 'edit' : 'create'} />;
       case 'ventas-clientes-edit':
-        return <CreateClient onBack={() => setCurrentView('ventas-clientes')} initialData={selectedClient || undefined}
+        return <CreateClient onBack={() => navigateTo('ventas-clientes')} initialData={selectedClient || undefined}
           mode={selectedClient ? 'edit' : 'create'} />;
 
       case 'ventas-productos':
-        return <Productos onSelect={setCurrentView} onSelectProduct={setSelectedProduct} />;
+        return <Productos onSelect={navigateTo} onSelectProduct={setSelectedProduct} />;
       case 'ventas-productos-create':
-        return <CreateProduct onBack={() => setCurrentView('ventas-productos')} initialData={selectedProduct || undefined}
+        return <CreateProduct onBack={() => navigateTo('ventas-productos')} initialData={selectedProduct || undefined}
           mode={selectedProduct ? 'edit' : 'create'} />;
       case 'ventas-productos-edit':
-        return <CreateProduct onBack={() => setCurrentView('ventas-productos')} initialData={selectedProduct || undefined}
+        return <CreateProduct onBack={() => navigateTo('ventas-productos')} initialData={selectedProduct || undefined}
           mode={selectedProduct ? 'edit' : 'create'} />;
 
       case 'ventas-vendedor':
-        return <Vendedores onSelect={setCurrentView} onSelectSeller={setSelectedSeller} />;
+        return <Vendedores onSelect={navigateTo} onSelectSeller={setSelectedSeller} />;
       case 'ventas-vendedor-create':
-        return <CreateSeller onBack={() => setCurrentView('ventas-vendedor')} initialData={selectedSeller || undefined}
+        return <CreateSeller onBack={() => navigateTo('ventas-vendedor')} initialData={selectedSeller || undefined}
           mode={selectedSeller ? 'edit' : 'create'} />;
       case 'ventas-vendedor-edit':
-        return <CreateSeller onBack={() => setCurrentView('ventas-vendedor')} initialData={selectedSeller || undefined}
+        return <CreateSeller onBack={() => navigateTo('ventas-vendedor')} initialData={selectedSeller || undefined}
           mode={selectedSeller ? 'edit' : 'create'} />;
 
       case 'ventas-bodega':
-        return <Bodega onSelect={setCurrentView} onSelectStores={setSelectedStore} />;
+        return <Bodega onSelect={navigateTo} onSelectStores={setSelectedStore} />;
       case 'ventas-bodega-create':
-        return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined}
+        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
       case 'ventas-bodega-edit':
-        return <CreateStore onBack={() => setCurrentView('ventas-bodega')} initialData={selectedStore || undefined}
+        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
 
       case 'inventario-precios':
-        return <ListPrices onSelect={setCurrentView} onSelectListPrice={setSelectedListPrice} />
+        return <ListPrices onSelect={navigateTo} onSelectListPrice={setSelectedListPrice} />
       case 'inventario-precios-create':
-        return <CreateListPrice onBack={() => setCurrentView('inventario-precios')} initialData={selectedListPrice || undefined}
+        return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
       case 'inventario-precios-edit':
-        return <CreateListPrice onBack={() => setCurrentView('inventario-precios')} initialData={selectedListPrice || undefined}
+        return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
       default:
         return <div className="text-white p-8">NO SELECIONADO</div>;
@@ -127,7 +129,7 @@ console.log('📋 Layout - currentView:', currentView);
 
   return (
     <div className="flex w-full">
-      <Sidebar onSelect={setCurrentView} />
+      <Sidebar onSelect={navigateTo} />
 
       <main className="flex-1 flex justify-center ml-7 mt-7">
         <div className="w-full max-w-[200%]">
@@ -137,5 +139,25 @@ console.log('📋 Layout - currentView:', currentView);
         </div>
       </main>
     </div>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <SessionProvider>
+      <LoadingProvider>
+        <ProtectedRoute>
+          <NavigationProvider>
+            <AppStateProvider>
+              <AdminContent>{children}</AdminContent>
+            </AppStateProvider>
+          </NavigationProvider>
+        </ProtectedRoute>
+      </LoadingProvider>
+    </SessionProvider>
   );
 }
