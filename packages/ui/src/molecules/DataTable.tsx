@@ -224,11 +224,13 @@ export function DataTable<T extends { id: string | string }>({
   return (
     <div className={`rounded-lg ${className} relative`}>
       {/* Bulk loading overlay */}
+      {/* Bulk loading overlay */}
       {isBulkDeleting && (
-        <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center rounded-lg">
-          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-lg">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm text-foreground font-medium">Eliminando {selectedIds.size} elemento(s)...</p>
+        <div className="fixed inset-0 top-0 left-0 w-screen h-screen bg-background/80 backdrop-blur-md z-[9999] flex items-center justify-center">
+          <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-2xl animate-in fade-in zoom-in duration-300">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+            <p className="text-lg text-foreground font-medium">Eliminando {selectedIds.size} elemento(s)...</p>
+            <p className="text-sm text-muted-foreground">Por favor espera, no cierres esta ventana.</p>
           </div>
         </div>
       )}
@@ -314,14 +316,13 @@ export function DataTable<T extends { id: string | string }>({
                   size="sm"
                   onClick={handleBulkDelete}
                   disabled={isBulkDeleting}
-                  className="gap-2 h-8 cursor-pointer"
                 >
+                  Eliminar
                   {isBulkDeleting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : (
                     <Trash2 className="w-4 h-4" />
                   )}
-                  Eliminar ({selectedIds.size})
                 </Button>
               )}
             </div>

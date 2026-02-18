@@ -96,12 +96,33 @@ export const useProductCustomers = ({ onSelect, onSelectProduct, onDeleteSuccess
     // };
 
 
+    const handleDeleteManyCustomers = async (products: Product[]) => {
+        const results = await Promise.allSettled(
+            products.map((product) => deleteProduct(product.id!))
+        );
+
+        const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+        const failed = results.length - succeeded;
+
+        if (succeeded > 0) {
+            toast.success(`${succeeded} producto(s) eliminado(s)`);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        }
+
+        if (failed > 0) {
+            toast.error(`Error al eliminar ${failed} producto(s)`);
+        }
+    };
+
     return {
         handleEditCustomer,
         handleViewCustomer,
         handleAddCustomer,
         handleExportCustomers,
         handleDeleteCustomer,
+        handleDeleteManyCustomers,
 
         //POR ADÑADIR
         // handleToggleStatus,

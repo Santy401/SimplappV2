@@ -17,7 +17,8 @@ export const useClientTable = ({ onSelect, onSelectClient, onDeleteSuccess }: Us
     handleDeleteCustomer,
     handleViewCustomer,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteManyCustomers,
   } = useClientCustomers({ onSelect, onSelectClient, onDeleteSuccess });
 
   const columns = useMemo(() =>
@@ -29,6 +30,7 @@ export const useClientTable = ({ onSelect, onSelectClient, onDeleteSuccess }: Us
     columns,
     handleAddCustomer,
     handleExportCustomers,
-    onDeleteSuccess
+    onDeleteSuccess,
+    handleDeleteManyCustomers
   };
 };

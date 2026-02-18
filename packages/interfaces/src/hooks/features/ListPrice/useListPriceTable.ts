@@ -17,7 +17,8 @@ export const useListPriceTable = ({ onSelect, onSelectListPrice, onDeleteSuccess
     handleDeleteCustomer,
     handleViewCustomer,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteManyCustomers,
   } = useListPriceCustomers({ onSelect, onSelectListPrice, onDeleteSuccess });
 
   const columns = useMemo(() =>
@@ -29,6 +30,7 @@ export const useListPriceTable = ({ onSelect, onSelectListPrice, onDeleteSuccess
     columns,
     handleAddCustomer,
     handleDeleteCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteManyCustomers,
   };
 };

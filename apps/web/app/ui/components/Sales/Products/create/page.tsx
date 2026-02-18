@@ -337,7 +337,7 @@ export default function CreateProduct({
                     value: "no-categories",
                     label: "No hay categorías disponibles",
                   },
-                ] 
+                ]
                 : categories.map((cat) => ({
                   value: cat.id,
                   label: cat.name,
@@ -450,25 +450,25 @@ export default function CreateProduct({
         <FormSection columns={3} gap="md">
           {formData.type === "PRODUCT" && (
             <>
-            <CheckboxField
-              label="Controlar Stock"
-              checked={formData.trackStock}
-              onChange={(checked) =>
-                setFormData((prev) => ({ ...prev, trackStock: checked }))
-            }
-          />
+              <CheckboxField
+                label="Controlar Stock"
+                checked={formData.trackStock}
+                onChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, trackStock: checked }))
+                }
+              />
 
-          <CheckboxField
-            label="Permitir Stock Negativo"
-            checked={formData.allowNegativeStock}
-            onChange={(checked) =>
-              setFormData((prev) => ({ ...prev, allowNegativeStock: checked }))
-            }
-          />
-          </>
+              <CheckboxField
+                label="Permitir Stock Negativo"
+                checked={formData.allowNegativeStock}
+                onChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, allowNegativeStock: checked }))
+                }
+              />
+            </>
           ) || (
-            <></>
-          )}
+              <></>
+            )}
           <CheckboxField
             label="Producto Activo"
             checked={formData.active}

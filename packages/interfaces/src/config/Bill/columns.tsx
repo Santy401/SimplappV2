@@ -84,7 +84,7 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
             cell: (bill: Bill) => (
                 <TableActionsDropdown
                     onView={() => handleViewCustomer(bill)}
-                    onEdit={() => handleEditCustomer(bill)}
+                    onEdit={bill.status === BillStatus.DRAFT ? () => handleEditCustomer(bill) : undefined}
                     onDelete={() => handleDeleteCustomer(bill)}
                     onMarkAsPaid={bill.status === BillStatus.TO_PAY ? () => handleMarkAsPaid(bill) : undefined}
                 />

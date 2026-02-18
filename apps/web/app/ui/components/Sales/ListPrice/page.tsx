@@ -30,7 +30,7 @@ export default function ListPrices({
         setTableversion((prev) => prev + 1);
     };
 
-    const { columns, handleAddCustomer, handleExportCustomers } = useListPriceTable({
+    const { columns, handleAddCustomer, handleExportCustomers, handleDeleteManyCustomers } = useListPriceTable({
         onSelect,
         onSelectListPrice,
         onDeleteSuccess: refetchTable
@@ -40,11 +40,11 @@ export default function ListPrices({
     const handleDelete = async (item: ListPrice) => {
         // 1. Marcar para eliminar INMEDIATAMENTE (feedback visual)
         setDeletingId(item.id);
-        
+
         // 2. Eliminar en segundo plano
         try {
             const success = await deleteListPrice(item.id);
-            
+
             if (!success) {
                 // Si falla, quitar el estado de eliminación
                 setDeletingId(null);
@@ -148,7 +148,8 @@ export default function ListPrices({
                             itemsPerPage={10}
                             onAdd={handleAddCustomer}
                             onExport={handleExportCustomers}
-                            onDelete={handleDelete} 
+                            onDelete={handleDelete}
+                            onDeleteMany={handleDeleteManyCustomers}
                             className="bg-transparent"
                             isLoading={{
                                 fetch: hookLoading.fetch,
