@@ -145,9 +145,9 @@ export default function BillsCreatePage({
                     taxTotal: data.taxTotal || '0',
                     discountTotal: data.discountTotal || '0',
                     total: data.total || '0',
-                    balance: data.balance || '0',
+                    balance: data.balance || data.total || '0', // If balance is not provided, use total (assuming full amount due)
                     notes: data.notes,
-                    items: (initialData?.items as any) || [],
+                    items: (data.items as any) || [],
                     createdAt: initialData?.createdAt || new Date(),
                     updatedAt: new Date(),
                 };
