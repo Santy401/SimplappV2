@@ -62,22 +62,22 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
         }
 
         if (formData.type === TypePrice.PORCENTAJE) {
-    const percentageValue = formData.percentage 
-        ? parseFloat(formData.percentage) 
-        : 0;
+            const percentageValue = formData.percentage
+                ? parseFloat(formData.percentage)
+                : 0;
 
-    if (percentageValue < 0) {  // ← Comparar números, no strings
-        newErrors.percentage = 'El porcentaje no puede ser negativo';
-    }
+            if (percentageValue < 0) {  // ← Comparar números, no strings
+                newErrors.percentage = 'El porcentaje no puede ser negativo';
+            }
 
-    if (percentageValue > 1000) {  // ← Comparar números
-        newErrors.percentage = 'El porcentaje no puede ser mayor a 1000%';
-    }  
+            if (percentageValue > 1000) {  // ← Comparar números
+                newErrors.percentage = 'El porcentaje no puede ser mayor a 1000%';
+            }
 
-    if (percentageValue === 0) {
-        newErrors.percentage = 'El porcentaje no puede ser 0';
-    }
-}
+            if (percentageValue === 0) {
+                newErrors.percentage = 'El porcentaje no puede ser 0';
+            }
+        }
 
         // Si es VALOR, podemos establecer el porcentaje en 0 o mantenerlo según tu lógica de negocio
         if (formData.type === TypePrice.VALOR) {
@@ -131,8 +131,8 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
     // }
 
     const handleTypeChange = (value: TypePrice) => {
-        setFormData(prev => ({ 
-            ...prev, 
+        setFormData(prev => ({
+            ...prev,
             type: value,
             // Opcional: resetear porcentaje si cambia de PORCENTAJE a VALOR
             percentage: value === TypePrice.VALOR ? '' : prev.percentage
@@ -228,8 +228,8 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
                 {/* Opcional: Mostrar mensaje cuando es VALOR */}
                 {formData.type === TypePrice.VALOR && (
                     <div className="p-3 bg-sidebar-50 border border-sidebar-border rounded-lg flex items-center gap-2">
-                      <CircleAlert width={30} height={30} className="text-blue-700"/>  <p className="text-sm text-blue-700">
-                            Para listas de precios de tipo "Valor Fijo", se utiliza el valor fijo definido 
+                        <CircleAlert width={30} height={30} className="text-blue-700" />  <p className="text-sm text-blue-700">
+                            Para listas de precios de tipo "Valor Fijo", se utiliza el valor fijo definido
                             en el producto. Este campo no requiere porcentaje.
                         </p>
                     </div>
