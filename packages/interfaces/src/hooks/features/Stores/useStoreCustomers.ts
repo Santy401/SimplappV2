@@ -53,6 +53,26 @@ export const useStoreCustomers = ({ onSelect, onSelectStores, onDeleteSuccess }:
         // Logic
     };
 
-    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteCustomer }
+    const handleDeleteManyCustomers = async (stores: Store[]) => {
+        const results = await Promise.allSettled(
+            stores.map((store) => deleteStore(store.id))
+        );
+
+        const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+        const failed = results.length - succeeded;
+
+        if (succeeded > 0) {
+            toast.success(`${succeeded} bodega(s) eliminada(s)`);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        }
+
+        if (failed > 0) {
+            toast.error(`Error al eliminar ${failed} bodega(s)`);
+        }
+    };
+
+    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteCustomer, handleDeleteManyCustomers }
 
 }

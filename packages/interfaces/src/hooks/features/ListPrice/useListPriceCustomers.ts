@@ -56,5 +56,25 @@ export const useListPriceCustomers = ({ onSelect, onSelectListPrice, onDeleteSuc
         // Logic
     };
 
-    return { handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers }
+    const handleDeleteManyCustomers = async (listPrices: ListPrice[]) => {
+        const results = await Promise.allSettled(
+            listPrices.map((listPrice) => deleteListPrice(listPrice.id))
+        );
+
+        const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+        const failed = results.length - succeeded;
+
+        if (succeeded > 0) {
+            toast.success(`${succeeded} lista(s) eliminada(s)`);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        }
+
+        if (failed > 0) {
+            toast.error(`Error al eliminar ${failed} lista(s)`);
+        }
+    };
+
+    return { handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteManyCustomers }
 }

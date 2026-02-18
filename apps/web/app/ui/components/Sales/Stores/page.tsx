@@ -22,7 +22,7 @@ export default function Bodega({
   const refetchTable = () => {
     setTableVersion(prev => prev + 1);
   }
-  const { columns, handleAddCustomer } = useStoreTable({ onSelect, onSelectStores, onDeleteSuccess: refetchTable });
+  const { columns, handleAddCustomer, handleDeleteManyCustomers } = useStoreTable({ onSelect, onSelectStores, onDeleteSuccess: refetchTable });
   const [tableVersion, setTableVersion] = useState(0);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [localLoading, setLocalLoading] = useState({
@@ -107,6 +107,7 @@ export default function Bodega({
               itemsPerPage={10}
               onAdd={handleAddCustomer}
               onExport={() => { }}
+              onDeleteMany={handleDeleteManyCustomers}
               className="bg-transparent"
               isLoading={{
                 fetch: isLoading.fetch,

@@ -28,7 +28,7 @@ export default function Productos({
     const { products, isLoading, error, refetch } = useProduct();
 
 
-    const validProducts = products || [];
+    const validProducts = (products || []).filter(p => p.id) as (Product & { id: string })[];
 
     const totalProducts = validProducts.length;
     const activeProducts = validProducts.filter(p => p.active).length;
@@ -53,7 +53,8 @@ export default function Productos({
     const {
         columns,
         handleAddCustomer,
-        handleExportCustomers
+        handleExportCustomers,
+        handleDeleteManyCustomers,
     } = useProductTable({ onSelect, onSelectProduct, onDeleteSuccess: refetchTable });
 
     useEffect(() => {
@@ -188,7 +189,8 @@ export default function Productos({
                             onAdd={handleAddCustomer}
                             onExport={handleExportCustomers}
                             className="bg-transparent"
-                            isLoading={{ 
+                            onDeleteMany={handleDeleteManyCustomers}
+                            isLoading={{
                                 fetch: isLoading.fetch,
                                 create: isLoading.create,
                                 update: isLoading.update,

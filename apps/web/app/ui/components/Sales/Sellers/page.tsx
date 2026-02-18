@@ -35,7 +35,7 @@ export default function Sellers({
         refetch();
     }, [tableVersion]);
 
-    const { columns, handleAddCustomer } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetch });
+    const { columns, handleAddCustomer, handleDeleteManyCustomers } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetch });
 
     const ValidSellers = sellers || [];
 
@@ -107,6 +107,7 @@ export default function Sellers({
                             itemsPerPage={10}
                             onAdd={handleAddCustomer}
                             onExport={() => { }}
+                            onDeleteMany={handleDeleteManyCustomers}
                             className="bg-transparent"
                             isLoading={{
                                 fetch: isLoading.fetch,

@@ -48,7 +48,8 @@ export default function ClientesPage({
   const {
     columns,
     handleAddCustomer,
-    handleExportCustomers
+    handleExportCustomers,
+    handleDeleteManyCustomers,
   } = useClientTable({ onSelect, onSelectClient, onDeleteSuccess: refetchTable });
 
   const validClients = clients || [];
@@ -211,6 +212,7 @@ export default function ClientesPage({
                 view: false,
                 rowId: deletingId,
               }}
+              onDeleteMany={handleDeleteManyCustomers}
             />
           </div>
         ) : (
