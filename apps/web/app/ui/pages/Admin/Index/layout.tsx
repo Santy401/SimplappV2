@@ -129,7 +129,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex w-full">
-      <Sidebar onSelect={navigateTo} />
+      <Sidebar onSelect={navigateTo} activeView={currentView} />
 
       <main className="flex-1 flex justify-center ml-7 mt-7">
         <div className="w-full max-w-[200%]">
