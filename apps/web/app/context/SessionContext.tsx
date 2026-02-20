@@ -1,7 +1,6 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { useSession } from "@hooks/features/auth/use-session";
 import { SessionExpiredModal } from "@ui/molecules/SessionExpiredModal";
 import { useRouter } from "next/navigation";
 
@@ -26,8 +25,6 @@ interface SessionProviderProps {
 
 export const SessionProvider = ({ children }: SessionProviderProps) => {
   const [showModal, setShowModal] = useState(false);
-  const [wasAuthenticated, setWasAuthenticated] = useState(false);
-  const { isAuthenticated, isLoading } = useSession();
   const router = useRouter();
 
   const handleSessionExpired = () => {
@@ -36,37 +33,20 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const handleLogin = () => {
     setShowModal(false);
-    router.push('/login');
+    router.push('/ui/pages/Login');
   };
 
   const checkSession = () => {
-    if (!isLoading && !isAuthenticated) {
-      handleSessionExpired();
-      return false;
-    }
-    return true;
+    // Exponer por compatibilidad, el modal se activa mediante el evento session:expired
+    return !showModal;
   };
 
-  // Rastrear si el usuario estuvo autenticado
-  useEffect(() => {
-    if (isAuthenticated) {
-      setWasAuthenticated(true);
-    }
-  }, [isAuthenticated]);
-
-  // Detectar si la sesión se pierde mientras la app está abierta
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && wasAuthenticated) {
-      // Solo mostrar el modal si el usuario ESTABA autenticado antes
-      handleSessionExpired();
-    }
-  }, [isAuthenticated, isLoading, wasAuthenticated]);
-
   // Escuchar el evento de sesión expirada del apiClient
+  // Este es el único canal por el que se muestra el modal de sesión expirada
   useEffect(() => {
     const handleSessionExpiredEvent = () => {
       console.log('Session expired event received');
-      handleSessionExpired();
+      setShowModal(true);
     };
 
     if (typeof window !== 'undefined') {
