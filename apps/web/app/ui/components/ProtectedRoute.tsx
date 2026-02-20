@@ -1,9 +1,8 @@
 // components/ProtectedRoute.tsx
 "use client";
 
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { useSession } from "@hooks/features/auth/use-session";
-import { useSessionContext } from "../../context/SessionContext";
 import { Loading } from "@ui/atoms/SessionLoader/Loading";
 import { useLoading } from "../../context/LoadingContext";
 
@@ -17,20 +16,30 @@ export const ProtectedRoute = ({
   fallback
 }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useSession();
-  const { handleSessionExpired } = useSessionContext();
   const { setGlobalLoading, isAnyLoading } = useLoading();
+  const wasAuthenticated = useRef(false);
 
   // Sincronizar el estado de carga de sesión con el contexto global
   useEffect(() => {
     setGlobalLoading(isLoading);
   }, [isLoading, setGlobalLoading]);
 
+  // Rastrear si el usuario alguna vez estuvo autenticado en esta sesión
   useEffect(() => {
-    // Solo verificar si no está cargando y no está autenticado
-    if (!isLoading && !isAuthenticated) {
-      handleSessionExpired();
+    if (isAuthenticated) {
+      wasAuthenticated.current = true;
     }
-  }, [isAuthenticated, isLoading, handleSessionExpired]);
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    // Solo disparar el evento si el usuario ESTABA autenticado y perdió la sesión
+    // Esto evita mostrar el modal al primer acceso sin token (ya redirige a login el servidor)
+    if (!isLoading && !isAuthenticated && wasAuthenticated.current) {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('session:expired'));
+      }
+    }
+  }, [isAuthenticated, isLoading]);
 
   // Mostrar loading unificado
   return (

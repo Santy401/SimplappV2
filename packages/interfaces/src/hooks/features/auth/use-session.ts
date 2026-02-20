@@ -61,10 +61,13 @@ export const useSession = (): Session => {
   };
 
   // Escuchar eventos de sesión expirada
+  // Solo limpiar datos SIN invalidar (sin causar re-fetch que volvería a disparar el evento)
   useEffect(() => {
     const handleSessionExpired = () => {
+      // Limpiar los datos de sesión del cache sin disparar un re-fetch
       queryClient.setQueryData(['session'], null);
-      queryClient.invalidateQueries({ queryKey: ['session'] });
+      // Cancelar cualquier fetch pendiente de sesión
+      queryClient.cancelQueries({ queryKey: ['session'] });
     };
 
     if (typeof window !== 'undefined') {
