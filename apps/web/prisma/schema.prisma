@@ -200,9 +200,9 @@ model Product {
 
   taxRate String
 
-  cost       String?
-  basePrice  String?
-  finalPrice String?
+  cost       Decimal?
+  basePrice  Decimal?
+  finalPrice Decimal?
 
   trackStock         Boolean @default(true)
   allowNegativeStock Boolean @default(false)
@@ -277,8 +277,8 @@ model ProductPrice {
   productId   String
   listPriceId String
 
-  basePrice String
-  value     String
+  basePrice Decimal
+  value     Decimal
 
   product   Product   @relation(fields: [productId], references: [id])
   listPrice ListPrice @relation(fields: [listPriceId], references: [id])
@@ -315,11 +315,11 @@ model Bill {
   dueDate DateTime 
 
   // --- 3. Totales (Cálculos guardados) ---
-  subtotal             String     @default("0")
-  taxTotal             String     @default("0")
-  discountTotal        String     @default("0")
-  total                String     @default("0")
-  balance              String     @default("0")
+  subtotal             Decimal    @default(0)
+  taxTotal             Decimal    @default(0)
+  discountTotal        Decimal    @default(0)
+  total                Decimal    @default(0)
+  balance              Decimal    @default(0)
   // --- 4. Snapshot (Datos del cliente al momento de facturar) ---
   clientName           String?
   clientIdentification String?
@@ -352,7 +352,7 @@ model Payment {
   billId String
   bill   Bill @relation(fields: [billId], references: [id])
 
-  amount String
+  amount Decimal
   method PaymentMethod
   date   DateTime      @default(now())
 }
@@ -363,12 +363,13 @@ model BillItem {
   productId String
   quantity  Int
 
-  price String 
+  price     Decimal 
+  subtotal  Decimal
 
-  taxRate   String @default("0") 
-  taxAmount String @default("0") 
-  discount  String @default("0")
-  total     String
+  taxRate   Decimal @default(0) 
+  taxAmount Decimal @default(0) 
+  discount  Decimal @default(0)
+  total     Decimal
 
   productName String?
   productCode String?
