@@ -114,6 +114,8 @@ model Company {
   products Product[]
   bills    Bill[]
 
+  categories CategoryProduct[]
+
   productAccountings ProductAccounting[]
 
   createdAt DateTime @default(now())
@@ -239,7 +241,12 @@ model CategoryProduct {
   name        String
   description String
 
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   products Product[]
+
+  @@index([companyId])
 }
 
 model ProductImage {
