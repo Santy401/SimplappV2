@@ -117,6 +117,13 @@ export async function PUT(
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
+    if (existingBill.status === 'ISSUED') {
+      return NextResponse.json(
+        { error: 'No se puede editar una factura emitida.' },
+        { status: 400 }
+      );
+    }
+
     const data = await request.json();
     const {
       items,
@@ -220,6 +227,13 @@ export async function DELETE(
 
     if (!bill) {
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
+    }
+
+    if (bill.status === 'ISSUED') {
+      return NextResponse.json(
+        { error: 'No se puede eliminar una factura emitida. Debe realizar una nota de crédito o cambiar su estado.' },
+        { status: 400 }
+      );
     }
 
     await prisma.billItem.deleteMany({
