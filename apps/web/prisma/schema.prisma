@@ -129,7 +129,8 @@ model Client {
   code             String?
 
   identificationType   IdentificationType
-  identificationNumber String             @unique
+  identificationNumber String
+
 
   email        String?
   includeCcBcc Boolean @default(false)
@@ -152,6 +153,8 @@ model Client {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([companyId, identificationNumber])
 }
 
 model Seller {
