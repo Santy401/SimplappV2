@@ -96,7 +96,14 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) { }
+
+        const error: any = new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+        error.response = { status: response.status, data: errorData };
+        throw error;
       }
 
       if (response.status === 204) {
