@@ -105,13 +105,13 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         return <CreateSeller onBack={() => navigateTo('ventas-vendedor')} initialData={selectedSeller || undefined}
           mode={selectedSeller ? 'edit' : 'create'} />;
 
-      case 'ventas-bodega':
+      case 'inventario-bodega':
         return <Bodega onSelect={navigateTo} onSelectStores={setSelectedStore} />;
-      case 'ventas-bodega-create':
-        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
+      case 'inventario-bodega-create':
+        return <CreateStore onBack={() => navigateTo('inventario-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
-      case 'ventas-bodega-edit':
-        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
+      case 'inventario-bodega-edit':
+        return <CreateStore onBack={() => navigateTo('inventario-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
 
       case 'inventario-precios':
