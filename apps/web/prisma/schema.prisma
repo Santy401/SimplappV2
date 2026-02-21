@@ -329,6 +329,17 @@ model Bill {
   items                BillItem[]
   payments             Payment[] 
   notes                String?
+
+  // --- 5. Facturación Electrónica DIAN ---
+  cufe           String?   // Código único de factura electrónica
+  dianStatus     String?   // PENDING | ACCEPTED | REJECTED
+  dianResponse   String?   // Respuesta completa de DIAN
+  xml            String?   // XML generado para DIAN
+  pdfUrl         String?   // URL del PDF firmado
+  sentAt         DateTime? // Cuándo se envió a DIAN
+  acceptedAt     DateTime? // Cuándo fue aceptada
+  rejectedReason String?   // Motivo de rechazo si fue rechazada
+
   createdAt            DateTime   @default(now())
   updatedAt            DateTime   @updatedAt
 
