@@ -20,6 +20,7 @@ import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
 import Bills from "@/app/ui/components/Sales/Bills/pages";
 import FormBill from "@/app/ui/components/Sales/Bills/create/page";
 import BillsCreatePage from "@/app/ui/components/Sales/Bills/create/page";
+import ProfileConfig from "@/app/ui/components/Settings/Profile/page";
 
 import { ProtectedRoute } from "@/app/ui/components/ProtectedRoute";
 import { SessionProvider } from "@/app/context/SessionContext";
@@ -122,6 +123,10 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       case 'inventario-precios-edit':
         return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
+
+      case 'perfil-usuario':
+        return <ProfileConfig />
+
       default:
         return <div className="text-white p-8">NO SELECIONADO</div>;
     }
@@ -133,7 +138,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
       <main className="flex-1 flex justify-center ml-7 mt-7">
         <div className="w-full max-w-[200%]">
-          <Breadcrumb activeItem={currentView} />
+          {currentView !== 'perfil-usuario' && <Breadcrumb activeItem={currentView} />}
           {renderContent()}
           {children}
         </div>

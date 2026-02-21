@@ -23,9 +23,10 @@ interface UserData {
 
 interface ProfileDropdownProps {
   isExpanded: boolean
+  onSelect?: (view: string) => void
 }
 
-export function ProfileDropdown({ isExpanded }: ProfileDropdownProps) {
+export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) {
   const { logout } = useAuth()
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -110,7 +111,7 @@ export function ProfileDropdown({ isExpanded }: ProfileDropdownProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect?.('perfil-usuario')} className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>

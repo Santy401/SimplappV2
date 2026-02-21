@@ -276,7 +276,7 @@ export default function Sidebar({ onSelect, activeView }: SidebarProps) {
           {isExpanded && <span className="text-sm font-medium">Support</span>}
         </button> */}
         <div className="flex items-center gap-3">
-          <ProfileDropdown isExpanded={isExpanded} />
+          <ProfileDropdown isExpanded={isExpanded} onSelect={onSelect} />
           {isExpanded && <div><ThemeToggle /></div>}
         </div>
       </div>
