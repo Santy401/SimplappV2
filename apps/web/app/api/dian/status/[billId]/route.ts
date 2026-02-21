@@ -3,6 +3,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { DianStatus } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { getFriendlyDianMessage } from '@interfaces/lib/dian-errors';
 
 /**
  * GET /api/dian/status/[billId]
@@ -48,15 +49,35 @@ export async function GET(
         if (!bill) return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
 
         // AQUÍ DEBERÍAS SOLICITAR EL STATUS A LA DIAN Y ACTUALIZAR TU DB SI ES NECESARIO
-        // simulamos q se aceptó
-        if (bill.dianStatus === DianStatus.PENDING) {
-            const updated = await prisma.bill.update({
-                where: { id: billId },
-                data: {
+        // simulamos q se aceptó o rechazó según el query param mockStatus (para pruebas)
+        const { searchParams } = new URL(request.url);
+        const mockStatus = searchParams.get('mockStatus');
+
+        if (bill.dianStatus === DianStatus.PENDING || mockStatus) {
+            let updateData: any = {};
+
+            if (mockStatus === 'REJECTED') {
+                const mockDianResponse = {
+                    status: 'REJECTED',
+                    errorCode: 'FAD01', // Ejemplo
+                    message: 'Rechazo simulado'
+                };
+                updateData = {
+                    dianStatus: DianStatus.REJECTED,
+                    rejectedReason: getFriendlyDianMessage(mockDianResponse.errorCode),
+                    dianResponse: JSON.stringify(mockDianResponse)
+                };
+            } else {
+                updateData = {
                     dianStatus: DianStatus.ACCEPTED,
                     acceptedAt: new Date(),
                     dianResponse: '{"StatusCode": "0", "Message": "Procesado Correctamente."}'
-                },
+                };
+            }
+
+            const updated = await prisma.bill.update({
+                where: { id: billId },
+                data: updateData,
                 select: {
                     dianStatus: true,
                     cufe: true,
