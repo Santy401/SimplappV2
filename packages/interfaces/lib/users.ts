@@ -6,8 +6,8 @@ export async function getUsers() {
     try {
         const users = await prisma.user.findMany({
             where: {
-                company: {
-                    isNot: null
+                companies: {
+                    some: {}
                 }
             },
             select: {
@@ -16,11 +16,15 @@ export async function getUsers() {
                 email: true,
                 typeAccount: true,
                 country: true,
-                company: {
+                companies: {
                     select: {
-                        id: true,
-                        companyName: true,
-                        commercialName: true
+                        company: {
+                            select: {
+                                id: true,
+                                companyName: true,
+                                commercialName: true
+                            }
+                        }
                     }
                 }
             },
@@ -46,31 +50,41 @@ export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password'
                     password: User.password,
                     typeAccount: User.typeAccount,
                     country: User.country,
+                    companies: {
+                        create: {
+                            role: 'OWNER',
+                            company: {
+                                create: {
+                                    companyName: Company?.companyName || "",
+                                    commercialName: Company?.commercialName || null,
+                                    organizationType: Company?.organizationType || OrganizationType.COMPANY,
+                                    vatCondition: Company?.vatCondition || VatCondition.SIMPLIFIED_REGIME,
+                                    identificationNumber: Company?.identificationNumber || "",
+                                    address: Company?.address || "",
+                                    verificationDigit: Company?.verificationDigit || null,
+                                    accountId: Company?.accountId || null,
+                                    economicActivity: Company?.economicActivity || null,
+                                    industryAndCommerceTax: Company?.industryAndCommerceTax || false,
+                                    department: Company?.department || null,
+                                    municipality: Company?.municipality || null,
+                                    postalCode: Company?.postalCode || null,
+                                    phone: Company?.phone || null,
+                                    email: Company?.email || null,
+                                }
+                            }
+                        }
+                    }
+                },
+                include: {
+                    companies: {
+                        include: {
+                            company: true
+                        }
+                    }
                 }
             });
 
-            const companyData = {
-                userId: user.id,
-                companyName: Company?.companyName || "",
-                commercialName: Company?.commercialName || null,
-                organizationType: Company?.organizationType || OrganizationType.COMPANY, // Usar el enum
-                vatCondition: Company?.vatCondition || VatCondition.SIMPLIFIED_REGIME, // Usar el enum
-                identificationNumber: Company?.identificationNumber || "",
-                address: Company?.address || "",
-                verificationDigit: Company?.verificationDigit || null,
-                accountId: Company?.accountId || null,
-                economicActivity: Company?.economicActivity || null,
-                industryAndCommerceTax: Company?.industryAndCommerceTax || false,
-                department: Company?.department || null,
-                municipality: Company?.municipality || null,
-                postalCode: Company?.postalCode || null,
-                phone: Company?.phone || null,
-                email: Company?.email || null,
-            };
 
-            const company = await tx.company.create({
-                data: companyData
-            });
 
             return {
                 id: user.id,
@@ -79,9 +93,9 @@ export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password'
                 typeAccount: user.typeAccount,
                 country: user.country,
                 company: {
-                    id: company.id,
-                    companyName: company.companyName,
-                    commercialName: company.commercialName
+                    id: user.companies[0].company.id,
+                    companyName: user.companies[0].company.companyName,
+                    commercialName: user.companies[0].company.commercialName
                 }
             };
         });
@@ -96,10 +110,10 @@ export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password'
 export async function validateUserHasCompany(userId: string) {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: { company: true }
+        include: { companies: { include: { company: true } } }
     });
 
-    if (!user?.company) {
+    if (!user?.companies?.[0]?.company) {
         throw new Error('El usuario no tiene empresa asignada. Complete los datos de empresa.');
     }
 

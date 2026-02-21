@@ -26,10 +26,10 @@ export async function GET(
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -39,7 +39,7 @@ export async function GET(
     const bill = await prisma.bill.findFirst({
       where: {
         id: billId,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
       include: {
         items: {
@@ -96,10 +96,10 @@ export async function PUT(
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -109,7 +109,7 @@ export async function PUT(
     const existingBill = await prisma.bill.findFirst({
       where: {
         id: billId,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 
@@ -137,14 +137,35 @@ export async function PUT(
       user: _user,
       company: _company,
       store: _store,
+      number: _numberProp, // Quitamos number para evitar sobrescrituras accidentales con 0
       ...billData
     } = data;
 
-    const cleanItems = items?.map((item: any) => ({
+    let updatedNumber = existingBill.number;
+    // Si era borrador (o número 0) y ahora se emite o se pasa a por pagar, obtiene consecutivo real
+    if (existingBill.number === 0 && billData.status && billData.status !== 'DRAFT') {
+      const lastBill = await prisma.bill.findFirst({
+        where: {
+          companyId: user.companies[0].company.id,
+          number: { gt: 0 },
+          OR: [
+            { deletedAt: null },
+            { deletedAt: { not: null } }
+          ]
+        },
+        orderBy: {
+          number: 'desc'
+        }
+      });
+      updatedNumber = (lastBill?.number ?? 0) + 1;
+    }
+
+    const cleanItems = items?.filter((item: any) => item.productId).map((item: any) => ({
       productId: item.productId,
-      quantity: item.quantity,
-      price: String(item.price),
-      total: String(item.total),
+      quantity: Number(item.quantity) || 1,
+      price: String(item.price || 0),
+      subtotal: String(item.subtotal || item.total || 0),
+      total: String(item.total || 0),
       taxRate: String(item.taxRate || 0),
       taxAmount: String(item.taxAmount || 0),
       discount: String(item.discount || 0),
@@ -161,6 +182,7 @@ export async function PUT(
         where: { id: billId },
         data: {
           ...billData,
+          number: updatedNumber,
           ...(data.clientId ? { clientId: data.clientId } : {}),
           ...(data.storeId ? { storeId: data.storeId } : {}),
           items: {
@@ -208,10 +230,10 @@ export async function DELETE(
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -221,7 +243,7 @@ export async function DELETE(
     const bill = await prisma.bill.findFirst({
       where: {
         id: billId,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 
@@ -236,10 +258,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.billItem.deleteMany({
-      where: { billId },
-    });
-
+    // Con el middleware de Soft Delete, solo marcamos la factura como eliminada.
+    // No eliminamos los ítems físicamente para preservar el historial detallado.
     await prisma.bill.delete({
       where: { id: billId },
     });

@@ -27,10 +27,10 @@ export async function PUT(
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json(
         { error: "User or company not found" },
         { status: 404 }
@@ -42,7 +42,7 @@ export async function PUT(
     const existingSeller = await prisma.seller.findFirst({
       where: {
         id: id,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 
@@ -122,10 +122,10 @@ export async function DELETE(
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json(
         { error: 'User or company not found' },
         { status: 404 }
@@ -135,7 +135,7 @@ export async function DELETE(
     await prisma.seller.delete({
       where: {
         id: id,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 

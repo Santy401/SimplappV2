@@ -3,9 +3,9 @@ import { resolve } from 'path';
 
 config({ path: resolve(__dirname, '..', '.env') });
 
-import { prisma } from '@interfaces/lib/prisma';
 
 async function main() {
+    const { prisma } = await import('@interfaces/lib/prisma');
     console.log('🌱 Seeding database...');
 
     const categories = [
@@ -19,11 +19,25 @@ async function main() {
 
     console.log(`📦 Creando ${categories.length} categorías...`);
 
+    const defaultCompany = await prisma.company.findFirst();
+    if (!defaultCompany) {
+        console.log('⚠️ No company found. Please create a company first before seeding categories.');
+        return;
+    }
+
     for (const category of categories) {
-        const created = await prisma.categoryProduct.create({
-            data: category,
+        const existing = await prisma.categoryProduct.findFirst({
+            where: { name: category.name, companyId: defaultCompany.id }
         });
-        console.log(`   ✅ ${created.name}`);
+
+        if (!existing) {
+            const created = await prisma.categoryProduct.create({
+                data: { ...category, companyId: defaultCompany.id },
+            });
+            console.log(`   ✅ ${created.name}`);
+        } else {
+            console.log(`   ⏭️ ${category.name} (ya existe)`);
+        }
     }
 
     console.log(`\n🎉 Seed completado exitosamente!`);
@@ -35,5 +49,6 @@ main()
         process.exit(1);
     })
     .finally(async () => {
+        const { prisma } = await import('@interfaces/lib/prisma');
         await prisma.$disconnect();
     });
