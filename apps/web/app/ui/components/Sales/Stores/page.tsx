@@ -70,7 +70,7 @@ export default function Bodega({
   return (
     <div className="min-h-fit">
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Bodegas</h1>
             <p className="text-muted-foreground mt-2">
@@ -122,7 +122,7 @@ export default function Bodega({
             />
           </div>
         ) : (
-          <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+          <div className="text-center p-12 border border-sidebar-border rounded-xl bg-white mt-4">
             <Store className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No hay Bodegas registrados</h3>
             <p className="text-muted-foreground mb-6">

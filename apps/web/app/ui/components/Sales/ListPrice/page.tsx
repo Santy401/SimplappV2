@@ -164,7 +164,7 @@ export default function ListPrices({
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                    <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
                         <Tag className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No hay listas de precios registradas</h3>
                         <p className="text-muted-foreground mb-6">

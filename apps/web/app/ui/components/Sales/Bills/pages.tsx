@@ -201,7 +201,7 @@ export default function BillsPage({
             />
           </div>
         ) : (
-          <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+          <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
             <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">
               No hay facturas registradas

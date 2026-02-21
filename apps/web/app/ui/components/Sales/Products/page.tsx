@@ -120,7 +120,7 @@ export default function Productos({
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="border border-sidebar-border rounded-xl p-4">
+                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <div className="text-sm text-muted-foreground">Total</div>
@@ -134,7 +134,7 @@ export default function Productos({
                         </div>
                     </div>
 
-                    <div className="border border-sidebar-border rounded-xl p-4">
+                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <div className="text-sm text-muted-foreground">Activos</div>
@@ -148,7 +148,7 @@ export default function Productos({
                         </div>
                     </div>
 
-                    <div className="border border-sidebar-border rounded-xl p-4">
+                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
                         <div className="flex items-center justify-between">
                             <div>
                                 <div className="text-sm text-muted-foreground">Inactivos</div>
@@ -203,7 +203,7 @@ export default function Productos({
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                    <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
                         <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No hay productos registrados</h3>
                         <p className="text-muted-foreground mb-6">

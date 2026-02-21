@@ -122,7 +122,7 @@ export default function Sellers({
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                    <div className="text-center p-12 border border-sidebar-border rounded-xl bg-white mt-4">
                         <Receipt className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No hay Vendedores registrados</h3>
                         <p className="text-muted-foreground mb-6">
