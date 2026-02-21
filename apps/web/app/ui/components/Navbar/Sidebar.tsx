@@ -85,7 +85,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
   return (
     <div
       className={cn(
-        "h-screen sticky top-0 left-0 z-50 transition-[width] duration-300 flex-shrink-0 outline-none",
+        "h-screen sticky top-0 left-0 z-100 transition-[width] duration-300 flex-shrink-0 outline-none",
         isPinned ? "w-62" : "w-20"
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -99,7 +99,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           !isPinned && isHovered && "shadow-2xl shadow-black/10 dark:shadow-black/30"
         )}
       >
-        <div className="border-b border-sidebar-border py-5 px-6 flex items-center h-[72px] box-border">
+        <div className="border-b h-[56px] border-sidebar-border py-1 px-6 flex items-center box-border">
           <div className="flex items-center justify-between gap-2 overflow-hidden w-full">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -219,7 +219,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="border-t relative border-sidebar-border space-y-1 py-4 px-1 flex items-center h-[64px] box-border">
+        <div className="relative border-sidebar-border space-y-1 py-4 px-1 flex items-center h-[64px] box-border">
           {/* <button
           className={cn(
             "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-foreground-text hover:text-slate-300 transition-all duration-200 group",
@@ -231,7 +231,6 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           {isExpanded && <span className="text-sm font-medium">Support</span>}
         </button> */}
           <div className="flex items-center gap-3">
-            <ProfileDropdown isExpanded={isExpanded} />
             {/* {isExpanded && <div><ThemeToggle /></div>} */}
           </div>
         </div>

@@ -1,69 +1,77 @@
 "use client"
 
-import { PanelLeftOpen, Search, Bell, Settings, LucideIcon, User, LogOut, CreditCard } from "lucide-react"
-import Image from "next/image"
+import { Search, Plus, CircleHelp, Sprout, Grip, ChevronDown, User, LogOut, CreditCard } from "lucide-react"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+    ProfileDropdown,
 } from "@ui/index"
 import { useLogout } from "@interfaces/src/hooks/features/auth"
 
 export const Navbar = () => {
     const { handleLogout } = useLogout();
 
-    const IconButton = ({ icon: Icon }: { icon: LucideIcon }) => (
-        <span className="h-9 w-9 bg-[#303030] flex rounded-4xl items-center justify-center cursor-pointer">
-            <Icon className="text-white scale-[80%]" />
-        </span>
-    )
-
     return (
-        <div>
-            <nav className="flex items-center p-4 justify-between h-13 bg-[#171717]">
-                <div className="flex items-center gap-3">
-                    <IconButton icon={PanelLeftOpen} />
-                    <label className="text-white font-extrabold">Dashboard</label>
+        <nav className="sticky top-0 z-50 flex items-center px-4 justify-between h-14 bg-white dark:bg-background/95 backdrop-blur-sm border-b border-sidebar-border w-full">
+            {/* Left side */}
+            <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 ml-1">
+                    <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition text-muted-foreground hover:text-foreground">
+                        <CircleHelp className="w-5 h-5" />
+                    </button>
+                    {/* <button className="w-8 h-8 flex items-center justify-center rounded-full border border-teal-200 dark:border-teal-900 bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-900/50 transition">
+                        <Sprout className="w-4 h-4" />
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition text-muted-foreground hover:text-foreground">
+                        <Grip className="w-5 h-5" />
+                    </button> */}
                 </div>
-                <h1 className="text-[#ddd] font-bold text-[1.2rem]">SolanaBackend</h1>
-                <div className="flex gap-2">
-                    <IconButton icon={Search} />
-                    <IconButton icon={Bell} />
-                    <IconButton icon={Settings} />
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <span className="h-9 w-9 bg-[#303030] flex rounded-4xl items-center justify-center cursor-pointer relative overflow-hidden">
-                                <Image
-                                    src="/Admin/PhotoFile.png"
-                                    fill
-                                    className="object-cover"
-                                    alt="Profile"
-                                />
-                            </span>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent className="w-56 bg-[#ffffff] border-gray-300 text-black">
-                            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-                            <DropdownMenuSeparator className="bg-gray-300" />
-                            <DropdownMenuItem className="cursor-pointer hover:bg-[#dadada] focus:bg-[#dfdfdf]">
-                                <User className="mr-2 h-4 w-4" />
-                                <span>Perfil</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer hover:bg-[#dadada] focus:bg-[#dfdfdf]">
-                                <CreditCard className="mr-2 h-4 w-4" />
-                                <span>Facturación</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-300" />
-                            <DropdownMenuItem className="cursor-pointer hover:bg-[#dadada] focus:bg-[#dfdfdf] text-red-600" onClick={handleLogout}>
-                                <LogOut className="mr-2 h-4 w-4" />
-                                <span>Cerrar Sesión</span>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+            </div>
+
+            {/* Center - Search */}
+            <div className="flex-1 max-w-xl mx-8 hidden sm:block">
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Buscar"
+                        className="w-full pl-9 pr-4 py-1.5 bg-transparent border border-sidebar-border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-foreground placeholder-muted-foreground"
+                    />
                 </div>
-            </nav>
-        </div>
+            </div>
+
+            {/* Right side */}
+            <div className="flex items-center gap-2 sm:gap-4">
+                <button className="w-8 h-8 flex items-center justify-center bg-white dark:bg-slate-900 border border-sidebar-border rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                    <Plus className="w-4 h-4 text-foreground" />
+                </button>
+                {/* <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <button className="flex items-center gap-2 px-3 py-1.5 border border-sidebar-border bg-white dark:bg-slate-900 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                            <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold">
+                                S
+                            </div>
+                            <span className="text-sm font-medium text-foreground">Simplea...</span>
+                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-56 bg-white dark:bg-slate-950 border-sidebar-border">
+                        <DropdownMenuLabel>Empresas</DropdownMenuLabel>
+                        <DropdownMenuSeparator className="bg-sidebar-border" />
+                        <DropdownMenuItem className="cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900">
+                            <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-[10px] font-bold mr-2">
+                                S
+                            </div>
+                            <span>Simpleapp</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu> */}
+                <ProfileDropdown />
+            </div>
+        </nav>
     )
 }
