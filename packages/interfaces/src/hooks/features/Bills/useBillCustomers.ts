@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { useBill } from "./useBill";
 import { Bill, BillDetail, BillStatus, UpdateBill } from "@domain/entities/Bill.entity";
 import { BillsProps } from "@domain/entities/props/bills/Bills.entity.props";
@@ -10,7 +11,7 @@ export const useBillCustomers = ({
 }: BillsProps) => {
   const { deleteBill, updateBill } = useBill();
 
-  const toBillDetail = (bill: any): BillDetail => {
+  const toBillDetail = useCallback((bill: any): BillDetail => {
     return {
       ...bill,
       items: bill.items || [],
@@ -22,9 +23,9 @@ export const useBillCustomers = ({
       total: bill.total || "0",
       balance: bill.balance || "0",
     } as BillDetail;
-  };
+  }, []);
 
-  const handleEditCustomer = (bill: Bill | BillDetail | UpdateBill | any) => {
+  const handleEditCustomer = useCallback((bill: Bill | BillDetail | UpdateBill | any) => {
     if (onSelectBill) {
       const billDetail = toBillDetail(bill);
       onSelectBill(billDetail);
@@ -33,9 +34,9 @@ export const useBillCustomers = ({
     if (onSelect) {
       onSelect("ventas-facturacion-edit");
     }
-  };
+  }, [onSelectBill, onSelect, toBillDetail]);
 
-  const handleDeleteCustomer = async (bill: Bill) => {
+  const handleDeleteCustomer = useCallback(async (bill: Bill) => {
     if (confirm(`¿Estás seguro de eliminar la factura ${bill.id}?`)) {
       const result = await deleteBill(bill.id);
       if (result) {
@@ -47,9 +48,9 @@ export const useBillCustomers = ({
         toast.error("Error al eliminar factura");
       }
     }
-  };
+  }, [deleteBill, onDeleteSuccess]);
 
-  const handleMarkAsPaid = async (bill: Bill | BillDetail | any) => {
+  const handleMarkAsPaid = useCallback(async (bill: Bill | BillDetail | any) => {
     if (confirm(`¿Marcar la factura #${bill.number} como pagada?`)) {
       const billDetail = toBillDetail(bill);
       const updated = await updateBill({
@@ -67,9 +68,9 @@ export const useBillCustomers = ({
         toast.error("Error al actualizar la factura");
       }
     }
-  };
+  }, [updateBill, toBillDetail, onDeleteSuccess]);
 
-  const handleViewCustomer = (bill: Bill | BillDetail | any) => {
+  const handleViewCustomer = useCallback((bill: Bill | BillDetail | any) => {
     console.log("Ver detalles de factura:", bill);
 
     if (onSelectBill) {
@@ -80,9 +81,9 @@ export const useBillCustomers = ({
     if (onSelect) {
       onSelect('ventas-facturacion-view');
     }
-  };
+  }, [onSelectBill, onSelect, toBillDetail]);
 
-  const handleAddCustomer = () => {
+  const handleAddCustomer = useCallback(() => {
     console.log("Agregar nueva factura");
 
     if (onSelectBill) {
@@ -92,9 +93,9 @@ export const useBillCustomers = ({
     if (onSelect) {
       onSelect("ventas-facturacion-create");
     }
-  };
+  }, [onSelectBill, onSelect]);
 
-  const handleDeleteManyCustomers = async (bills: (Bill | BillDetail | any)[]) => {
+  const handleDeleteManyCustomers = useCallback(async (bills: (Bill | BillDetail | any)[]) => {
     const results = await Promise.allSettled(
       bills.map((bill) => deleteBill(bill.id))
     );
@@ -111,12 +112,12 @@ export const useBillCustomers = ({
     if (failed > 0) {
       toast.error(`Error al eliminar ${failed} factura(s)`);
     }
-  };
+  }, [deleteBill, onDeleteSuccess]);
 
-  const handleExportCustomers = () => {
+  const handleExportCustomers = useCallback(() => {
     console.log("Exportar facturas");
     // Logic
-  };
+  }, []);
 
   return {
     handleEditCustomer,
