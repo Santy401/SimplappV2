@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
+import { Navbar } from "@/app/ui/components/Navbar/Navbar";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -128,16 +129,21 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full h-screen overflow-hidden">
       <Sidebar onSelect={navigateTo} />
 
-      <main className="flex-1 flex justify-center ml-7 mt-7">
-        <div className="w-full max-w-[200%]">
-          <Breadcrumb activeItem={currentView} />
-          {renderContent()}
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar />
+        <main className="flex-1 overflow-y-auto w-full">
+          <div className="flex justify-center ml-7 mt-7 mb-7">
+            <div className="w-full max-w-[200%] pr-7">
+              <Breadcrumb activeItem={currentView} />
+              {renderContent()}
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
