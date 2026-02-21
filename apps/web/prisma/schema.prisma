@@ -168,6 +168,8 @@ model Client {
   updatedAt DateTime @updatedAt
 
   @@unique([companyId, identificationNumber])
+  @@index([companyId])
+  @@index([identificationNumber])
 }
 
 model Seller {
@@ -234,6 +236,9 @@ model Product {
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   categoryProductId String
+
+  @@index([companyId])
+  @@index([code])
 }
 
 model CategoryProduct {
@@ -362,6 +367,9 @@ model Bill {
   updatedAt            DateTime   @updatedAt
 
   @@unique([companyId, prefix, number])
+  @@index([companyId])
+  @@index([createdAt])
+  @@index([status])
 }
 
 model Payment {
