@@ -10,6 +10,30 @@ export interface SessionResponse {
   typeAccount: string;
   country: string;
   companyId?: string;
+  companyName?: string | null;
+  companyLogo?: string | null;
+  userType?: string | null;
+  onboardingCompleted?: boolean;
+  profileLogo?: string | null;
+  language?: string | null;
+  timezone?: string | null;
+  legalName?: string | null;
+  businessType?: string | null;
+  industry?: string | null;
+  taxIdentification?: string | null;
+  taxRegime?: string | null;
+  taxResponsibilities?: string | null;
+  state?: string | null;
+  city?: string | null;
+  address?: string | null;
+  zipCode?: string | null;
+  currency?: string | null;
+  invoicePrefix?: string | null;
+  invoiceInitialNumber?: number | null;
+  defaultTax?: string | null;
+  phone?: string | null;
+  billingEmail?: string | null;
+  website?: string | null;
 }
 
 /**
@@ -28,7 +52,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const payload = await verifyAccessToken(accessToken) as {id: string};
+    const payload = await verifyAccessToken(accessToken) as { id: string };
 
     if (!payload || !payload.id) {
       return NextResponse.json(
@@ -56,6 +80,30 @@ export async function GET(request: NextRequest) {
       typeAccount: user.typeAccount,
       country: user.country,
       companyId: user.company?.id,
+      companyName: user.companyName,
+      companyLogo: user.companyLogo,
+      userType: user.userType,
+      onboardingCompleted: user.onboardingCompleted,
+      profileLogo: user.profileLogo,
+      language: user.language,
+      timezone: user.timezone,
+      legalName: user.legalName,
+      businessType: user.businessType,
+      industry: user.industry,
+      taxIdentification: user.taxIdentification,
+      taxRegime: user.taxRegime,
+      taxResponsibilities: user.taxResponsibilities,
+      state: user.state,
+      city: user.city,
+      address: user.address,
+      zipCode: user.zipCode,
+      currency: user.currency,
+      invoicePrefix: user.invoicePrefix,
+      invoiceInitialNumber: user.invoiceInitialNumber,
+      defaultTax: user.defaultTax,
+      phone: user.phone,
+      billingEmail: user.billingEmail,
+      website: user.website,
     };
 
     return NextResponse.json(userData);
