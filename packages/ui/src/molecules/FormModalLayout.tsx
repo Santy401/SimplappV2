@@ -58,8 +58,8 @@ export function FormModalLayout({
     <div className={`min-h-fit ${className}`}>
       <div className='mt-3'>
         <div className={`${maxWidthClass} mx-auto px-1 py-4`}>
-            <h1 className="text-3xl font-bold text-foreground mb-5">{title}</h1>
-          <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-foreground mb-5">{title}</h1>
+          {/* <div className="flex items-center justify-between">
             {showHeaderActions && (
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" type="button">
@@ -76,18 +76,18 @@ export function FormModalLayout({
                 </Button>
               </div>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
 
       <div className={`${maxWidthClass} mx-auto px-8 py-8`}>
         <form onSubmit={onSubmit} className="space-y-8">
-          <div className="border border-sidebar-border rounded-lg p-6 space-y-6">
+          <div className="border border-sidebar-border bg-white dark:bg-transparent rounded-lg p-6 space-y-6">
             {children}
           </div>
 
           {showMoreOptions && moreOptionsContent && (
-            <div className="border border-sidebar-border rounded-lg overflow-hidden">
+            <div className="border border-sidebar-border bg-white dark:bg-transparent rounded-lg overflow-hidden">
               <button
                 type="button"
                 onClick={onToggleMoreOptions}

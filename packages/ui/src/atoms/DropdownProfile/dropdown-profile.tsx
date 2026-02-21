@@ -82,7 +82,7 @@ export function ProfileDropdown({ isExpanded }: ProfileDropdownProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-3 w-42 px-4 py-3 rounded-lg hover:bg-purple-400/50 transition-all duration-200 group"
+          className="flex items-center gap-3 w-60 px-4 py-3 rounded-lg hover:bg-purple-400/50 transition-all duration-200 group"
         >
           <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
             <span className="text-white font-semibold text-xs">
