@@ -29,6 +29,43 @@ model User {
   company     Company?
   bills       Bill[]
 
+  companyName         String?
+  companyLogo         String?
+  userType            String?
+  onboardingCompleted Boolean @default(false)
+
+  // Profile - User
+  profileLogo         String?
+  language            String? @default("es")
+  timezone            String? @default("America/Bogota")
+
+  // Company details
+  legalName           String?
+  businessType        String?
+  industry            String?
+  
+  // Fiscal info
+  taxIdentification   String?
+  taxRegime           String?
+  taxResponsibilities String?
+
+  // Fiscal Address
+  state               String?
+  city                String?
+  address             String?
+  zipCode             String?
+
+  // Billing setup
+  currency             String? @default("COP")
+  invoicePrefix        String? @default("FAC")
+  invoiceInitialNumber Int?    @default(1)
+  defaultTax           String? @default("19")
+
+  // Contact
+  phone               String?
+  billingEmail        String?
+  website             String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
