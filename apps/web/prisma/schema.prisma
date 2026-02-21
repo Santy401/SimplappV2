@@ -26,13 +26,25 @@ model User {
   password    String
   typeAccount String
   country     String
-  company     Company?
+  companies   UserCompany[]
   bills       Bill[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+}
+
+model UserCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      UserRole @default(EMPLOYEE)
+  
+  user      User     @relation(fields: [userId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
+  
+  @@unique([userId, companyId])
 }
 
 model ProductAccounting {
@@ -72,8 +84,7 @@ model RefreshToken {
 model Company {
   id String @id @default(uuid())
 
-  userId String  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users UserCompany[]
 
   companyName      String           @default("")
   logoUrl          String? // URL del logo de la empresa
@@ -382,6 +393,13 @@ model BillItem {
  * 🧩 ENUMS & CONSTANTS
  * =========================================
  */
+
+enum UserRole {
+  OWNER      // Dueño de la empresa
+  ADMIN      // Administrador
+  ACCOUNTANT // Contador
+  EMPLOYEE   // Empleado
+}
 
 enum TypePrice {
   VALOR
