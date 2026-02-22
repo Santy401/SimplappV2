@@ -173,7 +173,7 @@ export async function PUT(
       productCode: item.productCode || item.reference || "",
     })) || [];
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: any) => {
       await tx.billItem.deleteMany({
         where: { billId: billId }
       });

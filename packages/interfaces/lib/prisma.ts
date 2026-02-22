@@ -35,27 +35,27 @@ const prismaClientSingleton = () => {
                 });
               }
               
-              if (args.where && !('deletedAt' in args.where)) {
-                args.where = { ...args.where, deletedAt: null }
+              if ((args as any).where && !('deletedAt' in (args as any).where)) {
+                (args as any).where = { ...(args as any).where, deletedAt: null }
               }
             }
             
             if (['update', 'updateMany', 'upsert'].includes(operation)) {
-              if (args.where && !('deletedAt' in args.where)) {
-                args.where = { ...args.where, deletedAt: null }
+              if ((args as any).where && !('deletedAt' in (args as any).where)) {
+                (args as any).where = { ...(args as any).where, deletedAt: null }
               }
             }
 
             if (operation === 'delete') {
               return (client as any)[clientModel].update({
-                where: args.where,
+                where: (args as any) .where,
                 data: { deletedAt: new Date() },
               })
             }
             
             if (operation === 'deleteMany') {
               return (client as any)[clientModel].updateMany({
-                where: args.where,
+                where: (args as any).where,
                 data: { deletedAt: new Date() },
               })
             }

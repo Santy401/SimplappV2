@@ -42,7 +42,7 @@ export async function getUsers() {
 
 export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password' | 'typeAccount' | 'country'>, Company?: Partial<CompanyData>) {
     try {
-        const newUser = await prisma.$transaction(async (tx) => {
+        const newUser = await prisma.$transaction(async (tx: any) => {
             const user = await tx.user.create({
                 data: {
                     name: User.name,
