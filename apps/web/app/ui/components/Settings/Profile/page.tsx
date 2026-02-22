@@ -130,7 +130,7 @@ export default function ProfileConfig() {
         }
     };
 
-    const membershipTier = "Free";
+    const membershipTier: string = "Free";
 
     return (
         <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto flex flex-col min-h-[calc(100vh-100px)]">
