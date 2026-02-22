@@ -7,7 +7,7 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "outDir": "./dist",
-    "rootDir": "../..",
+    "rootDir": "../../",
     "baseUrl": ".",
     "jsx": "react-jsx",
     "lib": [
@@ -17,7 +17,7 @@
     ],
     "paths": {
       "@/*": [
-        "apps/web/*"
+        "../../apps/web/*"
       ],
       "@domain/*": [
         "../domain/src/*"
@@ -26,17 +26,23 @@
         "./*"
       ],
       "@web/*": [
-        "../../../apps/web/app/*"
+        "../../apps/web/app/*"
       ],
       "@ui/*": [
         "../ui/src/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
       ]
     }
   },
   "include": [
     "src/**/*",
-    "../../apps/**/*",
-    "../../packages/**/*"
+    "lib/**/*",
+    "data/**/*",
+    "../domain/src/**/*",
+    "../ui/src/**/*",
+    "../../apps/web/app/**/*"
   ],
   "exclude": [
     "node_modules",
