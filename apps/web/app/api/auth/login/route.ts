@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
+import { logActivity } from '@interfaces/lib/activity-log';
 
 /**
  * POST /api/auth/login
@@ -15,7 +16,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: { companies: true }
+    });
     if (!user) {
       return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
     }
@@ -41,6 +45,19 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       },
       accessToken,
     });
+
+    if (user.companies.length > 0) {
+      logActivity({
+        companyId: user.companies[0].companyId,
+        userId: user.id,
+        action: 'LOGIN',
+        entityType: 'User',
+        entityId: user.id,
+        metadata: { source: 'WEB_LOGIN' },
+        ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip'),
+        userAgent: req.headers.get('user-agent'),
+      });
+    }
 
     response.cookies.delete('token');
     response.cookies.delete('auth-token');

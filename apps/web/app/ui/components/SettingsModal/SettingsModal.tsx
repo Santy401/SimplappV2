@@ -6,6 +6,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Maximize2, Minimize2, User, Building2, Receipt, Activity, Shield, Bell } from 'lucide-react';
 import { cn } from '@simplapp/ui';
 import { ActivityLogViewer } from './ActivityLogViewer';
+import { ProfileSettings } from './ProfileSettings';
+import { CompanySettings } from './CompanySettings';
+import { BillingSettings } from './BillingSettings';
 
 export function SettingsModal() {
     const { isOpen, isMaximized, currentView, setCurrentView, closeSettings, toggleMaximized } = useSettings();
@@ -99,10 +102,10 @@ export function SettingsModal() {
                             </div>
 
                             {/* View Content */}
-                            <div className="flex-1 overflow-y-auto p-6">
-                                {currentView === 'perfil' && <div>Opciones de perfil aquí...</div>}
-                                {currentView === 'empresa' && <div>Opciones de la empresa aquí...</div>}
-                                {currentView === 'facturacion' && <div>Opciones de facturación aquí...</div>}
+                            <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30 dark:bg-transparent">
+                                {currentView === 'perfil' && <ProfileSettings />}
+                                {currentView === 'empresa' && <CompanySettings />}
+                                {currentView === 'facturacion' && <BillingSettings />}
                                 {currentView === 'actividad' && <ActivityLogViewer />}
                                 {currentView === 'seguridad' && <div>Opciones de seguridad aquí...</div>}
                                 {currentView === 'notificaciones' && <div>Opciones de notificaciones aquí...</div>}

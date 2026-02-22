@@ -2,41 +2,50 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface SettingsContextType {
+type SettingsView = 'perfil' | 'empresa' | 'facturacion' | 'actividad' | 'seguridad' | 'notificaciones';
+
+interface SettingsContextProps {
     isOpen: boolean;
     isMaximized: boolean;
-    currentView: string;
-    setCurrentView: (view: string) => void;
-    openSettings: (view?: string) => void;
+    currentView: SettingsView;
+    openSettings: (view?: SettingsView) => void;
     closeSettings: () => void;
     toggleMaximized: () => void;
+    setCurrentView: (view: SettingsView) => void;
 }
 
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextProps | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [isMaximized, setIsMaximized] = useState(false);
-    const [currentView, setCurrentView] = useState('perfil');
+    const [currentView, setCurrentView] = useState<SettingsView>('perfil');
 
-    const openSettings = (view: string = 'perfil') => {
-        setCurrentView(view);
+    const openSettings = (view?: SettingsView) => {
+        if (view) setCurrentView(view);
         setIsOpen(true);
     };
 
-    const closeSettings = () => setIsOpen(false);
-    const toggleMaximized = () => setIsMaximized(prev => !prev);
+    const closeSettings = () => {
+        setIsOpen(false);
+    };
+
+    const toggleMaximized = () => {
+        setIsMaximized((prev) => !prev);
+    };
 
     return (
-        <SettingsContext.Provider value={{
-            isOpen,
-            isMaximized,
-            currentView,
-            setCurrentView,
-            openSettings,
-            closeSettings,
-            toggleMaximized
-        }}>
+        <SettingsContext.Provider
+            value={{
+                isOpen,
+                isMaximized,
+                currentView,
+                openSettings,
+                closeSettings,
+                toggleMaximized,
+                setCurrentView,
+            }}
+        >
             {children}
         </SettingsContext.Provider>
     );

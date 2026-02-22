@@ -35,25 +35,25 @@ model User {
   onboardingCompleted Boolean @default(false)
 
   // Profile - User
-  profileLogo         String?
-  language            String? @default("es")
-  timezone            String? @default("America/Bogota")
+  profileLogo String?
+  language    String? @default("es")
+  timezone    String? @default("America/Bogota")
 
   // Company details
-  legalName           String?
-  businessType        String?
-  industry            String?
-  
+  legalName    String?
+  businessType String?
+  industry     String?
+
   // Fiscal info
   taxIdentification   String?
   taxRegime           String?
   taxResponsibilities String?
 
   // Fiscal Address
-  state               String?
-  city                String?
-  address             String?
-  zipCode             String?
+  state   String?
+  city    String?
+  address String?
+  zipCode String?
 
   // Billing setup
   currency             String? @default("COP")
@@ -62,14 +62,15 @@ model User {
   defaultTax           String? @default("19")
 
   // Contact
-  phone               String?
-  billingEmail        String?
-  website             String?
+  phone        String?
+  billingEmail String?
+  website      String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   refreshTokens RefreshToken[]
+  activityLogs  ActivityLog[]
 }
 
 model UserCompany {
@@ -159,7 +160,8 @@ model Company {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  listPrices ListPrice[]
+  listPrices   ListPrice[]
+  activityLogs ActivityLog[]
 
   @@index([deletedAt])
 }
@@ -446,6 +448,33 @@ model BillItem {
   productCode String?
   bill        Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
   product     Product @relation(fields: [productId], references: [id])
+}
+
+/**
+ * =========================================
+ * 📊 ACTIVITY LOG MODEL
+ * =========================================
+ */
+model ActivityLog {
+  id         String   @id @default(uuid())
+  companyId  String
+  userId     String?
+  action     String // CREATE, UPDATE, DELETE, SEND, CANCEL
+  entityType String // Bill, Client, Product, etc.
+  entityId   String
+  changes    Json? // Qué cambió (antes/después)
+  metadata   Json? // Info adicional
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
 }
 
 /**

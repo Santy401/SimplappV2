@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { logActivity } from '@interfaces/lib/activity-log';
 
 /**
  * POST /api/bills/[id]/cancel
@@ -60,6 +61,18 @@ export async function POST(
             data: {
                 status: 'CANCELLED',
             },
+        });
+
+        logActivity({
+            companyId: company.id,
+            userId: user.id,
+            action: 'CANCEL',
+            entityType: 'Bill',
+            entityId: id,
+            changes: { previousStatus: bill.status, newStatus: 'CANCELLED' },
+            metadata: { source: 'API/cancel' },
+            ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+            userAgent: request.headers.get('user-agent'),
         });
 
         return NextResponse.json(updatedBill);

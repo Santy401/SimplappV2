@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { logActivity } from '@interfaces/lib/activity-log';
 
 /**
  * GET /api/clients
@@ -83,6 +84,18 @@ export async function POST(request: NextRequest) {
         ...data,
         companyId: user.companies[0].company.id,
       },
+    });
+
+    logActivity({
+      companyId: user.companies[0].company.id,
+      userId: user.id,
+      action: 'CREATE',
+      entityType: 'Client',
+      entityId: client.id,
+      changes: client,
+      metadata: { source: 'API' },
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
+      userAgent: request.headers.get('user-agent'),
     });
 
     return NextResponse.json(client, { status: 201 });
