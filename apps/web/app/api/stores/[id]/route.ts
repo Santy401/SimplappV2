@@ -23,10 +23,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -36,7 +36,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const store = await prisma.store.update({
       where: {
         id: id,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
       data: {
         name: data.name?.trim(),
@@ -75,10 +75,10 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -87,7 +87,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     await prisma.store.delete({
       where: {
         id: id,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 

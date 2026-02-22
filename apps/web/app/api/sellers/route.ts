@@ -23,16 +23,16 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
     const seller = await prisma.seller.findMany({
       where: {
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       }
     });
 
@@ -66,10 +66,10 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json(
         { error: "User or company not found" },
         { status: 404 }
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         observation: data.observation?.trim() || null,
         company: {
           connect: {
-            id: user.company.id,
+            id: user.companies[0].company.id,
           },
         },
       },

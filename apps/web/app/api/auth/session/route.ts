@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
     if (!user) {
@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       name: user.name,
       typeAccount: user.typeAccount,
       country: user.country,
-      companyId: user.company?.id,
+      companyId: user.companies?.[0]?.company?.id,
     };
 
     return NextResponse.json(userData);
