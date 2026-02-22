@@ -14,9 +14,10 @@ import { useLogout } from "@interfaces/src/hooks/features/auth"
 
 interface NavbarProps {
     onSearchOpen: () => void;
+    onSelect?: (view: string) => void;
 }
 
-export const Navbar = ({ onSearchOpen }: NavbarProps) => {
+export const Navbar = ({ onSearchOpen, onSelect }: NavbarProps) => {
     const { handleLogout } = useLogout();
 
     return (
@@ -78,7 +79,7 @@ export const Navbar = ({ onSearchOpen }: NavbarProps) => {
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu> */}
-                <ProfileDropdown />
+                <ProfileDropdown onSelect={onSelect} />
             </div>
         </nav>
     )

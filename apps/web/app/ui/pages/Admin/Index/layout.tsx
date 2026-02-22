@@ -152,7 +152,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       <Sidebar onSelect={navigateTo} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onSearchOpen={() => setIsSearchOpen(true)} />
+        <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={navigateTo} />
         <main className="flex-1 overflow-y-auto w-full">
           <div className="flex justify-center ml-7 mt-7 mb-7">
             <div className="w-full max-w-[200%] pr-7">

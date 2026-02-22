@@ -33,9 +33,6 @@ CREATE TYPE "MovementType" AS ENUM ('IN', 'OUT', 'ADJUSTMENT', 'TRANSFER');
 -- CreateEnum
 CREATE TYPE "DianStatus" AS ENUM ('PENDING', 'SENT', 'ACCEPTED', 'REJECTED');
 
--- AlterEnum
-ALTER TYPE "BillStatus" ADD VALUE 'TO_PAY';
-
 -- DropForeignKey
 ALTER TABLE "Company" DROP CONSTRAINT "Company_userId_fkey";
 
@@ -51,10 +48,8 @@ ADD COLUMN     "cufe" TEXT,
 ADD COLUMN     "deletedAt" TIMESTAMP(3),
 ADD COLUMN     "dianResponse" TEXT,
 ADD COLUMN     "dianStatus" "DianStatus",
-ADD COLUMN     "listPriceId" TEXT,
 ADD COLUMN     "pdfUrl" TEXT,
 ADD COLUMN     "rejectedReason" TEXT,
-ADD COLUMN     "sellerId" TEXT,
 ADD COLUMN     "sentAt" TIMESTAMP(3),
 ADD COLUMN     "xml" TEXT,
 DROP COLUMN "balance",
@@ -94,9 +89,6 @@ ADD COLUMN     "deletedAt" TIMESTAMP(3);
 -- AlterTable
 ALTER TABLE "InventoryMovement" DROP COLUMN "type",
 ADD COLUMN     "type" "MovementType" NOT NULL;
-
--- AlterTable
-ALTER TABLE "ListPrice" ADD COLUMN     "percentage" TEXT;
 
 -- AlterTable
 ALTER TABLE "Payment" DROP COLUMN "amount",

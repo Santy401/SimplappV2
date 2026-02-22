@@ -23,9 +23,10 @@ interface UserData {
 
 interface ProfileDropdownProps {
   isExpanded?: boolean
+  onSelect?: (view: string) => void
 }
 
-export function ProfileDropdown({ isExpanded = false }: ProfileDropdownProps) {
+export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdownProps) {
   const { logout } = useAuth()
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
