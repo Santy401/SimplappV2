@@ -22,6 +22,7 @@ import {
 import { cn } from "@simplapp/ui"
 import { ThemeToggle } from "@simplapp/ui"
 import { ProfileDropdown } from "@simplapp/ui"
+import { useNavigation } from "@/app/context/NavigationContext"
 
 interface NavItem {
   id: string
@@ -38,8 +39,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onSelect }: SidebarProps) {
+  const { currentView } = useNavigation()
   const [expandedItems, setExpandedItems] = useState<string[]>(["ventas"])
-  const [activeItem, setActiveItem] = useState("inicio")
   const [isPinned, setIsPinned] = useState(true)
   const [isHovered, setIsHovered] = useState(false)
 
@@ -85,7 +86,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
   return (
     <div
       className={cn(
-        "h-screen sticky top-0 left-0 z-50 transition-[width] duration-300 flex-shrink-0 outline-none",
+        "h-screen sticky top-0 left-0 z-100 transition-[width] duration-300 flex-shrink-0 outline-none",
         isPinned ? "w-62" : "w-20"
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -99,7 +100,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           !isPinned && isHovered && "shadow-2xl shadow-black/10 dark:shadow-black/30"
         )}
       >
-        <div className="border-b border-sidebar-border py-5 px-6 flex items-center h-[72px] box-border">
+        <div className="border-b h-[56px] border-sidebar-border py-1 px-6 flex items-center box-border">
           <div className="flex items-center justify-between gap-2 overflow-hidden w-full">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -123,17 +124,6 @@ export default function Sidebar({ onSelect }: SidebarProps) {
               </button>
             )}
           </div>
-
-          {/* {isExpanded && (
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full border border-[#2d2d2d] rounded-lg pl-9 pr-3 py-2 text-sm placeholder-slate-500 focus:outline-none focus:border-purple-500/50 transition-colors text-slate-300"
-            />
-          </div>
-        )} */}
         </div>
 
         <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
@@ -141,16 +131,19 @@ export default function Sidebar({ onSelect }: SidebarProps) {
             <div key={item.id}>
               <button
                 onClick={() => {
-                  setActiveItem(item.id)
                   if (item.submenu) {
+                    const isExpanding = !expandedItems.includes(item.id);
                     toggleSubmenu(item.id)
+                    if (isExpanding && item.submenu.length > 0) {
+                      onSelect?.(item.submenu[0].id)
+                    }
                   } else {
                     onSelect?.(item.id)
                   }
                 }}
                 className={cn(
                   "w-full flex items-center justify-between py-2 px-6 rounded-lg transition-all duration-200 group relative overflow-hidden",
-                  activeItem === item.id
+                  currentView === item.id || (item.submenu && item.submenu.some(sub => sub.id === currentView))
                     ? "text-purple-400 bg-purple-500/5 font-medium before:absolute before:left-0 before:top-0 before:h-full before:w-1 before:bg-purple-500"
                     : "hover:bg-forground text-foreground-text hover:foreground-text-second00",
                 )}
@@ -160,7 +153,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                   <div
                     className={cn(
                       "flex items-center justify-center flex-shrink-0",
-                      activeItem === item.id ? "text-purple-400" : "group-hover:text-purple-400/60",
+                      currentView === item.id || (item.submenu && item.submenu.some(sub => sub.id === currentView)) ? "text-purple-400" : "group-hover:text-purple-400/60",
                     )}
                   >
                     {item.icon}
@@ -199,12 +192,11 @@ export default function Sidebar({ onSelect }: SidebarProps) {
                       <button
                         key={subitem.id}
                         onClick={() => {
-                          setActiveItem(subitem.id)
                           onSelect?.(subitem.id)
                         }}
                         className={cn(
                           "w-full flex items-center gap-2 px-3 py-2 text-[13px] cursor-pointer rounded-lg transition-all duration-200 relative overflow-hidden",
-                          activeItem === subitem.id
+                          currentView === subitem.id
                             ? "text-purple-400 bg-purple-500/10 font-medium before:absolute before:left-0 before:top-0 before:h-full before:w-[2px] before:bg-purple-500/50"
                             : "text-foreground-text hover:bg-purple-500/5 hover:text-purple-300"
                         )}
@@ -219,7 +211,7 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           ))}
         </nav>
 
-        <div className="border-t relative border-sidebar-border space-y-1 py-4 px-1 flex items-center h-[64px] box-border">
+        <div className="relative border-sidebar-border space-y-1 py-4 px-1 flex items-center h-[64px] box-border">
           {/* <button
           className={cn(
             "flex items-center gap-3 rounded-lg hover:bg-slate-800/50 text-foreground-text hover:text-slate-300 transition-all duration-200 group",
@@ -231,7 +223,6 @@ export default function Sidebar({ onSelect }: SidebarProps) {
           {isExpanded && <span className="text-sm font-medium">Support</span>}
         </button> */}
           <div className="flex items-center gap-3">
-            <ProfileDropdown isExpanded={isExpanded} />
             {/* {isExpanded && <div><ThemeToggle /></div>} */}
           </div>
         </div>
