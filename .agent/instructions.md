@@ -18,5 +18,5 @@ This document contains core rules and preferences for the Simplapp V2 project. T
 - **TSConfig Integrity**: Ensure `rootDir` and `include` paths in sub-packages allow for resolving dependencies correctly without including built files or unnecessary external code.
 
 ## References
-- See `Docs/GUIA_COMMITS.md` for detailed commit message formatting.
-- See `Docs/GUIA_IMPLEMENTACION.md` for feature implementation standards.
+- See `.doc/GUIA_COMMITS.md` for detailed commit message formatting.
+- See `.doc/GUIA_IMPLEMENTACION.md` for feature implementation standards.

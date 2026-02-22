@@ -8,7 +8,7 @@ description: Standardized process to validate build and perform atomic commits
    - If build fails, identify the package causing the error and fix it before proceeding.
 
 2. Group Changes Logically
-   - Sort modified files following the dependency order defined in `Docs/GUIA_COMMITS.md`:
+   - Sort modified files following the dependency order defined in `.doc/GUIA_COMMITS.md`:
      1. Configuration and Dependencies
      2. Domain Entities and Schema
      3. Core Infrastructure/API Client
