@@ -6,6 +6,7 @@ import {
   FormModalLayout,
   FormSection,
   InputField,
+  CurrencyField,
   SelectField,
   TextareaField,
   CheckboxField,
@@ -387,24 +388,24 @@ export default function CreateProduct({
       </FormSection>
 
       <FormSection columns={4} gap="md">
-        <InputField
+        <CurrencyField
           label="Costo por unidad"
           required={formData.type === "PRODUCT"}
-          value={formData.cost}
+          value={parseFloat(formData.cost) || 0}
           onChange={(value) =>
-            setFormData((prev) => ({ ...prev, cost: value }))
+            setFormData((prev) => ({ ...prev, cost: value.toString() }))
           }
           error={errors.cost}
           placeholder="0.00"
           className="w-50 mr-4"
         />
 
-        <InputField
+        <CurrencyField
           label="Precio base"
           required
-          value={formData.basePrice}
+          value={parseFloat(formData.basePrice) || 0}
           onChange={(value) =>
-            setFormData((prev) => ({ ...prev, basePrice: value }))
+            setFormData((prev) => ({ ...prev, basePrice: value.toString() }))
           }
           placeholder="0.00"
           className="w-50 mr-4"
@@ -422,12 +423,12 @@ export default function CreateProduct({
           className="w-50 mr-4"
         />
 
-        <InputField
+        <CurrencyField
           label="Precio Total"
           required
-          value={formData.finalPrice}
+          value={parseFloat(formData.finalPrice) || 0}
           onChange={(value) =>
-            setFormData((prev) => ({ ...prev, finalPrice: value }))
+            setFormData((prev) => ({ ...prev, finalPrice: value.toString() }))
           }
           placeholder="0.00"
         />

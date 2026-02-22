@@ -6,6 +6,8 @@ import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
+import { Navbar } from "@/app/ui/components/Navbar/Navbar";
+import { GlobalSearch } from "@/app/ui/components/Navbar/GlobalSearch";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -20,6 +22,7 @@ import CreateListPrice from "@/app/ui/components/Sales/ListPrice/create/page";
 import Bills from "@/app/ui/components/Sales/Bills/pages";
 import FormBill from "@/app/ui/components/Sales/Bills/create/page";
 import BillsCreatePage from "@/app/ui/components/Sales/Bills/create/page";
+import ProfileConfig from "@/app/ui/components/Settings/Profile/page";
 
 import { ProtectedRoute } from "@/app/ui/components/ProtectedRoute";
 import { SessionProvider } from "@/app/context/SessionContext";
@@ -29,6 +32,7 @@ import { LoadingProvider } from "@/app/context/LoadingContext";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { currentView, navigateTo } = useNavigation();
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const {
     selectedClient,
     selectedSeller,
@@ -49,6 +53,18 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       setSelectedProduct(null);
     }
   }, [currentView, setSelectedProduct]);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   console.log('📋 Layout - selectedBill:', selectedBill);
   console.log('📋 Layout - currentView:', currentView);
@@ -105,13 +121,13 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         return <CreateSeller onBack={() => navigateTo('ventas-vendedor')} initialData={selectedSeller || undefined}
           mode={selectedSeller ? 'edit' : 'create'} />;
 
-      case 'ventas-bodega':
+      case 'inventario-bodega':
         return <Bodega onSelect={navigateTo} onSelectStores={setSelectedStore} />;
-      case 'ventas-bodega-create':
-        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
+      case 'inventario-bodega-create':
+        return <CreateStore onBack={() => navigateTo('inventario-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
-      case 'ventas-bodega-edit':
-        return <CreateStore onBack={() => navigateTo('ventas-bodega')} initialData={selectedStore || undefined}
+      case 'inventario-bodega-edit':
+        return <CreateStore onBack={() => navigateTo('inventario-bodega')} initialData={selectedStore || undefined}
           mode={selectedStore ? 'edit' : 'create'} />;
 
       case 'inventario-precios':
@@ -122,22 +138,36 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       case 'inventario-precios-edit':
         return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
+
+      case 'perfil-usuario':
+        return <ProfileConfig />
+
       default:
         return <div className="text-white p-8">NO SELECIONADO</div>;
     }
   };
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full h-screen overflow-hidden">
       <Sidebar onSelect={navigateTo} />
 
-      <main className="flex-1 flex justify-center ml-7 mt-7">
-        <div className="w-full max-w-[200%]">
-          <Breadcrumb activeItem={currentView} />
-          {renderContent()}
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={navigateTo} />
+        <main className="flex-1 overflow-y-auto w-full">
+          <div className="flex justify-center ml-7 mt-7 mb-7">
+            <div className="w-full max-w-[200%] pr-7">
+              <Breadcrumb activeItem={currentView} />
+              {renderContent()}
+              {children}
+            </div>
+          </div>
+        </main>
+      </div>
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelect={(id) => navigateTo(id)}
+      />
     </div>
   );
 }

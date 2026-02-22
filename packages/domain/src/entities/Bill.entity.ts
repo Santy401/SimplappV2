@@ -15,6 +15,13 @@ export enum BillStatus {
     TO_PAY = "TO_PAY"
 }
 
+export enum DianStatus {
+    PENDING = "PENDING",
+    SENT = "SENT",
+    ACCEPTED = "ACCEPTED",
+    REJECTED = "REJECTED"
+}
+
 export enum PaymentMethod {
     CASH = "CASH",
     CREDIT_CARD = "CREDIT_CARD",
@@ -59,6 +66,16 @@ export interface Bill {
     clientEmail?: string | null;
 
     notes?: string | null;
+
+    // --- Facturación Electrónica DIAN ---
+    cufe?: string | null;
+    dianStatus?: DianStatus | null;
+    dianResponse?: string | null;
+    xml?: string | null;
+    pdfUrl?: string | null;
+    sentAt?: Date | null;
+    acceptedAt?: Date | null;
+    rejectedReason?: string | null;
 
     createdAt: Date;
     updatedAt: Date;

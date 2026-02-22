@@ -30,6 +30,7 @@ export default function ClientesPage({
   const [tableversion, setTableversion] = useState(0);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'natural' | 'juridical' | 'suppliers' | 'branches'>('all');
 
   const [localLoading, setLocalLoading] = useState({
     export: false,
@@ -60,9 +61,19 @@ export default function ClientesPage({
   const suppliers = validClients.filter(c => c.is_supplier).length;
   const withBranches = validClients.filter(c => c.it_branches).length;
 
+  const filteredClients = validClients.filter(client => {
+    switch (activeFilter) {
+      case 'natural': return client.organizationType === OrganizationType.NATURAL_PERSON;
+      case 'juridical': return client.organizationType === OrganizationType.PERSON_JURIDIC;
+      case 'suppliers': return client.is_supplier;
+      case 'branches': return client.it_branches;
+      default: return true;
+    }
+  });
+
   if (isLoading.fetch && clients.length === 0) {
     return (
-      <div className="min-h-[90vh] flex items-center justify-center">
+      <div className="h-[70vh] flex items-center justify-center">
         <div className="text-center">
           <Loading />
           {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
@@ -73,7 +84,7 @@ export default function ClientesPage({
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[70vh] flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
           <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
           <p className="mb-4">{error}</p>
@@ -118,7 +129,10 @@ export default function ClientesPage({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-          <div className="border border-sidebar-border rounded-xl p-4">
+          <div
+            onClick={() => setActiveFilter('all')}
+            className={`border bg-white rounded-xl p-4 cursor-pointer transition-all ${activeFilter === 'all' ? 'ring-2 ring-foreground border-transparent' : 'border-sidebar-border hover:border-foreground/30'}`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">Total</div>
@@ -132,7 +146,10 @@ export default function ClientesPage({
             </div>
           </div>
 
-          <div className="border border-sidebar-border rounded-xl p-4">
+          <div
+            onClick={() => setActiveFilter('natural')}
+            className={`border bg-white rounded-xl p-4 cursor-pointer transition-all ${activeFilter === 'natural' ? 'ring-2 ring-foreground border-transparent' : 'border-sidebar-border hover:border-foreground/30'}`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">Naturales</div>
@@ -146,7 +163,10 @@ export default function ClientesPage({
             </div>
           </div>
 
-          <div className=" border border-sidebar-border rounded-xl p-4">
+          <div
+            onClick={() => setActiveFilter('juridical')}
+            className={`border bg-white rounded-xl p-4 cursor-pointer transition-all ${activeFilter === 'juridical' ? 'ring-2 ring-foreground border-transparent' : 'border-sidebar-border hover:border-foreground/30'}`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">Jurídicas</div>
@@ -160,7 +180,10 @@ export default function ClientesPage({
             </div>
           </div>
 
-          <div className=" border border-sidebar-border rounded-xl p-4">
+          <div
+            onClick={() => setActiveFilter('suppliers')}
+            className={`border bg-white rounded-xl p-4 cursor-pointer transition-all ${activeFilter === 'suppliers' ? 'ring-2 ring-foreground border-transparent' : 'border-sidebar-border hover:border-foreground/30'}`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">Proveedores</div>
@@ -174,7 +197,10 @@ export default function ClientesPage({
             </div>
           </div>
 
-          <div className=" border border-sidebar-border rounded-xl p-4">
+          <div
+            onClick={() => setActiveFilter('branches')}
+            className={`border bg-white rounded-xl p-4 cursor-pointer transition-all ${activeFilter === 'branches' ? 'ring-2 ring-foreground border-transparent' : 'border-sidebar-border hover:border-foreground/30'}`}
+          >
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm text-muted-foreground">Con Sucursales</div>
@@ -192,8 +218,8 @@ export default function ClientesPage({
         {validClients.length > 0 ? (
           <div className="rounded-xl overflow-hidden">
             <DataTable
-              key={`clients-table-version-${tableversion}`}
-              data={validClients}
+              key={`clients-table-version-${tableversion}-filter-${activeFilter}`}
+              data={filteredClients}
               columns={columns}
               title=""
               searchable={true}
@@ -216,7 +242,7 @@ export default function ClientesPage({
             />
           </div>
         ) : (
-          <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+          <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
             <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No hay clientes registrados</h3>
             <p className="text-muted-foreground mb-6">

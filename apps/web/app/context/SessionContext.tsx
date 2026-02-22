@@ -36,7 +36,7 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const handleLogin = () => {
     setShowModal(false);
-    router.push('/login');
+    router.push('/ui/pages/Login');
   };
 
   const checkSession = () => {

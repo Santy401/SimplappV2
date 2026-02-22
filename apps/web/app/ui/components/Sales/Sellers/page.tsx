@@ -41,7 +41,7 @@ export default function Sellers({
 
     if (isLoading.fetch && sellers.length === 0) {
         return (
-            <div className="min-h-[90vh] flex items-center justify-center">
+            <div className="h-[70vh] flex items-center justify-center">
                 <div className="text-center">
                     <Loading />
                     {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
@@ -52,7 +52,7 @@ export default function Sellers({
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="h-[70vh] flex items-center justify-center">
                 <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
                     <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
                     <p className="mb-4">{error}</p>
@@ -122,7 +122,7 @@ export default function Sellers({
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                    <div className="text-center p-12 border border-sidebar-border rounded-xl bg-white mt-4">
                         <Receipt className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No hay Vendedores registrados</h3>
                         <p className="text-muted-foreground mb-6">

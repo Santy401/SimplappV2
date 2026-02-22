@@ -222,7 +222,7 @@ export function DataTable<T extends { id: string | string }>({
   };
 
   return (
-    <div className={`rounded-lg ${className} relative`}>
+    <div className={`rounded-lg bg-white border border-sidebar-border mt-5 ${className} relative`}>
       {/* Bulk loading overlay */}
       {/* Bulk loading overlay */}
       {isBulkDeleting && (
@@ -235,66 +235,64 @@ export function DataTable<T extends { id: string | string }>({
         </div>
       )}
 
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-white ml-4 mb-4">{title}</h1>
-        <div className="flex flex-col gap-4 mx-1 my-2">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 items-center">
-            <div className="flex gap-5">
-              {actions || (
-                <>
-                  <div className="flex gap-2 border border-sidebar-border rounded-lg p-2">
-                    <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                        />
-                      </svg>
-                      Table
-                    </Button>
+      <div className="mb-4">
+        {/* {!hasSelection && (
+          <div className="flex flex-col gap-4 mx-1 my-2">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1 items-center">
+              <div className="flex gap-5">
+                {actions || (
+                  <>
+                    <div className="flex gap-2 border border-sidebar-border rounded-lg p-2">
+                      <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                        Table
+                      </Button>
+                    </div>
+                    <div>
+                    </div>
+                  </>
+                )}
+                {isBillView && (
+                  <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
+                    <TabsList>
+                      <TabsTrigger value="all">Todas</TabsTrigger>
+                      <TabsTrigger value="active">Por Pagar</TabsTrigger>
+                      <TabsTrigger value="pay">Pagadas</TabsTrigger>
+                      <TabsTrigger value="overdue">Vencidas</TabsTrigger>
+                      <TabsTrigger value="draft">Borradores</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                )}
+              </div>
+              <div className="flex gap-2 flex-wrap md:flex-nowrap items-center">
+                {searchable && (
+                  <div className="relative flex-1 md:flex-initial">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <input
+                      type="text"
+                      placeholder="Search"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="w-full pl-10 pr-4 py-2 border border-sidebar-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+                    />
                   </div>
-                  <div>
-                  </div>
-                </>
-              )}
-              {/* Only show bill view tabs when there is NO selection */}
-              {isBillView && !hasSelection && (
-                <Tabs defaultValue="all" value={statusFilter} onValueChange={setStatusFilter}>
-                  <TabsList>
-                    <TabsTrigger value="all">Todas</TabsTrigger>
-                    <TabsTrigger value="active">Por Pagar</TabsTrigger>
-                    <TabsTrigger value="pay">Pagadas</TabsTrigger>
-                    <TabsTrigger value="overdue">Vencidas</TabsTrigger>
-                    <TabsTrigger value="draft">Borradores</TabsTrigger>
-                  </TabsList>
-                </Tabs>
-              )}
-            </div>
-            <div className="flex gap-2 flex-wrap md:flex-nowrap items-center">
-              {searchable && (
-                <div className="relative flex-1 md:flex-initial">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <input
-                    type="text"
-                    placeholder="Search"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="w-full pl-10 pr-4 py-2 border border-sidebar-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                  />
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Selection action bar */}
+        )} */}
         {hasSelection && (
-          <div className="flex items-center justify-between gap-4 mx-1 my-3 px-4 py-3 bg-primary/10 border border-primary/30 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between gap-4 px-4 py-3  border border-primary/30 rounded-lg animate-in fade-in slide-in-from-top-2 duration-200">
             <div className="flex items-center gap-3">
               <span className="text-sm font-medium text-foreground">
                 {selectedIds.size} seleccionado
@@ -329,11 +327,11 @@ export function DataTable<T extends { id: string | string }>({
           </div>
         )}
 
-        <div className="border border-sidebar-border scale-99 rounded-lg overflow-auto">
+        <div className="w-full bg-white rounded-lg h-[calc(100vh-200px)] overflow-x-auto">
           <table className="w-full overflow-auto">
             <thead className="border-b border border-sidebar-border">
               <tr>
-                <th className="w-10 px-4 py-4 text-left">
+                <th className="w-10 px-4 py-3 text-left">
                   <Checkbox
                     checked={allCurrentPageSelected ? true : someCurrentPageSelected ? "indeterminate" : false}
                     onCheckedChange={toggleSelectAll}
@@ -342,7 +340,7 @@ export function DataTable<T extends { id: string | string }>({
                 {columns.map((column) => (
                   <th
                     key={String(column.key)}
-                    className={`px-4 py-4 text-left text-sm font-medium text-muted-foreground ${column.className || ""}`}
+                    className={`px-4 py-3 text-left text-[13px] font-medium text-muted-foreground ${column.className || ""}`}
                   >
                     {column.header}
                   </th>
@@ -356,7 +354,7 @@ export function DataTable<T extends { id: string | string }>({
                   <tr
                     key={item.id}
                     className={`
-          transition-all duration-300 cursor-pointer
+          transition-all duration-300 border-b border-sidebar-border cursor-pointer
           ${isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-gray-400/15"}
           ${isLoading?.deleteId === item.id ? 'opacity-50 pointer-events-none' : ''}
         `}

@@ -81,7 +81,7 @@ export default function ListPrices({
 
     if (hookLoading.fetch && listPrices.length === 0) {
         return (
-            <div className="min-h-[90vh] flex items-center justify-center">
+            <div className="h-[70vh] flex items-center justify-center">
                 <div className="text-center">
                     <Loading />
                 </div>
@@ -91,7 +91,7 @@ export default function ListPrices({
 
     if (error) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="h-[70vh] flex items-center justify-center">
                 <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
                     <h3 className="text-lg font-semibold mb-2">Error al cargar listas de precios</h3>
                     <p className="mb-4">{error}</p>
@@ -164,7 +164,7 @@ export default function ListPrices({
                         />
                     </div>
                 ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+                    <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
                         <Tag className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h3 className="text-lg font-semibold mb-2">No hay listas de precios registradas</h3>
                         <p className="text-muted-foreground mb-6">

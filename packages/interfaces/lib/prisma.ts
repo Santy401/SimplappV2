@@ -8,16 +8,72 @@ const prismaClientSingleton = () => {
   const pool = new Pool({ connectionString })
   const adapter = new PrismaPg(pool)
 
-  return new PrismaClient({
+  const client = new PrismaClient({
     adapter,
     log: ['query'],
   })
+
+  return client.$extends({
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          const softDeleteModels = ['Bill', 'Client', 'Product', 'Company']
+          
+          if (softDeleteModels.includes(model)) {
+            const clientModel = model.charAt(0).toLowerCase() + model.slice(1);
+
+            if (['findFirst', 'findMany', 'findUnique', 'findFirstOrThrow', 'findUniqueOrThrow', 'count', 'aggregate', 'groupBy'].includes(operation)) {
+              if (operation === 'findUnique' || operation === 'findUniqueOrThrow') {
+                // Si ya se especificó un filtro sobre deletedAt, no lo sobreescribimos
+                if (args.where && 'deletedAt' in args.where) {
+                  return query(args);
+                }
+                const newOp = operation === 'findUnique' ? 'findFirst' : 'findFirstOrThrow';
+                return (client as any)[clientModel][newOp]({
+                  ...args,
+                  where: { ...args.where, deletedAt: null }
+                });
+              }
+              
+              if ((args as any).where && !('deletedAt' in (args as any).where)) {
+                (args as any).where = { ...(args as any).where, deletedAt: null }
+              }
+            }
+            
+            if (['update', 'updateMany', 'upsert'].includes(operation)) {
+              if ((args as any).where && !('deletedAt' in (args as any).where)) {
+                (args as any).where = { ...(args as any).where, deletedAt: null }
+              }
+            }
+
+            if (operation === 'delete') {
+              return (client as any)[clientModel].update({
+                where: (args as any) .where,
+                data: { deletedAt: new Date() },
+              })
+            }
+            
+            if (operation === 'deleteMany') {
+              return (client as any)[clientModel].updateMany({
+                where: (args as any).where,
+                data: { deletedAt: new Date() },
+              })
+            }
+          }
+          
+          return query(args)
+        },
+      },
+    },
+  })
 }
 
+type ExtendedPrismaClient = ReturnType<typeof prismaClientSingleton>
+
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+  prismaGlobal: ExtendedPrismaClient;
 } & typeof global;
 
-export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+export const prisma = (globalThis as any).prismaGlobal ?? prismaClientSingleton()
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma
+if (process.env.NODE_ENV !== 'production') (globalThis as any).prismaGlobal = prisma
