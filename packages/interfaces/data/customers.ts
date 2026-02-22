@@ -2,7 +2,7 @@ import { Client, OrganizationType, IdentificationType } from "@domain/entities/C
 
 export const clientsData: Client[] = [
   {
-    id: 1,
+    id: "1",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "Pérez",
     secondLastName: "Gómez",
@@ -28,7 +28,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-20"),
   },
   {
-    id: 2,
+    id: "2",
     organizationType: OrganizationType.PERSON_JURIDIC,
     firstLastName: "García",
     secondLastName: null,
@@ -54,7 +54,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-15"),
   },
   {
-    id: 3,
+    id: "3",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "López",
     secondLastName: "Méndez",
@@ -80,7 +80,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-06-30"),
   },
   {
-    id: 4,
+    id: "4",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "Martínez",
     secondLastName: "Rodríguez",
@@ -106,7 +106,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-11-05"),
   },
   {
-    id: 5,
+    id: "5",
     organizationType: OrganizationType.PERSON_JURIDIC,
     firstLastName: "Sánchez",
     secondLastName: null,
@@ -132,7 +132,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-18"),
   },
   {
-    id: 6,
+    id: "6",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "Fernández",
     secondLastName: "González",
@@ -158,7 +158,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-10"),
   },
   {
-    id: 7,
+    id: "7",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "Torres",
     secondLastName: "Vargas",
@@ -184,7 +184,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-08-15"),
   },
   {
-    id: 8,
+    id: "8",
     organizationType: OrganizationType.PERSON_JURIDIC,
     firstLastName: "Ramírez",
     secondLastName: null,
@@ -210,7 +210,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-22"),
   },
   {
-    id: 9,
+    id: "9",
     organizationType: OrganizationType.NATURAL_PERSON,
     firstLastName: "Castro",
     secondLastName: "Ortega",
@@ -236,7 +236,7 @@ export const clientsData: Client[] = [
     updatedAt: new Date("2024-12-18"),
   },
   {
-    id: 10,
+    id: "10",
     organizationType: OrganizationType.PERSON_JURIDIC,
     firstLastName: 'jaunito',
     secondLastName: null,
