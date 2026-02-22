@@ -29,9 +29,11 @@ import { SessionProvider } from "@/app/context/SessionContext";
 import { NavigationProvider, useNavigation } from "@/app/context/NavigationContext";
 import { AppStateProvider, useAppState } from "@/app/context/AppStateContext";
 import { LoadingProvider } from "@/app/context/LoadingContext";
+import { useSettings } from "@/app/context/SettingsContext";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { currentView, navigateTo } = useNavigation();
+  const { openSettings } = useSettings();
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const {
     selectedClient,
@@ -147,12 +149,28 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleNavigationList = (id: string) => {
+    if (id === 'settings') {
+      openSettings('perfil');
+      return;
+    }
+    if (id === 'perfil-usuario') {
+      openSettings('perfil');
+      return;
+    }
+    if (id === 'facturacion') {
+      openSettings('facturacion');
+      return;
+    }
+    navigateTo(id);
+  };
+
   return (
     <div className="flex w-full h-screen overflow-hidden">
-      <Sidebar onSelect={navigateTo} />
+      <Sidebar onSelect={handleNavigationList} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={navigateTo} />
+        <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={handleNavigationList} />
         <main className="flex-1 overflow-y-auto w-full">
           <div className="flex justify-center ml-7 mt-7 mb-7">
             <div className="w-full max-w-[200%] pr-7">
