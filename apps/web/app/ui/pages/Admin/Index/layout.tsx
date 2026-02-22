@@ -7,6 +7,7 @@ import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
 import { Navbar } from "@/app/ui/components/Navbar/Navbar";
+import { GlobalSearch } from "@/app/ui/components/Navbar/GlobalSearch";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -30,6 +31,7 @@ import { LoadingProvider } from "@/app/context/LoadingContext";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { currentView, navigateTo } = useNavigation();
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const {
     selectedClient,
     selectedSeller,
@@ -50,6 +52,18 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       setSelectedProduct(null);
     }
   }, [currentView, setSelectedProduct]);
+
+  // Keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   console.log('📋 Layout - selectedBill:', selectedBill);
   console.log('📋 Layout - currentView:', currentView);
@@ -133,7 +147,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       <Sidebar onSelect={navigateTo} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar />
+        <Navbar onSearchOpen={() => setIsSearchOpen(true)} />
         <main className="flex-1 overflow-y-auto w-full">
           <div className="flex justify-center ml-7 mt-7 mb-7">
             <div className="w-full max-w-[200%] pr-7">
@@ -144,6 +158,11 @@ function AdminContent({ children }: { children: React.ReactNode }) {
           </div>
         </main>
       </div>
+      <GlobalSearch
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onSelect={(id) => navigateTo(id)}
+      />
     </div>
   );
 }

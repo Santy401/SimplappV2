@@ -12,7 +12,11 @@ import {
 } from "@ui/index"
 import { useLogout } from "@interfaces/src/hooks/features/auth"
 
-export const Navbar = () => {
+interface NavbarProps {
+    onSearchOpen: () => void;
+}
+
+export const Navbar = ({ onSearchOpen }: NavbarProps) => {
     const { handleLogout } = useLogout();
 
     return (
@@ -34,14 +38,18 @@ export const Navbar = () => {
 
             {/* Center - Search */}
             <div className="flex-1 max-w-xl mx-8 hidden sm:block">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <input
-                        type="text"
-                        placeholder="Buscar"
-                        className="w-full pl-9 pr-4 py-1.5 bg-transparent border border-sidebar-border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-primary transition-all text-foreground placeholder-muted-foreground"
-                    />
-                </div>
+                <button
+                    onClick={onSearchOpen}
+                    className="w-full relative group"
+                >
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-900/50 border border-sidebar-border rounded-xl text-sm text-left text-muted-foreground flex items-center justify-between hover:border-primary/50 transition-all cursor-text">
+                        <span>Buscar...</span>
+                        <kbd className="hidden sm:flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] text-muted-foreground border border-sidebar-border font-mono">
+                            <span className="text-[12px]">⌘</span>K
+                        </kbd>
+                    </div>
+                </button>
             </div>
 
             {/* Right side */}
