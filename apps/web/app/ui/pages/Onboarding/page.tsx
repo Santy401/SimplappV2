@@ -86,7 +86,7 @@ export default function OnboardingPage() {
                         <p className="text-muted-foreground">Te ayudaremos a configurar tu espacio en menos de un minuto.</p>
 
                         <Button
-                            className="bg-purple-600 hover:bg-purple-700 text-white w-full rounded py-6 mt-8 shadow-lg shadow-purple-500/20"
+                            className="bg-purple-600 flex items-center justify-center cursor-pointer hover:bg-purple-700 text-white w-full rounded py-6 mt-8 shadow-lg shadow-purple-500/20"
                             onClick={handleNext}
                         >
                             Comenzar <ArrowRight className="ml-2 w-4 h-4" />
@@ -132,10 +132,10 @@ export default function OnboardingPage() {
                             </button>
                         </div>
 
-                        <div className="flex gap-3 pt-6">
-                            <Button variant="outline" onClick={handleBack} className="flex-1">Atrás</Button>
+                        <div className="flex gap-3-6 pt-6">
+                            <Button variant="outline" onClick={handleBack} className="flex-1 py-4 rounded-xl cursor-pointer">Atrás</Button>
                             <Button
-                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2]"
+                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2] py-4 rounded-xl cursor-pointer"
                                 disabled={!userType}
                                 onClick={handleNext}
                             >
@@ -212,9 +212,9 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className="flex gap-3 pt-6">
-                            <Button variant="outline" onClick={handleBack} className="flex-1">Atrás</Button>
+                            <Button variant="outline" onClick={handleBack} className="flex-1 py-4 rounded-xl cursor-pointer">Atrás</Button>
                             <Button
-                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2]"
+                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2] py-4 rounded-xl cursor-pointer"
                                 disabled={!companyName.trim()}
                                 onClick={handleNext}
                             >
@@ -261,9 +261,9 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className="flex gap-3 pt-6">
-                            <Button variant="outline" onClick={handleBack} className="flex-1" disabled={loading}>Atrás</Button>
+                            <Button variant="outline" onClick={handleBack} className="flex-1 py-4 rounded-xl cursor-pointer" disabled={loading}>Atrás</Button>
                             <Button
-                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2]"
+                                className="bg-purple-600 hover:bg-purple-700 text-white flex-[2] py-4 rounded-xl cursor-pointer"
                                 onClick={handleSubmit}
                                 disabled={loading}
                             >
@@ -288,7 +288,7 @@ export default function OnboardingPage() {
                         <p className="text-muted-foreground">Ya puedes crear tu primera factura.</p>
 
                         <Button
-                            className="bg-purple-600 hover:bg-purple-700 text-white w-full rounded py-6 mt-8 shadow-lg shadow-purple-500/20"
+                            className="bg-purple-600 flex items-center justify-center cursor-pointer  hover:bg-purple-700 text-white w-full rounded py-6 mt-8 shadow-lg shadow-purple-500/20"
                             onClick={finishOnboarding}
                         >
                             Ir al dashboard <ArrowRight className="ml-2 w-4 h-4" />
