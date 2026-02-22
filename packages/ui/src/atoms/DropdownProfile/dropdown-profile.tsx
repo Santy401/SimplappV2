@@ -110,7 +110,7 @@ export function ProfileDropdown({ isExpanded = false }: ProfileDropdownProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect?.('perfil-usuario')} className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>
