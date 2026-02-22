@@ -41,7 +41,7 @@ export function BillPreview({
     const [showDianModal, setShowDianModal] = useState(false);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 print:p-0">
+        <div className="fixed inset-0 z-200 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 print:p-0">
             <div className="bg-card text-card-foreground border border-border w-full max-w-4xl min-h-[800px] shadow-2xl rounded-lg flex flex-col relative animate-in zoom-in-99 scale-69 duration-200">
 
                 {/* Toolbar */}

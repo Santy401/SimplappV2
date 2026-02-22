@@ -156,6 +156,7 @@
 
 body {
   background-color: var(--background);
+  overflow: hidden;
   display: flex;
   min-height: 90vh;
   /* height: 100vh; */
