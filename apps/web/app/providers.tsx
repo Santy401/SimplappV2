@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactNode, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { SettingsProvider } from './context/SettingsContext';
+import { SettingsModal } from './ui/components/SettingsModal/SettingsModal';
 
 export function Providers({ children }: { children: ReactNode }) {
     const [queryClient] = useState(
@@ -20,7 +22,10 @@ export function Providers({ children }: { children: ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            {children}
+            <SettingsProvider>
+                {children}
+                <SettingsModal />
+            </SettingsProvider>
             <ToastContainer
                 position="bottom-right"
                 autoClose={3000}

@@ -115,11 +115,11 @@ export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdow
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect?.('facturacion')} className="cursor-pointer">
             <CreditCard className="mr-2 h-4 w-4" />
             <span>Facturación</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onSelect?.('settings')} className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Configuración</span>
           </DropdownMenuItem>
