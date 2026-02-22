@@ -30,13 +30,14 @@ const SIDEBAR_ITEMS = [
     { id: "ventas-vendedor-create", label: "Crear Vendedor", parentId: "ventas-vendedor" },
     { id: "ventas-vendedor-edit", label: "Editar Vendedor", parentId: "ventas-vendedor" },
 
-    { id: "ventas-bodega", label: "Bodegas", parentId: "ventas" },
-    { id: "ventas-bodega-create", label: "Crear Bodega", parentId: "ventas-bodega" },
-    { id: "ventas-bodega-edit", label: "Editar Bodega", parentId: "ventas-bodega" },
+    { id: "inventario", label: "Inventario" },
+    { id: "inventario-bodega", label: "Bodegas", parentId: "inventario" },
+    { id: "inventario-bodega-create", label: "Crear Bodega", parentId: "inventario" },
+    { id: "inventario-bodega-edit", label: "Editar Bodega", parentId: "inventario" },
 
-    { id: "inventario-precios", label: "Lista Precios", parentId: "ventas" },
-    { id: "inventario-precios-create", label: "Crear Lista De Precios", parentId: "inventario-precios" },
-    { id: "inventario-precios-edit", label: "Editar Lista De Precios", parentId: "inventario-precios" },
+    { id: "inventario-precios", label: "Lista Precios", parentId: "inventario" },
+    { id: "inventario-precios-create", label: "Crear Lista De Precios", parentId: "inventario" },
+    { id: "inventario-precios-edit", label: "Editar Lista De Precios", parentId: "inventario" },
 ];
 
 interface BreadcrumbProps {
@@ -81,14 +82,14 @@ function detectActiveItem(pathname: string): string {
     if (path.includes('/ventas/facturacion/create')) return 'ventas-facturacio-create';
     if (path.includes('/ventas/facturacion')) return 'ventas-facturacio';
 
-    if (path.includes('/ventas/precios/create')) return 'inventario-precios-create';
-    if (path.includes('/ventas/precios')) return 'inventario-precios';
+    if (path.includes('/inventario/precios/create')) return 'inventario-precios-create';
+    if (path.includes('/inventario/precios')) return 'inventario-precios';
 
     if (path.includes('/ventas/clientes/create')) return 'ventas-clientes-create';
     if (path.includes('/ventas/clientes')) return 'ventas-clientes';
 
-    if (path.includes('/ventas/bodega/create')) return 'ventas-bodega-create';
-    if (path.includes('/ventas/bodega')) return 'ventas-bodega';
+    if (path.includes('/inventario/bodega/create')) return 'inventario-bodega-create';
+    if (path.includes('/inventario/bodega')) return 'inventario-bodega';
 
     if (path.includes('/ventas/vendedores')) return 'ventas-vendedor';
     if (path.includes('/ventas/cotizaciones')) return 'ventas-cotizaciones';

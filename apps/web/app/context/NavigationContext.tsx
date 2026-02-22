@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode, useEffect, useRef } from "react";
+import { createContext, useContext, ReactNode, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { usePersistedState } from "@hooks/usePersistedState";
 
@@ -41,20 +41,8 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
         []
     );
 
-    // Resetear a "inicio" al montar (cada inicio de sesión)
-    const isFirstMount = useRef(true);
+    // Sincronizar la URL con el estado actual
     useEffect(() => {
-        if (isFirstMount.current) {
-            isFirstMount.current = false;
-            const viewFromUrl = searchParams.get("view");
-            // Siempre arrancar en "inicio" a menos que la URL ya tenga una vista específica
-            setCurrentView(viewFromUrl || "inicio");
-        }
-    }, []);
-
-    // Sincronizar la URL con el estado actual al cambiar searchParams
-    useEffect(() => {
-        if (isFirstMount.current) return;
         const viewFromUrl = searchParams.get("view");
         if (viewFromUrl && viewFromUrl !== currentView) {
             setCurrentView(viewFromUrl);

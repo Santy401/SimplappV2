@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
     if (!user) {

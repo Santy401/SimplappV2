@@ -22,11 +22,10 @@ interface UserData {
 }
 
 interface ProfileDropdownProps {
-  isExpanded: boolean
-  onSelect?: (view: string) => void
+  isExpanded?: boolean
 }
 
-export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) {
+export function ProfileDropdown({ isExpanded = false }: ProfileDropdownProps) {
   const { logout } = useAuth()
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -63,12 +62,12 @@ export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) 
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-3 px-4 py-3">
-        <div className="w-8 h-8 rounded-full bg-slate-700 animate-pulse" />
+      <div className="flex items-center gap-3 px-1 py-1">
+        <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 animate-pulse" />
         {isExpanded && (
           <div className="flex-1">
-            <div className="h-3 bg-slate-700 rounded w-24 mb-2 animate-pulse" />
-            <div className="h-2 bg-slate-700 rounded w-32 animate-pulse" />
+            <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-24 mb-2 animate-pulse" />
+            <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-32 animate-pulse" />
           </div>
         )}
       </div>
@@ -83,7 +82,7 @@ export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="flex items-center gap-3 w-42 px-4 py-3 rounded-lg hover:bg-purple-400/50 transition-all duration-200 group"
+          className="flex items-center justify-center rounded-full hover:ring-2 hover:ring-purple-500/30 transition-all focus:outline-none outline-none"
         >
           <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
             <span className="text-white font-semibold text-xs">
@@ -91,7 +90,7 @@ export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) 
             </span>
           </div>
           {isExpanded && (
-            <div className="flex-1 text-left overflow-hidden">
+            <div className="flex-1 text-left overflow-hidden ml-3">
               <p className="text-sm font-medium text-foreground truncate">
                 {userData.name}
               </p>
@@ -102,7 +101,7 @@ export function ProfileDropdown({ isExpanded, onSelect }: ProfileDropdownProps) 
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" side="right">
+      <DropdownMenuContent className="w-56" align="end" side="bottom" sideOffset={8}>
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium">{userData.name}</p>

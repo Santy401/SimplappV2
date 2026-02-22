@@ -20,13 +20,13 @@ datasource db {
  */
 
 model User {
-  id          String      @id @default(uuid())
-  email       String   @unique
+  id          String        @id @default(uuid())
+  email       String        @unique
   name        String
   password    String
   typeAccount String
   country     String
-  company     Company?
+  companies   UserCompany[]
   bills       Bill[]
 
   companyName         String?
@@ -72,6 +72,18 @@ model User {
   refreshTokens RefreshToken[]
 }
 
+model UserCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      UserRole @default(EMPLOYEE)
+
+  user    User    @relation(fields: [userId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, companyId])
+}
+
 model ProductAccounting {
   id String @id @default(uuid())
 
@@ -109,8 +121,7 @@ model RefreshToken {
 model Company {
   id String @id @default(uuid())
 
-  userId String  @unique
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users UserCompany[]
 
   companyName      String           @default("")
   logoUrl          String? // URL del logo de la empresa
@@ -140,12 +151,17 @@ model Company {
   products Product[]
   bills    Bill[]
 
+  categories CategoryProduct[]
+
   productAccountings ProductAccounting[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   listPrices ListPrice[]
+
+  @@index([deletedAt])
 }
 
 /**
@@ -166,7 +182,7 @@ model Client {
   code             String?
 
   identificationType   IdentificationType
-  identificationNumber String             @unique
+  identificationNumber String
 
   email        String?
   includeCcBcc Boolean @default(false)
@@ -187,12 +203,18 @@ model Client {
   companyId String?
   company   Company? @relation(fields: [companyId], references: [id])
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([companyId, identificationNumber])
+  @@index([companyId])
+  @@index([identificationNumber])
+  @@index([deletedAt])
 }
 
 model Seller {
-  id             String      @id @default(uuid())
+  id             String   @id @default(uuid())
   name           String
   identification String?
   observation    String?
@@ -207,7 +229,7 @@ model Seller {
  */
 
 model Store {
-  id          String     @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   address     String?
   observation String?
@@ -234,9 +256,9 @@ model Product {
 
   taxRate String
 
-  cost       String?
-  basePrice  String?
-  finalPrice String?
+  cost       Decimal?
+  basePrice  Decimal?
+  finalPrice Decimal?
 
   trackStock         Boolean @default(true)
   allowNegativeStock Boolean @default(false)
@@ -252,21 +274,31 @@ model Product {
   inventoryMovements InventoryMovement[]
   billItems          BillItem[]
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
   categoryProductId String
+
+  @@index([companyId])
+  @@index([code])
+  @@index([deletedAt])
 }
 
 model CategoryProduct {
-  id          String    @id @default(uuid())
+  id          String @id @default(uuid())
   name        String
   description String
 
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
   products Product[]
+
+  @@index([companyId])
 }
 
 model ProductImage {
-  id  String    @id @default(uuid())
+  id  String @id @default(uuid())
   url String
 
   productId String
@@ -280,7 +312,7 @@ model InventoryMovement {
   storeId   String
 
   quantity Int
-  type     InventoryMovementType
+  type     MovementType
 
   product Product @relation(fields: [productId], references: [id])
   store   Store   @relation(fields: [storeId], references: [id])
@@ -311,8 +343,8 @@ model ProductPrice {
   productId   String
   listPriceId String
 
-  basePrice String
-  value     String
+  basePrice Decimal
+  value     Decimal
 
   product   Product   @relation(fields: [productId], references: [id])
   listPrice ListPrice @relation(fields: [listPriceId], references: [id])
@@ -325,12 +357,12 @@ model ProductPrice {
  */
 
 model Bill {
-  id          String     @id @default(uuid())
+  id          String  @id @default(uuid())
   userId      String
   clientId    String
   storeId     String
-  listPriceId String? 
-  sellerId    String? 
+  listPriceId String?
+  sellerId    String?
   companyId   String
   user        User    @relation(fields: [userId], references: [id])
   client      Client  @relation(fields: [clientId], references: [id])
@@ -338,7 +370,7 @@ model Bill {
   company     Company @relation(fields: [companyId], references: [id])
   // --- 1. Control Legal y Numeración ---
   prefix      String? @default("") // Ejemplo: "SETT"
-  number      Int 
+  number      Int
   legalNumber String?
 
   // --- 2. Estados y Fechas ---
@@ -346,14 +378,14 @@ model Bill {
   paymentMethod PaymentMethod @default(CASH)
 
   date    DateTime @default(now())
-  dueDate DateTime 
+  dueDate DateTime
 
   // --- 3. Totales (Cálculos guardados) ---
-  subtotal             String     @default("0")
-  taxTotal             String     @default("0")
-  discountTotal        String     @default("0")
-  total                String     @default("0")
-  balance              String     @default("0")
+  subtotal             Decimal    @default(0)
+  taxTotal             Decimal    @default(0)
+  discountTotal        Decimal    @default(0)
+  total                Decimal    @default(0)
+  balance              Decimal    @default(0)
   // --- 4. Snapshot (Datos del cliente al momento de facturar) ---
   clientName           String?
   clientIdentification String?
@@ -361,21 +393,37 @@ model Bill {
   clientPhone          String?
   clientEmail          String?
   items                BillItem[]
-  payments             Payment[] 
+  payments             Payment[]
   notes                String?
-  createdAt            DateTime   @default(now())
-  updatedAt            DateTime   @updatedAt
+
+  // --- 5. Facturación Electrónica DIAN ---
+  cufe           String? // Código único de factura electrónica
+  dianStatus     DianStatus?
+  dianResponse   String? // Respuesta completa de DIAN
+  xml            String? // XML generado para DIAN
+  pdfUrl         String? // URL del PDF firmado
+  sentAt         DateTime? // Cuándo se envió a DIAN
+  acceptedAt     DateTime? // Cuándo fue aceptada
+  rejectedReason String? // Motivo de rechazo si fue rechazada
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@unique([companyId, prefix, number])
+  @@index([companyId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([deletedAt])
 }
 
 model Payment {
   id String @id @default(uuid())
 
   billId String
-  bill   Bill @relation(fields: [billId], references: [id])
+  bill   Bill   @relation(fields: [billId], references: [id])
 
-  amount String
+  amount Decimal
   method PaymentMethod
   date   DateTime      @default(now())
 }
@@ -386,12 +434,13 @@ model BillItem {
   productId String
   quantity  Int
 
-  price String 
+  price    Decimal
+  subtotal Decimal
 
-  taxRate   String @default("0") 
-  taxAmount String @default("0") 
-  discount  String @default("0")
-  total     String
+  taxRate   Decimal @default(0)
+  taxAmount Decimal @default(0)
+  discount  Decimal @default(0)
+  total     Decimal
 
   productName String?
   productCode String?
@@ -404,6 +453,13 @@ model BillItem {
  * 🧩 ENUMS & CONSTANTS
  * =========================================
  */
+
+enum UserRole {
+  OWNER // Dueño de la empresa
+  ADMIN // Administrador
+  ACCOUNTANT // Contador
+  EMPLOYEE // Empleado
+}
 
 enum TypePrice {
   VALOR
@@ -461,19 +517,27 @@ enum ItemType {
   VARIANT
 }
 
-enum InventoryMovementType {
+enum MovementType {
   IN
   OUT
   ADJUSTMENT
+  TRANSFER
+}
+
+enum DianStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  REJECTED
 }
 
 enum BillStatus {
   DRAFT
-  ISSUED 
-  PAID 
+  ISSUED
+  PAID
   PARTIALLY_PAID
   CANCELLED
-  TO_PAY 
+  TO_PAY
 }
 
 enum PaymentMethod {
@@ -485,5 +549,5 @@ enum PaymentMethod {
   CHECK
   DEPOSIT
   OTHER
-  CREDIT 
+  CREDIT
 }

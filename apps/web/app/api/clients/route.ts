@@ -23,16 +23,16 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
     const clients = await prisma.client.findMany({
       where: {
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
       orderBy: {
         createdAt: 'desc',
@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     const client = await prisma.client.create({
       data: {
         ...data,
-        companyId: user.company.id,
+        companyId: user.companies[0].company.id,
       },
     });
 

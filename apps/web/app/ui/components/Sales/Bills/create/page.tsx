@@ -156,8 +156,8 @@ export default function BillsCreatePage({
                     toast.success('Factura actualizada exitosamente');
                     onSelectBill?.(result);
                 }
-            } else if (mode === 'create') {
-                result = await createBill(data);
+            } else {
+                result = await createBill({ ...data, status: data.status || BillStatus.TO_PAY });
                 if (result) {
                     toast.success('Factura creada exitosamente');
                     onSelectBill?.(result);
@@ -188,6 +188,7 @@ export default function BillsCreatePage({
                     toast.success('Borrador creado');
                 }
             }
+            onSelect?.('ventas-facturacion');
         } catch (error) {
             toast.error('Error al guardar borrador');
         }
@@ -195,7 +196,6 @@ export default function BillsCreatePage({
 
     const handleEmitBill = async (data: CreateBillInput) => {
         try {
-            // Asegurar que el estado sea TO_PAY
             const issuedData = { ...data, status: BillStatus.TO_PAY };
 
             if (currentBillId) {

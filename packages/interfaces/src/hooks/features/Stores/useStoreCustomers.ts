@@ -13,7 +13,7 @@ export const useStoreCustomers = ({ onSelect, onSelectStores, onDeleteSuccess }:
         }
 
         if (onSelect) {
-            onSelect('ventas-bodega-edit');
+            onSelect('inventario-bodega-edit');
         }
     };
 
@@ -44,7 +44,7 @@ export const useStoreCustomers = ({ onSelect, onSelectStores, onDeleteSuccess }:
         }
 
         if (onSelect) {
-            onSelect('ventas-bodega-create');
+            onSelect('inventario-bodega-create');
         }
     };
 
