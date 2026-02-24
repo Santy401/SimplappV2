@@ -87,8 +87,9 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // APIs de auth: siempre pasar (son llamadas desde el frontend)
-  if (isAuthApiRoute(pathname)) {
+  // TODAS las rutas de API: siempre pasar sin restricción
+  // Esto incluye /api/auth/session, /api/bills, /api/clients, etc.
+  if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
 
