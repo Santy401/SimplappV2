@@ -24,13 +24,23 @@ function isAppDomain(hostname: string): boolean {
 // ─── URL helpers para redirects cross-domain ─────────────────────────────────
 // En producción, los redirects entre marketing↔app van a dominios distintos.
 // En localhost, todo es relativo (mismo dominio).
-function marketingUrl(pathname: string, hostname: string): string {
-  if (isLocalhost(hostname)) return pathname;
+function marketingUrl(pathname: string, request: NextRequest): string {
+  const hostname = getHostname(request);
+  if (isLocalhost(hostname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    return url.toString();
+  }
   return `https://${ROOT_DOMAIN}${pathname}`;
 }
 
-function appUrl(pathname: string, hostname: string): string {
-  if (isLocalhost(hostname)) return pathname;
+function appUrl(pathname: string, request: NextRequest): string {
+  const hostname = getHostname(request);
+  if (isLocalhost(hostname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    return url.toString();
+  }
   return `https://${APP_SUBDOMAIN}${pathname}`;
 }
 
@@ -101,7 +111,7 @@ export async function proxy(request: NextRequest) {
   if (!appDomain) {
     // Autenticado → mandar al app domain
     if (isTokenValid) {
-      return NextResponse.redirect(appUrl('/', hostname));
+      return NextResponse.redirect(appUrl('/', request));
     }
 
     // Login/Register → dejar pasar
@@ -137,14 +147,18 @@ export async function proxy(request: NextRequest) {
     if (isTokenValid) {
       return NextResponse.redirect(new URL('/', request.url));
     }
-    // Sin sesión → mandar al marketing domain para login
-    return NextResponse.redirect(marketingUrl(pathname, hostname));
+    // En localhost no hay dominio separado → dejar pasar
+    if (isLocalhost(hostname)) return NextResponse.next();
+    // En producción → mandar al marketing domain
+    return NextResponse.redirect(marketingUrl(pathname, request));
   }
 
   // Rutas de marketing en app domain → redirigir al marketing domain
+  // En localhost, dejar pasar (no hay dominio separado)
   const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
   if (isMarketingRoute) {
-    return NextResponse.redirect(marketingUrl(pathname, hostname));
+    if (isLocalhost(hostname)) return NextResponse.next();
+    return NextResponse.redirect(marketingUrl(pathname, request));
   }
 
   // Rutas del dashboard (ventas-*, inventario-*, etc.)
@@ -152,7 +166,7 @@ export async function proxy(request: NextRequest) {
     if (!isTokenValid) {
       // Sin sesión → login en el marketing domain
       const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
-      return NextResponse.redirect(marketingUrl(loginPath, hostname));
+      return NextResponse.redirect(marketingUrl(loginPath, request));
     }
     return NextResponse.rewrite(new URL('/', request.url));
   }
@@ -160,8 +174,11 @@ export async function proxy(request: NextRequest) {
   // Raíz '/' en app domain
   if (pathname === '/' || pathname === '') {
     if (!isTokenValid) {
-      // Sin sesión → landing en marketing domain
-      return NextResponse.redirect(marketingUrl('/colombia/', hostname));
+      // Sin sesión → en localhost mandar a login directo, en prod a landing
+      if (isLocalhost(hostname)) {
+        return NextResponse.redirect(new URL('/colombia/Login/', request.url));
+      }
+      return NextResponse.redirect(marketingUrl('/colombia/', request));
     }
     // Con sesión → dashboard
     return NextResponse.next();
@@ -170,7 +187,7 @@ export async function proxy(request: NextRequest) {
   // Cualquier otra ruta sin sesión → login en marketing domain
   if (!isTokenValid) {
     const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(marketingUrl(loginPath, hostname));
+    return NextResponse.redirect(marketingUrl(loginPath, request));
   }
 
   return NextResponse.next();
