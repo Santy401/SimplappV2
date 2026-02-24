@@ -1,14 +1,15 @@
-# Despliegue: GoDaddy + Vercel (Subdominio app.simplapp.com)
+# Despliegue: GoDaddy + Vercel (Subdominios)
 
 ## Arquitectura de Dominios
 
 ```
-simplapp.com            → Landing/Marketing (público)
-app.simplapp.com        → Dashboard SPA (autenticado)
+simplapp.com.co          → Landing/Marketing (público)
+www.simplapp.com.co      → Redirect a simplapp.com.co
+app.simplapp.com.co      → Dashboard SPA (autenticado)
 ```
 
-Ambos dominios apuntan al **mismo deployment de Vercel**. El middleware (`proxy.ts`)
-decide qué contenido servir según el header `Host`.
+Ambos dominios apuntan al **mismo deployment de Vercel**.
+El middleware (`proxy.ts`) decide qué contenido servir según el header `Host`.
 
 ---
 
@@ -18,28 +19,23 @@ decide qué contenido servir según el header `Host`.
 
 1. Ve a [vercel.com](https://vercel.com) → "Add New Project"
 2. Importa el repo de GitHub: `SimplappV2`
-3. **Root Directory**: `apps/web` (¡importante! no la raíz del monorepo)
-4. **Framework Preset**: Next.js (se detecta automáticamente)
+3. **Root Directory**: `apps/web`
+4. **Framework Preset**: Next.js
 5. Deploy
 
 ### 1.2 Agregar dominios custom
 
-En el dashboard del proyecto en Vercel:
+En Vercel → Settings → Domains:
 
-1. Settings → Domains
-2. Agrega: `simplapp.com`
-3. Agrega: `www.simplapp.com` (redirect a `simplapp.com`)
-4. Agrega: `app.simplapp.com`
-
-Vercel te mostrará los **DNS records** que necesitas configurar en GoDaddy.
+1. `simplapp.com.co`
+2. `www.simplapp.com.co` (redirect a `simplapp.com.co`)
+3. `app.simplapp.com.co`
 
 ---
 
 ## Paso 2 — Configurar DNS en GoDaddy
 
-Ve a GoDaddy → DNS Management de tu dominio `simplapp.com`.
-
-### Records a crear/modificar:
+En GoDaddy → DNS Management de `simplapp.com.co`:
 
 | Tipo  | Nombre | Valor                      | TTL   |
 |-------|--------|----------------------------|-------|
@@ -47,123 +43,141 @@ Ve a GoDaddy → DNS Management de tu dominio `simplapp.com`.
 | CNAME | www    | `cname.vercel-dns.com`     | 3600  |
 | CNAME | app    | `cname.vercel-dns.com`     | 3600  |
 
-> ⚠️ Los valores exactos los da Vercel al agregar los dominios.
-> Los de arriba son los valores estándar de Vercel, pero **siempre confirma** en el panel.
+> ⚠️ Confirmar los valores exactos en el panel de Vercel al agregar los dominios.
 
 ### Verificar propagación
 
-Después de agregar los records, verifica con:
-
 ```bash
-# Verificar que el DNS apunta correctamente
-nslookup simplapp.com
-nslookup app.simplapp.com
+nslookup simplapp.com.co
+nslookup app.simplapp.com.co
 ```
 
-La propagación puede tardar entre 5 minutos y 48 horas.
+Herramienta online: https://dnschecker.org
 
 ---
 
 ## Paso 3 — Variables de entorno en Vercel
 
-En Vercel → Settings → Environment Variables, agrega **todas**:
+### Variables obligatorias
 
-### Variables existentes
 | Variable | Valor | Environments |
 |---|---|---|
-| `DATABASE_URL` | tu connection string | Production, Preview |
-| `DIRECT_URL` | tu direct connection string | Production, Preview |
-| `JWT_SECRET` | tu secret | Production, Preview |
+| `DATABASE_URL` | connection string de Supabase/Neon | Production, Preview |
+| `DIRECT_URL` | direct connection string | Production, Preview |
+| `JWT_SECRET` | tu secret key | Production, Preview |
 | `JWT_REFRESH_SECRET` | tu refresh secret | Production, Preview |
-| `NEXT_PUBLIC_API_URL` | `https://app.simplapp.com` | Production |
 
-### Variables nuevas (dominios)
-| Variable | Valor | Environments |
+### Variables de dominio (solo Production)
+
+| Variable | Valor | Nota |
 |---|---|---|
-| `NEXT_PUBLIC_ROOT_DOMAIN` | `simplapp.com` | Production |
-| `COOKIE_DOMAIN` | `.simplapp.com` | Production |
+| `NEXT_PUBLIC_ROOT_DOMAIN` | `simplapp.com.co` | Sin protocolo, sin punto |
+| `COOKIE_DOMAIN` | `.simplapp.com.co` | **CON** punto al inicio |
+| `NEXT_PUBLIC_API_URL` | `""` (vacío) | Las APIs usan URLs relativas |
 
-> ⚠️ `COOKIE_DOMAIN` DEBE empezar con `.` (punto) para que las cookies sean
-> accesibles desde ambos subdominios.
+> ⚠️ **NO poner** `COOKIE_DOMAIN` ni `NEXT_PUBLIC_ROOT_DOMAIN` en **Preview**.
+> En preview, el código usa defaults que funcionan con `.vercel.app`.
 
-> 💡 Para **Preview** deployments, NO pongas estas variables de dominio
-> (el código usa `localhost` como fallback).
+> ⚠️ `NEXT_PUBLIC_*` se baken en el bundle → requieren **redeploy** al cambiarlas.
 
 ---
 
 ## Paso 4 — SSL
 
-Vercel genera certificados SSL **automáticamente** para todos tus dominios custom.
-No necesitas hacer nada extra.
+Vercel genera certificados SSL **automáticamente** para todos los dominios custom.
 
 ---
 
-## Cómo funciona el routing en producción
+## Flujo completo en producción
 
 ### Usuario no autenticado
 
 ```
-1. Visita simplapp.com
-   → Middleware detecta host=simplapp.com, no es appDomain
-   → No tiene token → next() → muestra landing
+1. Visita simplapp.com.co
+   → Middleware: !appDomain, no token
+   → redirect /colombia/ → muestra landing
 
 2. Click "Iniciar Sesión"
-   → Va a simplapp.com/colombia/Login
-   → Middleware: isAuthPageRoute=true, no token → next()
+   → simplapp.com.co/colombia/Login/
+   → Middleware: isAuthPageRoute → next() → login page
 
-3. Submit login form
-   → POST /api/auth/login
-   → Cookies seteadas con domain=.simplapp.com
+3. Submit login
+   → POST /api/auth/login (mismo origen)
+   → Cookies con domain=.simplapp.com.co
    → window.location.href = '/'
+
+4. simplapp.com.co/ con token
+   → Middleware: !appDomain + token → redirect app.simplapp.com.co/
    
-4. Redirigido a simplapp.com/
-   → Middleware: host=simplapp.com + token válido
-   → redirect → app.simplapp.com/ ✓
+5. app.simplapp.com.co/
+   → Middleware: appDomain + token → next() → dashboard ✓
 ```
 
-### Usuario autenticado
+### Navegación en el dashboard
 
 ```
-1. Visita app.simplapp.com
-   → Middleware: isAppDomain=true, token válido → next()
-   → (dashboard)/layout.tsx renderiza dashboard
-
-2. Navega a "Facturación"
+1. Click "Facturación" en sidebar
    → NavigationContext.navigateTo('ventas-facturacion')
-   → URL: app.simplapp.com/ventas-facturacion/
-   → Middleware: isDashboardRoute + token válido → rewrite('/')
+   → URL: app.simplapp.com.co/ventas-facturacion/
+   → Middleware: isDashboardRoute + token → rewrite('/') 
    → Layout renderiza <Bills />
 ```
 
-### Sesión expirada
+### Logout
 
 ```
-1. Token expira en app.simplapp.com
-   → Middleware: isDashboardRoute + token inválido
-   → redirect → simplapp.com/colombia/Login?redirect=/ventas-facturacion/
+1. Click cerrar sesión
+   → POST /api/auth/logout (limpia cookies con domain)
+   → window.location.href = 'https://simplapp.com.co/colombia/Login/'
+   → Usuario en marketing domain ✓
 ```
+
+---
+
+## Configuración para desarrollo local
+
+En local **NO necesitas** las variables de dominio. Todo funciona en `localhost:3000`:
+
+```env
+# .env (solo estas son necesarias en local)
+DATABASE_URL="postgresql://..."
+DIRECT_URL="postgresql://..."
+JWT_SECRET="tu-secret"
+JWT_REFRESH_SECRET="tu-refresh-secret"
+NEXT_PUBLIC_API_URL=""
+```
+
+En localhost:
+- `isAppDomain('localhost') = true` → siempre dashboard
+- `marketingUrl('/path') = '/path'` → URLs relativas (mismo dominio)
+- `COOKIE_DOMAIN` no seteado → cookies sin `domain` → funciona en localhost
 
 ---
 
 ## Troubleshooting
 
 ### Las cookies no funcionan entre subdominios
-- Verifica que `COOKIE_DOMAIN=.simplapp.com` (con el punto inicial)
-- Las cookies deben tener `secure: true` en producción (ya configurado)
-- `sameSite: 'lax'` funciona para navegación normal entre subdominios
+- `COOKIE_DOMAIN` debe ser `.simplapp.com.co` (con punto al inicio)
+- Las cookies deben tener `secure: true` en producción
+- Limpia TODAS las cookies del browser y prueba de nuevo
 
-### El middleware no detecta el dominio correcto
-- Verifica `NEXT_PUBLIC_ROOT_DOMAIN=simplapp.com` en Vercel env vars
-- El middleware lee `request.headers.get('host')` — Vercel lo proporciona correctamente
-
-### DNS no propaga
-- Usa https://dnschecker.org para verificar propagación global
-- GoDaddy puede tener "Domain Forwarding" habilitado que interfiere — desactívalo
+### Blank page después de login
+- Verifica que `/api/auth/session` responde (F12 → Network)
+- Si da redirect en vez de JSON: el middleware está atrapando APIs
+- Solución: `if (pathname.startsWith('/api/')) return NextResponse.next();`
 
 ### Redirect loop
-- Limpia cookies del browser (DevTools → Application → Cookies → Clear All)
-- Verifica que no haya `domain forwarding` en GoDaddy
-- Verifica que Vercel tenga ambos dominios como "Primary" o "Redirect"
+- Limpia cookies del browser
+- Verifica que `NEXT_PUBLIC_ROOT_DOMAIN=simplapp.com.co` (sin protocolo)
+- Verifica que no haya "Domain Forwarding" en GoDaddy
+
+### Landing se ve en app.simplapp.com.co
+- El middleware debe usar `marketingUrl()` para redirects al marketing domain
+- Los redirects NO deben usar `url.pathname =` (mantiene el hostname)
+
+### Variables NEXT_PUBLIC_* no toman efecto
+- Estas variables se baken en build time
+- Después de cambiarlas, hacer **Redeploy** en Vercel
 
 ---
 
@@ -173,31 +187,36 @@ No necesitas hacer nada extra.
                     ┌──────────────────────┐
                     │      GoDaddy DNS     │
                     │                      │
-                    │  simplapp.com → A    │
-                    │  app.* → CNAME       │
+                    │  simplapp.com.co → A │
+                    │  www → CNAME         │
+                    │  app → CNAME         │
                     └──────┬───────────────┘
                            │
                     ┌──────▼───────────────┐
-                    │    Vercel Edge       │
-                    │    (SSL auto)        │
+                    │   Vercel Edge (SSL)  │
                     └──────┬───────────────┘
                            │
                     ┌──────▼───────────────┐
                     │    proxy.ts          │
                     │    (Middleware)       │
                     │                      │
-                    │  host check:         │
-                    │  ├─ simplapp.com     │
-                    │  │  → marketing      │
-                    │  └─ app.simplapp.com │
-                    │     → dashboard      │
+                    │  Host header:        │
+                    │  ├─ simplapp.com.co  │
+                    │  │  (marketing)      │
+                    │  └─ app.simplapp...  │
+                    │     (dashboard)      │
                     └──────┬───────────────┘
                            │
               ┌────────────┴────────────┐
               │                         │
    ┌──────────▼──────────┐  ┌──────────▼──────────┐
    │  (marketing)        │  │  (dashboard)        │
-   │  Landing + Auth     │  │  SPA Dashboard      │
-   │  simplapp.com       │  │  app.simplapp.com   │
+   │  + (auth)           │  │  SPA con sidebar    │
+   │  Landing, Login,    │  │  + NavigationContext │
+   │  Register           │  │  + ProtectedRoute   │
+   │                     │  │                     │
+   │  simplapp.com.co    │  │  app.simplapp.com.co│
    └─────────────────────┘  └─────────────────────┘
+   
+   Cookies: domain=.simplapp.com.co (compartidas)
 ```

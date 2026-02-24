@@ -32,8 +32,11 @@ This document contains core rules and preferences for the Simplapp V2 project. T
 - To add a new view category with a new URL prefix, register it in `DASHBOARD_ROUTES` inside `apps/web/proxy.ts`.
 
 ## Domain Architecture (Production)
-- `simplapp.com` → Marketing/Landing (public). Authenticated users redirect to `app.simplapp.com`.
-- `app.simplapp.com` → Dashboard SPA (authenticated). Unauthenticated users redirect to login.
+- `simplapp.com.co` → Marketing/Landing (public). Authenticated users redirect to `app.simplapp.com.co`.
+- `app.simplapp.com.co` → Dashboard SPA (authenticated). Unauthenticated users redirect to marketing domain.
 - Both domains point to the **same Vercel deployment**. The middleware reads `Host` header to decide.
-- Cookies use `domain=.simplapp.com` (env: `COOKIE_DOMAIN`) for cross-subdomain auth.
-- In local dev, `localhost` always behaves as app domain (dashboard).
+- Cookies use `domain=.simplapp.com.co` (env: `COOKIE_DOMAIN`) for cross-subdomain auth.
+- In local dev, `localhost` always behaves as app domain (dashboard). All redirects are relative.
+- **Cross-domain redirects** must use `marketingUrl()` / `appUrl()` helpers in proxy.ts — never `url.pathname =` alone.
+- All `/api/*` routes MUST pass through middleware without any checks (early return).
+- `NEXT_PUBLIC_*` env vars are baked at build time — require **redeploy** after changing.
