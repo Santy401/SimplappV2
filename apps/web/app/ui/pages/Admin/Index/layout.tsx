@@ -1,13 +1,14 @@
 'use client';
 
 import "@/app/globals.css";
-import Sidebar from "@/app/ui/components/Navbar/Sidebar";
+import Sidebar from "@/app/ui/components/Bars/Sidebar";
 import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
-import { Navbar } from "@/app/ui/components/Navbar/Navbar";
-import { GlobalSearch } from "@/app/ui/components/Navbar/GlobalSearch";
+import { Navbar } from "@/app/ui/components/Bars/Navbar";
+import { GlobalSearch } from "@/app/ui/components/Bars/GlobalSearch";
+import { SettingsModal } from "@/app/ui/components/SettingsModal/SettingsModal";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -141,7 +142,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
 
-      case 'perfil-usuario':
+      case 'profile-settings':
         return <ProfileConfig />
 
       default:
@@ -150,11 +151,8 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigationList = (id: string) => {
-    if (id === 'settings') {
-      openSettings('perfil');
-      return;
-    }
-    if (id === 'perfil-usuario') {
+    console.log('DEBUG - handleNavigationList id:', id);
+    if (id === 'settings' || id === 'perfil-usuario' || id === 'profile-settings') {
       openSettings('perfil');
       return;
     }
@@ -186,6 +184,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         onClose={() => setIsSearchOpen(false)}
         onSelect={(id) => navigateTo(id)}
       />
+      <SettingsModal />
     </div>
   );
 }

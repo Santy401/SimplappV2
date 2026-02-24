@@ -111,7 +111,7 @@ export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdow
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onSelect?.('perfil-usuario')} className="cursor-pointer">
+          <DropdownMenuItem onClick={() => onSelect?.('profile-settings')} className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>Perfil</span>
           </DropdownMenuItem>
