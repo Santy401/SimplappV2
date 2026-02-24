@@ -21,3 +21,8 @@ export * from './molecules/DataTableSkeleton';
 
 // UTILS
 export * from './utils/utils'
+
+// ORGANISMS
+export * from './organisms/Sidebar';
+export * from './organisms/Navbar';
+export * from './organisms/GlobalSearch';
