@@ -16,14 +16,22 @@ export async function POST() {
       await revokeRefreshToken(refreshToken);
     }
 
-    cookieStore.delete('access-token');
-    cookieStore.delete('refresh-token');
+    // Domain para limpiar cookies cross-subdomain
+    const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+    const cookieOptions = {
+      path: '/',
+      ...(cookieDomain && { domain: cookieDomain }),
+    };
 
-    cookieStore.delete('auth-token');
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Logout exitoso'
     });
+
+    response.cookies.delete({ name: 'access-token', ...cookieOptions });
+    response.cookies.delete({ name: 'refresh-token', ...cookieOptions });
+    response.cookies.delete({ name: 'auth-token', ...cookieOptions });
+
+    return response;
 
   } catch (error) {
     console.error('Logout error:', error);
