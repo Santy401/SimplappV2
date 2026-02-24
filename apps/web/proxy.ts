@@ -164,17 +164,29 @@ export async function proxy(request: NextRequest) {
   // Raíz '/' en app domain
   if (pathname === '/' || pathname === '') {
     if (!isTokenValid) {
-      // Sin sesión en app.* → mandar al login del marketing
-      const loginUrl = process.env.NODE_ENV === 'production'
-        ? `https://${ROOT_DOMAIN}/colombia/Login`
-        : 'http://localhost:3000/colombia/Login';
-      return NextResponse.redirect(loginUrl);
+      // Sin sesión → mandar a la landing (desde ahí puede ir a Login o Register)
+      const url = request.nextUrl.clone();
+      url.pathname = '/colombia/';
+      return NextResponse.redirect(url);
     }
     // Con sesión → dashboard
     return NextResponse.next();
   }
 
-  // Cualquier otra ruta en app domain sin sesión → login
+  // Rutas de marketing (/colombia/, /us/, etc.) → siempre accesibles
+  // Esto permite la landing page y que el usuario navegue a Login/Register
+  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
+  if (isMarketingRoute) {
+    // Si ya tiene sesión y está en una página de marketing (no auth), mandar al dashboard
+    if (isTokenValid && !isAuthPageRoute(pathname)) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+    return NextResponse.next();
+  }
+
+  // Cualquier otra ruta desconocida sin sesión → login
   if (!isTokenValid) {
     const url = request.nextUrl.clone();
     url.pathname = '/colombia/Login';
