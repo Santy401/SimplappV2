@@ -1,13 +1,13 @@
 'use client';
 
 import "@/app/globals.css";
-import Sidebar from "@/app/ui/components/bars/Sidebar";
+import Sidebar from "@/app/ui/components/Bars/Sidebar";
 import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
-import { Navbar } from "@/app/ui/components/bars/Navbar";
-import { GlobalSearch } from "@/app/ui/components/bars/GlobalSearch";
+import { Navbar } from "@/app/ui/components/Bars/Navbar";
+import { GlobalSearch } from "@/app/ui/components/Bars/GlobalSearch";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -141,7 +141,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         return <CreateListPrice onBack={() => navigateTo('inventario-precios')} initialData={selectedListPrice || undefined}
           mode={selectedListPrice ? 'edit' : 'create'} />
 
-      case 'perfil-usuario':
+      case 'profile-settings':
         return <ProfileConfig />
 
       default:
