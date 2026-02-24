@@ -132,9 +132,8 @@ export default function LandingPage({
               </div>
             ))}
           </div>
-
           {/* Screenshot del app */}
-          <div className="mt-14 relative">
+          {/* <div className="mt-14 relative">
             <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-2xl shadow-gray-200/50 bg-white">
               <img
                 src="/PreviewWeb.png"
@@ -142,9 +141,8 @@ export default function LandingPage({
                 className="w-full h-auto"
               />
             </div>
-            {/* Glow decorativo */}
             <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-3/4 h-32 bg-purple-400/10 rounded-full blur-3xl pointer-events-none" />
-          </div>
+          </div> */}
         </section>
 
         {/* ── Features ── */}
