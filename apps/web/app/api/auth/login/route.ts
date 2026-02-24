@@ -62,12 +62,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     response.cookies.delete('token');
     response.cookies.delete('auth-token');
 
+    // Domain para cookies cross-subdomain (simplapp.com + app.simplapp.com)
+    const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+
     response.cookies.set('access-token', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 15 * 60,
       path: '/',
+      ...(cookieDomain && { domain: cookieDomain }),
     });
 
     response.cookies.set('refresh-token', refreshToken, {
@@ -76,6 +80,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
       path: '/',
+      ...(cookieDomain && { domain: cookieDomain }),
     });
 
     return response;

@@ -33,7 +33,8 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
 
   const handleLogin = () => {
     setShowModal(false);
-    router.push('/ui/pages/Login');
+    // Asumimos colombia como default para la reconexión rápida, o mandamos a la raíz para que resuelva.
+    router.push('/colombia/Login');
   };
 
   const checkSession = () => {

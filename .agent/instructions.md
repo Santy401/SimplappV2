@@ -20,3 +20,20 @@ This document contains core rules and preferences for the Simplapp V2 project. T
 ## References
 - See `.doc/GUIA_COMMITS.md` for detailed commit message formatting.
 - See `.doc/GUIA_IMPLEMENTACION.md` for feature implementation standards.
+- See `.doc/ARQUITECTURA_ROUTING.md` for the dashboard SPA routing architecture (middleware, NavigationContext, trailingSlash behavior).
+- See `.doc/GUIA_DESPLIEGUE.md` for GoDaddy DNS + Vercel deployment with subdomains.
+- Use `/add-dashboard-view` workflow when adding a new view to the dashboard.
+
+## Routing Rules (Dashboard SPA)
+- The dashboard is a **SPA** — all views render inside `(dashboard)/layout.tsx` via `NavigationContext`.
+- **Never redirect post-login to `/dashboard`** — always redirect to `/` (root).
+- All dashboard routes (`/ventas-*`, `/inventario-*`, etc.) are handled via **middleware rewrite → `/`** to avoid conflicts with `(marketing)/[country]`.
+- `trailingSlash: true` is active in `next.config.ts` — account for this in any URL comparison.
+- To add a new view category with a new URL prefix, register it in `DASHBOARD_ROUTES` inside `apps/web/proxy.ts`.
+
+## Domain Architecture (Production)
+- `simplapp.com` → Marketing/Landing (public). Authenticated users redirect to `app.simplapp.com`.
+- `app.simplapp.com` → Dashboard SPA (authenticated). Unauthenticated users redirect to login.
+- Both domains point to the **same Vercel deployment**. The middleware reads `Host` header to decide.
+- Cookies use `domain=.simplapp.com` (env: `COOKIE_DOMAIN`) for cross-subdomain auth.
+- In local dev, `localhost` always behaves as app domain (dashboard).

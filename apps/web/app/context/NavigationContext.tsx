@@ -43,11 +43,21 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
 
     // Sincronizar la URL con el estado actual
     useEffect(() => {
-        const viewFromUrl = searchParams.get("view");
-        if (viewFromUrl && viewFromUrl !== currentView) {
-            setCurrentView(viewFromUrl);
+        // Quitar trailing slash y barra inicial: '/ventas-facturacion/' → 'ventas-facturacion'
+        const cleanPath = pathname.replace(/\/$/, '');
+        const pathSegment = cleanPath.slice(1);
+
+        // La raíz '/' equivale a la vista 'dashboard'
+        if (pathname === '/' || pathname === '') {
+            setCurrentView('dashboard');
+            return;
         }
-    }, [searchParams]);
+
+        // Si el path difiere del estado actual, sincronizar
+        if (pathSegment && pathSegment !== currentView && pathSegment !== 'Onboarding') {
+            setCurrentView(pathSegment);
+        }
+    }, [pathname]);
 
     // Actualizar la URL cuando cambia la vista
     const navigateTo = (view: string, preserveState: boolean = true) => {
@@ -58,10 +68,9 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
             setNavigationHistory((prev) => [...prev, currentView]);
         }
 
-        // Actualizar la URL
-        const url = new URL(window.location.href);
-        url.searchParams.set("view", view);
-        router.push(url.pathname + url.search, { scroll: false });
+        // Actualizar la URL: inicio/dashboard viven en '/', el resto en su slug
+        const path = (view === 'inicio' || view === 'dashboard') ? '/' : `/${view}`;
+        router.push(path, { scroll: false });
     };
 
     const goBack = () => {
@@ -70,7 +79,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
             setNavigationHistory((prev) => prev.slice(0, -1));
             navigateTo(previousView, false);
         } else {
-            navigateTo("dashboard", false);
+            navigateTo('dashboard', false);
         }
     };
 

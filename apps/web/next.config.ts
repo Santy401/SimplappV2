@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["@simplapp/ui"],
+  trailingSlash: true,
 
   async headers() {
     return [

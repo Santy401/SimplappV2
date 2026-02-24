@@ -14,7 +14,7 @@ export function useAuth() {
 
             if (!response.ok) {
                 console.error('Failed to refresh token');
-                router.push('/login');
+                router.push('/colombia/Login');
                 return false;
             }
 
@@ -26,7 +26,7 @@ export function useAuth() {
             return true;
         } catch (error) {
             console.error('Error refreshing token:', error);
-            router.push('/login');
+            router.push('/colombia/Login');
             return false;
         }
     }, [router]);
@@ -54,7 +54,7 @@ export function useAuth() {
             if (!response.ok) {
                 const refreshed = await refreshAccessToken();
                 if (!refreshed) {
-                    router.push('/login');
+                    router.push('/colombia/Login');
                 }
                 return;
             }
@@ -62,7 +62,7 @@ export function useAuth() {
             scheduleTokenRefresh();
         } catch (error) {
             console.error('Error checking session:', error);
-            router.push('/login');
+            router.push('/colombia/Login');
         }
     }, [refreshAccessToken, scheduleTokenRefresh, router]);
 
@@ -77,10 +77,10 @@ export function useAuth() {
                 credentials: 'include',
             });
 
-            router.push('/ui/pages/Login');
+            router.push('/colombia/Login');
         } catch (error) {
             console.error('Logout error:', error);
-            router.push('/ui/pages/Login');
+            router.push('/colombia/Login');
         }
     }, [router]);
 

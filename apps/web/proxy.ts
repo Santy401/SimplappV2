@@ -2,51 +2,81 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
-// Public routes, no auth needed
-const PUBLIC_ROUTES = [
-  '/ui/pages/Login',
-  '/ui/pages/Register',
-  '/login',
-  '/register',
+// ─── Dominios ────────────────────────────────────────────────────────────────
+// En producción: simplapp.com (marketing) y app.simplapp.com (dashboard)
+// En desarrollo: todo corre en localhost (isAppDomain = true por defecto)
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'simplapp.com';
+const APP_SUBDOMAIN = `app.${ROOT_DOMAIN}`;
+
+function getHostname(request: NextRequest): string {
+  return request.headers.get('host') || '';
+}
+
+function isAppDomain(hostname: string): boolean {
+  // En localhost siempre tratamos como app domain (dashboard)
+  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) return true;
+  // En producción, solo app.simplapp.com es el dashboard
+  return hostname === APP_SUBDOMAIN || hostname.startsWith('app.');
+}
+
+// ─── Rutas de Auth API (siempre públicas) ────────────────────────────────────
+const AUTH_API_ROUTES = [
   '/api/auth/login',
   '/api/auth/register',
   '/api/auth/forgot-password',
   '/api/auth/reset-password',
 ];
 
-// Protected routes, auth required
-const PROTECTED_ROUTES = [
-  '/admin',
-  '/ui/pages/Admin',
+function isAuthApiRoute(pathname: string): boolean {
+  return AUTH_API_ROUTES.some(route => pathname.startsWith(route));
+}
+
+// ─── Páginas de Login/Register (marketing) ───────────────────────────────────
+function isAuthPageRoute(pathname: string): boolean {
+  return (
+    pathname.endsWith('/Login') ||
+    pathname.endsWith('/Register') ||
+    pathname.endsWith('/Login/') ||
+    pathname.endsWith('/Register/')
+  );
+}
+
+// ─── Rutas protegidas del dashboard ──────────────────────────────────────────
+// Prefijos de URL que pertenecen al dashboard SPA.
+// El middleware hace rewrite→'/' para evitar conflicto con (marketing)/[country].
+const DASHBOARD_ROUTES = [
+  '/Dashboard',
   '/dashboard',
+  '/ventas-',
+  '/inventario-',
+  '/profile-settings',
+  '/Onboarding',
+  '/Settings',
 ];
 
-// Check if route is public
-function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+function isDashboardRoute(pathname: string): boolean {
+  return DASHBOARD_ROUTES.some(route => pathname.startsWith(route));
 }
 
-// Check if route is protected
-function isProtectedRoute(pathname: string): boolean {
-  return PROTECTED_ROUTES.some(route => pathname.startsWith(route));
-}
-
-// Validate token signature
+// ─── Validar JWT ─────────────────────────────────────────────────────────────
 async function verifyToken(token: string): Promise<boolean> {
   if (!token) return false;
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET);
     await jwtVerify(token, secret);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
 
+// ─── Middleware principal ─────────────────────────────────────────────────────
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const hostname = getHostname(request);
+  const appDomain = isAppDomain(hostname);
 
-  // Ignore static files and internal Next.js requests
+  // Ignorar archivos estáticos y requests internos de Next.js
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
@@ -55,50 +85,97 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Get access token
-  const accessToken = request.cookies.get('access-token')?.value;
-  const isTokenValid = await verifyToken(accessToken || '');
-
-  // Handle public routes
-  // Redirect authenticated users to admin
-  if (isPublicRoute(pathname)) {
-    if (isTokenValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/ui/pages/Admin/Index';
-      return NextResponse.redirect(url);
-    }
+  // APIs de auth: siempre pasar (son llamadas desde el frontend)
+  if (isAuthApiRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Handle protected routes
-  // Redirect unauthenticated users to login
-  if (isProtectedRoute(pathname)) {
+  // Obtener y validar el token
+  const accessToken = request.cookies.get('access-token')?.value;
+  const isTokenValid = await verifyToken(accessToken || '');
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DOMINIO MARKETING: simplapp.com
+  // Solo sirve landing y páginas de auth. Si hay sesión → redirige a app.*
+  // ═══════════════════════════════════════════════════════════════════════════
+  if (!appDomain) {
+    // Usuario autenticado en simplapp.com → mandarlo al dashboard
+    if (isTokenValid) {
+      const appUrl = process.env.NODE_ENV === 'production'
+        ? `https://${APP_SUBDOMAIN}/`
+        : 'http://localhost:3000/';
+      return NextResponse.redirect(appUrl);
+    }
+
+    // Páginas de login/register → dejar pasar (son parte del marketing)
+    if (isAuthPageRoute(pathname)) {
+      return NextResponse.next();
+    }
+
+    // Raíz → landing
+    if (pathname === '/' || pathname === '') {
+      return NextResponse.next();
+    }
+
+    // Cualquier otra ruta en simplapp.com → mandarlo a la landing
+    const url = request.nextUrl.clone();
+    url.pathname = '/colombia/';
+    return NextResponse.redirect(url);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DOMINIO APP: app.simplapp.com (o localhost)
+  // Solo sirve el dashboard. Sin sesión → redirige a simplapp.com/Login
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // Páginas de Login/Register en app.* → redirigir al marketing si ya hay sesión
+  if (isAuthPageRoute(pathname)) {
+    if (isTokenValid) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+    // Sin sesión en app.*/Login → dejar pasar (puede pasar en dev)
+    return NextResponse.next();
+  }
+
+  // Rutas específicas del dashboard (ventas-*, inventario-*, etc.)
+  // Usamos rewrite→'/' para que (dashboard)/layout.tsx las maneje siempre
+  // y evitar conflicto con (marketing)/[country]
+  if (isDashboardRoute(pathname)) {
     if (!isTokenValid) {
       const url = request.nextUrl.clone();
-      url.pathname = '/ui/pages/Login';
+      url.pathname = '/colombia/Login';
       url.searchParams.set('redirect', pathname);
-
       const response = NextResponse.redirect(url);
-
-      // Clear invalid cookies
       if (accessToken) {
         response.cookies.delete('access-token');
         response.cookies.delete('refresh-token');
       }
       return response;
     }
+    return NextResponse.rewrite(new URL('/', request.url));
+  }
+
+  // Raíz '/' en app domain
+  if (pathname === '/' || pathname === '') {
+    if (!isTokenValid) {
+      // Sin sesión en app.* → mandar al login del marketing
+      const loginUrl = process.env.NODE_ENV === 'production'
+        ? `https://${ROOT_DOMAIN}/colombia/Login`
+        : 'http://localhost:3000/colombia/Login';
+      return NextResponse.redirect(loginUrl);
+    }
+    // Con sesión → dashboard
     return NextResponse.next();
   }
 
-  // Handle root path
-  if (pathname === '/') {
-    if (isTokenValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/ui/pages/Admin/Index';
-      return NextResponse.redirect(url);
-    }
-    // Allow access to landing page for unauthenticated users
-    return NextResponse.next();
+  // Cualquier otra ruta en app domain sin sesión → login
+  if (!isTokenValid) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/colombia/Login';
+    url.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

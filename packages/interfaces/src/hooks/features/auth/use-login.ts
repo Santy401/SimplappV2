@@ -52,8 +52,8 @@ export const useLogin = () => {
       const result = await response.json();
       console.log('Login successful:', result);
 
-      // Redirección
-      window.location.href = '/ui/pages/Admin/Index';
+      // Redirección al dashboard (raíz de la app autenticada)
+      window.location.href = '/';
 
     } catch (err) {
       const message =
