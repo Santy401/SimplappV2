@@ -4,7 +4,7 @@
   "rsc": true,
   "tsx": true,
   "tailwind": {
-    "config": "",
+    "config": "tailwind.config.js",
     "css": "app/globals.css",
     "baseColor": "neutral",
     "cssVariables": true,
@@ -12,11 +12,11 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@/app/ui/cn/components",
-    "utils": "@/app/ui/cn/lib/utils",
-    "ui": "@/simplapp/ui/src/atoms",
-    "lib": "@/app/ui/cn/lib",
-    "hooks": "@/app/ui/cn/hooks"
+    "components": "@ui/molecules",
+    "utils": "@ui/utils/utils",
+    "ui": "@ui/atoms",
+    "lib": "@ui/utils",
+    "hooks": "@hooks"
   },
   "registries": {}
 }
