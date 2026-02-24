@@ -151,6 +151,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigationList = (id: string) => {
+    console.log('DEBUG - handleNavigationList id:', id);
     if (id === 'settings' || id === 'perfil-usuario' || id === 'profile-settings') {
       openSettings('perfil');
       return;
