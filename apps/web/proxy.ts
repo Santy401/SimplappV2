@@ -15,6 +15,8 @@ function getHostname(request: NextRequest): string {
 function isAppDomain(hostname: string): boolean {
   // En localhost siempre tratamos como app domain (dashboard)
   if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) return true;
+  // Vercel preview/production domains → tratar como app domain
+  if (hostname.endsWith('.vercel.app')) return true;
   // En producción, solo app.simplapp.com es el dashboard
   return hostname === APP_SUBDOMAIN || hostname.startsWith('app.');
 }
@@ -112,9 +114,11 @@ export async function proxy(request: NextRequest) {
       return NextResponse.next();
     }
 
-    // Raíz → landing
+    // Raíz → redirigir a landing (no hay page.tsx en marketing para '/')
     if (pathname === '/' || pathname === '') {
-      return NextResponse.next();
+      const url = request.nextUrl.clone();
+      url.pathname = '/colombia/';
+      return NextResponse.redirect(url);
     }
 
     // Cualquier otra ruta en simplapp.com → mandarlo a la landing
