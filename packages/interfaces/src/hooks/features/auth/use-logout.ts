@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 export const useLogout = () => {
-  const [ isLoading, setIsLoading ] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,15 +17,15 @@ export const useLogout = () => {
         credentials: 'include',
       });
 
-      window.location.href = '/ui/pages/Login';
+      window.location.href = '/colombia/Login';
 
     } catch (err) {
       console.error('Logout error:', err);
-      window.location.href = '/ui/pages/Login';
+      window.location.href = '/colombia/Login';
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   return { handleLogout, isLoading }
 };
