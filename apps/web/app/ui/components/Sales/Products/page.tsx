@@ -1,6 +1,6 @@
 "use client";
 
-import { DataTable, Loading } from "@simplapp/ui";
+import { DataTable, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Button } from '@simplapp/ui';
 import {
     Package,
@@ -64,10 +64,55 @@ export default function Productos({
 
     if (isLoading.fetch && products.length === 0) {
         return (
-            <div className="h-[70vh] flex items-center justify-center">
-                <div className="text-center">
-                    <Loading />
-                    {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+            <div className="min-h-fit w-full animate-in fade-in duration-200">
+                <div className="max-w-5xl mx-auto px-4 py-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">
+                                <Skeleton className="h-9 w-64" />
+                            </h1>
+                            <div className="text-muted-foreground mt-2">
+                                <Skeleton className="h-5 w-64" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded" />
+                            </Button>
+                            <Button
+                                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[150px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            </Button>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                        {Array.from({ length: 3 }).map((_, i) => (
+                            <div key={i} className="border border-sidebar-border rounded-xl p-4 bg-white">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm text-muted-foreground mb-1">
+                                            <Skeleton className="h-4 w-16" />
+                                        </div>
+                                        <div className="text-2xl font-bold text-foreground">
+                                            <Skeleton className="h-8 w-12" />
+                                        </div>
+                                    </div>
+                                    <div className="p-2 rounded-lg bg-muted/20">
+                                        <Skeleton className="w-6 h-6 rounded" />
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <DataTableSkeleton />
                 </div>
             </div>
         );
@@ -91,14 +136,14 @@ export default function Productos({
     }
 
     return (
-        <div className="min-h-fit">
+        <div className="min-h-fit animate-in fade-in duration-500">
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">Productos De Venta</h1>
-                        <p className="text-muted-foreground mt-2">
+                        <div className="text-muted-foreground mt-2">
                             Gestiona tu catálogo de productos y servicios
-                        </p>
+                        </div>
                     </div>
                     <div className="flex gap-3">
                         <Button

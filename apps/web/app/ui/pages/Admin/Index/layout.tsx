@@ -190,6 +190,8 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { SettingsProvider } from "@/app/context/SettingsContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -201,7 +203,9 @@ export default function RootLayout({
         <ProtectedRoute>
           <NavigationProvider>
             <AppStateProvider>
-              <AdminContent>{children}</AdminContent>
+              <SettingsProvider>
+                <AdminContent>{children}</AdminContent>
+              </SettingsProvider>
             </AppStateProvider>
           </NavigationProvider>
         </ProtectedRoute>

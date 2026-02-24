@@ -7,6 +7,7 @@ export * from './atoms/DropdownProfile/dropdown-profile'
 export * from './atoms/DropdownMenu/dropdown-menu'
 export * from './atoms/Badge/badge'
 export * from './atoms/LoadingV2/Loading'
+export * from './atoms/Skeleton/skeleton'
 
 // MOLECULES
 export * from './molecules/FormFields';
@@ -15,6 +16,8 @@ export * from './molecules/FormModalLayout';
 export * from './molecules/theme-provider';
 export * from './molecules/FormSection';
 export * from './molecules/TableActionsDropdown';
+export * from './molecules/PageSkeleton/PageSkeleton';
+export * from './molecules/DataTableSkeleton';
 
 // UTILS
 export * from './utils/utils'

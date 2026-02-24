@@ -12,7 +12,7 @@ import {
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { useClients } from "@interfaces/src/hooks/index"
 import { useClientTable } from "@interfaces/src/hooks/index";
-import { Loading } from '@simplapp/ui'
+import { Loading, DataTableSkeleton, Skeleton } from '@simplapp/ui'
 import { useState, useEffect } from "react";
 
 interface ClientesProps {
@@ -73,10 +73,51 @@ export default function ClientesPage({
 
   if (isLoading.fetch && clients.length === 0) {
     return (
-      <div className="h-[70vh] flex items-center justify-center">
-        <div className="text-center">
-          <Loading />
-          {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+      <div className="min-h-fit w-full animate-in fade-in duration-200">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                <Skeleton className="h-9 w-32" />
+              </h1>
+              <div className="text-muted-foreground mt-2">
+                <Skeleton className="h-5 w-64" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
+                disabled
+              >
+                <Skeleton className="w-full h-full rounded" />
+              </Button>
+              <Button
+                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[140px] h-[38px] p-0 border-0"
+                disabled
+              >
+                <Skeleton className="w-full h-full rounded-lg" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="border bg-white rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-sm text-muted-foreground mb-1"><Skeleton className="h-4 w-16" /></div>
+                    <div className="text-2xl font-bold text-foreground"><Skeleton className="h-8 w-12" /></div>
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/20">
+                    <Skeleton className="w-6 h-6 rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <DataTableSkeleton />
         </div>
       </div>
     );
@@ -100,14 +141,14 @@ export default function ClientesPage({
   }
 
   return (
-    <div className="min-h-fit">
+    <div className="min-h-fit animate-in fade-in duration-500">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
-            <p className="text-muted-foreground mt-2">
+            <div className="text-muted-foreground mt-2">
               Gestiona tu lista de clientes y proveedores
-            </p>
+            </div>
           </div>
           <div className="flex gap-3">
             <Button

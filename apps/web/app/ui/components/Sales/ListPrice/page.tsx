@@ -3,7 +3,7 @@
 import { ListPrice } from "@domain/entities/ListPrice.entity";
 import { useListPrice } from "@interfaces/src/hooks/features/ListPrice/useListPrice";
 import { useListPriceTable } from "@interfaces/src/hooks/features/ListPrice/useListPriceTable";
-import { DataTable, Button, Loading } from "@simplapp/ui";
+import { DataTable, Button, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Tag, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
@@ -81,9 +81,34 @@ export default function ListPrices({
 
     if (hookLoading.fetch && listPrices.length === 0) {
         return (
-            <div className="h-[70vh] flex items-center justify-center">
-                <div className="text-center">
-                    <Loading />
+            <div className="min-h-fit w-full animate-in fade-in duration-200">
+                <div className="max-w-5xl mx-auto px-4 py-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">
+                                <Skeleton className="h-9 w-64" />
+                            </h1>
+                            <div className="text-muted-foreground mt-2">
+                                <Skeleton className="h-5 w-72" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                className="gap-2 text-[15px] py-2 px-2 rounded w-[100px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded" />
+                            </Button>
+                            <Button
+                                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[190px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            </Button>
+                        </div>
+                    </div>
+                    <DataTableSkeleton />
                 </div>
             </div>
         );
@@ -107,14 +132,14 @@ export default function ListPrices({
     }
 
     return (
-        <div className="min-h-fit">
+        <div className="min-h-fit animate-in fade-in duration-500">
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">Listas de Precios</h1>
-                        <p className="text-muted-foreground mt-2">
+                        <div className="text-muted-foreground mt-2">
                             Gestiona tus listas de precios y sus porcentajes
-                        </p>
+                        </div>
                     </div>
                     <div className="flex gap-3">
                         <Button

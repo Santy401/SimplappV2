@@ -3,7 +3,7 @@
 import { DataTable } from "@simplapp/ui";
 import { Button } from "@simplapp/ui";
 import { UserCheck, UserPlus } from "lucide-react";
-import { Loading } from "@simplapp/ui";
+import { Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { useState, useEffect } from "react";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
@@ -114,9 +114,34 @@ export default function BillsPage({
 
   if (isLoading.fetch && bills.length === 0) {
     return (
-      <div className="h-[70vh] flex items-center justify-center">
-        <div className="text-center">
-          <Loading />
+      <div className="min-h-fit w-full animate-in fade-in duration-200">
+        <div className="max-w-5xl mx-auto px-4 py-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                <Skeleton className="h-9 w-64" />
+              </h1>
+              <div className="text-muted-foreground mt-2">
+                <Skeleton className="h-5 w-52" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
+                disabled
+              >
+                <Skeleton className="w-full h-full rounded" />
+              </Button>
+              <Button
+                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
+                disabled
+              >
+                <Skeleton className="w-full h-full rounded-lg" />
+              </Button>
+            </div>
+          </div>
+          <DataTableSkeleton />
         </div>
       </div>
     );
@@ -142,16 +167,16 @@ export default function BillsPage({
   }
 
   return (
-    <div className="min-h-fit">
+    <div className="min-h-fit animate-in fade-in duration-500">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               Facturas De Venta
             </h1>
-            <p className="text-muted-foreground mt-2">
+            <div className="text-muted-foreground mt-2">
               Gestiona tus facturas de venta
-            </p>
+            </div>
           </div>
           <div className="flex gap-3">
             <Button
