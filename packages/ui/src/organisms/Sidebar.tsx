@@ -91,7 +91,7 @@ export function Sidebar({ onSelect, currentView }: SidebarProps) {
                 <div className="border-b h-[56px] border-sidebar-border py-1 px-6 flex items-center box-border">
                     <div className="flex items-center justify-between gap-2 overflow-hidden w-full">
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-purple-200">
                                 <span className="text-white font-bold text-sm">S</span>
                             </div>
                             {isExpanded && <span className="text-foreground font-bold text-lg tracking-tight whitespace-nowrap">Simplapp</span>}
