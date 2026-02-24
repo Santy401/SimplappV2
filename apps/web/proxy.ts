@@ -110,19 +110,26 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(appUrl);
     }
 
-    // Páginas de login/register → dejar pasar (son parte del marketing)
+    // Páginas de login/register → dejar pasar
     if (isAuthPageRoute(pathname)) {
       return NextResponse.next();
     }
 
-    // Raíz → redirigir a landing (no hay page.tsx en marketing para '/')
+    // Raíz → redirigir a landing
     if (pathname === '/' || pathname === '') {
       const url = request.nextUrl.clone();
       url.pathname = '/colombia/';
       return NextResponse.redirect(url);
     }
 
-    // Cualquier otra ruta en simplapp.com → mandarlo a la landing
+    // Rutas de marketing válidas (/colombia/, /us/, etc.) → dejar pasar
+    // Regex: /seguido de 2-15 letras, opcionalmente seguido de / y más path
+    const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname);
+    if (isValidMarketingPath) {
+      return NextResponse.next();
+    }
+
+    // Ruta desconocida en marketing → mandar a la landing
     const url = request.nextUrl.clone();
     url.pathname = '/colombia/';
     return NextResponse.redirect(url);
