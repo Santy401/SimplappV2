@@ -8,6 +8,7 @@ import React from "react";
 import Breadcrumb from "./Breadcrumb";
 import { Navbar } from "@/app/ui/components/Bars/Navbar";
 import { GlobalSearch } from "@/app/ui/components/Bars/GlobalSearch";
+import { SettingsModal } from "@/app/ui/components/SettingsModal/SettingsModal";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
@@ -150,11 +151,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigationList = (id: string) => {
-    if (id === 'settings') {
-      openSettings('perfil');
-      return;
-    }
-    if (id === 'perfil-usuario') {
+    if (id === 'settings' || id === 'perfil-usuario' || id === 'profile-settings') {
       openSettings('perfil');
       return;
     }
@@ -186,6 +183,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         onClose={() => setIsSearchOpen(false)}
         onSelect={(id) => navigateTo(id)}
       />
+      <SettingsModal />
     </div>
   );
 }
