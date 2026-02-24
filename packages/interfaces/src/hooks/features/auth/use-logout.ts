@@ -17,11 +17,20 @@ export const useLogout = () => {
         credentials: 'include',
       });
 
-      window.location.href = '/colombia/Login';
+      // Redirigir al login en el dominio público
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+      const loginUrl = rootDomain
+        ? `https://${rootDomain}/colombia/Login/`
+        : '/colombia/Login';
+      window.location.href = loginUrl;
 
     } catch (err) {
       console.error('Logout error:', err);
-      window.location.href = '/colombia/Login';
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+      const loginUrl = rootDomain
+        ? `https://${rootDomain}/colombia/Login/`
+        : '/colombia/Login';
+      window.location.href = loginUrl;
     } finally {
       setIsLoading(false);
     }
