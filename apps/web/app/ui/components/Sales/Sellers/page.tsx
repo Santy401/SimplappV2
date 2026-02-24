@@ -3,7 +3,7 @@
 import { Seller } from "@domain/entities/Seller.entity";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
-import { DataTable, Button, Loading } from "@simplapp/ui";
+import { DataTable, Button, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Receipt, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -41,10 +41,34 @@ export default function Sellers({
 
     if (isLoading.fetch && sellers.length === 0) {
         return (
-            <div className="h-[70vh] flex items-center justify-center">
-                <div className="text-center">
-                    <Loading />
-                    {/* <p className="text-gray-600 ">Cargando clientes...</p> */}
+            <div className="min-h-fit w-full animate-in fade-in duration-200">
+                <div className="max-w-5xl mx-auto px-4 py-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        <div>
+                            <h1 className="text-3xl font-bold text-foreground">
+                                <Skeleton className="h-9 w-40" />
+                            </h1>
+                            <div className="text-muted-foreground mt-2">
+                                <Skeleton className="h-5 w-48" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <Button
+                                variant="outline"
+                                className="gap-2 text-[15px] py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded" />
+                            </Button>
+                            <Button
+                                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[160px] h-[38px] p-0 border-0"
+                                disabled
+                            >
+                                <Skeleton className="w-full h-full rounded-lg" />
+                            </Button>
+                        </div>
+                    </div>
+                    <DataTableSkeleton />
                 </div>
             </div>
         );
@@ -68,14 +92,14 @@ export default function Sellers({
     }
 
     return (
-        <div className="min-h-fit">
+        <div className="min-h-fit animate-in fade-in duration-500">
             <div className="max-w-5xl mx-auto px-4 py-8">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                     <div>
                         <h1 className="text-3xl font-bold text-foreground">Vendedores</h1>
-                        <p className="text-muted-foreground mt-2">
+                        <div className="text-muted-foreground mt-2">
                             Gestiona tus Vendedores
-                        </p>
+                        </div>
                     </div>
                     <div className="flex gap-3">
                         <Button
