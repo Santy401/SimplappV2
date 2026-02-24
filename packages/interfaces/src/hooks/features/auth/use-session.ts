@@ -13,6 +13,7 @@ export interface Session {
   error: Error | null;
   checkSession: () => boolean;
   logout: () => void;
+  refetch: () => void;
 }
 
 export const useSession = (): Session => {
@@ -84,5 +85,6 @@ export const useSession = (): Session => {
     error: error as Error | null,
     checkSession,
     logout,
+    refetch,
   };
 };

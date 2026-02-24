@@ -42,11 +42,11 @@ export const useClientCustomers = ({ onSelect, onSelectClient, onDeleteSuccess }
 
     const handleAddCustomer = () => {
         console.log("Agregar nuevo cliente");
-        
+
         if (onSelectClient) {
             onSelectClient(null as any);
         }
-        
+
         if (onSelect) {
             onSelect('ventas-clientes-create');
         }
@@ -57,6 +57,26 @@ export const useClientCustomers = ({ onSelect, onSelectClient, onDeleteSuccess }
         // Logic
     };
 
-    return { handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers }
+    const handleDeleteManyCustomers = async (clients: Client[]) => {
+        const results = await Promise.allSettled(
+            clients.map((client) => deleteClient(client.id))
+        );
+
+        const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+        const failed = results.length - succeeded;
+
+        if (succeeded > 0) {
+            toast.success(`${succeeded} cliente(s) eliminado(s)`);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        }
+
+        if (failed > 0) {
+            toast.error(`Error al eliminar ${failed} cliente(s)`);
+        }
+    };
+
+    return { handleEditCustomer, handleDeleteCustomer, handleDeleteManyCustomers, handleViewCustomer, handleAddCustomer, handleExportCustomers }
 
 }

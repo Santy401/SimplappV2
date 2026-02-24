@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useRef } from "react";
 import { useSession } from "@hooks/features/auth/use-session";
 import { Loading } from "@ui/atoms/SessionLoader/Loading";
 import { useLoading } from "../../context/LoadingContext";
+import { useRouter, usePathname } from "next/navigation";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -15,8 +16,10 @@ export const ProtectedRoute = ({
   children,
   fallback
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, isLoading } = useSession();
+  const { user, isAuthenticated, isLoading } = useSession();
   const { setGlobalLoading, isAnyLoading } = useLoading();
+  const router = useRouter();
+  const pathname = usePathname();
   const wasAuthenticated = useRef(false);
 
   // Sincronizar el estado de carga de sesión con el contexto global
@@ -32,6 +35,15 @@ export const ProtectedRoute = ({
   }, [isAuthenticated]);
 
   useEffect(() => {
+    // Redirección de Onboarding
+    if (!isLoading && isAuthenticated && user) {
+      if (user.onboardingCompleted === false && pathname !== '/ui/pages/Onboarding') {
+        router.push('/ui/pages/Onboarding');
+      } else if (user.onboardingCompleted !== false && pathname === '/ui/pages/Onboarding') {
+        router.push('/ui/pages/Admin/Index');
+      }
+    }
+
     // Solo disparar el evento si el usuario ESTABA autenticado y perdió la sesión
     // Esto evita mostrar el modal al primer acceso sin token (ya redirige a login el servidor)
     if (!isLoading && !isAuthenticated && wasAuthenticated.current) {
@@ -39,7 +51,7 @@ export const ProtectedRoute = ({
         window.dispatchEvent(new CustomEvent('session:expired'));
       }
     }
-  }, [isAuthenticated, isLoading]);
+  }, [isAuthenticated, isLoading, user, pathname, router]);
 
   // Mostrar loading unificado
   return (

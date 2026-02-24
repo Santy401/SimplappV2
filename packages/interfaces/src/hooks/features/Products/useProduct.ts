@@ -3,7 +3,7 @@ import {
   CreateProductDto,
   UpdateProductDto,
 } from "@domain/entities/Product.entity";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 
 export function useProduct() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -15,25 +15,25 @@ export function useProduct() {
     delete: false,
   });
 
-  const isLoading = {
+  const isLoading = useMemo(() => ({
     fetch: loadingStates.fetch,
     create: loadingStates.create,
     update: loadingStates.update,
     delete: loadingStates.delete,
-  }
+  }), [loadingStates]);
 
-  const setIsLoading = (state: keyof typeof loadingStates, value: boolean) => {
-        setLoadingStates(prev => ({
-            ...prev,
-            [state]: value,
-        }));
-    }
+  const setIsLoading = useCallback((state: keyof typeof loadingStates, value: boolean) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [state]: value,
+    }));
+  }, []);
 
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setIsLoading('fetch', true);
       setError(null);
@@ -52,9 +52,9 @@ export function useProduct() {
     } finally {
       setIsLoading('fetch', false);
     }
-  };
+  }, [setIsLoading]);
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = useCallback(async (id: string) => {
     setIsLoading('delete', true);
     try {
       const response = await fetch(`/api/products/${id}`, {
@@ -71,9 +71,9 @@ export function useProduct() {
     } finally {
       setIsLoading('delete', false);
     }
-  };
+  }, [setIsLoading]);
 
-  const createProduct = async (data: CreateProductDto) => {
+  const createProduct = useCallback(async (data: CreateProductDto) => {
     setIsLoading('create', true)
     try {
       console.log("📤 Enviando producto:", data);
@@ -102,9 +102,9 @@ export function useProduct() {
     } finally {
       setIsLoading('create', false)
     }
-  };
+  }, [setIsLoading]);
 
-  const updateProduct = async (id: string, data: UpdateProductDto) => {
+  const updateProduct = useCallback(async (id: string, data: UpdateProductDto) => {
     setIsLoading('update', true)
     try {
       console.log('📤 Actualizando producto:', id, data);
@@ -148,7 +148,7 @@ export function useProduct() {
     } finally {
       setIsLoading('update', false)
     }
-  };
+  }, [setIsLoading]);
 
   return {
     products,

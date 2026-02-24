@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
 
 export const useBill = () => {
@@ -14,7 +14,7 @@ export const useBill = () => {
         rowId: null,
     });
 
-    const isLoading = {
+    const isLoading = useMemo(() => ({
         fetch: loadingState.fetch,
         create: loadingState.create,
         update: loadingState.update,
@@ -22,11 +22,11 @@ export const useBill = () => {
         export: loadingState.export,
         view: loadingState.view,
         rowId: loadingState.rowId,
-    };
+    }), [loadingState]);
 
-    const setLoading = (key: keyof typeof loadingState, value: boolean) => {
+    const setLoading = useCallback((key: keyof typeof loadingState, value: boolean) => {
         setLoadingState(prev => ({ ...prev, [key]: value }));
-    };
+    }, []);
 
     const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
         const fetchOptions = {
@@ -57,7 +57,7 @@ export const useBill = () => {
         return response;
     }, []);
 
-    const fetchBills = async () => {
+    const fetchBills = useCallback(async () => {
         setLoading('fetch', true);
         try {
             const response = await fetchWithAuth('/api/bills');
@@ -71,9 +71,9 @@ export const useBill = () => {
         } finally {
             setLoading('fetch', false);
         }
-    };
+    }, [fetchWithAuth, setLoading]);
 
-    const createBill = async (billData: CreateBillInput) => {
+    const createBill = useCallback(async (billData: CreateBillInput) => {
         setLoading('create', true);
         try {
             const response = await fetchWithAuth('/api/bills', {
@@ -95,9 +95,9 @@ export const useBill = () => {
         } finally {
             setLoading('create', false);
         }
-    };
+    }, [fetchWithAuth, setLoading]);
 
-    const updateBill = async (billData: UpdateBill) => {
+    const updateBill = useCallback(async (billData: UpdateBill) => {
         setLoading('update', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billData.id}`, {
@@ -121,9 +121,9 @@ export const useBill = () => {
         } finally {
             setLoading('update', false);
         }
-    };
+    }, [fetchWithAuth, setLoading]);
 
-    const deleteBill = async (billId: string) => {
+    const deleteBill = useCallback(async (billId: string) => {
         setLoading('delete', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billId}`, {
@@ -140,9 +140,9 @@ export const useBill = () => {
         } finally {
             setLoading('delete', false);
         }
-    };
+    }, [fetchWithAuth, setLoading]);
 
-    const getBill = async (billId: string) => {
+    const getBill = useCallback(async (billId: string) => {
         setLoading('view', true);
         try {
             const response = await fetchWithAuth(`/api/bills/${billId}`);
@@ -157,7 +157,7 @@ export const useBill = () => {
         } finally {
             setLoading('view', false);
         }
-    };
+    }, [fetchWithAuth, setLoading]);
 
     return {
         bills,

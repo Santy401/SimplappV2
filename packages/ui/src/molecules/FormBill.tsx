@@ -3,6 +3,7 @@
 import { BillPreview } from "./BillPreview";
 import { useState, useEffect, useRef } from "react";
 import { Input } from "../atoms/Input/Input";
+import { InputCurrency } from "../atoms/InputCurrency/InputCurrency";
 import { Label } from "../atoms/Label/Label";
 import { Textarea } from "../atoms/Textarea/Textarea";
 import { Button } from "../atoms/Button/Button";
@@ -30,6 +31,7 @@ import { Product } from "@domain/entities/Product.entity";
 import { Store } from "@domain/entities/Store.entity";
 import { Seller } from "@domain/entities/Seller.entity";
 import { ListPrice } from "@domain/entities/ListPrice.entity";
+import { calculateItemTotals, calculateBillTotals } from "@domain/utils/billing";
 
 // Interfaces locales para el formulario
 export interface FormBillItem {
@@ -132,7 +134,7 @@ export function FormBill({
     terms: "",
     notes: "",
     footerNote: "",
-    status: BillStatus.TO_PAY,
+    status: BillStatus.DRAFT,
     logo: undefined,
     signature: undefined,
   });
@@ -247,33 +249,20 @@ export function FormBill({
     }
     setTimeout(() => { formLoaded.current = true; }, 500);
   }, [initialData, mode]);
-  const calculateItemTotal = (item: FormBillItem) => {
-    const subtotal = item.price * item.quantity;
-    const discountAmount = subtotal * (item.discount / 100);
-    const subtotalAfterDiscount = subtotal - discountAmount;
-    const taxAmount = subtotalAfterDiscount * (item.taxRate / 100);
-    return subtotalAfterDiscount + taxAmount;
-  };
+  // Centralized calculations using @domain/utils/billing
+  const calculatedBill = calculateBillTotals(
+    items.map(i => ({
+      price: i.price,
+      quantity: i.quantity,
+      discountPercentage: i.discount,
+      taxRate: i.taxRate
+    }))
+  );
 
-  const subtotal = items.reduce((sum, item) => {
-    const itemSubtotal = item.price * item.quantity;
-    const discountAmount = itemSubtotal * (item.discount / 100);
-    return sum + (itemSubtotal - discountAmount);
-  }, 0);
-
-  const discountTotal = items.reduce((sum, item) => {
-    const itemSubtotal = item.price * item.quantity;
-    return sum + itemSubtotal * (item.discount / 100);
-  }, 0);
-
-  const taxTotal = items.reduce((sum, item) => {
-    const itemSubtotal = item.price * item.quantity;
-    const discountAmount = itemSubtotal * (item.discount / 100);
-    const subtotalAfterDiscount = itemSubtotal - discountAmount;
-    return sum + subtotalAfterDiscount * (item.taxRate / 100);
-  }, 0);
-
-  const total = items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
+  const subtotal = calculatedBill.subtotal;
+  const discountTotal = calculatedBill.discountTotal;
+  const taxTotal = calculatedBill.taxTotal;
+  const total = calculatedBill.total;
 
   const handleSignatureClick = () => {
     signatureInputRef.current?.click();
@@ -323,11 +312,15 @@ export function FormBill({
       items.map((item) => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-          const subtotal = updatedItem.price * updatedItem.quantity;
-          const discountAmount = subtotal * (updatedItem.discount / 100);
-          const subtotalAfterDiscount = subtotal - discountAmount;
-          updatedItem.taxAmount = subtotalAfterDiscount * (updatedItem.taxRate / 100);
-          updatedItem.total = subtotalAfterDiscount + updatedItem.taxAmount;
+          const calc = calculateItemTotals({
+            price: updatedItem.price,
+            quantity: updatedItem.quantity,
+            discountPercentage: updatedItem.discount,
+            taxRate: updatedItem.taxRate
+          });
+
+          updatedItem.taxAmount = calc.taxAmount;
+          updatedItem.total = calc.total;
           return updatedItem;
         }
         return item;
@@ -346,14 +339,18 @@ export function FormBill({
               productId: product.id,
               name: product.name,
               reference: product.reference || "",
-              price: product.basePrice,
+              price: parseFloat(product.basePrice as any) || 0,
               taxRate: parseFloat(product.taxRate) || 0,
             };
-            const subtotal = updatedItem.price * updatedItem.quantity;
-            const discountAmount = subtotal * (updatedItem.discount / 100);
-            const subtotalAfterDiscount = subtotal - discountAmount;
-            updatedItem.taxAmount = subtotalAfterDiscount * (updatedItem.taxRate / 100);
-            updatedItem.total = subtotalAfterDiscount + updatedItem.taxAmount;
+            const calc = calculateItemTotals({
+              price: updatedItem.price,
+              quantity: updatedItem.quantity,
+              discountPercentage: updatedItem.discount,
+              taxRate: updatedItem.taxRate
+            });
+
+            updatedItem.taxAmount = calc.taxAmount;
+            updatedItem.total = calc.total;
             return updatedItem;
           }
           return item;
@@ -472,10 +469,10 @@ export function FormBill({
       return;
     }
 
+    // Usar statusOverride === BillStatus.DRAFT en prepareBillData debido a que setFormData es async
     const data = prepareBillData(BillStatus.DRAFT);
     if (data) {
-      // Llama a una función específica para borradores
-      onSaveDraft?.(data); // ← Nuevo prop
+      onSaveDraft?.(data);
     }
   };
   const handleEmitBill = () => {
@@ -948,26 +945,26 @@ export function FormBill({
                           handleItemChange(
                             item.id,
                             "quantity",
-                            parseInt(e.target.value) || 0,
+                            parseFloat(e.target.value) || 0,
                           )
                         }
                         className="text-right text-sm w-20"
                         min="0"
+                        step="any"
                       />
                     </td>
                     <td className="p-2">
-                      <Input
-                        type="number"
+                      <InputCurrency
                         placeholder="Precio uni"
-                        value={item.price || ""}
-                        onChange={(e) =>
+                        value={item.price || 0}
+                        onChange={(val) =>
                           handleItemChange(
                             item.id,
                             "price",
-                            parseFloat(e.target.value) || 0,
+                            val,
                           )
                         }
-                        className="text-right text-sm"
+                        className="text-right text-sm px-2 w-32"
                       />
                     </td>
                     <td className="p-2">
@@ -1002,6 +999,7 @@ export function FormBill({
                           )
                         }
                         className="text-right text-sm w-16"
+                        step="any"
                       />
                     </td>
                     <td className="p-2 text-right font-medium whitespace-nowrap">

@@ -100,6 +100,9 @@ export default function BillsPage({
         footerNote: "",
         terms: "",
         logo: undefined,
+        dianStatus: (bill as any).dianStatus,
+        rejectedReason: (bill as any).rejectedReason,
+        dianResponse: (bill as any).dianResponse,
       },
       items: formattedItems,
       subtotal: parseFloat(bill.subtotal || "0"),
@@ -111,7 +114,7 @@ export default function BillsPage({
 
   if (isLoading.fetch && bills.length === 0) {
     return (
-      <div className="min-h-[90vh] flex items-center justify-center">
+      <div className="h-[70vh] flex items-center justify-center">
         <div className="text-center">
           <Loading />
         </div>
@@ -121,7 +124,7 @@ export default function BillsPage({
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-[70vh] flex items-center justify-center">
         <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
           <h3 className="text-lg font-semibold mb-2">
             Error al cargar facturas
@@ -201,7 +204,7 @@ export default function BillsPage({
             />
           </div>
         ) : (
-          <div className="text-center p-12 border border-sidebar-border rounded-xl mt-4">
+          <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
             <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">
               No hay facturas registradas

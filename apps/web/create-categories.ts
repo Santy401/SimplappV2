@@ -12,10 +12,16 @@ async function main() {
         { name: 'Servicios', description: 'Servicios profesionales y técnicos' },
     ];
 
+    const defaultCompany = await prisma.company.findFirst();
+    if (!defaultCompany) {
+        console.log('⚠️ No company found. Please create a company first before seeding categories.');
+        return;
+    }
+
     for (const category of categories) {
         try {
             await prisma.categoryProduct.create({
-                data: category,
+                data: { ...category, companyId: defaultCompany.id },
             });
             console.log(`✅ Created category: ${category.name}`);
         } catch (error: any) {

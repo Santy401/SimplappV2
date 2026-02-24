@@ -5,7 +5,7 @@ class ApiClient {
   private refreshPromise: Promise<boolean> | null = null;
 
   constructor() {
-    this.baseURL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    this.baseURL = process.env.NEXT_PUBLIC_API_URL || '';
     this.defaultHeaders = {
       'Content-Type': 'application/json',
     };
@@ -96,7 +96,14 @@ class ApiClient {
       }
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) { }
+
+        const error: any = new Error(errorData?.error || `HTTP error! status: ${response.status}`);
+        error.response = { status: response.status, data: errorData };
+        throw error;
       }
 
       if (response.status === 204) {

@@ -105,7 +105,7 @@ export const createColumns = (
             className: "w-28",
             cell: (product: any) => (
                 <Badge
-                className="w-24 h-6 bg-gray-200 text-black"
+                    className="w-24 h-6 bg-gray-200 text-black"
                     variant={
                         product.type === 'SERVICE' ? "secondary" :
                             product.type === 'PRODUCT' ? "default" :
@@ -138,7 +138,7 @@ export const createColumns = (
                 return (
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
-                        <span>${!isNaN(numericPrice) ? numericPrice.toFixed(2) : '0.00'}</span>
+                        <span>$ {!isNaN(numericPrice) ? numericPrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</span>
                     </div>
                 );
             }
@@ -320,7 +320,7 @@ export const createCompactProductColumns = (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
-                        ${product.basePrice.toFixed(2)}
+                        $ {product.basePrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm text-gray-500">
                         Impuesto: {product.taxRate}

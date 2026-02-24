@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { FormBillItem } from "./FormBill";
-import { BillStatus, PaymentMethod } from '@domain/entities/Bill.entity';
+import { BillStatus, PaymentMethod, DianStatus } from '@domain/entities/Bill.entity';
+import { XCircle, Terminal, Info } from 'lucide-react';
 
 export interface BillPreviewProps {
     formData: {
@@ -16,6 +17,9 @@ export interface BillPreviewProps {
         terms?: string;
         footerNote?: string;
         logo?: string;
+        dianStatus?: DianStatus;
+        rejectedReason?: string;
+        dianResponse?: string;
     };
     items: FormBillItem[];
     subtotal: number;
@@ -34,8 +38,10 @@ export function BillPreview({
     total,
     onClose,
 }: BillPreviewProps) {
+    const [showDianModal, setShowDianModal] = useState(false);
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 print:p-0">
             <div className="bg-card text-card-foreground border border-border w-full max-w-4xl min-h-[800px] shadow-2xl rounded-lg flex flex-col relative animate-in zoom-in-99 scale-69 duration-200">
 
                 {/* Toolbar */}
@@ -58,7 +64,33 @@ export function BillPreview({
                 </div>
 
                 {/* Invoice Content */}
-                <div className="p-8 md:p-12 flex-1 bg-card" id="invoice-preview">
+                <div className="p-8 md:p-12 flex-1 bg-card overflow-y-auto" id="invoice-preview">
+
+                    {/* DIAN Rejection Banner */}
+                    {formData.dianStatus === DianStatus.REJECTED && (
+                        <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-300 print:hidden">
+                            <div className="p-2 bg-red-100 rounded-lg">
+                                <XCircle className="w-6 h-6 text-red-600" />
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-red-900 font-bold text-lg flex items-center gap-2">
+                                    Factura Rechazada por DIAN
+                                </h3>
+                                <p className="text-red-700 mt-1 leading-relaxed">
+                                    <span className="font-semibold text-red-800">Motivo:</span> {formData.rejectedReason || 'No se proporcionó un motivo específico.'}
+                                </p>
+                                {formData.dianResponse && (
+                                    <button
+                                        onClick={() => setShowDianModal(true)}
+                                        className="mt-4 flex items-center gap-2 text-sm font-medium text-red-700 hover:text-red-900 transition-colors group"
+                                    >
+                                        <Terminal className="w-4 h-4" />
+                                        <span className="border-b border-red-300 group-hover:border-red-900">Ver respuesta técnica completa</span>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Header */}
                     <div className="flex justify-between items-start mb-12">
@@ -185,6 +217,55 @@ export function BillPreview({
                     )}
                 </div>
             </div>
+
+            {/* DIAN Raw Response Modal */}
+            {showDianModal && formData.dianResponse && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                    <div className="bg-zinc-900 text-zinc-100 border border-zinc-800 w-full max-w-2xl shadow-2xl rounded-2xl flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200">
+                        <div className="flex justify-between items-center p-5 border-b border-zinc-800">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-zinc-800 rounded-lg">
+                                    <Terminal className="w-5 h-5 text-zinc-400" />
+                                </div>
+                                <h3 className="font-semibold text-lg text-white">Respuesta Técnica DIAN</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowDianModal(false)}
+                                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white"
+                            >
+                                <XCircle className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto">
+                            <div className="bg-black/50 rounded-xl p-4 border border-zinc-800 font-mono text-xs sm:text-sm leading-relaxed text-zinc-300">
+                                <pre className="whitespace-pre-wrap break-all">
+                                    {(() => {
+                                        try {
+                                            return JSON.stringify(JSON.parse(formData.dianResponse), null, 2);
+                                        } catch (e) {
+                                            return formData.dianResponse;
+                                        }
+                                    })()}
+                                </pre>
+                            </div>
+                            <div className="mt-6 flex items-start gap-3 p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
+                                <Info className="w-5 h-5 text-zinc-400 mt-0.5" />
+                                <p className="text-xs text-zinc-400 leading-relaxed">
+                                    Esta es la respuesta cruda enviada por los servidores de la DIAN. Contiene detalles técnicos sobre el rechazo que pueden ser útiles para soporte técnico.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="p-5 border-t border-zinc-800 flex justify-end">
+                            <button
+                                onClick={() => setShowDianModal(false)}
+                                className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition-all"
+                            >
+                                Entendido
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

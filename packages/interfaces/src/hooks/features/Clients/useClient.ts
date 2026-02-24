@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 
 export function useClients() {
@@ -17,7 +17,7 @@ export function useClients() {
     rowId: null,
   });
 
-  const isLoading = {
+  const isLoading = useMemo(() => ({
     fetch: LoadingState.fetch,
     create: LoadingState.create,
     update: LoadingState.update,
@@ -25,17 +25,17 @@ export function useClients() {
     export: LoadingState.export,
     view: LoadingState.view,
     rowId: LoadingState.rowId,
-  }
+  }), [LoadingState]);
 
-  const setLoading = (key: keyof typeof LoadingState, value: boolean) => {
+  const setLoading = useCallback((key: keyof typeof LoadingState, value: boolean) => {
     setLoadingState(prev => ({ ...prev, [key]: value }));
-  }
+  }, []);
 
   useEffect(() => {
     fetchClients();
   }, []);
 
-  const fetchClients = async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading('fetch', true);
       setError(null);
@@ -54,9 +54,9 @@ export function useClients() {
     } finally {
       setLoading('fetch', false);
     }
-  };
+  }, [setLoading]);
 
-  const updateClient = async (id: string, data: Partial<Client>) => {
+  const updateClient = useCallback(async (id: string, data: Partial<Client>) => {
     try {
       setLoading('update', true);
       console.log('Actualizando cliente:', { id, data });
@@ -89,9 +89,9 @@ export function useClients() {
     } finally {
       setLoading('update', false);
     }
-  };
+  }, [setLoading]);
 
-  const deleteClient = async (id: string) => {
+  const deleteClient = useCallback(async (id: string) => {
     try {
       setLoading('delete', true);
       const response = await fetch(`/api/clients/${id}`, {
@@ -112,9 +112,9 @@ export function useClients() {
     } finally {
       setLoading('delete', false);
     }
-  };
+  }, [setLoading]);
 
-  const createClient = async (data: CreateClientDto) => {
+  const createClient = useCallback(async (data: CreateClientDto) => {
     try {
       setLoading('create', true);
       setError(null);
@@ -141,7 +141,7 @@ export function useClients() {
     } finally {
       setLoading('create', false);
     }
-  };
+  }, [setLoading]);
 
   return {
     clients,

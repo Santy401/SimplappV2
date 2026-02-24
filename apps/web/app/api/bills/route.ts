@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const whereClause: any = {
-      companyId: user.company.id,
+      companyId: user.companies[0].company.id,
     };
 
     if (clientId) {
@@ -106,10 +106,10 @@ export async function POST(request: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      include: { company: true },
+      include: { companies: { include: { company: true } } },
     });
 
-    if (!user || !user.company) {
+    if (!user || !user.companies?.[0]?.company) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
@@ -130,23 +130,33 @@ export async function POST(request: NextRequest) {
       notes
     } = data;
 
-    if (!clientId || !items || items.length === 0 || !date || !subtotal || !total) {
+    // Si el usuario nos pasa items, pero son un array vacio de Drafts o sin validar cantdades, los limpia.
+    const validItems = items?.filter((item: any) => item.productId) || [];
+
+    if (!clientId || !date || (status !== 'DRAFT' && (!validItems || validItems.length === 0 || !subtotal || !total))) {
       return NextResponse.json(
         { error: 'Faltan campos requeridos: clientId, items, date, subtotal, total' },
         { status: 400 }
       );
     }
 
-    const lastBill = await prisma.bill.findFirst({
-      where: {
-        companyId: user.company.id,
-      },
-      orderBy: {
-        number: 'desc'
-      }
-    });
-
-    const nextNumber = (lastBill?.number ?? 0) + 1;
+    let nextNumber = 0;
+    if (status !== 'DRAFT') {
+      const lastBill = await prisma.bill.findFirst({
+        where: {
+          companyId: user.companies[0].company.id,
+          number: { gt: 0 },
+          OR: [
+            { deletedAt: null },
+            { deletedAt: { not: null } }
+          ]
+        },
+        orderBy: {
+          number: 'desc'
+        }
+      });
+      nextNumber = (lastBill?.number ?? 0) + 1;
+    }
 
     const client = await prisma.client.findUnique({
       where: { id: clientId }
@@ -178,19 +188,20 @@ export async function POST(request: NextRequest) {
       clientEmail: client.email,
 
       user: { connect: { id: user.id } },
-      company: { connect: { id: user.company.id } },
+      company: { connect: { id: user.companies[0].company.id } },
       client: { connect: { id: String(clientId) } },
 
       items: {
-        create: items.map((item: any) => ({
+        create: validItems.map((item: any) => ({
           productId: String(item.productId),
-          quantity: Number(item.quantity),
-          price: String(item.price),
-          total: String(item.total),
+          quantity: Number(item.quantity) || 1,
+          price: String(item.price || 0),
+          subtotal: String(item.subtotal || item.total || 0),
+          total: String(item.total || 0),
           taxRate: String(item.taxRate || 0),
           taxAmount: String(item.taxAmount || 0),
           discount: String(item.discount || 0),
-          productName: item.productName,
+          productName: item.productName || item.name || "",
         }))
       }
     };
@@ -208,7 +219,7 @@ export async function POST(request: NextRequest) {
     } else {
       let defaultStore = await prisma.store.findFirst({
         where: {
-          companyId: user.company.id,
+          companyId: user.companies[0].company.id,
         },
       });
 
@@ -216,7 +227,7 @@ export async function POST(request: NextRequest) {
         defaultStore = await prisma.store.create({
           data: {
             name: "Principal",
-            companyId: user.company.id
+            companyId: user.companies[0].company.id
           }
         });
       }

@@ -6,10 +6,10 @@ import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
 import { toast } from "sonner";
 
 import {
-  FormModalLayout,
-  FormSection,
-  InputField,
-  TextareaField,
+    FormModalLayout,
+    FormSection,
+    InputField,
+    TextareaField,
 } from "@simplapp/ui";
 
 interface CreateStoreProps {

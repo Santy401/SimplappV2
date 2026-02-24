@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { Input } from '../atoms/Input/Input';
+import { InputCurrency } from '../atoms/InputCurrency/InputCurrency';
 import { Label } from '../atoms/Label/Label';
 import { Textarea } from '../atoms/Textarea/Textarea';
 import { Checkbox } from '../atoms/Checkbox/Checkbox';
@@ -24,10 +25,13 @@ interface BaseFieldProps {
 interface InputFieldProps extends BaseFieldProps {
   type?: 'text' | 'email' | 'tel' | 'number' | 'password' | 'date';
   placeholder?: string;
-  value: string;
+  value: string | number;
   onChange: (value: string) => void;
   disabled?: boolean;
   readOnly?: boolean;
+  min?: string | number;
+  max?: string | number;
+  step?: string | number;
 }
 
 export function InputField({
@@ -42,6 +46,9 @@ export function InputField({
   disabled = false,
   readOnly = false,
   className = '',
+  min,
+  max,
+  step,
 }: InputFieldProps) {
   return (
     <div className={`space-y-2 ${className}`}>
@@ -54,6 +61,52 @@ export function InputField({
         type={type}
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className={error ? 'border-destructive' : ''}
+        disabled={disabled}
+        readOnly={readOnly}
+        min={min}
+        max={max}
+        step={step}
+      />
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {helpText && !error && (
+        <p className="text-sm text-muted-foreground">{helpText}</p>
+      )}
+    </div>
+  );
+}
+
+interface CurrencyFieldProps extends BaseFieldProps {
+  placeholder?: string;
+  value: number;
+  onChange: (value: number) => void;
+  disabled?: boolean;
+  readOnly?: boolean;
+}
+
+export function CurrencyField({
+  label,
+  required = false,
+  error,
+  helpText,
+  placeholder,
+  value,
+  onChange,
+  disabled = false,
+  readOnly = false,
+  className = '',
+}: CurrencyFieldProps) {
+  return (
+    <div className={`space-y-2 ${className}`}>
+      <Label htmlFor={label}>
+        {label}
+        {required && <span className="text-destructive ml-1">*</span>}
+      </Label>
+      <InputCurrency
+        id={label}
+        value={value || 0}
+        onChange={onChange}
         placeholder={placeholder}
         className={error ? 'border-destructive' : ''}
         disabled={disabled}

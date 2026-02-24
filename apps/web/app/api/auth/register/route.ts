@@ -68,6 +68,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 15 * 60,
+      path: '/'
     });
 
     cookieStore.set('refresh-token', refreshToken, {
@@ -75,6 +76,7 @@ export async function POST(request: Request): Promise<NextResponse> {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60,
+      path: '/'
     });
 
     cookieStore.set('auth-token', accessToken, {

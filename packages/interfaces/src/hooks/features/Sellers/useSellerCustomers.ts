@@ -53,5 +53,25 @@ export const useSellerCustomers = ({ onSelect, onSelectSeller, onDeleteSuccess }
         // Logic
     };
 
-    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteCustomer }
+    const handleDeleteManyCustomers = async (sellers: Seller[]) => {
+        const results = await Promise.allSettled(
+            sellers.map((seller) => deleteSeller(seller.id))
+        );
+
+        const succeeded = results.filter((r) => r.status === 'fulfilled' && r.value).length;
+        const failed = results.length - succeeded;
+
+        if (succeeded > 0) {
+            toast.success(`${succeeded} vendedor(es) eliminado(s)`);
+            if (onDeleteSuccess) {
+                onDeleteSuccess();
+            }
+        }
+
+        if (failed > 0) {
+            toast.error(`Error al eliminar ${failed} vendedor(es)`);
+        }
+    };
+
+    return { handleEditCustomer, handleViewCustomer, handleAddCustomer, handleExportCustomers, handleDeleteCustomer, handleDeleteManyCustomers }
 }

@@ -79,12 +79,29 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
             ),
         },
         {
+            key: "dianStatus",
+            header: "DIAN",
+            cell: (bill: Bill) => (
+                <span className={`px-2 py-1 rounded-full text-xs font-medium 
+                    ${bill.dianStatus === 'ACCEPTED' ? 'bg-emerald-100 text-emerald-700' :
+                        bill.dianStatus === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                            bill.dianStatus === 'SENT' ? 'bg-blue-100 text-blue-700' :
+                                'bg-slate-100 text-slate-700'}`}>
+                    {bill.dianStatus === 'ACCEPTED' ? 'Aceptada' :
+                        bill.dianStatus === 'REJECTED' ? 'Rechazada' :
+                            bill.dianStatus === 'SENT' ? 'Enviada' :
+                                bill.dianStatus === 'PENDING' ? 'Pendiente' :
+                                    'N/A'}
+                </span>
+            ),
+        },
+        {
             key: "actions",
             header: "Acciones",
             cell: (bill: Bill) => (
                 <TableActionsDropdown
                     onView={() => handleViewCustomer(bill)}
-                    onEdit={() => handleEditCustomer(bill)}
+                    onEdit={bill.status === BillStatus.DRAFT ? () => handleEditCustomer(bill) : undefined}
                     onDelete={() => handleDeleteCustomer(bill)}
                     onMarkAsPaid={bill.status === BillStatus.TO_PAY ? () => handleMarkAsPaid(bill) : undefined}
                 />
