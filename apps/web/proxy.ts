@@ -3,37 +3,38 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 // ─── Dominios ────────────────────────────────────────────────────────────────
-// En producción: simplapp.com (marketing) y app.simplapp.com (dashboard)
-// En desarrollo: todo corre en localhost (isAppDomain = true por defecto)
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'simplapp.com';
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'simplapp.com.co';
 const APP_SUBDOMAIN = `app.${ROOT_DOMAIN}`;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 function getHostname(request: NextRequest): string {
   return request.headers.get('host') || '';
 }
 
+function isLocalhost(hostname: string): boolean {
+  return hostname.includes('localhost') || hostname.includes('127.0.0.1');
+}
+
 function isAppDomain(hostname: string): boolean {
-  // En localhost siempre tratamos como app domain (dashboard)
-  if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) return true;
-  // Vercel preview/production domains → tratar como app domain
+  if (isLocalhost(hostname)) return true;
   if (hostname.endsWith('.vercel.app')) return true;
-  // En producción, solo app.simplapp.com es el dashboard
   return hostname === APP_SUBDOMAIN || hostname.startsWith('app.');
 }
 
-// ─── Rutas de Auth API (siempre públicas) ────────────────────────────────────
-const AUTH_API_ROUTES = [
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/forgot-password',
-  '/api/auth/reset-password',
-];
-
-function isAuthApiRoute(pathname: string): boolean {
-  return AUTH_API_ROUTES.some(route => pathname.startsWith(route));
+// ─── URL helpers para redirects cross-domain ─────────────────────────────────
+// En producción, los redirects entre marketing↔app van a dominios distintos.
+// En localhost, todo es relativo (mismo dominio).
+function marketingUrl(pathname: string, hostname: string): string {
+  if (isLocalhost(hostname)) return pathname;
+  return `https://${ROOT_DOMAIN}${pathname}`;
 }
 
-// ─── Páginas de Login/Register (marketing) ───────────────────────────────────
+function appUrl(pathname: string, hostname: string): string {
+  if (isLocalhost(hostname)) return pathname;
+  return `https://${APP_SUBDOMAIN}${pathname}`;
+}
+
+// ─── Páginas de Login/Register ───────────────────────────────────────────────
 function isAuthPageRoute(pathname: string): boolean {
   return (
     pathname.endsWith('/Login') ||
@@ -44,8 +45,6 @@ function isAuthPageRoute(pathname: string): boolean {
 }
 
 // ─── Rutas protegidas del dashboard ──────────────────────────────────────────
-// Prefijos de URL que pertenecen al dashboard SPA.
-// El middleware hace rewrite→'/' para evitar conflicto con (marketing)/[country].
 const DASHBOARD_ROUTES = [
   '/Dashboard',
   '/dashboard',
@@ -88,7 +87,6 @@ export async function proxy(request: NextRequest) {
   }
 
   // TODAS las rutas de API: siempre pasar sin restricción
-  // Esto incluye /api/auth/session, /api/bills, /api/clients, etc.
   if (pathname.startsWith('/api/')) {
     return NextResponse.next();
   }
@@ -98,73 +96,63 @@ export async function proxy(request: NextRequest) {
   const isTokenValid = await verifyToken(accessToken || '');
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // DOMINIO MARKETING: simplapp.com
-  // Solo sirve landing y páginas de auth. Si hay sesión → redirige a app.*
+  // DOMINIO MARKETING: simplapp.com.co (o www.simplapp.com.co)
   // ═══════════════════════════════════════════════════════════════════════════
   if (!appDomain) {
-    // Usuario autenticado en simplapp.com → mandarlo al dashboard
+    // Autenticado → mandar al app domain
     if (isTokenValid) {
-      const appUrl = process.env.NODE_ENV === 'production'
-        ? `https://${APP_SUBDOMAIN}/`
-        : 'http://localhost:3000/';
-      return NextResponse.redirect(appUrl);
+      return NextResponse.redirect(appUrl('/', hostname));
     }
 
-    // Páginas de login/register → dejar pasar
+    // Login/Register → dejar pasar
     if (isAuthPageRoute(pathname)) {
       return NextResponse.next();
     }
 
-    // Raíz → redirigir a landing
+    // Raíz → landing
     if (pathname === '/' || pathname === '') {
       const url = request.nextUrl.clone();
       url.pathname = '/colombia/';
       return NextResponse.redirect(url);
     }
 
-    // Rutas de marketing válidas (/colombia/, /us/, etc.) → dejar pasar
-    // Regex: /seguido de 2-15 letras, opcionalmente seguido de / y más path
-    const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname);
+    // Rutas de marketing válidas (/colombia/, etc.) → dejar pasar
+    const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
     if (isValidMarketingPath) {
       return NextResponse.next();
     }
 
-    // Ruta desconocida en marketing → mandar a la landing
+    // Desconocido → landing
     const url = request.nextUrl.clone();
     url.pathname = '/colombia/';
     return NextResponse.redirect(url);
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // DOMINIO APP: app.simplapp.com (o localhost)
-  // Solo sirve el dashboard. Sin sesión → redirige a simplapp.com/Login
+  // DOMINIO APP: app.simplapp.com.co (o localhost)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Páginas de Login/Register en app.* → redirigir al marketing si ya hay sesión
+  // Login/Register en app domain
   if (isAuthPageRoute(pathname)) {
     if (isTokenValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/';
-      return NextResponse.redirect(url);
+      return NextResponse.redirect(new URL('/', request.url));
     }
-    // Sin sesión en app.*/Login → dejar pasar (puede pasar en dev)
-    return NextResponse.next();
+    // Sin sesión → mandar al marketing domain para login
+    return NextResponse.redirect(marketingUrl(pathname, hostname));
   }
 
-  // Rutas específicas del dashboard (ventas-*, inventario-*, etc.)
-  // Usamos rewrite→'/' para que (dashboard)/layout.tsx las maneje siempre
-  // y evitar conflicto con (marketing)/[country]
+  // Rutas de marketing en app domain → redirigir al marketing domain
+  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
+  if (isMarketingRoute) {
+    return NextResponse.redirect(marketingUrl(pathname, hostname));
+  }
+
+  // Rutas del dashboard (ventas-*, inventario-*, etc.)
   if (isDashboardRoute(pathname)) {
     if (!isTokenValid) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/colombia/Login';
-      url.searchParams.set('redirect', pathname);
-      const response = NextResponse.redirect(url);
-      if (accessToken) {
-        response.cookies.delete('access-token');
-        response.cookies.delete('refresh-token');
-      }
-      return response;
+      // Sin sesión → login en el marketing domain
+      const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(marketingUrl(loginPath, hostname));
     }
     return NextResponse.rewrite(new URL('/', request.url));
   }
@@ -172,34 +160,17 @@ export async function proxy(request: NextRequest) {
   // Raíz '/' en app domain
   if (pathname === '/' || pathname === '') {
     if (!isTokenValid) {
-      // Sin sesión → mandar a la landing (desde ahí puede ir a Login o Register)
-      const url = request.nextUrl.clone();
-      url.pathname = '/colombia/';
-      return NextResponse.redirect(url);
+      // Sin sesión → landing en marketing domain
+      return NextResponse.redirect(marketingUrl('/colombia/', hostname));
     }
     // Con sesión → dashboard
     return NextResponse.next();
   }
 
-  // Rutas de marketing (/colombia/, /us/, etc.) → siempre accesibles
-  // Esto permite la landing page y que el usuario navegue a Login/Register
-  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
-  if (isMarketingRoute) {
-    // Si ya tiene sesión y está en una página de marketing (no auth), mandar al dashboard
-    if (isTokenValid && !isAuthPageRoute(pathname)) {
-      const url = request.nextUrl.clone();
-      url.pathname = '/';
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
-  }
-
-  // Cualquier otra ruta desconocida sin sesión → login
+  // Cualquier otra ruta sin sesión → login en marketing domain
   if (!isTokenValid) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/colombia/Login';
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+    const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(marketingUrl(loginPath, hostname));
   }
 
   return NextResponse.next();
