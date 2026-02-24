@@ -1,13 +1,13 @@
 'use client';
 
 import "@/app/globals.css";
-import Sidebar from "@/app/ui/components/Navbar/Sidebar";
+import Sidebar from "@/app/ui/components/bars/Sidebar";
 import { useEffect } from "react";
 import Dashboard from "../Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
-import { Navbar } from "@/app/ui/components/Navbar/Navbar";
-import { GlobalSearch } from "@/app/ui/components/Navbar/GlobalSearch";
+import { Navbar } from "@/app/ui/components/bars/Navbar";
+import { GlobalSearch } from "@/app/ui/components/bars/GlobalSearch";
 
 import Clientes from "@/app/ui/components/Sales/Clients/pages";
 import CreateClient from "@/app/ui/components/Sales/Clients/create/page";
