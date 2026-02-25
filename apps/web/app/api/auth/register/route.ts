@@ -3,45 +3,28 @@ import bcrypt from 'bcryptjs';
 import { createUsers } from '@interfaces/lib/users';
 import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
+import { rateLimit } from '@/lib/rate-limit';
+import { parseBody, registerApiSchema } from '@/lib/api-schemas';
 
 /**
  * POST /api/auth/register
  * Registra un nuevo usuario en la plataforma
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  // ─── Rate Limiting: 5 registros por IP cada hora ─────────────────────────
+  const { allowed, response: rateLimitResponse } = rateLimit(request, {
+    limit: 5,
+    windowSec: 60 * 60,
+  });
+  if (!allowed) return rateLimitResponse!;
+
   try {
     const body = await request.json();
-    const { email, password, name, phone, typeAccount } = body;
 
-    if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'Email, contraseña y nombre son requeridos' },
-        { status: 400 }
-      );
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Formato de email inválido' },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 8 caracteres' },
-        { status: 400 }
-      );
-    }
-
-    // Prevenir bcrypt DoS con passwords excesivamente largos
-    if (password.length > 128) {
-      return NextResponse.json(
-        { error: 'La contraseña no puede superar los 128 caracteres' },
-        { status: 400 }
-      );
-    }
+    // ─── Validación con Zod ───────────────────────────────────────────────
+    const parsed = parseBody(body, registerApiSchema);
+    if (!parsed.success) return parsed.errorResponse;
+    const { email, password, name, phone, typeAccount } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
