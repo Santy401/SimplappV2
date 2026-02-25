@@ -7,14 +7,20 @@ import 'react-toastify/dist/ReactToastify.css';
 import { SettingsProvider } from './context/SettingsContext';
 import { SessionProvider } from './context/SessionContext';
 import { LoadingProvider } from './context/LoadingContext';
+
 export function Providers({ children }: { children: ReactNode }) {
     const [queryClient] = useState(
         () =>
             new QueryClient({
                 defaultOptions: {
                     queries: {
-                        staleTime: 60 * 1000,
+                        // 5 minutos — alineado con useSession (evita refetches innecesarios)
+                        // Si necesitas datos más frescos en alguna query específica, override
+                        // con staleTime en esa query individual.
+                        staleTime: 5 * 60 * 1000,
+                        gcTime: 10 * 60 * 1000,   // 10 min en memoria después de sin suscriptores
                         refetchOnWindowFocus: false,
+                        retry: 1,
                     },
                 },
             })

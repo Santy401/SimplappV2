@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    logActivity({
+    void logActivity({
       companyId: user.companies[0].company.id,
       userId: user.id,
       action: 'CREATE',

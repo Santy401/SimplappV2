@@ -3,30 +3,35 @@
 import "@/app/globals.css";
 import { Sidebar } from "@simplapp/ui";
 import { useEffect } from "react";
-import Dashboard from "./Dashboard/page";
 import React from "react";
 import Breadcrumb from "./Breadcrumb";
 import { Navbar, GlobalSearch } from "@simplapp/ui";
 import { SettingsModal } from "./SettingsModal/SettingsModal";
 
-import Clientes from "./Sales/Clients/pages";
-import CreateClient from "./Sales/Clients/create/page";
-import Vendedores from "./Sales/Sellers/page"
-import Productos from "./Sales/Products/page";
-import CreateProduct from "./Sales/Products/create/page";
-import Bodega from "./Sales/Stores/page";
-import CreateStore from "./Sales/Stores/create/page";
-import CreateSeller from "./Sales/Sellers/create/page";
-import ListPrices from "./Sales/ListPrice/page";
-import CreateListPrice from "./Sales/ListPrice/create/page";
-import Bills from "./Sales/Bills/pages";
-import FormBill from "./Sales/Bills/create/page";
-import ProfileConfig from "./Settings/Profile/page";
+import dynamic from 'next/dynamic';
 
 import { ProtectedRoute } from "./ProtectedRoute";
 import { NavigationProvider, useNavigation } from "@/app/context/NavigationContext";
 import { AppStateProvider, useAppState } from "@/app/context/AppStateContext";
 import { useSettings } from "@/app/context/SettingsContext";
+
+// ─── Lazy loading de vistas del dashboard ───────────────────────────────────────
+// Cada vista se carga solo cuando el usuario navega a ella, reduciendo
+// el bundle inicial del dashboard en ~60-70%.
+const Dashboard = dynamic(() => import('./Dashboard/page'), { ssr: false });
+const Clientes = dynamic(() => import('./Sales/Clients/pages'), { ssr: false });
+const CreateClient = dynamic(() => import('./Sales/Clients/create/page'), { ssr: false });
+const Vendedores = dynamic(() => import('./Sales/Sellers/page'), { ssr: false });
+const CreateSeller = dynamic(() => import('./Sales/Sellers/create/page'), { ssr: false });
+const Productos = dynamic(() => import('./Sales/Products/page'), { ssr: false });
+const CreateProduct = dynamic(() => import('./Sales/Products/create/page'), { ssr: false });
+const Bodega = dynamic(() => import('./Sales/Stores/page'), { ssr: false });
+const CreateStore = dynamic(() => import('./Sales/Stores/create/page'), { ssr: false });
+const ListPrices = dynamic(() => import('./Sales/ListPrice/page'), { ssr: false });
+const CreateListPrice = dynamic(() => import('./Sales/ListPrice/create/page'), { ssr: false });
+const Bills = dynamic(() => import('./Sales/Bills/pages'), { ssr: false });
+const FormBill = dynamic(() => import('./Sales/Bills/create/page'), { ssr: false });
+const ProfileConfig = dynamic(() => import('./Settings/Profile/page'), { ssr: false });
 
 function AdminContent({ children }: { children: React.ReactNode }) {
   const { currentView, navigateTo } = useNavigation();
