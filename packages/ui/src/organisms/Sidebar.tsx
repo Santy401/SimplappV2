@@ -75,7 +75,7 @@ export function Sidebar({ onSelect, currentView }: SidebarProps) {
         <div
             className={cn(
                 "h-screen sticky top-0 left-0 z-100 transition-[width] duration-300 flex-shrink-0 outline-none",
-                isPinned ? "w-62" : "w-20"
+                isPinned ? "w-62" : "w-22"
             )}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
@@ -84,7 +84,7 @@ export function Sidebar({ onSelect, currentView }: SidebarProps) {
                 className={cn(
                     "absolute top-0 left-0 h-screen border-r border-sidebar-border flex flex-col font-sans overflow-hidden transition-all duration-300 z-50",
                     "bg-white text-slate-700 dark:bg-slate-950 dark:bg-gradient-to-b dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 dark:text-slate-300",
-                    isExpanded ? "w-62" : "w-20",
+                    isExpanded ? "w-62" : "w-22",
                     !isPinned && isHovered && "shadow-2xl shadow-black/10 dark:shadow-black/30"
                 )}
             >

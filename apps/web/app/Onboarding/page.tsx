@@ -291,7 +291,7 @@ export default function OnboardingPage() {
                             className="bg-purple-600 flex items-center justify-center cursor-pointer  hover:bg-purple-700 text-white w-full rounded py-6 mt-8 shadow-lg shadow-purple-500/20"
                             onClick={finishOnboarding}
                         >
-                            Ir al dashboard <ArrowRight className="ml-2 w-4 h-4" />
+                            Ir al inicio <ArrowRight className="ml-2 w-4 h-4" />
                         </Button>
                     </motion.div>
                 );

@@ -25,10 +25,8 @@ import BillsCreatePage from "./Sales/Bills/create/page";
 import ProfileConfig from "./Settings/Profile/page";
 
 import { ProtectedRoute } from "./ProtectedRoute";
-import { SessionProvider } from "@/app/context/SessionContext";
 import { NavigationProvider, useNavigation } from "@/app/context/NavigationContext";
 import { AppStateProvider, useAppState } from "@/app/context/AppStateContext";
-import { LoadingProvider } from "@/app/context/LoadingContext";
 import { useSettings } from "@/app/context/SettingsContext";
 
 function AdminContent({ children }: { children: React.ReactNode }) {
@@ -74,8 +72,6 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   const renderContent = () => {
     switch (currentView) {
       case 'inicio':
-        return <div className="text-white">Inicio</div>;
-      case 'dashboard':
         return <Dashboard />;
       case 'ventas-venta':
         return <div className="text-white p-8">Comprobante De Venta</div>;
@@ -196,18 +192,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <SessionProvider>
-      <LoadingProvider>
-        <ProtectedRoute>
-          <NavigationProvider>
-            <AppStateProvider>
-              <SettingsProvider>
-                <AdminContent>{children}</AdminContent>
-              </SettingsProvider>
-            </AppStateProvider>
-          </NavigationProvider>
-        </ProtectedRoute>
-      </LoadingProvider>
-    </SessionProvider>
+    <ProtectedRoute>
+      <NavigationProvider>
+        <AppStateProvider>
+          <SettingsProvider>
+            <AdminContent>{children}</AdminContent>
+          </SettingsProvider>
+        </AppStateProvider>
+      </NavigationProvider>
+    </ProtectedRoute>
   );
 }

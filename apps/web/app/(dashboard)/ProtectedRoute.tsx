@@ -39,7 +39,7 @@ export const ProtectedRoute = ({
     if (!isLoading && isAuthenticated && user) {
       if (user.onboardingCompleted === false && pathname !== '/Onboarding') {
         router.push('/Onboarding');
-      } else if (user.onboardingCompleted !== false && pathname === '/Onboarding') {
+      } else if (user.onboardingCompleted === true && pathname === '/Onboarding') {
         router.push('/');
       }
     }

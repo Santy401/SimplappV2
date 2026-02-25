@@ -5,6 +5,8 @@ import { ReactNode, useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { SettingsProvider } from './context/SettingsContext';
+import { SessionProvider } from './context/SessionContext';
+import { LoadingProvider } from './context/LoadingContext';
 export function Providers({ children }: { children: ReactNode }) {
     const [queryClient] = useState(
         () =>
@@ -20,9 +22,13 @@ export function Providers({ children }: { children: ReactNode }) {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <SettingsProvider>
-                {children}
-            </SettingsProvider>
+            <SessionProvider>
+                <LoadingProvider>
+                    <SettingsProvider>
+                        {children}
+                    </SettingsProvider>
+                </LoadingProvider>
+            </SessionProvider>
             <ToastContainer
                 position="bottom-right"
                 autoClose={3000}

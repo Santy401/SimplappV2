@@ -61,7 +61,6 @@ const DASHBOARD_ROUTES = [
   '/ventas-',
   '/inventario-',
   '/profile-settings',
-  '/Onboarding',
   '/Settings',
 ];
 
@@ -98,7 +97,20 @@ export async function proxy(request: NextRequest) {
 
   // TODAS las rutas de API: siempre pasar sin restricción
   if (pathname.startsWith('/api/')) {
-    return NextResponse.next();
+    const response = request.method === 'OPTIONS'
+      ? new NextResponse(null, { status: 204 })
+      : NextResponse.next();
+
+    // Manejo dinámico de CORS para permitir subdominios y credenciales
+    const origin = request.headers.get('origin');
+    if (origin && (origin.endsWith(ROOT_DOMAIN) || origin.includes('localhost'))) {
+      response.headers.set('Access-Control-Allow-Origin', origin);
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      response.headers.set('Access-Control-Allow-Methods', 'GET,DELETE,PATCH,POST,PUT,OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version');
+    }
+
+    return response;
   }
 
   // Obtener y validar el token

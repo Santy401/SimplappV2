@@ -30,13 +30,13 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (userData: RegisterData): Promise<RegisterResponse> => {
-      const response = await apiClient.post<RegisterResponse>('/api/auth/register', userData);
+      const response = await apiClient.post<RegisterResponse>('/api/auth/register/', userData);
       return response;
     },
     onSuccess: (data) => {
       toast.success('Cuenta creada exitosamente');
       // Force reload to update session state correctly and route naturally
-      window.location.href = "/ui/pages/Onboarding";
+      window.location.href = "/Onboarding";
     },
     onError: (error: Error) => {
       console.error('Registration error:', error);

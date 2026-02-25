@@ -33,7 +33,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
     // Persistir el estado de navegación
     const [currentView, setCurrentView] = usePersistedState<string>(
         "app_current_view",
-        "dashboard"
+        "inicio"
     );
 
     const [navigationHistory, setNavigationHistory] = usePersistedState<string[]>(
@@ -49,7 +49,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
 
         // La raíz '/' equivale a la vista 'dashboard'
         if (pathname === '/' || pathname === '') {
-            setCurrentView('dashboard');
+            setCurrentView('inicio');
             return;
         }
 
@@ -79,7 +79,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
             setNavigationHistory((prev) => prev.slice(0, -1));
             navigateTo(previousView, false);
         } else {
-            navigateTo('dashboard', false);
+            navigateTo('inicio', false);
         }
     };
 
