@@ -65,7 +65,7 @@ export const useBill = () => {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
-            setBills(data);
+            setBills(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } catch (error) {
             setError(error instanceof Error ? error.message : 'Unknown error');
         } finally {

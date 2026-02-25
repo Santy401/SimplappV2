@@ -45,7 +45,7 @@ export function useProduct() {
       }
 
       const data = await response.json();
-      setProducts(data);
+      setProducts(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
     } finally {

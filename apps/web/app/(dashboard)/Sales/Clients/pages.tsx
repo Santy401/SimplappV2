@@ -53,7 +53,7 @@ export default function ClientesPage({
     handleDeleteManyCustomers,
   } = useClientTable({ onSelect, onSelectClient, onDeleteSuccess: refetchTable });
 
-  const validClients = clients || [];
+  const validClients = Array.isArray(clients) ? clients : [];
 
   const totalClients = validClients.length;
   const naturalPersons = validClients.filter(c => c.organizationType === OrganizationType.NATURAL_PERSON).length;

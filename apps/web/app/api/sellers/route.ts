@@ -38,7 +38,6 @@ export async function GET(request: NextRequest) {
 
     const where = {
       companyId,
-      deletedAt: null,
       ...(searchQuery && {
         OR: [
           { name: { contains: searchQuery, mode: 'insensitive' as const } },
@@ -48,7 +47,7 @@ export async function GET(request: NextRequest) {
     };
 
     const [sellers, total] = await prisma.$transaction([
-      prisma.seller.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.seller.findMany({ where, skip, take }),
       prisma.seller.count({ where }),
     ]);
 
