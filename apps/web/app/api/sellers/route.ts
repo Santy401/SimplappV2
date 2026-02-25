@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@interfaces/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyAccessToken } from "@interfaces/lib/auth/token";
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
+
 
 /**
  * GET /api/sellers
@@ -30,13 +32,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    const seller = await prisma.seller.findMany({
-      where: {
-        companyId: user.companies[0].company.id,
-      }
-    });
+    const companyId = user.companies[0].company.id;
+    const { page, take, skip } = getPaginationParams(request);
+    const searchQuery = request.nextUrl.searchParams.get('search') ?? undefined;
 
-    return NextResponse.json(seller);
+    const where = {
+      companyId,
+      deletedAt: null,
+      ...(searchQuery && {
+        OR: [
+          { name: { contains: searchQuery, mode: 'insensitive' as const } },
+          { identification: { contains: searchQuery, mode: 'insensitive' as const } },
+        ],
+      }),
+    };
+
+    const [sellers, total] = await prisma.$transaction([
+      prisma.seller.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.seller.count({ where }),
+    ]);
+
+    return NextResponse.json({ data: sellers, meta: buildMeta(page, take, total) });
   } catch (error) {
     console.error('Error fetching sellers:', error);
     return NextResponse.json(

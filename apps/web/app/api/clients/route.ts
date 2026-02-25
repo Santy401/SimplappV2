@@ -3,6 +3,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { logActivity } from '@interfaces/lib/activity-log';
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
 
 /**
  * GET /api/clients
@@ -31,16 +32,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
     }
 
-    const clients = await prisma.client.findMany({
-      where: {
-        companyId: user.companies[0].company.id,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const companyId = user.companies[0].company.id;
+    const { page, take, skip } = getPaginationParams(request);
+    const searchQuery = request.nextUrl.searchParams.get('search') ?? undefined;
 
-    return NextResponse.json(clients);
+    const where = {
+      companyId,
+      deletedAt: null,
+      ...(searchQuery && {
+        OR: [
+          { firstName: { contains: searchQuery, mode: 'insensitive' as const } },
+          { firstLastName: { contains: searchQuery, mode: 'insensitive' as const } },
+          { identificationNumber: { contains: searchQuery, mode: 'insensitive' as const } },
+          { email: { contains: searchQuery, mode: 'insensitive' as const } },
+        ],
+      }),
+    };
+
+    const [clients, total] = await prisma.$transaction([
+      prisma.client.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.client.count({ where }),
+    ]);
+
+    return NextResponse.json({ data: clients, meta: buildMeta(page, take, total) });
   } catch (error) {
     console.error('Error fetching clients:', error);
     return NextResponse.json(

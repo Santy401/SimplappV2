@@ -3,6 +3,8 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { BillStatus } from '@prisma/client';
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
+
 
 /**
  * GET /api/bills
@@ -32,6 +34,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
+    const { page, take, skip } = getPaginationParams(request);
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
     const startDate = searchParams.get('startDate');
@@ -39,44 +42,31 @@ export async function GET(request: NextRequest) {
 
     const whereClause: any = {
       companyId: user.companies[0].company.id,
+      deletedAt: null,
     };
 
-    if (clientId) {
-      whereClause.clientId = clientId;
-    }
-
-    if (status) {
-      whereClause.status = status as BillStatus;
-    }
+    if (clientId) whereClause.clientId = clientId;
+    if (status) whereClause.status = status as BillStatus;
 
     if (startDate || endDate) {
       whereClause.date = {};
-      if (startDate) {
-        whereClause.date.gte = new Date(startDate);
-      }
-      if (endDate) {
-        whereClause.date.lte = new Date(endDate);
-      }
+      if (startDate) whereClause.date.gte = new Date(startDate);
+      if (endDate) whereClause.date.lte = new Date(endDate);
     }
 
-    const bills = await prisma.bill.findMany({
-      where: whereClause,
-      include: {
-        client: true,
-        store: true,
-        user: true,
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const include = {
+      client: true,
+      store: true,
+      user: true,
+      items: { include: { product: true } },
+    };
 
-    return NextResponse.json(bills);
+    const [bills, total] = await prisma.$transaction([
+      prisma.bill.findMany({ where: whereClause, include, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.bill.count({ where: whereClause }),
+    ]);
+
+    return NextResponse.json({ data: bills, meta: buildMeta(page, take, total) });
   } catch (error) {
     console.error('Error fetching bills:', error);
     return NextResponse.json(

@@ -222,6 +222,13 @@ model Seller {
   observation    String?
   companyId      String?
   company        Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
 /**
@@ -242,6 +249,13 @@ model Store {
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
 model Product {

@@ -1,6 +1,17 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
+/**
+ * @deprecated Usar `useSession` de `@hooks/features/auth/use-session` como fuente de verdad
+ * para el estado de autenticación (isAuthenticated, user, isLoading).
+ *
+ * `useAuth` se mantiene SOLO para:
+ *  - `logout()` — cierra la sesión y limpia cookies
+ *  - El timer de auto-refresh del access-token (13 min)
+ *
+ * No usar para leer datos del usuario ni el estado de autenticación.
+ * En su lugar: `const { user, isAuthenticated } = useSession();`
+ */
 export function useAuth() {
     const router = useRouter();
     const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);

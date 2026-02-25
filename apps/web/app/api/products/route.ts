@@ -3,6 +3,8 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { ItemType, UnitOfMeansureList } from '@prisma/client';
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
+
 
 /**
  * GET /api/products
@@ -31,25 +33,36 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
         }
 
-        const products = await prisma.product.findMany({
-            where: {
-                companyId: user.companies[0].company.id,
-            },
-            include: {
-                category: true,
-                images: true,
-                prices: {
-                    include: {
-                        listPrice: true,
-                    },
-                },
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        });
+        const companyId = user.companies[0].company.id;
+        const { page, take, skip } = getPaginationParams(request);
+        const searchQuery = request.nextUrl.searchParams.get('search') ?? undefined;
+        const categoryId = request.nextUrl.searchParams.get('category') ?? undefined;
 
-        return NextResponse.json(products);
+        const where = {
+            companyId,
+            deletedAt: null,
+            ...(categoryId && { categoryProductId: categoryId }),
+            ...(searchQuery && {
+                OR: [
+                    { name: { contains: searchQuery, mode: 'insensitive' as const } },
+                    { reference: { contains: searchQuery, mode: 'insensitive' as const } },
+                    { code: { contains: searchQuery, mode: 'insensitive' as const } },
+                ],
+            }),
+        };
+
+        const include = {
+            category: true,
+            images: true,
+            prices: { include: { listPrice: true } },
+        };
+
+        const [products, total] = await prisma.$transaction([
+            prisma.product.findMany({ where, skip, take, include, orderBy: { createdAt: 'desc' } }),
+            prisma.product.count({ where }),
+        ]);
+
+        return NextResponse.json({ data: products, meta: buildMeta(page, take, total) });
     } catch (error) {
         console.error('Error fetching products:', error);
         return NextResponse.json(
