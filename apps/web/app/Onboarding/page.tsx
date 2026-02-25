@@ -42,7 +42,7 @@ export default function OnboardingPage() {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            await apiClient.post('/api/auth/onboarding', {
+            await apiClient.post('/api/auth/onboarding/', {
                 userType,
                 companyName,
                 country,

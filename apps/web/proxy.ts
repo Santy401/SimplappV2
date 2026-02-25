@@ -138,6 +138,11 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
+    // Onboarding → mandar al app domain obligatoriamente
+    if (pathname.startsWith('/Onboarding')) {
+      return NextResponse.redirect(appUrl(pathname.endsWith('/') ? pathname : `${pathname}/`, request));
+    }
+
     // Rutas de marketing válidas (/colombia/, etc.) → dejar pasar
     const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
     if (isValidMarketingPath) {
@@ -174,11 +179,20 @@ export async function proxy(request: NextRequest) {
   }
 
   // Rutas del dashboard (ventas-*, inventario-*, etc.)
-  if (isDashboardRoute(pathname)) {
+  if (isDashboardRoute(pathname) || pathname.startsWith('/Onboarding')) {
     if (!isTokenValid) {
       // Sin sesión → login en el marketing domain
       const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
       return NextResponse.redirect(marketingUrl(loginPath, request));
+    }
+
+    // El dashboard (inicio, ventas, etc) se sirve por el index SPA
+    // El Onboarding se sirve por su propia ruta física
+    if (pathname.startsWith('/Onboarding')) {
+      if (!pathname.endsWith('/')) {
+        return NextResponse.redirect(new URL(pathname + '/', request.url));
+      }
+      return NextResponse.next();
     }
     return NextResponse.rewrite(new URL('/', request.url));
   }

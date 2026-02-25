@@ -36,7 +36,7 @@ export const useRegister = () => {
     onSuccess: (data) => {
       toast.success('Cuenta creada exitosamente');
       // Force reload to update session state correctly and route naturally
-      window.location.href = "/Onboarding";
+      window.location.href = "/Onboarding/";
     },
     onError: (error: Error) => {
       console.error('Registration error:', error);

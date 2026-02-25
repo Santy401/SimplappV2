@@ -20,7 +20,7 @@ class ApiClient {
     this.isRefreshing = true;
     this.refreshPromise = (async () => {
       try {
-        const response = await fetch(`${this.baseURL}/api/auth/refresh`, {
+        const response = await fetch(`${this.baseURL}/api/auth/refresh/`, {
           method: 'POST',
           credentials: 'include',
           headers: {
