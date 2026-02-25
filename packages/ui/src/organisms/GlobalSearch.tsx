@@ -6,16 +6,15 @@ import {
     X,
     Home,
     BarChart3,
-    TrendingUp,
-    Inbox,
     FileText,
     Users,
     Package,
     User,
     Store,
-    Receipt,
     Tag,
     ArrowRight,
+    Loader2,
+    Receipt
 } from "lucide-react"
 import { cn } from "../utils/utils"
 
@@ -25,32 +24,104 @@ interface SearchResult {
     description: string
     icon: React.ReactNode
     category: string
+    backendType?: string
+    backendId?: string
+    raw?: any
 }
 
-// Catálogo de vistas navegables que se pueden buscar
+// Catálogo de vistas navegables locales que se pueden buscar
 const SEARCHABLE_ITEMS: SearchResult[] = [
-    { id: "inicio", label: "Inicio", description: "Página principal", icon: <Home size={18} />, category: "General" },
-    { id: "dashboard", label: "Dashboard", description: "Panel de control", icon: <BarChart3 size={18} />, category: "General" },
-    { id: "ventas-facturacion", label: "Facturación", description: "Facturas de venta", icon: <FileText size={18} />, category: "Ventas" },
-    { id: "ventas-clientes", label: "Clientes", description: "Gestión de clientes", icon: <Users size={18} />, category: "Ventas" },
-    { id: "ventas-productos", label: "Productos De Venta", description: "Catálogo de productos", icon: <Package size={18} />, category: "Ventas" },
-    { id: "ventas-vendedor", label: "Vendedores", description: "Gestión de vendedores", icon: <User size={18} />, category: "Ventas" },
-    { id: "ventas-bodega", label: "Bodega", description: "Gestión de bodegas", icon: <Store size={18} />, category: "Ventas" },
-    { id: "inventario-precios", label: "Lista De Precios", description: "Precios de inventario", icon: <Tag size={18} />, category: "Inventario" },
+    { id: "inicio", label: "Inicio", description: "Página principal", icon: <Home size={18} />, category: "Navegación" },
+    { id: "dashboard", label: "Dashboard", description: "Panel de control", icon: <BarChart3 size={18} />, category: "Navegación" },
+    { id: "ventas-facturacion", label: "Facturación", description: "Facturas de venta", icon: <FileText size={18} />, category: "Navegación" },
+    { id: "ventas-clientes", label: "Clientes", description: "Gestión de clientes", icon: <Users size={18} />, category: "Navegación" },
+    { id: "ventas-productos", label: "Productos De Venta", description: "Catálogo de productos", icon: <Package size={18} />, category: "Navegación" },
+    { id: "ventas-vendedor", label: "Vendedores", description: "Gestión de vendedores", icon: <User size={18} />, category: "Navegación" },
+    { id: "ventas-bodega", label: "Bodega", description: "Gestión de bodegas", icon: <Store size={18} />, category: "Navegación" },
+    { id: "inventario-precios", label: "Lista De Precios", description: "Precios de inventario", icon: <Tag size={18} />, category: "Navegación" },
 ]
 
 interface GlobalSearchProps {
     isOpen: boolean
     onClose: () => void
-    onSelect: (id: string) => void
+    onSelect: (id: string, item?: SearchResult) => void
 }
 
 export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
     const [query, setQuery] = useState("")
+    const [debouncedQuery, setDebouncedQuery] = useState("")
     const [selectedIndex, setSelectedIndex] = useState(0)
+    const [backendResults, setBackendResults] = useState<SearchResult[]>([])
+    const [isSearching, setIsSearching] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const results = query.trim().length > 0
+    // Debounce para la búsqueda en BD
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedQuery(query)
+        }, 300)
+        return () => clearTimeout(handler)
+    }, [query])
+
+    // Effect para buscar en BD remota
+    useEffect(() => {
+        if (debouncedQuery.trim().length === 0) {
+            setBackendResults([])
+            setIsSearching(false)
+            return
+        }
+
+        let current = true
+        const searchApi = async () => {
+            setIsSearching(true)
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(debouncedQuery)}`)
+                if (!res.ok) throw new Error("Search failed")
+                const data = await res.json()
+
+                if (current) {
+                    const mappedResults: SearchResult[] = data.results.map((r: any) => {
+                        let icon = <FileText size={18} />
+                        let category = "Datos"
+
+                        if (r.type === 'client') {
+                            icon = <Users size={18} />
+                            category = "Clientes"
+                        } else if (r.type === 'product') {
+                            icon = <Package size={18} />
+                            category = "Productos"
+                        } else if (r.type === 'bill') {
+                            icon = <Receipt size={18} />
+                            category = "Facturas"
+                        }
+
+                        return {
+                            id: `backend-${r.type}-${r.id}`,
+                            label: r.label,
+                            description: r.description,
+                            icon,
+                            category,
+                            backendType: r.type,
+                            backendId: r.id,
+                            raw: r.raw
+                        }
+                    })
+                    setBackendResults(mappedResults)
+                }
+            } catch (error) {
+                console.error("API search error", error)
+            } finally {
+                if (current) setIsSearching(false)
+            }
+        }
+
+        searchApi()
+
+        return () => { current = false }
+    }, [debouncedQuery])
+
+
+    const localResults = query.trim().length > 0
         ? SEARCHABLE_ITEMS.filter((item) =>
             item.label.toLowerCase().includes(query.toLowerCase()) ||
             item.description.toLowerCase().includes(query.toLowerCase()) ||
@@ -58,6 +129,7 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
         )
         : []
 
+    const results = [...localResults, ...backendResults]
     const hasResults = results.length > 0
 
     // Enfocar input al abrir
@@ -81,7 +153,7 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
                 e.preventDefault()
                 setSelectedIndex((prev) => Math.max(prev - 1, 0))
             } else if (e.key === "Enter" && results[selectedIndex]) {
-                handleNavigate(results[selectedIndex].id)
+                handleNavigate(results[selectedIndex])
             }
         },
         [results, selectedIndex, onClose]
@@ -89,10 +161,10 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
 
     useEffect(() => {
         setSelectedIndex(0)
-    }, [query])
+    }, [query, backendResults])
 
-    const handleNavigate = (id: string) => {
-        onSelect(id)
+    const handleNavigate = (item: SearchResult) => {
+        onSelect(item.id, item)
         onClose()
         setQuery("")
     }
@@ -118,14 +190,14 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
             }}
             onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
         >
-            {/* Contenedor que se mueve: centrado sin resultados, sube con resultados */}
+            {/* Contenedor principal */}
             <div
                 style={{
                     width: "100%",
                     maxWidth: "600px",
                     padding: "0 1rem",
                     transition: "margin-top 0.35s cubic-bezier(0.4,0,0.2,1)",
-                    marginTop: hasResults ? "80px" : "calc(50vh - 36px)",
+                    marginTop: hasResults || isSearching ? "80px" : "calc(50vh - 36px)",
                 }}
             >
                 {/* Input de búsqueda */}
@@ -136,14 +208,18 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
                         boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(139,92,246,0.15)",
                     }}
                 >
-                    <Search size={20} className="text-purple-400 flex-shrink-0" />
+                    {isSearching ? (
+                        <Loader2 size={20} className="text-purple-400 flex-shrink-0 animate-spin" />
+                    ) : (
+                        <Search size={20} className="text-purple-400 flex-shrink-0" />
+                    )}
                     <input
                         ref={inputRef}
                         type="text"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Buscar en Simplapp..."
+                        placeholder="Buscar vistas, clientes, facturas o productos..."
                         className="flex-1 bg-transparent outline-none text-white placeholder-white/30 text-[15px]"
                     />
                     {query && (
@@ -202,22 +278,18 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
                                         return (
                                             <button
                                                 key={item.id}
-                                                onClick={() => handleNavigate(item.id)}
+                                                onClick={() => handleNavigate(item)}
                                                 onMouseEnter={() => setSelectedIndex(globalIndex)}
                                                 className={cn(
                                                     "w-full flex items-center gap-3 px-4 py-3 transition-colors duration-100 text-left",
-                                                    isSelected
-                                                        ? "bg-purple-500/20"
-                                                        : "hover:bg-white/5"
+                                                    isSelected ? "bg-purple-500/20" : "hover:bg-white/5"
                                                 )}
                                             >
                                                 {/* Ícono */}
                                                 <div
                                                     className={cn(
                                                         "flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors duration-100",
-                                                        isSelected
-                                                            ? "bg-purple-500/30 text-purple-300"
-                                                            : "bg-white/5 text-white/40"
+                                                        isSelected ? "bg-purple-500/30 text-purple-300" : "bg-white/5 text-white/40"
                                                     )}
                                                 >
                                                     {item.icon}
@@ -229,7 +301,6 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
                                                         "text-[14px] font-medium transition-colors",
                                                         isSelected ? "text-white" : "text-white/70"
                                                     )}>
-                                                        {/* Highlight de la coincidencia */}
                                                         {highlightMatch(item.label, query)}
                                                     </div>
                                                     <div className="text-[12px] text-white/30 truncate">
@@ -254,8 +325,8 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
                     </div>
                 </div>
 
-                {/* Mensaje cuando no hay resultados */}
-                {query.trim().length > 0 && !hasResults && (
+                {/* Mensaje cuando no hay resultados pero ya terminó de buscar */}
+                {query.trim().length > 0 && !hasResults && !isSearching && (
                     <div
                         className="mt-2.5 rounded-2xl border border-white/10 px-5 py-6 text-center"
                         style={{
@@ -279,7 +350,6 @@ export function GlobalSearch({ isOpen, onClose, onSelect }: GlobalSearchProps) {
     )
 }
 
-/** Resalta la parte del texto que coincide con la búsqueda */
 function highlightMatch(text: string, query: string) {
     if (!query) return <>{text}</>
     const idx = text.toLowerCase().indexOf(query.toLowerCase())

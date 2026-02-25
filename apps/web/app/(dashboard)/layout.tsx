@@ -178,7 +178,24 @@ function AdminContent({ children }: { children: React.ReactNode }) {
       <GlobalSearch
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        onSelect={(id) => navigateTo(id)}
+        onSelect={(id, item) => {
+          if (item?.backendType && item.raw) {
+            if (item.backendType === 'client') {
+              setSelectedClient(item.raw);
+              navigateTo('ventas-clientes-view');
+            } else if (item.backendType === 'product') {
+              setSelectedProduct(item.raw);
+              navigateTo('productos-producto-view');
+            } else if (item.backendType === 'bill') {
+              setSelectedBill(item.raw);
+              navigateTo('ventas-facturacion-view');
+            } else {
+              navigateTo(id);
+            }
+          } else {
+            navigateTo(id);
+          }
+        }}
       />
       <SettingsModal />
     </div>

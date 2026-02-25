@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
                 });
-                data = clients.map(c => ({
+                data = clients.map((c: any) => ({
                     ID: c.id,
                     Identificación: c.identification,
                     Nombre: c.name,
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
                 });
-                data = products.map(p => ({
+                data = products.map((p: any) => ({
                     Código: p.internalId,
                     Nombre: p.name,
                     Tipo: p.productType,
@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
                 });
-                data = sellers.map(s => ({
+                data = sellers.map((s: any) => ({
                     ID: s.id,
                     Identificación: s.identification,
                     Nombre: s.name,
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
                 });
-                data = stores.map(s => ({
+                data = stores.map((s: any) => ({
                     ID: s.id,
                     Nombre: s.name,
                     Código: s.storeCode,

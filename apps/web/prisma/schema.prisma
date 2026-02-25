@@ -122,7 +122,7 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false) // Evitar reutilización del token
   createdAt DateTime @default(now())
-  ipAddress String?  // Auditoría de quién solicitó el reset
+  ipAddress String? // Auditoría de quién solicitó el reset
 
   @@index([token])
   @@index([userId])
