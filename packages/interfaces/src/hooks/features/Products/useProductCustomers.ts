@@ -55,8 +55,14 @@ export const useProductCustomers = ({ onSelect, onSelectProduct, onDeleteSuccess
 
 
     const handleExportCustomers = () => {
-        console.log("Exportar productos");
-        toast.info('Función de exportación en desarrollo');
+        const url = `/api/export?entity=products`;
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "true");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Descargando productos...');
     };
 
     // const handleToggleStatus = async (product: Product) => {
