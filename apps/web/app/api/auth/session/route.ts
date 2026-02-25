@@ -79,9 +79,12 @@ export async function GET(request: NextRequest) {
       name: user.name,
       typeAccount: user.typeAccount,
       country: user.country,
-      companyId: user.company?.id,
+      companyId: user.companies?.[0]?.company?.id,
       companyName: user.companyName,
-      companyLogo: user.companyLogo,
+      // ⚠️ companyLogo se omite intencionalmente: puede ser un Base64 de cientos de KB.
+      // Cargarlo en cada query de sesión degrada el rendimiento del dashboard.
+      // TODO: Migrar logos a Supabase Storage y devolver solo la URL.
+      companyLogo: null,
       userType: user.userType,
       onboardingCompleted: user.onboardingCompleted,
       profileLogo: user.profileLogo,

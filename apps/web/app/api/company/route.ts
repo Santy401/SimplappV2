@@ -1,214 +1,140 @@
+/**
+ * /api/company — CRUD de configuración de empresa
+ *
+ * ⚠️ NOTA DE ARQUITECTURA:
+ * Los campos de empresa (companyName, currency, invoicePrefix, etc.) actualmente
+ * viven en el modelo User. Esta es una deuda técnica conocida (ver LISTA_DE_TAREAS.md).
+ * Este endpoint actualiza esos campos en User hasta que se implemente la migración
+ * a Company como entidad separada.
+ */
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { prisma } from '@interfaces/lib/prisma';
+import { verifyCsrf } from '@/lib/csrf';
 
-const companies: any[] = [];
-const users = [
-  {
-    id: 'user_123',
-    email: 'demo@empresa.com',
-    name: 'Usuario Demo',
-    companyId: null,
-  }
-];
+async function getAuthenticatedUser(request: NextRequest) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('access-token')?.value;
 
-/**
- * GET /api/company
- * Obtiene la información de la empresa del usuario actual
- */
-export async function GET(request: NextRequest) {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
+  if (!accessToken) return { error: 'No autenticado', status: 401 };
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
-    }
+  const payload = await verifyAccessToken(accessToken) as { id: string } | null;
+  if (!payload?.id) return { error: 'Token inválido', status: 401 };
 
-    const tokenData = JSON.parse(Buffer.from(token.value, 'base64').toString());
-    const userId = tokenData.userId;
+  const user = await prisma.user.findUnique({
+    where: { id: payload.id },
+    include: { companies: { include: { company: true } } },
+  });
 
-    const user = users.find(u => u.id === userId);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Usuario no encontrado' },
-        { status: 404 }
-      );
-    }
-
-    if (!user.companyId) {
-      return NextResponse.json({ company: null });
-    }
-
-    const company = companies.find(c => c.id === user.companyId);
-    if (!company) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({ company });
-
-  } catch (error) {
-    console.error('Get company error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
-  }
+  if (!user) return { error: 'Usuario no encontrado', status: 404 };
+  return { user };
 }
 
 /**
- * POST /api/company
- * Crea una nueva empresa asociada al usuario
+ * GET /api/company
+ * Retorna los datos de configuración de empresa del usuario actual
  */
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const body = await request.json();
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    const auth = await getAuthenticatedUser(request);
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
     }
 
-    const tokenData = JSON.parse(Buffer.from(token.value, 'base64').toString());
-    const userId = tokenData.userId;
+    const { user } = auth;
 
-    const {
-      companyName,
-      legalName,
-      taxId,
-      address,
-      phone,
-      email,
-      industry,
-      currency,
-      website,
-      country
-    } = body;
-
-    if (!companyName || !legalName || !taxId) {
-      return NextResponse.json(
-        { error: 'Nombre comercial, razón social y NIT son requeridos' },
-        { status: 400 }
-      );
-    }
-
-    const user = users.find(u => u.id === userId);
-    if (user?.companyId) {
-      return NextResponse.json(
-        { error: 'El usuario ya tiene una empresa configurada' },
-        { status: 400 }
-      );
-    }
-
-    const existingCompany = companies.find(c => c.taxId === taxId);
-    if (existingCompany) {
-      return NextResponse.json(
-        { error: 'Ya existe una empresa con este NIT' },
-        { status: 409 }
-      );
-    }
-
-    const newCompany = {
-      id: `company_${Date.now()}`,
-      userId,
-      companyName,
-      legalName,
-      taxId,
-      address: address || '',
-      phone: phone || '',
-      email: email || '',
-      industry: industry || '',
-      currency: currency || 'COP',
-      website: website || '',
-      country: country || 'Colombia',
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    // Construir el objeto de empresa desde los campos del User (deuda técnica conocida)
+    const companyData = {
+      id: user.id,
+      companyName: user.companyName,
+      companyLogo: null, // No devolver Base64 en GET — puede ser enorme
+      userType: user.userType,
+      legalName: user.legalName,
+      businessType: user.businessType,
+      industry: user.industry,
+      taxIdentification: user.taxIdentification,
+      taxRegime: user.taxRegime,
+      taxResponsibilities: user.taxResponsibilities,
+      state: user.state,
+      city: user.city,
+      address: user.address,
+      zipCode: user.zipCode,
+      currency: user.currency,
+      invoicePrefix: user.invoicePrefix,
+      invoiceInitialNumber: user.invoiceInitialNumber,
+      defaultTax: user.defaultTax,
+      phone: user.phone,
+      billingEmail: user.billingEmail,
+      website: user.website,
+      country: user.country,
     };
 
-    companies.push(newCompany);
-
-    cookieStore.set('onboarding-completed', 'true', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    return NextResponse.json({
-      company: newCompany,
-      message: 'Empresa configurada exitosamente'
-    }, { status: 201 });
-
+    return NextResponse.json({ company: companyData });
   } catch (error) {
-    console.error('Create company error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    console.error('Get company error:', error);
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
 /**
  * PUT /api/company
- * Actualiza la información de la empresa existente
+ * Actualiza la configuración de empresa del usuario
  */
 export async function PUT(request: NextRequest) {
+  // CSRF protection — actualizar información fiscal es una mutación sensible
+  const csrfError = verifyCsrf(request);
+  if (csrfError) return csrfError;
+
   try {
+    const auth = await getAuthenticatedUser(request);
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
+
+    const { user } = auth;
     const body = await request.json();
-    const cookieStore = await cookies();
-    const token = cookieStore.get('auth-token');
 
-    if (!token) {
-      return NextResponse.json(
-        { error: 'No autenticado' },
-        { status: 401 }
-      );
+    // Lista blanca de campos permitidos (evitar mass assignment)
+    const allowedFields = [
+      'companyName', 'legalName', 'businessType', 'industry',
+      'taxIdentification', 'taxRegime', 'taxResponsibilities',
+      'state', 'city', 'address', 'zipCode',
+      'currency', 'invoicePrefix', 'invoiceInitialNumber',
+      'defaultTax', 'phone', 'billingEmail', 'website', 'country',
+    ];
+
+    const updateData: Record<string, unknown> = {};
+    for (const field of allowedFields) {
+      if (field in body && body[field] !== undefined) {
+        updateData[field] = body[field];
+      }
     }
 
-    const tokenData = JSON.parse(Buffer.from(token.value, 'base64').toString());
-    const userId = tokenData.userId;
-
-    const user = users.find(u => u.id === userId);
-    if (!user || !user.companyId) {
-      return NextResponse.json(
-        { error: 'No se encontró empresa para este usuario' },
-        { status: 404 }
-      );
+    // Validaciones específicas
+    if (updateData.defaultTax !== undefined) {
+      const taxStr = String(updateData.defaultTax);
+      if (!/^\d+(\.\d+)?$/.test(taxStr)) {
+        return NextResponse.json({ error: 'defaultTax debe ser un valor numérico' }, { status: 400 });
+      }
     }
 
-    const companyIndex = companies.findIndex(c => c.id === user.companyId);
-    if (companyIndex === -1) {
-      return NextResponse.json(
-        { error: 'Empresa no encontrada' },
-        { status: 404 }
-      );
-    }
+    // No permitir actualizar el logo por este endpoint (tiene su propio flujo)
+    delete (updateData as any).companyLogo;
 
-    companies[companyIndex] = {
-      ...companies[companyIndex],
-      ...body,
-      updatedAt: new Date(),
-    };
-
-    return NextResponse.json({
-      company: companies[companyIndex],
-      message: 'Empresa actualizada exitosamente'
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: updateData,
     });
 
+    const { companyLogo: _logo, password: _pw, ...safeUser } = updatedUser;
+
+    return NextResponse.json({
+      company: safeUser,
+      message: 'Empresa actualizada exitosamente',
+    });
   } catch (error) {
     console.error('Update company error:', error);
-    return NextResponse.json(
-      { error: 'Error interno del servidor' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }

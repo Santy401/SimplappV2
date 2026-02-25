@@ -1,12 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { revokeRefreshToken } from '@interfaces/lib/auth/token';
+import { verifyCsrf } from '@/lib/csrf';
 
 /**
  * POST /api/auth/logout
  * Cierra la sesión del usuario y revoca el refresh token
  */
-export async function POST() {
+export async function POST(request: NextRequest) {
+  const csrfError = verifyCsrf(request);
+  if (csrfError) return csrfError;
+
   try {
     const cookieStore = await cookies();
 
