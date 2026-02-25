@@ -69,8 +69,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  refreshTokens RefreshToken[]
-  activityLogs  ActivityLog[]
+  refreshTokens       RefreshToken[]
+  activityLogs        ActivityLog[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model UserCompany {
@@ -111,6 +112,20 @@ model RefreshToken {
 
   @@index([userId])
   @@index([token])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false) // Evitar reutilización del token
+  createdAt DateTime @default(now())
+  ipAddress String?  // Auditoría de quién solicitó el reset
+
+  @@index([token])
+  @@index([userId])
 }
 
 /**

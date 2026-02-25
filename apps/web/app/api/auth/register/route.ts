@@ -5,6 +5,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 import { rateLimit } from '@/lib/rate-limit';
 import { parseBody, registerApiSchema } from '@/lib/api-schemas';
+import { sendWelcomeEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/register
@@ -49,6 +50,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     const accessToken = await generateAccessToken(newUser.id, newUser.email);
     const refreshToken = await generateRefreshToken(newUser.id);
+
+    // Enviar email de bienvenida de forma no bloqueante
+    void sendWelcomeEmail(newUser.email, newUser.name);
 
     // Domain para cookies cross-subdomain — igual que en login
     const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
