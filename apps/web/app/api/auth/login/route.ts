@@ -16,21 +16,23 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Email y contraseña son requeridos' }, { status: 400 });
     }
 
+    // Prevenir bcrypt DoS con passwords excesivamente largos
+    if (typeof password === 'string' && password.length > 128) {
+      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
       include: { companies: true }
     });
-    if (!user) {
-      return NextResponse.json({ error: 'Usuario no encontrado' }, { status: 404 });
-    }
-
-    if (!user.password) {
-      return NextResponse.json({ error: 'Usuario inválido' }, { status: 400 });
+    // Respuesta genérica para no exponer qué emails están registrados (user enumeration)
+    if (!user || !user.password) {
+      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return NextResponse.json({ error: 'Contraseña incorrecta' }, { status: 401 });
+      return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 });
     }
 
     const accessToken = await generateAccessToken(user.id, user.email);

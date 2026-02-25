@@ -1,16 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { createUsers } from '@interfaces/lib/users';
 import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 
-import { cookies } from 'next/headers';
-
 /**
  * POST /api/auth/register
  * Registra un nuevo usuario en la plataforma
  */
-export async function POST(request: Request): Promise<NextResponse> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
     const { email, password, name, phone, typeAccount } = body;
@@ -33,6 +31,14 @@ export async function POST(request: Request): Promise<NextResponse> {
     if (password.length < 8) {
       return NextResponse.json(
         { error: 'La contraseña debe tener al menos 8 caracteres' },
+        { status: 400 }
+      );
+    }
+
+    // Prevenir bcrypt DoS con passwords excesivamente largos
+    if (password.length > 128) {
+      return NextResponse.json(
+        { error: 'La contraseña no puede superar los 128 caracteres' },
         { status: 400 }
       );
     }
@@ -61,36 +67,33 @@ export async function POST(request: Request): Promise<NextResponse> {
     const accessToken = await generateAccessToken(newUser.id, newUser.email);
     const refreshToken = await generateRefreshToken(newUser.id);
 
-    const cookieStore = await cookies();
-
-    cookieStore.set('access-token', accessToken, {
+    // Domain para cookies cross-subdomain — igual que en login
+    const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
+    const cookieOptions = {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60,
-      path: '/'
-    });
+      sameSite: 'lax' as const,
+      path: '/',
+      ...(cookieDomain && { domain: cookieDomain }),
+    };
 
-    cookieStore.set('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/'
-    });
-
-    cookieStore.set('auth-token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       message: 'Usuario creado exitosamente',
       user: newUser,
       token: accessToken
     }, { status: 201 });
+
+    response.cookies.set('access-token', accessToken, {
+      ...cookieOptions,
+      maxAge: 15 * 60, // 15 minutos
+    });
+
+    response.cookies.set('refresh-token', refreshToken, {
+      ...cookieOptions,
+      maxAge: 7 * 24 * 60 * 60, // 7 días
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Error en /api/auth/register:', error);

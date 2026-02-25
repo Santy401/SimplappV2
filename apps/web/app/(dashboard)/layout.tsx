@@ -66,8 +66,6 @@ function AdminContent({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  console.log('📋 Layout - selectedBill:', selectedBill);
-  console.log('📋 Layout - currentView:', currentView);
 
   const renderContent = () => {
     switch (currentView) {
@@ -146,7 +144,6 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   };
 
   const handleNavigationList = (id: string) => {
-    console.log('DEBUG - handleNavigationList id:', id);
     if (id === 'settings' || id === 'perfil-usuario' || id === 'profile-settings') {
       openSettings('perfil');
       return;

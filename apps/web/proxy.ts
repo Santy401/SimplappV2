@@ -68,6 +68,31 @@ function isDashboardRoute(pathname: string): boolean {
   return DASHBOARD_ROUTES.some(route => pathname.startsWith(route));
 }
 
+// ─── Rutas de Marketing (Países Base) ─────────────────────────────────────────
+const MARKETING_COUNTRIES = [
+  'colombia',
+  'mexico',
+  'peru',
+  'chile',
+  'argentina',
+  'ecuador',
+  'panama',
+  'costarica',
+  'usa',
+  'es',
+  'en'
+];
+
+function isMarketingCountryRoute(pathname: string): boolean {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return false; // Root is handled separately
+
+  // Extract base path (e.g. /colombia)
+  const base = segments[0].toLowerCase();
+
+  return MARKETING_COUNTRIES.includes(base);
+}
+
 // ─── Validar JWT ─────────────────────────────────────────────────────────────
 async function verifyToken(token: string): Promise<boolean> {
   if (!token) return false;
@@ -145,7 +170,7 @@ export async function proxy(request: NextRequest) {
     }
 
     // Rutas de marketing válidas (/colombia/, etc.) → dejar pasar
-    const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
+    const isValidMarketingPath = isMarketingCountryRoute(pathname) && !isDashboardRoute(pathname);
     if (isValidMarketingPath) {
       return NextResponse.next();
     }
@@ -173,7 +198,7 @@ export async function proxy(request: NextRequest) {
 
   // Rutas de marketing en app domain → redirigir al marketing domain
   // En localhost, dejar pasar (no hay dominio separado)
-  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname) && !pathname.startsWith('/Onboarding');
+  const isMarketingRoute = isMarketingCountryRoute(pathname) && !isDashboardRoute(pathname) && !pathname.startsWith('/Onboarding');
   if (isMarketingRoute) {
     if (isLocalhost(hostname)) return NextResponse.next();
     return NextResponse.redirect(marketingUrl(pathname, request));

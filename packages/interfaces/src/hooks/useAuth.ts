@@ -19,10 +19,7 @@ export function useAuth() {
             }
 
             const data = await response.json();
-            console.log('Token refreshed successfully');
-
             scheduleTokenRefresh();
-
             return true;
         } catch (error) {
             console.error('Error refreshing token:', error);
@@ -41,8 +38,6 @@ export function useAuth() {
         refreshTimerRef.current = setTimeout(() => {
             refreshAccessToken();
         }, REFRESH_INTERVAL);
-
-        console.log('Token refresh scheduled for 13 minutes');
     }, [refreshAccessToken]);
 
     const checkSession = useCallback(async () => {

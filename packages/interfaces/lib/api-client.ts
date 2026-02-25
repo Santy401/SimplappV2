@@ -33,7 +33,6 @@ class ApiClient {
           return false;
         }
 
-        console.log('Token refreshed successfully');
         return true;
       } catch (error) {
         console.error('Error refreshing token:', error);
@@ -49,7 +48,6 @@ class ApiClient {
 
   private dispatchSessionExpired() {
     if (typeof window !== 'undefined') {
-      console.warn('Session expired - dispatching event');
       window.dispatchEvent(new CustomEvent('session:expired'));
     }
   }
@@ -74,13 +72,9 @@ class ApiClient {
 
       // Si es 401 y no es el endpoint de refresh, intentar refrescar el token
       if (response.status === 401 && !endpoint.includes('/auth/refresh') && retryCount === 0) {
-        console.log('Received 401, attempting token refresh...');
-
         const refreshSuccess = await this.refreshToken();
 
         if (refreshSuccess) {
-          // Reintentar la petición original
-          console.log('Retrying original request after token refresh');
           return this.request<T>(endpoint, options, retryCount + 1);
         } else {
           // Si el refresh falló, la sesión expiró definitivamente

@@ -49,9 +49,6 @@ export const useLogin = () => {
         throw new Error(errorData.error);
       }
 
-      const result = await response.json();
-      console.log('Login successful:', result);
-
       // Redirección al dashboard (raíz de la app autenticada)
       window.location.href = '/';
 

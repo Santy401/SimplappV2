@@ -46,7 +46,6 @@ export const SessionProvider = ({ children }: SessionProviderProps) => {
   // Este es el único canal por el que se muestra el modal de sesión expirada
   useEffect(() => {
     const handleSessionExpiredEvent = () => {
-      console.log('Session expired event received');
       setShowModal(true);
     };
 
