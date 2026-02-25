@@ -27,9 +27,9 @@ export async function POST() {
       message: 'Logout exitoso'
     });
 
-    response.cookies.delete({ name: 'access-token', ...cookieOptions });
-    response.cookies.delete({ name: 'refresh-token', ...cookieOptions });
-    response.cookies.delete({ name: 'auth-token', ...cookieOptions });
+    response.cookies.set('access-token', '', { ...cookieOptions, maxAge: 0 });
+    response.cookies.set('refresh-token', '', { ...cookieOptions, maxAge: 0 });
+    response.cookies.set('auth-token', '', { ...cookieOptions, maxAge: 0 });
 
     return response;
 
