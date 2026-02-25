@@ -71,8 +71,6 @@ export const useBillCustomers = ({
   }, [updateBill, toBillDetail, onDeleteSuccess]);
 
   const handleViewCustomer = useCallback((bill: Bill | BillDetail | any) => {
-    console.log("Ver detalles de factura:", bill);
-
     if (onSelectBill) {
       const billDetail = toBillDetail(bill);
       onSelectBill(billDetail);
@@ -84,8 +82,6 @@ export const useBillCustomers = ({
   }, [onSelectBill, onSelect, toBillDetail]);
 
   const handleAddCustomer = useCallback(() => {
-    console.log("Agregar nueva factura");
-
     if (onSelectBill) {
       onSelectBill(null as any);
     }
@@ -115,8 +111,7 @@ export const useBillCustomers = ({
   }, [deleteBill, onDeleteSuccess]);
 
   const handleExportCustomers = useCallback(() => {
-    console.log("Exportar facturas");
-    // Logic
+    // TODO: implementar exportación de facturas
   }, []);
 
   return {

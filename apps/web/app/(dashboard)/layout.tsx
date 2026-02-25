@@ -21,7 +21,6 @@ import ListPrices from "./Sales/ListPrice/page";
 import CreateListPrice from "./Sales/ListPrice/create/page";
 import Bills from "./Sales/Bills/pages";
 import FormBill from "./Sales/Bills/create/page";
-import BillsCreatePage from "./Sales/Bills/create/page";
 import ProfileConfig from "./Settings/Profile/page";
 
 import { ProtectedRoute } from "./ProtectedRoute";
@@ -87,7 +86,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         return <FormBill onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={selectedBill ? 'edit' : 'create'} />;
       case 'ventas-facturacion-view':
-        return <BillsCreatePage onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
+        return <FormBill onSelect={navigateTo} onSelectBill={setSelectedBill} initialData={selectedBill || undefined}
           mode={'view'} />;
 
       case 'ventas-clientes':
@@ -163,7 +162,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={handleNavigationList} />
         <main className="flex-1 overflow-y-auto w-full">
           <div className="flex justify-center ml-7 mt-7 mb-7">
-            <div className="w-full max-w-[200%] pr-7">
+            <div className="w-full pr-7">
               <Breadcrumb activeItem={currentView} />
               {renderContent()}
               {children}
@@ -181,7 +180,6 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   );
 }
 
-import { SettingsProvider } from "@/app/context/SettingsContext";
 
 export default function RootLayout({
   children,
@@ -192,9 +190,7 @@ export default function RootLayout({
     <ProtectedRoute>
       <NavigationProvider>
         <AppStateProvider>
-          <SettingsProvider>
-            <AdminContent>{children}</AdminContent>
-          </SettingsProvider>
+          <AdminContent>{children}</AdminContent>
         </AppStateProvider>
       </NavigationProvider>
     </ProtectedRoute>

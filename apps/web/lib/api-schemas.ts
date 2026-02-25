@@ -2,37 +2,45 @@
  * Zod schemas para validación server-side en las rutas de API.
  * Estos son distintos a los schemas de formulario del cliente (auth.schema.ts)
  * porque el servidor debe ser más estricto y no confiar en el input del cliente.
+ *
+ * Compatible con Zod v4
  */
 import { z } from 'zod';
+import { NextResponse } from 'next/server';
 
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
 export const loginApiSchema = z.object({
     email: z
-        .string({ required_error: 'Email requerido' })
+        .string()
+        .min(1, 'Email requerido')
         .email('Formato de email inválido')
-        .max(320, 'Email demasiado largo') // RFC 5321 max
+        .max(320, 'Email demasiado largo')
         .toLowerCase()
         .trim(),
     password: z
-        .string({ required_error: 'Contraseña requerida' })
+        .string()
+        .min(1, 'Contraseña requerida')
         .min(8, 'La contraseña debe tener al menos 8 caracteres')
         .max(128, 'Contraseña demasiado larga'),
 });
 
 export const registerApiSchema = z.object({
     email: z
-        .string({ required_error: 'Email requerido' })
+        .string()
+        .min(1, 'Email requerido')
         .email('Formato de email inválido')
         .max(320, 'Email demasiado largo')
         .toLowerCase()
         .trim(),
     password: z
-        .string({ required_error: 'Contraseña requerida' })
+        .string()
+        .min(1, 'Contraseña requerida')
         .min(8, 'La contraseña debe tener al menos 8 caracteres')
         .max(128, 'Contraseña demasiado larga'),
     name: z
-        .string({ required_error: 'Nombre requerido' })
+        .string()
+        .min(1, 'Nombre requerido')
         .min(2, 'El nombre debe tener al menos 2 caracteres')
         .max(100, 'Nombre demasiado largo')
         .trim(),
@@ -48,8 +56,8 @@ export const onboardingApiSchema = z.object({
     companyName: z.string().min(2, 'Nombre comercial requerido').max(200).trim(),
     country: z.string().min(2).max(100).trim(),
     currency: z.enum(['COP', 'USD', 'EUR', 'MXN', 'PEN', 'CLP', 'ARS']),
-    companyLogo: z.string().max(2 * 1024 * 1024, 'Logo demasiado grande').optional(), // 2MB base64 max
-    invoicePrefix: z.string().min(1).max(4).toUpperCase().trim(),
+    companyLogo: z.string().optional(),
+    invoicePrefix: z.string().min(1).max(4).trim(),
     defaultTax: z.string().regex(/^\d+(\.\d+)?$/, 'Impuesto debe ser numérico').max(5),
 });
 
@@ -64,17 +72,17 @@ export const onboardingApiSchema = z.object({
  * if (!parsed.success) return parsed.errorResponse;
  * const { email, password } = parsed.data;
  */
-import { NextResponse } from 'next/server';
-
 export function parseBody<T>(
     body: unknown,
     schema: z.ZodSchema<T>
 ): { success: true; data: T } | { success: false; errorResponse: NextResponse } {
     const result = schema.safeParse(body);
     if (!result.success) {
-        const errors = result.error.errors.map(e => ({
-            field: e.path.join('.'),
-            message: e.message,
+        // Zod v4 usa .issues, Zod v3 usa .errors — soportamos ambos
+        const issues = (result.error as any).issues ?? (result.error as any).errors ?? [];
+        const errors = issues.map((issue: { path: (string | number)[]; message: string }) => ({
+            field: issue.path.join('.'),
+            message: issue.message,
         }));
         return {
             success: false,
