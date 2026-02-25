@@ -121,6 +121,12 @@ export async function proxy(request: NextRequest) {
   // DOMINIO MARKETING: simplapp.com.co (o www.simplapp.com.co)
   // ═══════════════════════════════════════════════════════════════════════════
   if (!appDomain) {
+    // Si el usuario registrado va a /Onboarding en el marketing,
+    // enviarlo al entorno APP preservando la ruta
+    if (pathname.startsWith('/Onboarding')) {
+      return NextResponse.redirect(appUrl(pathname.endsWith('/') ? pathname : `${pathname}/`, request));
+    }
+
     // Autenticado → mandar al app domain
     if (isTokenValid) {
       return NextResponse.redirect(appUrl('/', request));
@@ -136,11 +142,6 @@ export async function proxy(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = '/colombia/';
       return NextResponse.redirect(url);
-    }
-
-    // Onboarding → mandar al app domain obligatoriamente
-    if (pathname.startsWith('/Onboarding')) {
-      return NextResponse.redirect(appUrl(pathname.endsWith('/') ? pathname : `${pathname}/`, request));
     }
 
     // Rutas de marketing válidas (/colombia/, etc.) → dejar pasar
@@ -172,7 +173,7 @@ export async function proxy(request: NextRequest) {
 
   // Rutas de marketing en app domain → redirigir al marketing domain
   // En localhost, dejar pasar (no hay dominio separado)
-  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
+  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname) && !pathname.startsWith('/Onboarding');
   if (isMarketingRoute) {
     if (isLocalhost(hostname)) return NextResponse.next();
     return NextResponse.redirect(marketingUrl(pathname, request));

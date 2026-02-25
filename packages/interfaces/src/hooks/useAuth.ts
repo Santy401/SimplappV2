@@ -77,10 +77,18 @@ export function useAuth() {
                 credentials: 'include',
             });
 
-            router.push('/colombia/Login');
+            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const loginUrl = rootDomain
+                ? `https://${rootDomain}/colombia/Login/`
+                : '/colombia/Login/';
+            window.location.href = loginUrl;
         } catch (error) {
             console.error('Logout error:', error);
-            router.push('/colombia/Login');
+            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const loginUrl = rootDomain
+                ? `https://${rootDomain}/colombia/Login/`
+                : '/colombia/Login/';
+            window.location.href = loginUrl;
         }
     }, [router]);
 
