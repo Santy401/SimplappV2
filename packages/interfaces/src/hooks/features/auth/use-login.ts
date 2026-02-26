@@ -46,7 +46,7 @@ export const useLogin = () => {
           message: errorData.error || 'Credenciales inválidas',
         });
 
-        throw new Error(errorData.error);
+        return; // Terminamos la ejecución sin hacer throw (así no crashea la vista local)
       }
 
       // Redirección al dashboard (raíz de la app autenticada)
