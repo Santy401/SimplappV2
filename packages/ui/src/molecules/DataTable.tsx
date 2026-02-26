@@ -153,23 +153,28 @@ export function DataTable<T extends { id: string | string }>({
     });
   }, []);
 
-  const handleRowClick = useCallback((id: string, e: React.MouseEvent) => {
+  const handleRowClick = useCallback((item: T, e: React.MouseEvent) => {
     e.stopPropagation();
 
-    // Si hay un timeout previo, lo limpiamos
+    // Si hay onView (por ejemplo en facturas), abrimos la vista inmediatamente con un solo click
+    if (onView) {
+      onView(item);
+      return;
+    }
+
+    // Comportamiento original para otras tablas (doble click para seleccionar)
     if (clickTimeout) {
       clearTimeout(clickTimeout);
       setClickTimeout(null);
     }
 
-    // Si el click es en la misma fila que el anterior, es un doble click
-    if (lastClickedId === id) {
+    if (lastClickedId === item.id) {
       // DOBLE CLICK - Seleccionar/deseleccionar
-      toggleSelectItem(id);
+      toggleSelectItem(item.id);
       setLastClickedId(null); // Resetear para el próximo ciclo
     } else {
       // PRIMER CLICK - Guardar el ID y esperar
-      setLastClickedId(id);
+      setLastClickedId(item.id);
 
       // Configurar timeout para resetear después de 300ms
       const timeout = setTimeout(() => {
@@ -178,7 +183,7 @@ export function DataTable<T extends { id: string | string }>({
 
       setClickTimeout(timeout);
     }
-  }, [clickTimeout, lastClickedId, toggleSelectItem]);
+  }, [clickTimeout, lastClickedId, toggleSelectItem, onView]);
 
   // Limpiar timeout al desmontar
   useEffect(() => {
@@ -358,7 +363,7 @@ export function DataTable<T extends { id: string | string }>({
           ${isSelected ? "bg-primary/10 hover:bg-primary/15" : "hover:bg-gray-400/15"}
           ${isLoading?.deleteId === item.id ? 'opacity-50 pointer-events-none' : ''}
         `}
-                    onClick={(e) => handleRowClick(item.id, e)}
+                    onClick={(e) => handleRowClick(item, e)}
                   >
                     <td className="w-10 px-4 py-4" onClick={(e) => e.stopPropagation()}>
                       <Checkbox

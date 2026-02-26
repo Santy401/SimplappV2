@@ -2,12 +2,12 @@
 
 import { TableActionsDropdown } from "@ui/index";
 import { Bill, BillStatus } from "@domain/entities";
-import { Eye, Edit, Trash2 } from "lucide-react";
+import { Eye, Edit, Trash2, Coins } from "lucide-react";
 
 export const createColumns = (handleEditCustomer: (bill: Bill) => void,
     handleDeleteCustomer: (bill: Bill) => Promise<void>,
     handleViewCustomer: (bill: Bill) => void,
-    handleMarkAsPaid: (bill: Bill) => Promise<void>) => {
+    handleMarkAsPaid: (bill: Bill) => void | Promise<void>) => {
     return [
         {
             key: "basicInfo",
@@ -99,12 +99,22 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
             key: "actions",
             header: "Acciones",
             cell: (bill: Bill) => (
-                <TableActionsDropdown
-                    onView={() => handleViewCustomer(bill)}
-                    onEdit={bill.status === BillStatus.DRAFT ? () => handleEditCustomer(bill) : undefined}
-                    onDelete={() => handleDeleteCustomer(bill)}
-                    onMarkAsPaid={bill.status === BillStatus.TO_PAY ? () => handleMarkAsPaid(bill) : undefined}
-                />
+                <div className="flex items-center justify-end gap-2">
+                    {(bill.status === BillStatus.TO_PAY || bill.status === BillStatus.PARTIALLY_PAID) && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); handleMarkAsPaid(bill); }}
+                            className="text-gray-500 hover:text-green-600 transition-colors"
+                            title="Nuevo pago"
+                        >
+                            <Coins className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
+                    )}
+                    <TableActionsDropdown
+                        onView={() => handleViewCustomer(bill)}
+                        onEdit={bill.status === BillStatus.DRAFT ? () => handleEditCustomer(bill) : undefined}
+                        onDelete={bill.status === BillStatus.DRAFT ? () => handleDeleteCustomer(bill) : undefined}
+                    />
+                </div>
             ),
         }
     ]

@@ -3,12 +3,13 @@
 import { DataTable } from "@simplapp/ui";
 import { Button } from "@simplapp/ui";
 import { UserCheck, UserPlus } from "lucide-react";
-import { Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
+import { Loading, DataTableSkeleton, Skeleton, PaymentModal } from "@simplapp/ui";
 import { useState, useEffect } from "react";
-import { Bill, BillDetail } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail, BillStatus } from "@domain/entities/Bill.entity";
 import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
 import { BillPreview } from "@ui/molecules/BillPreview";
+import { toast } from "react-toastify";
 
 interface BillsPageProps {
   onSelect?: (view: string) => void;
@@ -19,10 +20,13 @@ export default function BillsPage({
   onSelect = () => { },
   onSelectBill = () => { },
 }: BillsPageProps) {
-  const { bills, isLoading, error, refetch } = useBill();
+  const { bills, isLoading, error, refetch, updateBill } = useBill();
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
+
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [selectedBillForPayment, setSelectedBillForPayment] = useState<Bill | null>(null);
 
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -52,9 +56,44 @@ export default function BillsPage({
     onSelect,
     onSelectBill,
     onDeleteSuccess: refetchTable,
+    onOpenPaymentModal: (bill) => {
+      setSelectedBillForPayment(bill);
+      setIsPaymentModalOpen(true);
+    }
   });
 
   const columns = originalColumns;
+
+  const handlePaymentSubmit = async (paymentData: any) => {
+    if (!selectedBillForPayment) return;
+
+    // Convert strings to proper types
+    const paymentValue = Number(paymentData.value) || 0;
+    const currentBalance = Number(selectedBillForPayment.balance) || 0;
+    const newBalance = currentBalance - paymentValue;
+
+    if (newBalance < 0) {
+      toast.error('El monto del pago no puede exceder el balance actual.');
+      return;
+    }
+
+    try {
+      const updated = await updateBill({
+        ...selectedBillForPayment,
+        balance: newBalance.toString(),
+        status: newBalance <= 0 ? BillStatus.PAID : BillStatus.PARTIALLY_PAID,
+        updatedAt: new Date(),
+      });
+      if (updated) {
+        toast.success("Pago registrado correctamente");
+        refetchTable();
+      } else {
+        toast.error("Error al registrar el pago");
+      }
+    } catch (err) {
+      toast.error("Error al registrar el pago");
+    }
+  };
 
   const handleViewBill = (bill: BillDetail) => {
     setSelectedBill(bill);
@@ -166,6 +205,20 @@ export default function BillsPage({
     );
   }
 
+  if (showPreview && selectedBill) {
+    return (
+      <div className="min-h-fit animate-in fade-in duration-500">
+        <BillPreview
+          {...preparePreviewData(selectedBill)}
+          onClose={() => {
+            setShowPreview(false);
+            setSelectedBill(null);
+          }}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-fit animate-in fade-in duration-500">
       <div className="max-w-5xl mx-auto px-4 py-8">
@@ -246,17 +299,19 @@ export default function BillsPage({
             </Button>
           </div>
         )}
-
-        {showPreview && selectedBill && (
-          <BillPreview
-            {...preparePreviewData(selectedBill)}
-            onClose={() => {
-              setShowPreview(false);
-              setSelectedBill(null);
-            }}
-          />
-        )}
       </div>
+
+      {selectedBillForPayment && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setTimeout(() => setSelectedBillForPayment(null), 300);
+          }}
+          bill={selectedBillForPayment}
+          onSubmit={handlePaymentSubmit}
+        />
+      )}
     </div>
   );
 }

@@ -9,9 +9,10 @@ interface UseBillTableProps {
     onSelect?: (view: string) => void;
     onSelectBill?: (bill: BillDetail) => void;
     onDeleteSuccess?: () => void;
+    onOpenPaymentModal?: (bill: Bill) => void;
 }
 
-export const useBillTable = ({ onSelect, onSelectBill, onDeleteSuccess }: UseBillTableProps) => {
+export const useBillTable = ({ onSelect, onSelectBill, onDeleteSuccess, onOpenPaymentModal }: UseBillTableProps) => {
     const {
         handleEditCustomer,
         handleDeleteCustomer,
@@ -19,12 +20,12 @@ export const useBillTable = ({ onSelect, onSelectBill, onDeleteSuccess }: UseBil
         handleViewCustomer,
         handleAddCustomer,
         handleExportCustomers,
-        handleMarkAsPaid,
+        handleMarkAsPaid, // Kept for backwards compatibility if needed
     } = useBillCustomers({ onSelect, onSelectBill, onDeleteSuccess });
 
     const columns = useMemo(() =>
-        createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleMarkAsPaid),
-        [handleEditCustomer, handleDeleteCustomer, handleViewCustomer, handleMarkAsPaid]
+        createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer, onOpenPaymentModal || handleMarkAsPaid),
+        [handleEditCustomer, handleDeleteCustomer, handleViewCustomer, onOpenPaymentModal, handleMarkAsPaid]
     );
 
     return {

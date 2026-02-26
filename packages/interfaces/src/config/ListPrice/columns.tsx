@@ -24,7 +24,7 @@ export const createColumns = (
             header: "Descripción",
             cell: (listPrice: ListPrice) => (
                 <div className="flex items-center gap-3">
-                    {listPrice.description || 'Sin descripción'}
+                    {listPrice.description || ''}
                 </div>
             )
         },
@@ -33,7 +33,7 @@ export const createColumns = (
             header: "Porcentaje",
             cell: (listPrice: ListPrice) => (
                 <div className="flex items-center gap-3">
-                    {listPrice.percentage ? `${listPrice.percentage}%` : '0%'}
+                    {listPrice.percentage ? `${listPrice.percentage}%` : ''}
                 </div>
             )
         },

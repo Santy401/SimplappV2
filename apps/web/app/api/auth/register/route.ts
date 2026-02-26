@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { createUsers } from '@interfaces/lib/users';
 import { prisma } from '@interfaces/lib/prisma';
-import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 import { rateLimit } from '@/lib/rate-limit';
 import { parseBody, registerApiSchema } from '@/lib/api-schemas';
 import { sendWelcomeEmail, sendVerificationEmail } from '@/lib/email';

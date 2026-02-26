@@ -146,6 +146,21 @@ export async function POST(request: NextRequest) {
         }
       });
       nextNumber = (lastBill?.number ?? 0) + 1;
+    } else {
+      const lastDraft = await prisma.bill.findFirst({
+        where: {
+          companyId: user.companies[0].company.id,
+          number: { lte: 0 },
+          OR: [
+            { deletedAt: null },
+            { deletedAt: { not: null } }
+          ]
+        },
+        orderBy: {
+          number: 'asc'
+        }
+      });
+      nextNumber = (lastDraft?.number ?? 0) - 1;
     }
 
     const client = await prisma.client.findUnique({
@@ -159,17 +174,17 @@ export async function POST(request: NextRequest) {
     const billData: any = {
       number: nextNumber,
       date: new Date(date),
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: dueDate ? new Date(dueDate) : new Date(date),
       status: status as BillStatus,
-      paymentMethod: paymentMethod,
+      paymentMethod: paymentMethod || 'CASH',
 
-      subtotal: String(subtotal),
+      subtotal: String(subtotal || 0),
       taxTotal: String(taxTotal || 0),
       discountTotal: String(discountTotal || 0),
-      total: String(total),
-      balance: String(balance || total),
+      total: String(total || 0),
+      balance: String(balance || total || 0),
 
-      notes: notes,
+      notes: notes || "",
 
       clientName: `${client.firstName} ${client.firstLastName}`,
       clientIdentification: client.identificationNumber,

@@ -92,21 +92,32 @@ export const useBillCustomers = ({
   }, [onSelectBill, onSelect]);
 
   const handleDeleteManyCustomers = useCallback(async (bills: (Bill | BillDetail | any)[]) => {
+    const drafts = bills.filter(b => b.status === "DRAFT" || b.status === BillStatus.DRAFT);
+    const skipped = bills.length - drafts.length;
+
+    if (drafts.length === 0) {
+      toast.error("Ninguna de las facturas seleccionadas es un borrador. Solo se pueden eliminar borradores.");
+      return;
+    }
+
     const results = await Promise.allSettled(
-      bills.map((bill) => deleteBill(bill.id))
+      drafts.map((bill) => deleteBill(bill.id))
     );
 
     const succeeded = results.filter((r) => r.status === "fulfilled" && r.value).length;
     const failed = results.length - succeeded;
 
     if (succeeded > 0) {
-      toast.success(`${succeeded} factura(s) eliminada(s)`);
+      toast.success(`${succeeded} borrador(es) eliminado(s)`);
       if (onDeleteSuccess) {
         onDeleteSuccess();
       }
     }
     if (failed > 0) {
-      toast.error(`Error al eliminar ${failed} factura(s)`);
+      toast.error(`Error al eliminar ${failed} borrador(es)`);
+    }
+    if (skipped > 0 && succeeded > 0) {
+      toast.info(`${skipped} factura(s) ignorada(s) por no ser borradores.`);
     }
   }, [deleteBill, onDeleteSuccess]);
 
