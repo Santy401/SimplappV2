@@ -4,6 +4,7 @@ import { DianStatus } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { getFriendlyDianMessage } from '@interfaces/lib/dian-errors';
+import { createNotification } from '@/lib/notify';
 
 /**
  * GET /api/dian/status/[billId]
@@ -88,6 +89,28 @@ export async function GET(
                     acceptedAt: true
                 }
             });
+
+            // 🔔 Notificación según resultado de la DIAN
+            if (mockStatus === 'REJECTED') {
+                void createNotification({
+                    userId: payload.id,
+                    companyId: company.id,
+                    title: 'Factura rechazada por la DIAN',
+                    message: `La factura fue rechazada: ${getFriendlyDianMessage('FAD01')}`,
+                    type: 'DIAN_REJECTED',
+                    link: 'Sales/Bills',
+                });
+            } else {
+                void createNotification({
+                    userId: payload.id,
+                    companyId: company.id,
+                    title: 'Factura aceptada por la DIAN ✅',
+                    message: `La factura fue procesada correctamente por la DIAN.`,
+                    type: 'SUCCESS',
+                    link: 'Sales/Bills',
+                });
+            }
+
             return NextResponse.json(updated);
         }
 

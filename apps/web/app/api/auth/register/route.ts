@@ -5,7 +5,8 @@ import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
 import { rateLimit } from '@/lib/rate-limit';
 import { parseBody, registerApiSchema } from '@/lib/api-schemas';
-import { sendWelcomeEmail } from '@/lib/email';
+import { sendWelcomeEmail, sendVerificationEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 /**
  * POST /api/auth/register
@@ -48,37 +49,25 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       country: ''
     });
 
-    const accessToken = await generateAccessToken(newUser.id, newUser.email);
-    const refreshToken = await generateRefreshToken(newUser.id);
+    // Generate Verification Token
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    await prisma.emailVerificationToken.create({
+      data: {
+        token: verifyToken,
+        userId: newUser.id,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      }
+    });
 
     // Enviar email de bienvenida de forma no bloqueante
     void sendWelcomeEmail(newUser.email, newUser.name);
-
-    // Domain para cookies cross-subdomain — igual que en login
-    const cookieDomain = process.env.COOKIE_DOMAIN || undefined;
-    const cookieOptions = {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax' as const,
-      path: '/',
-      ...(cookieDomain && { domain: cookieDomain }),
-    };
+    // Enviar email de verificacion
+    void sendVerificationEmail(newUser.email, newUser.name, verifyToken, ''); // TODO: pass correct country if available
 
     const response = NextResponse.json({
-      message: 'Usuario creado exitosamente',
-      user: newUser,
-      token: accessToken
+      message: 'Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada antes de iniciar sesión.',
+      user: newUser
     }, { status: 201 });
-
-    response.cookies.set('access-token', accessToken, {
-      ...cookieOptions,
-      maxAge: 15 * 60, // 15 minutos
-    });
-
-    response.cookies.set('refresh-token', refreshToken, {
-      ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60, // 7 días
-    });
 
     return response;
 

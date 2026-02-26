@@ -30,16 +30,16 @@ export async function GET(request: NextRequest) {
 
         const searchTerm = query.trim();
 
-        // Buscar en Cliente, Producto, Factura en paralelo (limitando resultados por UX y performance)
-        const [clients, products, bills] = await Promise.all([
+        // Ejecutar las búsquedas de forma independiente para que no falle todo si una falla
+        const [clientsResult, productsResult, billsResult] = await Promise.allSettled([
             prisma.client.findMany({
                 where: {
                     companyId,
                     deletedAt: null,
                     OR: [
-                        { name: { contains: searchTerm, mode: 'insensitive' } },
-                        { lastName: { contains: searchTerm, mode: 'insensitive' } },
-                        { identification: { contains: searchTerm, mode: 'insensitive' } },
+                        { firstName: { contains: searchTerm, mode: 'insensitive' } },
+                        { firstLastName: { contains: searchTerm, mode: 'insensitive' } },
+                        { identificationNumber: { contains: searchTerm, mode: 'insensitive' } },
                         { email: { contains: searchTerm, mode: 'insensitive' } }
                     ]
                 },
@@ -51,7 +51,8 @@ export async function GET(request: NextRequest) {
                     deletedAt: null,
                     OR: [
                         { name: { contains: searchTerm, mode: 'insensitive' } },
-                        { internalId: { contains: searchTerm, mode: 'insensitive' } }
+                        { code: { contains: searchTerm, mode: 'insensitive' } },
+                        { reference: { contains: searchTerm, mode: 'insensitive' } }
                     ]
                 },
                 take: 5
@@ -63,7 +64,6 @@ export async function GET(request: NextRequest) {
                     OR: [
                         { clientName: { contains: searchTerm, mode: 'insensitive' } },
                         { legalNumber: { contains: searchTerm, mode: 'insensitive' } },
-                        // Prisma no soporta `contains` genérico en campos Int fácilmente sin cast o raw query.
                     ]
                 },
                 take: 5,
@@ -71,26 +71,34 @@ export async function GET(request: NextRequest) {
             })
         ]);
 
+        const clients = clientsResult.status === 'fulfilled' ? clientsResult.value : [];
+        const products = productsResult.status === 'fulfilled' ? productsResult.value : [];
+        const bills = billsResult.status === 'fulfilled' ? billsResult.value : [];
+
+        if (clientsResult.status === 'rejected') console.error('[Search API Error - Clients]:', clientsResult.reason);
+        if (productsResult.status === 'rejected') console.error('[Search API Error - Products]:', productsResult.reason);
+        if (billsResult.status === 'rejected') console.error('[Search API Error - Bills]:', billsResult.reason);
+
         const formattedResults = [
             ...clients.map((c: any) => ({
                 type: 'client',
                 id: c.id,
-                label: `${c.name} ${c.lastName || ''}`.trim(),
-                description: `CC/NIT: ${c.identification} - ${c.email || 'Sin correo'}`,
+                label: `${c.firstName || c.name || ''} ${c.firstLastName || c.lastName || ''}`.trim(),
+                description: `ID: ${c.identificationNumber || c.identification} - ${c.email || 'Sin correo'}`,
                 raw: c
             })),
             ...products.map((p: any) => ({
                 type: 'product',
                 id: p.id,
                 label: p.name,
-                description: `Código: ${p.internalId || 'N/A'} - Precio: $${Number(p.price).toLocaleString()}`,
+                description: `Código: ${p.code || p.internalId || 'N/A'} - Precio: $${Number(p.basePrice || p.price || 0).toLocaleString()}`,
                 raw: p
             })),
             ...bills.map((b: any) => ({
                 type: 'bill',
                 id: b.id,
                 label: `Factura ${b.prefix || ''}${b.number}`,
-                description: `Cliente: ${b.clientName || 'Consumidor final'} - Total: $${Number(b.total).toLocaleString()}`,
+                description: `Cliente: ${b.clientName || 'Consumidor final'} - Total: $${Number(b.total || 0).toLocaleString()}`,
                 raw: b
             }))
         ];

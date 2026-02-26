@@ -3,6 +3,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { DianStatus } from '@prisma/client';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { createNotification } from '@/lib/notify';
 
 /**
  * POST /api/dian/send/[billId]
@@ -59,6 +60,16 @@ export async function POST(
                 pdfUrl: mockPdfUrl,
                 sentAt: new Date()
             },
+        });
+
+        // 🔔 Notificación al usuario: factura enviada a DIAN
+        void createNotification({
+            userId: payload.id,
+            companyId: company.id,
+            title: 'Factura enviada a la DIAN',
+            message: `La factura fue enviada correctamente y está pendiente de respuesta.`,
+            type: 'INFO',
+            link: 'Sales/Bills',
         });
 
         return NextResponse.json(updatedBill);

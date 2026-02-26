@@ -4,6 +4,7 @@ import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
 import { verifyCsrf } from '@/lib/csrf';
 import { parseBody, onboardingApiSchema } from '@/lib/api-schemas';
+import { createNotification } from '@/lib/notify';
 
 /**
  * POST /api/auth/onboarding
@@ -62,6 +63,24 @@ export async function POST(request: NextRequest) {
 
         // No devolver el logo en la respuesta (puede ser muy grande)
         const { companyLogo: _logo, ...safeUser } = updatedUser;
+
+        // 🔔 Notificación de bienvenida — ahora que el usuario tiene empresa asignada
+        const userCompanies = await prisma.userCompany.findMany({
+            where: { userId: payload.id },
+            select: { companyId: true },
+        });
+        const companyId = userCompanies[0]?.companyId;
+
+        if (companyId) {
+            void createNotification({
+                userId: payload.id,
+                companyId,
+                title: `¡Bienvenido a Simplapp, ${updatedUser.name}!`,
+                message: 'Tu cuenta está lista. Puedes empezar a crear facturas y gestionar tu empresa.',
+                type: 'SUCCESS',
+                link: 'Dashboard',
+            });
+        }
 
         return NextResponse.json({
             message: 'Onboarding completado exitosamente',

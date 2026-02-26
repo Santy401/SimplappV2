@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { BillStatus } from '@prisma/client';
 import { getPaginationParams, buildMeta } from '@/lib/pagination';
-
+import { createNotification } from '@/lib/notify';
 
 /**
  * GET /api/bills
@@ -233,6 +233,35 @@ export async function POST(request: NextRequest) {
         store: true,
       }
     });
+
+    // 🔔 Notificación de factura creada — usamos bill.status real, no el del body
+    const companyId = user.companies[0].company.id;
+    if (bill.status === 'DRAFT') {
+      void createNotification({
+        userId: user.id,
+        companyId,
+        title: 'Borrador de factura guardado',
+        message: `Se guardó un borrador de factura para ${client.firstName} ${client.firstLastName}.`,
+        type: 'INFO',
+        link: 'Sales/Bills',
+      });
+    } else {
+      const statusLabels: Record<string, string> = {
+        ISSUED: 'emitida',
+        TO_PAY: 'por pagar',
+        PAID: 'pagada',
+        PARTIALLY_PAID: 'pago parcial',
+      };
+      const label = statusLabels[bill.status] ?? bill.status.toLowerCase();
+      void createNotification({
+        userId: user.id,
+        companyId,
+        title: 'Factura creada exitosamente',
+        message: `Se creó la factura (${label}) para ${client.firstName} ${client.firstLastName} por $${total}.`,
+        type: 'SUCCESS',
+        link: 'Sales/Bills',
+      });
+    }
 
     return NextResponse.json(bill, { status: 201 });
   } catch (error) {

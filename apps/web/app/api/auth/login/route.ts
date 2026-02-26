@@ -41,6 +41,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       return NextResponse.json({ error: 'Email o contraseña incorrectos' }, { status: 401 });
     }
 
+    if (!user.emailVerified) {
+      return NextResponse.json({ error: 'Por favor, verifica tu correo electrónico antes de iniciar sesión. Revisa tu bandeja de entrada.' }, { status: 403 });
+    }
+
     const accessToken = await generateAccessToken(user.id, user.email);
     const refreshToken = await generateRefreshToken(user.id);
 
