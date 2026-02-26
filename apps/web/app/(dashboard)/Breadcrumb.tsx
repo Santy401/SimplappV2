@@ -49,12 +49,8 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
     const detectedItem = !activeItem ? detectActiveItem(pathname) : activeItem;
     const currentItem = SIDEBAR_ITEMS.find(item => item.id === detectedItem);
 
-    if (!currentItem) {
-        return (
-            <div className="text-gray-400 flex items-center">
-                <span className="text-foreground font-medium">Simplapp</span>
-            </div>
-        );
+    if (!currentItem || currentItem.id === 'inicio') {
+        return null;
     }
 
     const breadcrumbItems = getBreadcrumbChain(currentItem);

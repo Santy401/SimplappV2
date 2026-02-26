@@ -37,6 +37,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   const { currentView, navigateTo } = useNavigation();
   const { openSettings } = useSettings();
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false); // Mobile sidebar state
   const {
     selectedClient,
     selectedSeller,
@@ -161,10 +162,22 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex w-full h-screen overflow-hidden">
-      <Sidebar onSelect={handleNavigationList} currentView={currentView} />
+      <Sidebar
+        onSelect={(id) => {
+          handleNavigationList(id);
+          setIsMobileMenuOpen(false); // Close mobile sidebar on select
+        }}
+        currentView={currentView}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onSearchOpen={() => setIsSearchOpen(true)} onSelect={handleNavigationList} />
+        <Navbar
+          onSearchOpen={() => setIsSearchOpen(true)}
+          onSelect={handleNavigationList}
+          onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        />
         <main className="flex-1 overflow-y-auto w-full">
           <div className="flex justify-center ml-7 mt-7 mb-7">
             <div className="w-full pr-7">
