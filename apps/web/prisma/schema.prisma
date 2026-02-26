@@ -33,6 +33,7 @@ model User {
   companyLogo         String?
   userType            String?
   onboardingCompleted Boolean @default(false)
+  emailVerified       Boolean @default(false)
 
   // Profile - User
   profileLogo String?
@@ -69,9 +70,11 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  refreshTokens       RefreshToken[]
-  activityLogs        ActivityLog[]
-  passwordResetTokens PasswordResetToken[]
+  refreshTokens           RefreshToken[]
+  activityLogs            ActivityLog[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  notifications           Notification[]
 }
 
 model UserCompany {
@@ -128,6 +131,18 @@ model PasswordResetToken {
   @@index([userId])
 }
 
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
 /**
  * =========================================
  * 🏢 COMPANY & ORGANIZATION MODELS
@@ -177,6 +192,8 @@ model Company {
 
   listPrices   ListPrice[]
   activityLogs ActivityLog[]
+  notifications Notification[]
+  subscription  Subscription?
 
   @@index([deletedAt])
 }
@@ -508,9 +525,72 @@ model ActivityLog {
 
 /**
  * =========================================
+ * 🔔 NOTIFICATIONS MODEL
+ * =========================================
+ */
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  read      Boolean  @default(false)
+  archived  Boolean  @default(false)
+  link      String?  // Optional URL to navigate to when clicked
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+/**
+ * =========================================
+ * 💳 SUBSCRIPTION & BILLING MODEL
+ * =========================================
+ */
+model Subscription {
+  id              String   @id @default(uuid())
+  companyId       String   @unique
+  plan            PlanType @default(FREE)
+  status          SubscriptionStatus @default(ACTIVE)
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  stripeId        String?  // Optional for Stripe integration
+  
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * =========================================
  * 🧩 ENUMS & CONSTANTS
  * =========================================
  */
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  DIAN_REJECTED
+  BILL_OVERDUE
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+}
 
 enum UserRole {
   OWNER // Dueño de la empresa
