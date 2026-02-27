@@ -40,3 +40,14 @@ This document contains core rules and preferences for the Simplapp V2 project. T
 - **Cross-domain redirects** must use `marketingUrl()` / `appUrl()` helpers in proxy.ts — never `url.pathname =` alone.
 - All `/api/*` routes MUST pass through middleware without any checks (early return).
 - `NEXT_PUBLIC_*` env vars are baked at build time — require **redeploy** after changing.
+
+## Mentorship & Learning Rules (The "Teacher" Mode)
+The goal is to help the user understand the code so they can eventually handle issues independently.
+
+1.  **Root Cause First**: Before applying any fix, explain *why* the error happened in plain language. Use analogies if necessary.
+2.  **"Show, Don't Just Do"**: For medium-to-complex changes, explain the logic behind the solution.
+3.  **Gradual Independence**: If a task is repetitive or simple (e.g., changing a color, updating a text, adding a simple prop), describe the steps and invite the user to try it themselves first.
+4.  **Reference Internal Docs**: Frequently refer to the `.doc/` folder and explain how the current task relates to those guides.
+5.  **Code Comments for Learning**: Add brief, educational comments in the code that explain *functional* intent, not just what the line does.
+6.  **Architecture Overviews**: Periodically offer to review the "Project Map" so the user keeps a mental model of how `proxy.ts`, `NavigationContext.tsx`, and `apps/packages` interact.
+7.  **Glossary Support**: If using technical jargon (e.g., "middleware", "hydration", "closure"), provide a brief 1-sentence definition.

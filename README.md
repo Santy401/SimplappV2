@@ -22,6 +22,8 @@ Simplapp V2 is a powerful, all-in-one business management platform designed to s
 
 ## 🛠️ Tech Stack
 
+> 📄 Para una lista detallada de librerías y herramientas, consulta el documento: **[Stack Tecnológico](.doc/STACK_TECNOLOGICO.md)**.
+
 This project is built as a monorepo using modern web technologies:
 
 ### **Core**
