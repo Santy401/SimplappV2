@@ -1,0 +1,1 @@
+export default function Venta() { return <div className="text-white p-8">Comprobante De Venta</div>; }

@@ -44,29 +44,33 @@ export async function GET(request: NextRequest) {
 
     const { user } = auth;
 
-    // Construir el objeto de empresa desde los campos del User (deuda técnica conocida)
+    const company = user.companies[0]?.company;
+    if (!company) {
+      return NextResponse.json({ error: 'Compañía original no encontrada para este usuario' }, { status: 404 });
+    }
+
     const companyData = {
-      id: user.id,
-      companyName: user.companyName,
+      id: company.id,
+      companyName: company.companyName,
       companyLogo: null, // No devolver Base64 en GET — puede ser enorme
-      userType: user.userType,
-      legalName: user.legalName,
-      businessType: user.businessType,
-      industry: user.industry,
-      taxIdentification: user.taxIdentification,
-      taxRegime: user.taxRegime,
-      taxResponsibilities: user.taxResponsibilities,
-      state: user.state,
-      city: user.city,
-      address: user.address,
-      zipCode: user.zipCode,
-      currency: user.currency,
-      invoicePrefix: user.invoicePrefix,
-      invoiceInitialNumber: user.invoiceInitialNumber,
-      defaultTax: user.defaultTax,
-      phone: user.phone,
-      billingEmail: user.billingEmail,
-      website: user.website,
+      userType: 'owner', // Default as it's not a company field
+      legalName: company.commercialName,
+      businessType: null, // Was removed from schema, not needed by DIAN
+      industry: company.economicActivity,
+      taxIdentification: company.identificationNumber,
+      taxRegime: company.vatCondition,
+      taxResponsibilities: null, // Removed
+      state: company.department,
+      city: company.municipality,
+      address: company.address,
+      zipCode: company.postalCode,
+      currency: company.currency,
+      invoicePrefix: company.invoicePrefix,
+      invoiceInitialNumber: company.invoiceInitialNumber,
+      defaultTax: company.defaultTax,
+      phone: company.phone,
+      billingEmail: company.email,
+      website: company.website,
       country: user.country,
     };
 
@@ -93,44 +97,58 @@ export async function PUT(request: NextRequest) {
     }
 
     const { user } = auth;
+    const companyId = user.companies[0]?.companyId;
+    if (!companyId) {
+      return NextResponse.json({ error: 'Compañía original no encontrada' }, { status: 404 });
+    }
+
     const body = await request.json();
 
-    // Lista blanca de campos permitidos (evitar mass assignment)
-    const allowedFields = [
-      'companyName', 'legalName', 'businessType', 'industry',
-      'taxIdentification', 'taxRegime', 'taxResponsibilities',
-      'state', 'city', 'address', 'zipCode',
-      'currency', 'invoicePrefix', 'invoiceInitialNumber',
-      'defaultTax', 'phone', 'billingEmail', 'website', 'country',
-    ];
+    const companyUpdateData: Record<string, unknown> = {};
 
-    const updateData: Record<string, unknown> = {};
-    for (const field of allowedFields) {
-      if (field in body && body[field] !== undefined) {
-        updateData[field] = body[field];
+    // Mapping payload fields to Company schema fields
+    const fieldMapping: Record<string, string> = {
+      companyName: 'companyName',
+      legalName: 'commercialName',
+      industry: 'economicActivity',
+      taxIdentification: 'identificationNumber',
+      taxRegime: 'vatCondition',
+      state: 'department',
+      city: 'municipality',
+      address: 'address',
+      zipCode: 'postalCode',
+      currency: 'currency',
+      invoicePrefix: 'invoicePrefix',
+      invoiceInitialNumber: 'invoiceInitialNumber',
+      defaultTax: 'defaultTax',
+      phone: 'phone',
+      billingEmail: 'email',
+      website: 'website'
+    };
+
+    for (const [bodyField, dbField] of Object.entries(fieldMapping)) {
+      if (bodyField in body && body[bodyField] !== undefined) {
+        companyUpdateData[dbField] = body[bodyField];
       }
     }
 
     // Validaciones específicas
-    if (updateData.defaultTax !== undefined) {
-      const taxStr = String(updateData.defaultTax);
+    if (companyUpdateData.defaultTax !== undefined) {
+      const taxStr = String(companyUpdateData.defaultTax);
       if (!/^\d+(\.\d+)?$/.test(taxStr)) {
         return NextResponse.json({ error: 'defaultTax debe ser un valor numérico' }, { status: 400 });
       }
     }
 
-    // No permitir actualizar el logo por este endpoint (tiene su propio flujo)
-    delete (updateData as any).companyLogo;
-
-    const updatedUser = await prisma.user.update({
-      where: { id: user.id },
-      data: updateData,
+    const updatedCompany = await prisma.company.update({
+      where: { id: companyId },
+      data: companyUpdateData,
     });
 
-    const { companyLogo: _logo, password: _pw, ...safeUser } = updatedUser;
+    const { logoUrl: _logo, ...safeCompany } = updatedCompany;
 
     return NextResponse.json({
-      company: safeUser,
+      company: safeCompany,
       message: 'Empresa actualizada exitosamente',
     });
   } catch (error) {

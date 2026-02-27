@@ -168,16 +168,15 @@ export async function proxy(request: NextRequest) {
   }
 
   // ─── TODAS las demás rutas en el dominio app ─────────────────────────────
-  // Rutas del dashboard SPA: /ventas-facturacion/, /ventas-clientes/, etc.
-  // No existen como páginas reales en Next.js — se sirven vía rewrite al SPA root.
+  // Rutas reales de Next.js (ej: /ventas/facturacion, /inventario/bodega)
   if (!isTokenValid) {
     // Sin sesión → ir a login
     const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(marketingUrl(loginPath, request));
   }
 
-  // Autenticado → reescribir al SPA (dashboard index)
-  return NextResponse.rewrite(new URL('/', request.url));
+  // Autenticado → dejar que Next App Router maneje las subrutas profundas
+  return NextResponse.next();
 }
 
 export const config = {

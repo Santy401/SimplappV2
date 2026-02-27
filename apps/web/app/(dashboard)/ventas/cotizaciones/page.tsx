@@ -1,0 +1,1 @@
+export default function Cotizaciones() { return <div className="text-white p-8">Cotizaciones</div>; }

@@ -1,0 +1,1 @@
+export default function Remisiones() { return <div className="text-white p-8">Remisiones</div>; }
