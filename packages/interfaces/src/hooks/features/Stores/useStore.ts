@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.entity"
 
 export function useStore() {
@@ -82,15 +83,19 @@ export function useStore() {
                 body: JSON.stringify(data),
             });
 
-            if (!response.ok) throw new Error('Error al crear');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => null);
+                throw new Error(errorData?.error || 'Error al crear bodega');
+            }
 
             const newStore = await response.json();
 
             setStores(prev => [...prev, newStore]);
 
             return newStore;
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error creating store:', err);
+            toast.error(err?.message || 'Error desconocido');
             return null;
         } finally {
             setLoading('create', false)
@@ -110,7 +115,7 @@ export function useStore() {
 
             const updatedStore = await response.json();
 
-            setStores(prev => prev.map(store => 
+            setStores(prev => prev.map(store =>
                 store.id === id ? updatedStore : store
             ));
 

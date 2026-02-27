@@ -117,14 +117,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
-    if (existingBill.status === 'ISSUED') {
+    const data = await request.json();
+
+    if (existingBill.status !== 'DRAFT' && data.status !== 'PAID') {
       return NextResponse.json(
-        { error: 'No se puede editar una factura emitida.' },
+        { error: 'Solo se pueden editar facturas en borrador, o marcar facturas como pagadas.' },
         { status: 400 }
       );
     }
 
-    const data = await request.json();
     const {
       items,
       id: _id,
@@ -142,8 +143,8 @@ export async function PUT(
     } = data;
 
     let updatedNumber = existingBill.number;
-    // Si era borrador (o número 0) y ahora se emite o se pasa a por pagar, obtiene consecutivo real
-    if (existingBill.number === 0 && billData.status && billData.status !== 'DRAFT') {
+    // Si era borrador (número <= 0) y ahora se emite o se pasa a por pagar, obtiene consecutivo real
+    if (existingBill.number <= 0 && billData.status && billData.status !== 'DRAFT') {
       const lastBill = await prisma.bill.findFirst({
         where: {
           companyId: user.companies[0].company.id,
@@ -251,9 +252,9 @@ export async function DELETE(
       return NextResponse.json({ error: 'Bill not found' }, { status: 404 });
     }
 
-    if (bill.status === 'ISSUED') {
+    if (bill.status !== 'DRAFT') {
       return NextResponse.json(
-        { error: 'No se puede eliminar una factura emitida. Debe realizar una nota de crédito o cambiar su estado.' },
+        { error: 'Solo se pueden eliminar facturas en estado borrador.' },
         { status: 400 }
       );
     }

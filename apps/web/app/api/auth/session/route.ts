@@ -34,6 +34,11 @@ export interface SessionResponse {
   phone?: string | null;
   billingEmail?: string | null;
   website?: string | null;
+  companies?: Array<{
+    id: string;
+    companyName: string;
+    role: string;
+  }>;
 }
 
 /**
@@ -73,37 +78,50 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const currentCompanyEntry = user.lastCompanyId
+      ? user.companies.find((uc: { companyId: string; company: any; role: string }) => uc.companyId === user.lastCompanyId)
+      : user.companies[0];
+    const currentCompany = currentCompanyEntry?.company;
+
     const userData: SessionResponse = {
       id: user.id,
       email: user.email,
       name: user.name,
       typeAccount: user.typeAccount,
       country: user.country,
-      companyId: user.company?.id,
-      companyName: user.companyName,
-      companyLogo: user.companyLogo,
-      userType: user.userType,
+      companyId: currentCompany?.id,
+      companyName: currentCompany?.companyName,
+      // ⚠️ companyLogo se omite intencionalmente: puede ser un Base64 de cientos de KB.
+      // Cargarlo en cada query de sesión degrada el rendimiento del dashboard.
+      // TODO: Migrar logos a Supabase Storage y devolver solo la URL.
+      companyLogo: null,
+      userType: currentCompanyEntry?.role === 'OWNER' ? 'owner' : currentCompanyEntry?.role,
       onboardingCompleted: user.onboardingCompleted,
       profileLogo: user.profileLogo,
       language: user.language,
       timezone: user.timezone,
-      legalName: user.legalName,
-      businessType: user.businessType,
-      industry: user.industry,
-      taxIdentification: user.taxIdentification,
-      taxRegime: user.taxRegime,
-      taxResponsibilities: user.taxResponsibilities,
-      state: user.state,
-      city: user.city,
-      address: user.address,
-      zipCode: user.zipCode,
-      currency: user.currency,
-      invoicePrefix: user.invoicePrefix,
-      invoiceInitialNumber: user.invoiceInitialNumber,
-      defaultTax: user.defaultTax,
-      phone: user.phone,
-      billingEmail: user.billingEmail,
-      website: user.website,
+      legalName: currentCompany?.commercialName,
+      businessType: null,
+      industry: currentCompany?.economicActivity,
+      taxIdentification: currentCompany?.identificationNumber,
+      taxRegime: currentCompany?.vatCondition,
+      taxResponsibilities: null,
+      state: currentCompany?.department,
+      city: currentCompany?.municipality,
+      address: currentCompany?.address,
+      zipCode: currentCompany?.postalCode,
+      currency: currentCompany?.currency,
+      invoicePrefix: currentCompany?.invoicePrefix,
+      invoiceInitialNumber: currentCompany?.invoiceInitialNumber,
+      defaultTax: currentCompany?.defaultTax,
+      phone: currentCompany?.phone,
+      billingEmail: currentCompany?.email,
+      website: currentCompany?.website,
+      companies: user.companies.map((uc: any) => ({
+        id: uc.company.id,
+        companyName: uc.company.companyName,
+        role: uc.role
+      }))
     };
 
     return NextResponse.json(userData);

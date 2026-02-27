@@ -18,6 +18,7 @@ export * from './molecules/FormSection';
 export * from './molecules/TableActionsDropdown';
 export * from './molecules/PageSkeleton/PageSkeleton';
 export * from './molecules/DataTableSkeleton';
+export * from './molecules/PaymentModal';
 
 // UTILS
 export * from './utils/utils'

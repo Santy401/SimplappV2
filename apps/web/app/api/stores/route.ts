@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@interfaces/lib/prisma";
-import { cookies } from 'next/headers'
-import { verifyAccessToken } from "@interfaces/lib/auth/token";
+import { getAuthContext } from "@interfaces/lib/auth/session";
 
 /**
  * GET /api/stores
@@ -9,30 +8,16 @@ import { verifyAccessToken } from "@interfaces/lib/auth/token";
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const { companyId } = auth;
 
     const store = await prisma.store.findMany({
       where: {
-        companyId: user.companies[0].company.id,
+        companyId,
       }
     });
 
@@ -52,26 +37,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const { companyId } = auth;
 
     const data = await request.json();
 
@@ -89,7 +60,7 @@ export async function POST(request: NextRequest) {
         observation: data.observation?.trim() || null,
         company: {
           connect: {
-            id: user.companies[0].company.id
+            id: companyId
           }
         }
       },

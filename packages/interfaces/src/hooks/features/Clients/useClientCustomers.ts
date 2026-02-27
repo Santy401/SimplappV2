@@ -53,8 +53,14 @@ export const useClientCustomers = ({ onSelect, onSelectClient, onDeleteSuccess }
     };
 
     const handleExportCustomers = () => {
-        console.log("Exportar clientes");
-        // Logic
+        const url = `/api/export?entity=clients`;
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "true"); // trigger browser download behavior
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Descargando clientes...');
     };
 
     const handleDeleteManyCustomers = async (clients: Client[]) => {

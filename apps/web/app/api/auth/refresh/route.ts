@@ -6,12 +6,19 @@ import {
   generateRefreshToken,
   revokeRefreshToken,
 } from "@interfaces/lib/auth/token";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/refresh
  * Renueva el access token usando el refresh token
  */
 export async function POST(req: NextRequest) {
+  // Rate limiting más permisivo: tokens se auto-renuevan cada 13 min
+  const { allowed, response: rateLimitResponse } = rateLimit(req, {
+    limit: 30,
+    windowSec: 15 * 60,
+  });
+  if (!allowed) return rateLimitResponse!
   try {
     const cookieStore = await cookies();
     const refreshToken = cookieStore.get("refresh-token")?.value;
@@ -25,15 +32,7 @@ export async function POST(req: NextRequest) {
 
     const tokenData = await verifyRefreshToken(refreshToken);
 
-    const refreshTokenRecord = await verifyRefreshToken(refreshToken);
-    if (!refreshTokenRecord?.user) {
-      return NextResponse.json(
-        { error: "Invalid refresh token" },
-        { status: 401 },
-      );
-    }
-
-    if (!tokenData) {
+    if (!tokenData?.user) {
       return NextResponse.json(
         { error: "Invalid or expired refresh token" },
         { status: 401 },
@@ -41,8 +40,8 @@ export async function POST(req: NextRequest) {
     }
 
     const newAccessToken = await generateAccessToken(
-      refreshTokenRecord.user.id,
-      refreshTokenRecord.user.email
+      tokenData.user.id,
+      tokenData.user.email
     );
 
     await revokeRefreshToken(refreshToken);
@@ -50,12 +49,6 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({
       message: "Token refreshed successfully",
-      user: {
-        id: tokenData.user.id,
-        email: tokenData.user.email,
-        name: tokenData.user.name,
-      },
-      accessToken: newAccessToken,
     });
 
     // Domain para cookies cross-subdomain

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { logActivity } from '@interfaces/lib/activity-log';
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
+import { getAuthContext } from '@interfaces/lib/auth/session';
 
 /**
  * GET /api/clients
@@ -10,37 +10,34 @@ import { logActivity } from '@interfaces/lib/activity-log';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
+    const { companyId } = auth;
+    const { page, take, skip } = getPaginationParams(request);
+    const searchQuery = request.nextUrl.searchParams.get('search') ?? undefined;
 
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
+    const where = {
+      companyId,
+      deletedAt: null,
+      ...(searchQuery && {
+        OR: [
+          { firstName: { contains: searchQuery, mode: 'insensitive' as const } },
+          { firstLastName: { contains: searchQuery, mode: 'insensitive' as const } },
+          { identificationNumber: { contains: searchQuery, mode: 'insensitive' as const } },
+          { email: { contains: searchQuery, mode: 'insensitive' as const } },
+        ],
+      }),
+    };
 
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const [clients, total] = await prisma.$transaction([
+      prisma.client.findMany({ where, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.client.count({ where }),
+    ]);
 
-    const clients = await prisma.client.findMany({
-      where: {
-        companyId: user.companies[0].company.id,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    return NextResponse.json(clients);
+    return NextResponse.json({ data: clients, meta: buildMeta(page, take, total) });
   } catch (error) {
     console.error('Error fetching clients:', error);
     return NextResponse.json(
@@ -56,38 +53,24 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const { user, companyId } = auth;
 
     const data = await request.json();
 
     const client = await prisma.client.create({
       data: {
         ...data,
-        companyId: user.companies[0].company.id,
+        companyId,
       },
     });
 
-    logActivity({
-      companyId: user.companies[0].company.id,
+    void logActivity({
+      companyId,
       userId: user.id,
       action: 'CREATE',
       entityType: 'Client',

@@ -49,16 +49,16 @@ export function useSeller() {
     });
 
     const onSubmit: SubmitHandler<FormValues> = async (values) => {
-      const dto: CreateSellerDto = {
-        // requiered
-        name: '',
+        const dto: CreateSellerDto = {
+            // requiered
+            name: '',
 
-        // Opcionals
-        identification: null,
-        observation: null
-      };
-    
-      await createSeller(dto);
+            // Opcionals
+            identification: null,
+            observation: null
+        };
+
+        await createSeller(dto);
     };
 
     useEffect(() => {
@@ -83,7 +83,7 @@ export function useSeller() {
             }
 
             const data = await respose.json()
-            setSellers(data)
+            setSellers(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido')
             console.log('Error fetching Sellers:', err)

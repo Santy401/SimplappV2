@@ -24,7 +24,7 @@ export const createColumns = (
             header: "Identificación",
             cell: (seller: Seller) => (
                 <div className="flex items-center gap-3">
-                    {seller.identification || 'N/A'}
+                    {seller.identification || ''}
                 </div>
             )
         },
@@ -33,7 +33,7 @@ export const createColumns = (
             header: "Observaciones",
             cell: (seller: Seller) => (
                 <div className="flex items-center gap-3">
-                    {seller.observation || 'Sin observaciones'}
+                    {seller.observation || ''}
                 </div>
             )
         },

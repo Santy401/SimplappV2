@@ -70,8 +70,8 @@ export default function Login({
               type="email"
               placeholder="correo@dominio.com"
               className={`w-full px-4 py-2.5 rounded-xl bg-gray-50 text-gray-900 text-sm placeholder-gray-400 border ${errors.email
-                  ? "border-red-300 focus:border-red-400"
-                  : "border-gray-200 focus:border-purple-300"
+                ? "border-red-300 focus:border-red-400"
+                : "border-gray-200 focus:border-purple-300"
                 } focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all`}
               disabled={isLoading}
               {...register("email")}
@@ -97,8 +97,8 @@ export default function Login({
                 type={showPassword ? "text" : "password"}
                 placeholder="Ingresa tu contraseña"
                 className={`w-full px-4 py-2.5 rounded-xl bg-gray-50 text-gray-900 text-sm placeholder-gray-400 border ${errors.password
-                    ? "border-red-300 focus:border-red-400"
-                    : "border-gray-200 focus:border-purple-300"
+                  ? "border-red-300 focus:border-red-400"
+                  : "border-gray-200 focus:border-purple-300"
                   } focus:outline-none focus:ring-2 focus:ring-purple-100 transition-all pr-11`}
                 disabled={isLoading}
                 {...register("password")}
@@ -120,6 +120,14 @@ export default function Login({
                 {errors.password.message}
               </p>
             )}
+            <div className="flex justify-end mt-1.5">
+              <Link
+                href={`/${country}/ForgotPassword/`}
+                className="text-xs text-purple-600 hover:text-purple-700 transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
 
           {/* Submit */}

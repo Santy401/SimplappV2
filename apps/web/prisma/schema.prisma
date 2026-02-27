@@ -29,48 +29,24 @@ model User {
   companies   UserCompany[]
   bills       Bill[]
 
-  companyName         String?
-  companyLogo         String?
-  userType            String?
   onboardingCompleted Boolean @default(false)
+  emailVerified       Boolean @default(false)
 
   // Profile - User
   profileLogo String?
   language    String? @default("es")
   timezone    String? @default("America/Bogota")
 
-  // Company details
-  legalName    String?
-  businessType String?
-  industry     String?
-
-  // Fiscal info
-  taxIdentification   String?
-  taxRegime           String?
-  taxResponsibilities String?
-
-  // Fiscal Address
-  state   String?
-  city    String?
-  address String?
-  zipCode String?
-
-  // Billing setup
-  currency             String? @default("COP")
-  invoicePrefix        String? @default("FAC")
-  invoiceInitialNumber Int?    @default(1)
-  defaultTax           String? @default("19")
-
-  // Contact
-  phone        String?
-  billingEmail String?
-  website      String?
+  lastCompanyId String? // ID de la última empresa seleccionada
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  refreshTokens RefreshToken[]
-  activityLogs  ActivityLog[]
+  refreshTokens           RefreshToken[]
+  activityLogs            ActivityLog[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  notifications           Notification[]
 }
 
 model UserCompany {
@@ -113,6 +89,32 @@ model RefreshToken {
   @@index([token])
 }
 
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  used      Boolean  @default(false) // Evitar reutilización del token
+  createdAt DateTime @default(now())
+  ipAddress String? // Auditoría de quién solicitó el reset
+
+  @@index([token])
+  @@index([userId])
+}
+
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([userId])
+}
+
 /**
  * =========================================
  * 🏢 COMPANY & ORGANIZATION MODELS
@@ -145,6 +147,13 @@ model Company {
 
   phone String? @default("")
   email String? @default("")
+  website String? @default("")
+
+  // Billing setup
+  currency             String? @default("COP")
+  invoicePrefix        String? @default("FAC")
+  invoiceInitialNumber Int?    @default(1)
+  defaultTax           String? @default("19")
 
   stores   Store[]
   clients  Client[]
@@ -162,6 +171,8 @@ model Company {
 
   listPrices   ListPrice[]
   activityLogs ActivityLog[]
+  notifications Notification[]
+  subscription  Subscription?
 
   @@index([deletedAt])
 }
@@ -222,6 +233,13 @@ model Seller {
   observation    String?
   companyId      String?
   company        Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
 /**
@@ -242,6 +260,13 @@ model Store {
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
 model Product {
@@ -479,9 +504,72 @@ model ActivityLog {
 
 /**
  * =========================================
+ * 🔔 NOTIFICATIONS MODEL
+ * =========================================
+ */
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  companyId String
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  read      Boolean  @default(false)
+  archived  Boolean  @default(false)
+  link      String?  // Optional URL to navigate to when clicked
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
+}
+
+/**
+ * =========================================
+ * 💳 SUBSCRIPTION & BILLING MODEL
+ * =========================================
+ */
+model Subscription {
+  id              String   @id @default(uuid())
+  companyId       String   @unique
+  plan            PlanType @default(FREE)
+  status          SubscriptionStatus @default(ACTIVE)
+  startDate       DateTime @default(now())
+  endDate         DateTime?
+  stripeId        String?  // Optional for Stripe integration
+  
+  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+/**
+ * =========================================
  * 🧩 ENUMS & CONSTANTS
  * =========================================
  */
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  DIAN_REJECTED
+  BILL_OVERDUE
+}
+
+enum PlanType {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+}
 
 enum UserRole {
   OWNER // Dueño de la empresa

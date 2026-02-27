@@ -10,8 +10,6 @@ export const useLogout = () => {
     setIsLoading(true);
 
     try {
-      console.log('Attempting logout...');
-
       await fetch('/api/auth/logout', {
         method: 'POST',
         credentials: 'include',

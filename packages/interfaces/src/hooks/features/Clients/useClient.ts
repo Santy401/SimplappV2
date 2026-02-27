@@ -47,7 +47,7 @@ export function useClients() {
       }
 
       const data = await response.json();
-      setClients(data);
+      setClients(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error desconocido');
       console.error('Error fetching clients:', err);

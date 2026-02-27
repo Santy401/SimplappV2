@@ -46,11 +46,8 @@ export const useLogin = () => {
           message: errorData.error || 'Credenciales inválidas',
         });
 
-        throw new Error(errorData.error);
+        return; // Terminamos la ejecución sin hacer throw (así no crashea la vista local)
       }
-
-      const result = await response.json();
-      console.log('Login successful:', result);
 
       // Redirección al dashboard (raíz de la app autenticada)
       window.location.href = '/';
