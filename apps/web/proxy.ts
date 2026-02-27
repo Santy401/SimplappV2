@@ -39,9 +39,8 @@ function isLocalhost(hostname: string): boolean {
 function marketingUrl(pathname: string, request: NextRequest): string {
   const hostname = getHostname(request);
   if (isLocalhost(hostname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = pathname;
-    return url.toString();
+    const base = `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    return new URL(pathname, base).toString();
   }
   return `https://${ROOT_DOMAIN}${pathname}`;
 }
@@ -50,9 +49,8 @@ function marketingUrl(pathname: string, request: NextRequest): string {
 function appUrl(pathname: string, request: NextRequest): string {
   const hostname = getHostname(request);
   if (isLocalhost(hostname)) {
-    const url = request.nextUrl.clone();
-    url.pathname = pathname;
-    return url.toString();
+    const base = `${request.nextUrl.protocol}//${request.nextUrl.host}`;
+    return new URL(pathname, base).toString();
   }
   return `https://${APP_SUBDOMAIN}${pathname}`;
 }
@@ -93,7 +91,8 @@ export async function proxy(request: NextRequest) {
   if (!appDomain) {
     // /Onboarding siempre pertenece al dominio app
     if (pathname.startsWith('/Onboarding')) {
-      return NextResponse.redirect(appUrl(pathname.endsWith('/') ? pathname : `${pathname}/`, request));
+      const targetPath = pathname.endsWith('/') ? pathname : `${pathname}/`;
+      return NextResponse.redirect(appUrl(targetPath, request));
     }
 
     // Autenticado → enviar al dashboard
@@ -156,8 +155,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Raíz '/' en dominio app
-  if (pathname === '/' || pathname === '') {
+  // '/inicio' en dominio app
+  if (pathname === '/inicio') {
     if (!isTokenValid) {
       if (isLocalhost(hostname)) {
         return NextResponse.redirect(new URL('/colombia/Login/', request.url));

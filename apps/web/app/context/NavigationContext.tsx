@@ -71,7 +71,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
         }
 
         // Actualizar la URL: inicio/dashboard viven en '/', el resto reemplaza guiones por barras '/ventas/facturacion'
-        const path = (view === 'inicio' || view === 'dashboard') ? '/dashboard' : `/${view.replace(/-/g, '/')}`;
+        const path = (view === 'inicio' || view === 'dashboard' || view === 'i') ? '/' : `/${view.replace(/-/g, '/')}`;
         router.push(path, { scroll: false });
     };
 
