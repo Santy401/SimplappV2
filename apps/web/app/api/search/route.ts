@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
+import { getAuthContext } from '@interfaces/lib/auth/session';
 
 export async function GET(request: NextRequest) {
     try {
@@ -12,22 +11,12 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ results: [] });
         }
 
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get('access-token')?.value;
+        const auth = await getAuthContext();
+        if (!auth) {
+            return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
+        }
 
-        if (!accessToken) return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
-
-        const payload = await verifyAccessToken(accessToken) as { id: string } | null;
-        if (!payload?.id) return NextResponse.json({ error: 'Token inválido' }, { status: 401 });
-
-        const user = await prisma.user.findUnique({
-            where: { id: payload.id },
-            include: { companies: { include: { company: true } } },
-        });
-
-        const companyId = user?.companies[0]?.company?.id;
-        if (!companyId) return NextResponse.json({ error: 'No se encontró empresa' }, { status: 404 });
-
+        const { companyId } = auth;
         const searchTerm = query.trim();
 
         // Ejecutar las búsquedas de forma independiente para que no falle todo si una falla

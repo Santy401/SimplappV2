@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { ItemType, UnitOfMeansureList } from '@prisma/client';
 import { getPaginationParams, buildMeta } from '@/lib/pagination';
+import { getAuthContext } from '@interfaces/lib/auth/session';
 
 
 /**
@@ -12,28 +11,12 @@ import { getPaginationParams, buildMeta } from '@/lib/pagination';
  */
 export async function GET(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get('access-token')?.value;
-
-        if (!accessToken) {
-            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        const auth = await getAuthContext();
+        if (!auth) {
+            return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as { id: string };;
-        if (!payload || !payload.id) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { id: payload.id },
-            include: { companies: { include: { company: true } } },
-        });
-
-        if (!user || !user.companies?.[0]?.company) {
-            return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-        }
-
-        const companyId = user.companies[0].company.id;
+        const { companyId } = auth;
         const { page, take, skip } = getPaginationParams(request);
         const searchQuery = request.nextUrl.searchParams.get('search') ?? undefined;
         const categoryId = request.nextUrl.searchParams.get('category') ?? undefined;
@@ -78,32 +61,17 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
-        const accessToken = cookieStore.get('access-token')?.value;
-
-        if (!accessToken) {
-            return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+        const auth = await getAuthContext();
+        if (!auth) {
+            return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
         }
 
-        const payload = await verifyAccessToken(accessToken) as { id: string };;
-        if (!payload || !payload.id) {
-            return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-        }
-
-        const user = await prisma.user.findUnique({
-            where: { id: payload.id },
-            include: { companies: { include: { company: true } } },
-        });
-
-        if (!user || !user.companies?.[0]?.company) {
-            return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-        }
+        const { companyId } = auth;
 
         const rawData = await request.json();
 
         const {
             id,
-            companyId,
             createdAt,
             updatedAt,
             category,
@@ -143,7 +111,7 @@ export async function POST(request: NextRequest) {
             data: {
                 ...data,
                 description: data.description || observation,
-                companyId: user.companies[0].company.id,
+                companyId,
                 type: type || ItemType.PRODUCT,
                 unit: unitOfMeasure || UnitOfMeansureList.UNIDAD,
                 categoryProductId: categoryId,

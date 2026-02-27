@@ -55,16 +55,20 @@ export async function GET(request: NextRequest) {
                 });
                 data = clients.map((c: any) => ({
                     ID: c.id,
-                    Identificación: c.identification,
-                    Nombre: c.name,
-                    Apellido: c.lastName,
-                    Nombre_Legal: c.legalName,
+                    Identificación: c.identificationNumber,
+                    Tipo_Identificación: c.identificationType,
+                    Nombre: c.firstName,
+                    Otros_Nombres: c.otherNames,
+                    Apellido: c.firstLastName,
+                    Segundo_Apellido: c.secondLastName,
+                    Nombre_Comercial: c.commercialName,
                     Email: c.email,
                     Teléfono: c.phone,
                     Tipo_Organización: c.organizationType,
-                    Tipo_Régimen: c.taxRegime,
-                    Ciudad: c.city,
+                    Ciudad: c.municipality,
+                    Departamento: c.department,
                     Dirección: c.address,
+                    Es_Proveedor: c.is_supplier ? 'Sí' : 'No',
                     Creado_En: c.createdAt.toISOString().split('T')[0],
                 }));
                 filename = `clientes_${new Date().toISOString().split('T')[0]}.csv`;
@@ -76,12 +80,17 @@ export async function GET(request: NextRequest) {
                     orderBy: { createdAt: 'desc' },
                 });
                 data = products.map((p: any) => ({
-                    Código: p.internalId,
+                    Código: p.code,
+                    Referencia: p.reference,
                     Nombre: p.name,
-                    Tipo: p.productType,
-                    Precio: p.price,
-                    Impuesto: p.tax,
-                    Categoría: p.categoryId,
+                    Descripción: p.description,
+                    Tipo: p.type,
+                    Precio_Base: p.basePrice,
+                    Precio_Final: p.finalPrice,
+                    Costo: p.cost,
+                    Impuesto: p.taxRate,
+                    Unidad: p.unit,
+                    Activo: p.active ? 'Sí' : 'No',
                     Creado_En: p.createdAt.toISOString().split('T')[0],
                 }));
                 filename = `productos_${new Date().toISOString().split('T')[0]}.csv`;
@@ -96,11 +105,7 @@ export async function GET(request: NextRequest) {
                     ID: s.id,
                     Identificación: s.identification,
                     Nombre: s.name,
-                    Apellido: s.lastName,
-                    Email: s.email,
-                    Teléfono: s.phone,
-                    Sucursal_Principal: s.mainStoreId,
-                    Activo: s.active,
+                    Observación: s.observation,
                     Creado_En: s.createdAt.toISOString().split('T')[0],
                 }));
                 filename = `vendedores_${new Date().toISOString().split('T')[0]}.csv`;
@@ -114,12 +119,8 @@ export async function GET(request: NextRequest) {
                 data = stores.map((s: any) => ({
                     ID: s.id,
                     Nombre: s.name,
-                    Código: s.storeCode,
                     Dirección: s.address,
-                    Ciudad: s.city,
-                    Télefono: s.phone,
-                    Email: s.email,
-                    Activo: s.active,
+                    Observación: s.observation,
                     Creado_En: s.createdAt.toISOString().split('T')[0],
                 }));
                 filename = `bodegas_${new Date().toISOString().split('T')[0]}.csv`;

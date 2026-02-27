@@ -6,33 +6,20 @@ import { BillStatus } from '@prisma/client';
 import { getPaginationParams, buildMeta } from '@/lib/pagination';
 import { createNotification } from '@/lib/notify';
 
+import { getAuthContext } from '@interfaces/lib/auth/session';
+
 /**
  * GET /api/bills
  * Obtiene el listado de facturas con filtros opcionales
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
-
+    const { companyId } = auth;
     const { searchParams } = new URL(request.url);
     const { page, take, skip } = getPaginationParams(request);
     const clientId = searchParams.get('clientId');
@@ -41,7 +28,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const whereClause: any = {
-      companyId: user.companies[0].company.id,
+      companyId,
       deletedAt: null,
     };
 
@@ -82,26 +69,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const { user, companyId } = auth;
 
     const data = await request.json();
     const {
@@ -134,7 +107,7 @@ export async function POST(request: NextRequest) {
     if (status !== 'DRAFT') {
       const lastBill = await prisma.bill.findFirst({
         where: {
-          companyId: user.companies[0].company.id,
+          companyId,
           number: { gt: 0 },
           OR: [
             { deletedAt: null },
@@ -149,7 +122,7 @@ export async function POST(request: NextRequest) {
     } else {
       const lastDraft = await prisma.bill.findFirst({
         where: {
-          companyId: user.companies[0].company.id,
+          companyId,
           number: { lte: 0 },
           OR: [
             { deletedAt: null },
@@ -193,7 +166,7 @@ export async function POST(request: NextRequest) {
       clientEmail: client.email,
 
       user: { connect: { id: user.id } },
-      company: { connect: { id: user.companies[0].company.id } },
+      company: { connect: { id: companyId } },
       client: { connect: { id: String(clientId) } },
 
       items: {
@@ -224,7 +197,7 @@ export async function POST(request: NextRequest) {
     } else {
       let defaultStore = await prisma.store.findFirst({
         where: {
-          companyId: user.companies[0].company.id,
+          companyId,
         },
       });
 
@@ -232,7 +205,7 @@ export async function POST(request: NextRequest) {
         defaultStore = await prisma.store.create({
           data: {
             name: "Principal",
-            companyId: user.companies[0].company.id
+            companyId
           }
         });
       }
@@ -250,7 +223,6 @@ export async function POST(request: NextRequest) {
     });
 
     // 🔔 Notificación de factura creada — usamos bill.status real, no el del body
-    const companyId = user.companies[0].company.id;
     if (bill.status === 'DRAFT') {
       void createNotification({
         userId: user.id,
