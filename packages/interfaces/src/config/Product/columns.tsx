@@ -16,9 +16,9 @@ export const createColumns = (
         {
             key: "code",
             header: "Código",
-            className: "w-32",
+            className: "min-w-[120px] whitespace-nowrap",
             cell: (product: any) => {
-                const code = product.code || 'Nn';
+                const code = product.code || 'N/A';
                 const maxLength = 10;
                 const truncatedCode = code.length > maxLength ? `${code.substring(0, maxLength)}...` : code;
 
@@ -43,8 +43,8 @@ export const createColumns = (
                 };
 
                 return (
-                    <div className="flex items-center gap-3">
-                        <Package className="w-4 h-4 text-gray-500" />
+                    <div className="flex items-center gap-2 max-w-[150px]">
+                        <Package className="w-4 h-4 text-gray-500 shrink-0" />
                         {code.length > maxLength ? (
                             <HoverCard>
                                 <HoverCardTrigger asChild>
@@ -79,12 +79,12 @@ export const createColumns = (
         {
             key: "name",
             header: "Nombre",
-            className: "min-w-48",
+            className: "min-w-[250px] w-full",
             cell: (product: any) => (
-                <div className="flex flex-col">
-                    <span className="font-semibold truncate max-w-xs">{product.name}</span>
+                <div className="flex flex-col min-w-[200px]">
+                    <span className="font-semibold text-gray-900 truncate" title={product.name}>{product.name}</span>
                     {product.reference && (
-                        <span className="text-sm text-gray-500 truncate">Ref: {product.reference}</span>
+                        <span className="text-sm text-gray-500 truncate" title={`Ref: ${product.reference}`}>Ref: {product.reference}</span>
                     )}
                 </div>
             )
@@ -92,20 +92,20 @@ export const createColumns = (
         {
             key: "category",
             header: "Categoría",
-            className: "w-36",
+            className: "min-w-[140px] whitespace-nowrap",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
-                    <span className="text-sm">{product.category?.name || 'Sin categoría'}</span>
+                <div className="flex items-center gap-2 text-gray-600">
+                    <span className="text-sm font-medium">{product.category?.name || 'Sin categoría'}</span>
                 </div>
             )
         },
         {
             key: "type",
             header: "Tipo",
-            className: "w-28",
+            className: "min-w-[120px] whitespace-nowrap",
             cell: (product: any) => (
                 <Badge
-                    className="w-24 h-6 bg-gray-200 text-black"
+                    className="w-24 h-6 px-0 text-xs justify-center font-medium shadow-sm transition-colors"
                     variant={
                         product.type === 'SERVICE' ? "secondary" :
                             product.type === 'PRODUCT' ? "default" :
@@ -119,26 +119,26 @@ export const createColumns = (
         {
             key: "unit",
             header: "Unidad",
-            className: "w-32",
+            className: "min-w-[130px] whitespace-nowrap",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
-                    <Tag className="w-3 h-3" />
-                    <span>{getUnitLabel(product.unit)}</span>
+                <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
+                    <Tag className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                    <span className="text-sm font-medium">{getUnitLabel(product.unit)}</span>
                 </div>
             )
         },
         {
             key: "price",
             header: "Precio",
-            className: "w-32",
+            className: "min-w-[180px] whitespace-nowrap",
             cell: (product: any) => {
                 const price = product.prices?.[0]?.value || product.basePrice || product.finalPrice || '0';
                 const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 
                 return (
-                    <div className="flex items-center gap-2 font-semibold text-green-700">
-                        <DollarSign className="w-4 h-4" />
-                        <span>$ {!isNaN(numericPrice) ? numericPrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</span>
+                    <div className="flex items-center gap-1.5 font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit whitespace-nowrap">
+                        <DollarSign className="w-4 h-4 shrink-0 text-green-600" />
+                        <span className="tracking-tight">{!isNaN(numericPrice) ? numericPrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</span>
                     </div>
                 );
             }
@@ -146,24 +146,24 @@ export const createColumns = (
         {
             key: "tax",
             header: "Impuestos",
-            className: "w-28",
+            className: "min-w-[110px] whitespace-nowrap",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
-                    <Percent className="w-3 h-3" />
-                    <span>{product.taxRate}%</span>
+                <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
+                    <Percent className="w-3 h-3 shrink-0 text-gray-400" />
+                    <span className="text-sm font-medium">{product.taxRate}%</span>
                 </div>
             )
         },
         {
             key: "status",
             header: "Estado",
-            className: "w-28",
+            className: "min-w-[120px] whitespace-nowrap",
             cell: (product: any) => (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center">
                     {product.active ? (
                         <Badge
                             variant="active"
-                            className="flex items-center gap-1 bg-green-500"
+                            className="flex justify-center items-center gap-1 bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 w-24 px-0 h-6 text-xs transition-colors"
                         >
                             <Check className="w-3 h-3" />
                             Activo
@@ -171,7 +171,7 @@ export const createColumns = (
                     ) : (
                         <Badge
                             variant="destructive"
-                            className="flex items-center gap-1 bg-red-500"
+                            className="flex justify-center items-center gap-1 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 w-24 px-0 h-6 text-xs transition-colors"
                         >
                             <X className="w-3 h-3" />
                             Inactivo
@@ -183,7 +183,7 @@ export const createColumns = (
         {
             key: "actions",
             header: "Acciones",
-            className: "w-36",
+            className: "min-w-[100px] whitespace-nowrap",
             cell: (product: any) => (
                 <TableActionsDropdown
                     onView={() => handleViewProduct(product)}
@@ -320,7 +320,7 @@ export const createCompactProductColumns = (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
-                        $ {product.basePrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {product.basePrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm text-gray-500">
                         Impuesto: {product.taxRate}

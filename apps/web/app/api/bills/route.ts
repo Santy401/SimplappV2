@@ -3,6 +3,10 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { BillStatus } from '@prisma/client';
+import { getPaginationParams, buildMeta } from '@/lib/pagination';
+import { createNotification } from '@/lib/notify';
+
+import { getAuthContext } from '@interfaces/lib/auth/session';
 
 /**
  * GET /api/bills
@@ -10,73 +14,46 @@ import { BillStatus } from '@prisma/client';
  */
 export async function GET(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
-
+    const { companyId } = auth;
     const { searchParams } = new URL(request.url);
+    const { page, take, skip } = getPaginationParams(request);
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
     const whereClause: any = {
-      companyId: user.companies[0].company.id,
+      companyId,
+      deletedAt: null,
     };
 
-    if (clientId) {
-      whereClause.clientId = clientId;
-    }
-
-    if (status) {
-      whereClause.status = status as BillStatus;
-    }
+    if (clientId) whereClause.clientId = clientId;
+    if (status) whereClause.status = status as BillStatus;
 
     if (startDate || endDate) {
       whereClause.date = {};
-      if (startDate) {
-        whereClause.date.gte = new Date(startDate);
-      }
-      if (endDate) {
-        whereClause.date.lte = new Date(endDate);
-      }
+      if (startDate) whereClause.date.gte = new Date(startDate);
+      if (endDate) whereClause.date.lte = new Date(endDate);
     }
 
-    const bills = await prisma.bill.findMany({
-      where: whereClause,
-      include: {
-        client: true,
-        store: true,
-        user: true,
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const include = {
+      client: true,
+      store: true,
+      user: true,
+      items: { include: { product: true } },
+    };
 
-    return NextResponse.json(bills);
+    const [bills, total] = await prisma.$transaction([
+      prisma.bill.findMany({ where: whereClause, include, skip, take, orderBy: { createdAt: 'desc' } }),
+      prisma.bill.count({ where: whereClause }),
+    ]);
+
+    return NextResponse.json({ data: bills, meta: buildMeta(page, take, total) });
   } catch (error) {
     console.error('Error fetching bills:', error);
     return NextResponse.json(
@@ -92,26 +69,12 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get('access-token')?.value;
-
-    if (!accessToken) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthContext();
+    if (!auth) {
+      return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
-    const payload = await verifyAccessToken(accessToken) as { id: string };;
-    if (!payload || !payload.id) {
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      include: { companies: { include: { company: true } } },
-    });
-
-    if (!user || !user.companies?.[0]?.company) {
-      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
-    }
+    const { user, companyId } = auth;
 
     const data = await request.json();
     const {
@@ -144,7 +107,7 @@ export async function POST(request: NextRequest) {
     if (status !== 'DRAFT') {
       const lastBill = await prisma.bill.findFirst({
         where: {
-          companyId: user.companies[0].company.id,
+          companyId,
           number: { gt: 0 },
           OR: [
             { deletedAt: null },
@@ -156,6 +119,21 @@ export async function POST(request: NextRequest) {
         }
       });
       nextNumber = (lastBill?.number ?? 0) + 1;
+    } else {
+      const lastDraft = await prisma.bill.findFirst({
+        where: {
+          companyId,
+          number: { lte: 0 },
+          OR: [
+            { deletedAt: null },
+            { deletedAt: { not: null } }
+          ]
+        },
+        orderBy: {
+          number: 'asc'
+        }
+      });
+      nextNumber = (lastDraft?.number ?? 0) - 1;
     }
 
     const client = await prisma.client.findUnique({
@@ -169,17 +147,17 @@ export async function POST(request: NextRequest) {
     const billData: any = {
       number: nextNumber,
       date: new Date(date),
-      dueDate: dueDate ? new Date(dueDate) : null,
+      dueDate: dueDate ? new Date(dueDate) : new Date(date),
       status: status as BillStatus,
-      paymentMethod: paymentMethod,
+      paymentMethod: paymentMethod || 'CASH',
 
-      subtotal: String(subtotal),
+      subtotal: String(subtotal || 0),
       taxTotal: String(taxTotal || 0),
       discountTotal: String(discountTotal || 0),
-      total: String(total),
-      balance: String(balance || total),
+      total: String(total || 0),
+      balance: String(balance || total || 0),
 
-      notes: notes,
+      notes: notes || "",
 
       clientName: `${client.firstName} ${client.firstLastName}`,
       clientIdentification: client.identificationNumber,
@@ -188,7 +166,7 @@ export async function POST(request: NextRequest) {
       clientEmail: client.email,
 
       user: { connect: { id: user.id } },
-      company: { connect: { id: user.companies[0].company.id } },
+      company: { connect: { id: companyId } },
       client: { connect: { id: String(clientId) } },
 
       items: {
@@ -219,7 +197,7 @@ export async function POST(request: NextRequest) {
     } else {
       let defaultStore = await prisma.store.findFirst({
         where: {
-          companyId: user.companies[0].company.id,
+          companyId,
         },
       });
 
@@ -227,7 +205,7 @@ export async function POST(request: NextRequest) {
         defaultStore = await prisma.store.create({
           data: {
             name: "Principal",
-            companyId: user.companies[0].company.id
+            companyId
           }
         });
       }
@@ -243,6 +221,34 @@ export async function POST(request: NextRequest) {
         store: true,
       }
     });
+
+    // 🔔 Notificación de factura creada — usamos bill.status real, no el del body
+    if (bill.status === 'DRAFT') {
+      void createNotification({
+        userId: user.id,
+        companyId,
+        title: 'Borrador de factura guardado',
+        message: `Se guardó un borrador de factura para ${client.firstName} ${client.firstLastName}.`,
+        type: 'INFO',
+        link: 'Sales/Bills',
+      });
+    } else {
+      const statusLabels: Record<string, string> = {
+        ISSUED: 'emitida',
+        TO_PAY: 'por pagar',
+        PAID: 'pagada',
+        PARTIALLY_PAID: 'pago parcial',
+      };
+      const label = statusLabels[bill.status] ?? bill.status.toLowerCase();
+      void createNotification({
+        userId: user.id,
+        companyId,
+        title: 'Factura creada exitosamente',
+        message: `Se creó la factura (${label}) para ${client.firstName} ${client.firstLastName} por $${total}.`,
+        type: 'SUCCESS',
+        link: 'Sales/Bills',
+      });
+    }
 
     return NextResponse.json(bill, { status: 201 });
   } catch (error) {

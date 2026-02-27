@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { createNotification } from '@/lib/notify';
 
 /**
  * POST /api/bills/[id]/issue
@@ -59,8 +60,17 @@ export async function POST(
             where: { id },
             data: {
                 status: 'ISSUED',
-                // Opcional: date: new Date()
             },
+        });
+
+        // 🔔 Notificación: factura emitida
+        void createNotification({
+            userId: payload.id,
+            companyId: company.id,
+            title: 'Factura emitida exitosamente',
+            message: `La factura ha sido emitida y está lista para enviar a la DIAN.`,
+            type: 'SUCCESS',
+            link: 'Sales/Bills',
         });
 
         return NextResponse.json(updatedBill);

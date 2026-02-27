@@ -503,6 +503,22 @@ export function FormBill({
   //   throw new Error("Function not implemented.");
   // }
 
+  if (showPreview) {
+    return (
+      <div className="max-w-7xl mx-auto p-6 bg-background animate-in fade-in duration-500">
+        <BillPreview
+          formData={formData}
+          items={items}
+          subtotal={subtotal}
+          discountTotal={discountTotal}
+          taxTotal={taxTotal}
+          total={total}
+          onClose={() => setShowPreview(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
       {/* Header con navegación */}
@@ -1203,17 +1219,6 @@ export function FormBill({
         )}
       </div>
 
-      {showPreview && (
-        <BillPreview
-          formData={formData}
-          items={items}
-          subtotal={subtotal}
-          discountTotal={discountTotal}
-          taxTotal={taxTotal}
-          total={total}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
     </div>
   );
 }

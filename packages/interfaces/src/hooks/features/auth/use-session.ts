@@ -23,7 +23,7 @@ export const useSession = (): Session => {
     queryKey: ['session'],
     queryFn: async (): Promise<User | null> => {
       try {
-        const response = await apiClient.get<User>('/api/auth/session');
+        const response = await apiClient.get<User>('/api/auth/session/');
         return response;
       } catch (error: any) {
         // Si es un error de sesión expirada, no retornar null sino lanzar el error

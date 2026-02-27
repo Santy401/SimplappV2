@@ -35,3 +35,6 @@ yarn-error.log*
 *.bak
 *.backup
 *.old
+
+# Local task list (personal, not for repo)
+LISTA_DE_TAREAS.md

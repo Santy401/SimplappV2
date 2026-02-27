@@ -49,8 +49,14 @@ export const useSellerCustomers = ({ onSelect, onSelectSeller, onDeleteSuccess }
     };
 
     const handleExportCustomers = () => {
-        console.log("Exportar Vendedor");
-        // Logic
+        const url = `/api/export?entity=sellers`;
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "true");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Descargando vendedores...');
     };
 
     const handleDeleteManyCustomers = async (sellers: Seller[]) => {

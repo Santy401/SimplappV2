@@ -11,15 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "../DropdownMenu/dropdown-menu"
 import { useAuth } from "@hooks/useAuth"
-import { useEffect, useState } from "react"
-
-interface UserData {
-  id: string
-  email: string
-  name: string
-  typeAccount: string
-  country: string
-}
+import { useSession } from "@hooks/features/auth/use-session"
 
 interface ProfileDropdownProps {
   isExpanded?: boolean
@@ -28,29 +20,8 @@ interface ProfileDropdownProps {
 
 export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdownProps) {
   const { logout } = useAuth()
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch('/api/auth/session', {
-          credentials: 'include',
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          setUserData(data)
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchUserData()
-  }, [])
+  // Reutiliza el cache de TanStack Query — cero requests HTTP adicionales
+  const { user, isLoading } = useSession()
 
   const getInitials = (name: string) => {
     return name
@@ -75,7 +46,7 @@ export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdow
     )
   }
 
-  if (!userData) {
+  if (!user) {
     return null
   }
 
@@ -87,16 +58,16 @@ export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdow
         >
           <div className="w-8 h-8 rounded-full bg-linear-to-br from-purple-500 to-purple-600 flex items-center justify-center shrink-0">
             <span className="text-white font-semibold text-xs">
-              {getInitials(userData.name)}
+              {getInitials(user.name)}
             </span>
           </div>
           {isExpanded && (
             <div className="flex-1 text-left overflow-hidden ml-3">
               <p className="text-sm font-medium text-foreground truncate">
-                {userData.name}
+                {user.name}
               </p>
               <p className="text-xs text-muted-foreground truncate">
-                {userData.email}
+                {user.email}
               </p>
             </div>
           )}
@@ -105,8 +76,8 @@ export function ProfileDropdown({ isExpanded = false, onSelect }: ProfileDropdow
       <DropdownMenuContent className="w-56" align="end" side="bottom" sideOffset={8}>
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium">{userData.name}</p>
-            <p className="text-xs text-muted-foreground">{userData.email}</p>
+            <p className="text-sm font-medium">{user.name}</p>
+            <p className="text-xs text-muted-foreground">{user.email}</p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />

@@ -1,7 +1,9 @@
+import { ProtectedRoute } from "../(dashboard)/ProtectedRoute";
+
 export default function OnboardingLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    return <>{children}</>;
+    return <ProtectedRoute>{children}</ProtectedRoute>;
 }

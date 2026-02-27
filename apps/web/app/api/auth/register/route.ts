@@ -1,41 +1,31 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { createUsers } from '@interfaces/lib/users';
 import { prisma } from '@interfaces/lib/prisma';
-import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
-
-import { cookies } from 'next/headers';
+import { rateLimit } from '@/lib/rate-limit';
+import { parseBody, registerApiSchema } from '@/lib/api-schemas';
+import { sendWelcomeEmail, sendVerificationEmail } from '@/lib/email';
+import crypto from 'crypto';
 
 /**
  * POST /api/auth/register
  * Registra un nuevo usuario en la plataforma
  */
-export async function POST(request: Request): Promise<NextResponse> {
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  // ─── Rate Limiting: 5 registros por IP cada hora ─────────────────────────
+  const { allowed, response: rateLimitResponse } = rateLimit(request, {
+    limit: 5,
+    windowSec: 60 * 60,
+  });
+  if (!allowed) return rateLimitResponse!;
+
   try {
     const body = await request.json();
-    const { email, password, name, phone, typeAccount } = body;
 
-    if (!email || !password || !name) {
-      return NextResponse.json(
-        { error: 'Email, contraseña y nombre son requeridos' },
-        { status: 400 }
-      );
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Formato de email inválido' },
-        { status: 400 }
-      );
-    }
-
-    if (password.length < 8) {
-      return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 8 caracteres' },
-        { status: 400 }
-      );
-    }
+    // ─── Validación con Zod ───────────────────────────────────────────────
+    const parsed = parseBody(body, registerApiSchema);
+    if (!parsed.success) return parsed.errorResponse;
+    const { email, password, name, phone, typeAccount } = parsed.data;
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -58,39 +48,27 @@ export async function POST(request: Request): Promise<NextResponse> {
       country: ''
     });
 
-    const accessToken = await generateAccessToken(newUser.id, newUser.email);
-    const refreshToken = await generateRefreshToken(newUser.id);
-
-    const cookieStore = await cookies();
-
-    cookieStore.set('access-token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 15 * 60,
-      path: '/'
+    // Generate Verification Token
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    await prisma.emailVerificationToken.create({
+      data: {
+        token: verifyToken,
+        userId: newUser.id,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
+      }
     });
 
-    cookieStore.set('refresh-token', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/'
-    });
+    // Enviar email de bienvenida de forma no bloqueante
+    void sendWelcomeEmail(newUser.email, newUser.name);
+    // Enviar email de verificacion
+    void sendVerificationEmail(newUser.email, newUser.name, verifyToken, ''); // TODO: pass correct country if available
 
-    cookieStore.set('auth-token', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
-    });
-
-    return NextResponse.json({
-      message: 'Usuario creado exitosamente',
-      user: newUser,
-      token: accessToken
+    const response = NextResponse.json({
+      message: 'Te hemos enviado un correo de verificación. Por favor revisa tu bandeja de entrada antes de iniciar sesión.',
+      user: newUser
     }, { status: 201 });
+
+    return response;
 
   } catch (error) {
     console.error('Error en /api/auth/register:', error);

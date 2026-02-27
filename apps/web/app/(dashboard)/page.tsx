@@ -1,6 +1,5 @@
-// Esta página sirve la raíz "/" para usuarios autenticados.
-// El layout (dashboard)/layout.tsx envuelve esta página con ProtectedRoute
-// y renderiza el contenido correcto a través del NavigationContext.
+import Dashboard from './Dashboard/page';
+
 export default function DashboardRootPage() {
-    return null;
+    return <Dashboard />;
 }

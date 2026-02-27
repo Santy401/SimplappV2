@@ -45,10 +45,9 @@ export function useProduct() {
       }
 
       const data = await response.json();
-      setProducts(data);
+      setProducts(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error desconocido");
-      console.log("Error fetching Products:", err);
     } finally {
       setIsLoading('fetch', false);
     }
@@ -76,8 +75,6 @@ export function useProduct() {
   const createProduct = useCallback(async (data: CreateProductDto) => {
     setIsLoading('create', true)
     try {
-      console.log("📤 Enviando producto:", data);
-
       const response = await fetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -107,8 +104,6 @@ export function useProduct() {
   const updateProduct = useCallback(async (id: string, data: UpdateProductDto) => {
     setIsLoading('update', true)
     try {
-      console.log('📤 Actualizando producto:', id, data);
-
       // Asegurar que category sea string si es un número
       const formattedData = {
         ...data,
@@ -118,8 +113,6 @@ export function useProduct() {
         taxRate: data.taxRate != null && data.taxRate !== '' ? Number(data.taxRate) : null,
         basePrice: data.basePrice ? Number(data.basePrice) : 0,
       };
-
-      console.log('📦 Datos formateados para API:', formattedData);
 
       const response = await fetch(`/api/products/${id}`, {
         method: 'PUT',

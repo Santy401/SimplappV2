@@ -21,7 +21,6 @@ interface RegisterResponse {
     email: string;
     name: string;
   };
-  token: string;
   message: string;
 }
 
@@ -30,13 +29,18 @@ export const useRegister = () => {
 
   return useMutation({
     mutationFn: async (userData: RegisterData): Promise<RegisterResponse> => {
-      const response = await apiClient.post<RegisterResponse>('/api/auth/register', userData);
+      const response = await apiClient.post<RegisterResponse>('/api/auth/register/', userData);
       return response;
     },
     onSuccess: (data) => {
-      toast.success('Cuenta creada exitosamente');
-      // Force reload to update session state correctly and route naturally
-      window.location.href = "/ui/pages/Onboarding";
+      toast.success(data.message || 'Cuenta creada exitosamente. Revisa tu correo.', { duration: 6000 });
+      // Redirect to login page
+      setTimeout(() => {
+        // Detect current language route or default to colombia
+        const currentPath = window.location.pathname;
+        const country = currentPath.split('/')[1] || 'colombia';
+        window.location.href = `/${country}/Login/`;
+      }, 2000);
     },
     onError: (error: Error) => {
       console.error('Registration error:', error);

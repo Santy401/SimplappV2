@@ -33,7 +33,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
     // Persistir el estado de navegación
     const [currentView, setCurrentView] = usePersistedState<string>(
         "app_current_view",
-        "dashboard"
+        "inicio"
     );
 
     const [navigationHistory, setNavigationHistory] = usePersistedState<string[]>(
@@ -43,19 +43,21 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
 
     // Sincronizar la URL con el estado actual
     useEffect(() => {
-        // Quitar trailing slash y barra inicial: '/ventas-facturacion/' → 'ventas-facturacion'
+        // Quitar trailing slash y barra inicial: '/ventas/facturacion/' → 'ventas/facturacion'
         const cleanPath = pathname.replace(/\/$/, '');
         const pathSegment = cleanPath.slice(1);
 
-        // La raíz '/' equivale a la vista 'dashboard'
-        if (pathname === '/' || pathname === '') {
-            setCurrentView('dashboard');
+        // La raíz '/' o '/dashboard' equivalen a la vista 'inicio'
+        if (pathname === '/' || pathname === '' || pathname === '/dashboard') {
+            setCurrentView('inicio');
             return;
         }
 
-        // Si el path difiere del estado actual, sincronizar
-        if (pathSegment && pathSegment !== currentView && pathSegment !== 'Onboarding') {
-            setCurrentView(pathSegment);
+        // Si el path difiere del estado actual, sincronizar. 
+        // pathSegment es "ventas/facturacion" -> transformamos a "ventas-facturacion"
+        const parsedView = pathSegment.replace(/\//g, '-');
+        if (parsedView && parsedView !== currentView && parsedView !== 'Onboarding') {
+            setCurrentView(parsedView);
         }
     }, [pathname]);
 
@@ -68,8 +70,8 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
             setNavigationHistory((prev) => [...prev, currentView]);
         }
 
-        // Actualizar la URL: inicio/dashboard viven en '/', el resto en su slug
-        const path = (view === 'inicio' || view === 'dashboard') ? '/' : `/${view}`;
+        // Actualizar la URL: inicio/dashboard viven en '/', el resto reemplaza guiones por barras '/ventas/facturacion'
+        const path = (view === 'inicio' || view === 'dashboard') ? '/dashboard' : `/${view.replace(/-/g, '/')}`;
         router.push(path, { scroll: false });
     };
 
@@ -79,7 +81,7 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
             setNavigationHistory((prev) => prev.slice(0, -1));
             navigateTo(previousView, false);
         } else {
-            navigateTo('dashboard', false);
+            navigateTo('inicio', false);
         }
     };
 

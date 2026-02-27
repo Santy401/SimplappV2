@@ -1,6 +1,17 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 
+/**
+ * @deprecated Usar `useSession` de `@hooks/features/auth/use-session` como fuente de verdad
+ * para el estado de autenticación (isAuthenticated, user, isLoading).
+ *
+ * `useAuth` se mantiene SOLO para:
+ *  - `logout()` — cierra la sesión y limpia cookies
+ *  - El timer de auto-refresh del access-token (13 min)
+ *
+ * No usar para leer datos del usuario ni el estado de autenticación.
+ * En su lugar: `const { user, isAuthenticated } = useSession();`
+ */
 export function useAuth() {
     const router = useRouter();
     const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -19,10 +30,7 @@ export function useAuth() {
             }
 
             const data = await response.json();
-            console.log('Token refreshed successfully');
-
             scheduleTokenRefresh();
-
             return true;
         } catch (error) {
             console.error('Error refreshing token:', error);
@@ -41,8 +49,6 @@ export function useAuth() {
         refreshTimerRef.current = setTimeout(() => {
             refreshAccessToken();
         }, REFRESH_INTERVAL);
-
-        console.log('Token refresh scheduled for 13 minutes');
     }, [refreshAccessToken]);
 
     const checkSession = useCallback(async () => {
@@ -77,10 +83,18 @@ export function useAuth() {
                 credentials: 'include',
             });
 
-            router.push('/colombia/Login');
+            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const loginUrl = rootDomain
+                ? `https://${rootDomain}/colombia/Login/`
+                : '/colombia/Login/';
+            window.location.href = loginUrl;
         } catch (error) {
             console.error('Logout error:', error);
-            router.push('/colombia/Login');
+            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const loginUrl = rootDomain
+                ? `https://${rootDomain}/colombia/Login/`
+                : '/colombia/Login/';
+            window.location.href = loginUrl;
         }
     }, [router]);
 

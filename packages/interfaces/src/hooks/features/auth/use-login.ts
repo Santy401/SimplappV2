@@ -28,7 +28,7 @@ export const useLogin = () => {
     setError(null);
 
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/login/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -46,11 +46,8 @@ export const useLogin = () => {
           message: errorData.error || 'Credenciales inválidas',
         });
 
-        throw new Error(errorData.error);
+        return; // Terminamos la ejecución sin hacer throw (así no crashea la vista local)
       }
-
-      const result = await response.json();
-      console.log('Login successful:', result);
 
       // Redirección al dashboard (raíz de la app autenticada)
       window.location.href = '/';

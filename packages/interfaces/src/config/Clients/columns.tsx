@@ -122,29 +122,29 @@ export const createColumns = (handleEditCustomer: (client: Client) => void,
                 </div>
             ),
         },
-        {
-            key: "features",
-            header: "Características",
-            cell: (client: Client) => (
-                <div className="flex flex-wrap gap-1">
-                    {client.it_branches && (
-                        <span className="px-2 py-2 w-20 text-center text-xs bg-purple-500/20 text-purple-400 rounded">
-                            Sucursales
-                        </span>
-                    )}
-                    {client.includeCcBcc && (
-                        <span className="px-2 py-2 w-20 text-center text-xs bg-yellow-500/20 text-yellow-400 rounded">
-                            Cc/Bcc
-                        </span>
-                    )}
-                    {!client.it_branches && !client.includeCcBcc && (
-                        <span className="px-2 py-1 text-xs bg-gray-500/20 text-gray-400 rounded">
-                            N/A
-                        </span>
-                    )}
-                </div>
-            ),
-        },
+        // {
+        //     key: "features",
+        //     header: "Características",
+        //     cell: (client: Client) => (
+        //         <div className="flex flex-wrap gap-1">
+        //             {client.it_branches && (
+        //                 <span className="px-2 py-2 w-20 text-center text-xs bg-purple-500/20 text-purple-400 rounded">
+        //                     Sucursales
+        //                 </span>
+        //             )}
+        //             {client.includeCcBcc && (
+        //                 <span className="px-2 py-2 w-20 text-center text-xs bg-yellow-500/20 text-yellow-400 rounded">
+        //                     Cc/Bcc
+        //                 </span>
+        //             )}
+        //             {!client.it_branches && !client.includeCcBcc && (
+        //                 <span className="px-2 py-1 text-xs bg-gray-500/20 text-gray-400 rounded">
+        //                     N/A
+        //                 </span>
+        //             )}
+        //         </div>
+        //     ),
+        // },
         {
             key: "actions",
             header: "Acciones",

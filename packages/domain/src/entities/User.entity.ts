@@ -5,6 +5,7 @@ export interface User {
     password: string;
     typeAccount: string;
     country: string;
+    companyId?: string | null;
     companyName?: string | null;
     companyLogo?: string | null;
     userType?: string | null;
@@ -30,4 +31,9 @@ export interface User {
     phone?: string | null;
     billingEmail?: string | null;
     website?: string | null;
+    companies?: Array<{
+        id: string;
+        companyName: string;
+        role: string;
+    }>;
 }

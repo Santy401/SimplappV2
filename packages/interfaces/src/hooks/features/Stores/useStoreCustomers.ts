@@ -49,8 +49,14 @@ export const useStoreCustomers = ({ onSelect, onSelectStores, onDeleteSuccess }:
     };
 
     const handleExportCustomers = () => {
-        console.log("Exportar Bodega");
-        // Logic
+        const url = `/api/export?entity=stores`;
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", "true");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('Descargando bodegas...');
     };
 
     const handleDeleteManyCustomers = async (stores: Store[]) => {

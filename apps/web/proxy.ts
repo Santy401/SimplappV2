@@ -1,11 +1,31 @@
+/**
+ * Middleware principal (proxy) — Simplapp V2
+ * ─────────────────────────────────────────
+ * Responsabilidad: orquestar el flujo de routing entre dominios.
+ * La lógica de CORS, autenticación y helpers de URL vive en /middleware/*.
+ *
+ * Flujo:
+ *  1. Ignorar estáticos y _next
+ *  2. Rutas /api/* → CORS + pasar
+ *  3. Verificar sesión (auth-guard)
+ *  4. Dominio Marketing → lógica de landing/login
+ *  5. Dominio App → lógica de dashboard/onboarding
+ */
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { jwtVerify } from 'jose';
+import { handleApiRoute } from './middleware/cors';
+import { isAuthenticated } from './middleware/auth-guard';
+import {
+  isAppDomain,
+  isAuthPageRoute,
+  isDashboardRoute,
+  isMarketingCountryRoute,
+} from './middleware/routing';
 
-// ─── Dominios ────────────────────────────────────────────────────────────────
+// ─── Helpers locales (dependen del request) ───────────────────────────────────
+
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'simplapp.com.co';
 const APP_SUBDOMAIN = `app.${ROOT_DOMAIN}`;
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 function getHostname(request: NextRequest): string {
   return request.headers.get('host') || '';
@@ -15,15 +35,7 @@ function isLocalhost(hostname: string): boolean {
   return hostname.includes('localhost') || hostname.includes('127.0.0.1');
 }
 
-function isAppDomain(hostname: string): boolean {
-  if (isLocalhost(hostname)) return true;
-  if (hostname.endsWith('.vercel.app')) return true;
-  return hostname === APP_SUBDOMAIN || hostname.startsWith('app.');
-}
-
-// ─── URL helpers para redirects cross-domain ─────────────────────────────────
-// En producción, los redirects entre marketing↔app van a dominios distintos.
-// En localhost, todo es relativo (mismo dominio).
+/** URL en el dominio de marketing — relativa en localhost */
 function marketingUrl(pathname: string, request: NextRequest): string {
   const hostname = getHostname(request);
   if (isLocalhost(hostname)) {
@@ -34,6 +46,7 @@ function marketingUrl(pathname: string, request: NextRequest): string {
   return `https://${ROOT_DOMAIN}${pathname}`;
 }
 
+/** URL en el dominio de la app — relativa en localhost */
 function appUrl(pathname: string, request: NextRequest): string {
   const hostname = getHostname(request);
   if (isLocalhost(hostname)) {
@@ -44,50 +57,13 @@ function appUrl(pathname: string, request: NextRequest): string {
   return `https://${APP_SUBDOMAIN}${pathname}`;
 }
 
-// ─── Páginas de Login/Register ───────────────────────────────────────────────
-function isAuthPageRoute(pathname: string): boolean {
-  return (
-    pathname.endsWith('/Login') ||
-    pathname.endsWith('/Register') ||
-    pathname.endsWith('/Login/') ||
-    pathname.endsWith('/Register/')
-  );
-}
-
-// ─── Rutas protegidas del dashboard ──────────────────────────────────────────
-const DASHBOARD_ROUTES = [
-  '/Dashboard',
-  '/dashboard',
-  '/ventas-',
-  '/inventario-',
-  '/profile-settings',
-  '/Onboarding',
-  '/Settings',
-];
-
-function isDashboardRoute(pathname: string): boolean {
-  return DASHBOARD_ROUTES.some(route => pathname.startsWith(route));
-}
-
-// ─── Validar JWT ─────────────────────────────────────────────────────────────
-async function verifyToken(token: string): Promise<boolean> {
-  if (!token) return false;
-  try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-    await jwtVerify(token, secret);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 // ─── Middleware principal ─────────────────────────────────────────────────────
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = getHostname(request);
-  const appDomain = isAppDomain(hostname);
 
-  // Ignorar archivos estáticos y requests internos de Next.js
+  // 1. Ignorar archivos estáticos y requests internos de Next.js
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/static') ||
@@ -96,43 +72,53 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // TODAS las rutas de API: siempre pasar sin restricción
+  // 2. Rutas de API — delegar a cors.ts
   if (pathname.startsWith('/api/')) {
-    return NextResponse.next();
+    return handleApiRoute(request);
   }
 
-  // Obtener y validar el token
-  const accessToken = request.cookies.get('access-token')?.value;
-  const isTokenValid = await verifyToken(accessToken || '');
+  // 3. Determinar dominio
+  // En localhost no hay subdominios — siempre operamos como app domain.
+  // En Vercel previews también.
+  const appDomain =
+    isLocalhost(hostname) ||
+    hostname.endsWith('.vercel.app') ||
+    isAppDomain(hostname);
+
+  const isTokenValid = await isAuthenticated(request);
 
   // ═══════════════════════════════════════════════════════════════════════════
   // DOMINIO MARKETING: simplapp.com.co (o www.simplapp.com.co)
   // ═══════════════════════════════════════════════════════════════════════════
   if (!appDomain) {
-    // Autenticado → mandar al app domain
+    // /Onboarding siempre pertenece al dominio app
+    if (pathname.startsWith('/Onboarding')) {
+      return NextResponse.redirect(appUrl(pathname.endsWith('/') ? pathname : `${pathname}/`, request));
+    }
+
+    // Autenticado → enviar al dashboard
     if (isTokenValid) {
       return NextResponse.redirect(appUrl('/', request));
     }
 
-    // Login/Register → dejar pasar
+    // Páginas de auth (Login, Register) → dejar pasar
     if (isAuthPageRoute(pathname)) {
       return NextResponse.next();
     }
 
-    // Raíz → landing
+    // Raíz → landing de colombia por defecto
     if (pathname === '/' || pathname === '') {
       const url = request.nextUrl.clone();
       url.pathname = '/colombia/';
       return NextResponse.redirect(url);
     }
 
-    // Rutas de marketing válidas (/colombia/, etc.) → dejar pasar
-    const isValidMarketingPath = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
-    if (isValidMarketingPath) {
+    // Rutas de país válidas (/colombia/, /mexico/, etc.) → dejar pasar
+    if (isMarketingCountryRoute(pathname) && !isDashboardRoute(pathname)) {
       return NextResponse.next();
     }
 
-    // Desconocido → landing
+    // Cualquier otra ruta desconocida → landing
     const url = request.nextUrl.clone();
     url.pathname = '/colombia/';
     return NextResponse.redirect(url);
@@ -142,54 +128,54 @@ export async function proxy(request: NextRequest) {
   // DOMINIO APP: app.simplapp.com.co (o localhost)
   // ═══════════════════════════════════════════════════════════════════════════
 
-  // Login/Register en app domain
+  // Login/Register en el dominio app
   if (isAuthPageRoute(pathname)) {
-    if (isTokenValid) {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
-    // En localhost no hay dominio separado → dejar pasar
+    if (isTokenValid) return NextResponse.redirect(new URL('/', request.url));
     if (isLocalhost(hostname)) return NextResponse.next();
-    // En producción → mandar al marketing domain
     return NextResponse.redirect(marketingUrl(pathname, request));
   }
 
   // Rutas de marketing en app domain → redirigir al marketing domain
-  // En localhost, dejar pasar (no hay dominio separado)
-  const isMarketingRoute = /^\/[a-zA-Z]{2,15}(\/|$)/.test(pathname) && !isDashboardRoute(pathname);
-  if (isMarketingRoute) {
+  if (
+    isMarketingCountryRoute(pathname) &&
+    !pathname.startsWith('/Onboarding')
+  ) {
     if (isLocalhost(hostname)) return NextResponse.next();
     return NextResponse.redirect(marketingUrl(pathname, request));
   }
 
-  // Rutas del dashboard (ventas-*, inventario-*, etc.)
-  if (isDashboardRoute(pathname)) {
+  // Onboarding
+  if (pathname.startsWith('/Onboarding')) {
     if (!isTokenValid) {
-      // Sin sesión → login en el marketing domain
       const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
       return NextResponse.redirect(marketingUrl(loginPath, request));
     }
-    return NextResponse.rewrite(new URL('/', request.url));
+    if (!pathname.endsWith('/')) {
+      return NextResponse.redirect(new URL(pathname + '/', request.url));
+    }
+    return NextResponse.next();
   }
 
-  // Raíz '/' en app domain
+  // Raíz '/' en dominio app
   if (pathname === '/' || pathname === '') {
     if (!isTokenValid) {
-      // Sin sesión → en localhost mandar a login directo, en prod a landing
       if (isLocalhost(hostname)) {
         return NextResponse.redirect(new URL('/colombia/Login/', request.url));
       }
       return NextResponse.redirect(marketingUrl('/colombia/', request));
     }
-    // Con sesión → dashboard
     return NextResponse.next();
   }
 
-  // Cualquier otra ruta sin sesión → login en marketing domain
+  // ─── TODAS las demás rutas en el dominio app ─────────────────────────────
+  // Rutas reales de Next.js (ej: /ventas/facturacion, /inventario/bodega)
   if (!isTokenValid) {
+    // Sin sesión → ir a login
     const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(marketingUrl(loginPath, request));
   }
 
+  // Autenticado → dejar que Next App Router maneje las subrutas profundas
   return NextResponse.next();
 }
 

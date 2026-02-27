@@ -4,8 +4,7 @@ import { ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 const SIDEBAR_ITEMS = [
-    { id: "inicio", label: "Inicio" },
-    { id: "dashboard", label: "Dashboard" },
+    { id: "inicio", label: "Inicio", parentId: null },
 
     { id: "ventas-facturacion", label: "Facturación", parentId: "ventas" },
     { id: "ventas-facturacion-create", label: "Crear Factura", parentId: "ventas-facturacion" },
@@ -50,12 +49,8 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
     const detectedItem = !activeItem ? detectActiveItem(pathname) : activeItem;
     const currentItem = SIDEBAR_ITEMS.find(item => item.id === detectedItem);
 
-    if (!currentItem || detectedItem === 'inicio') {
-        return (
-            <div className="text-gray-400 flex items-center">
-                <span className="text-white font-medium">Simplapp</span>
-            </div>
-        );
+    if (!currentItem || currentItem.id === 'inicio') {
+        return null;
     }
 
     const breadcrumbItems = getBreadcrumbChain(currentItem);
@@ -79,8 +74,8 @@ export default function Breadcrumb({ activeItem }: BreadcrumbProps) {
 function detectActiveItem(pathname: string): string {
     const path = pathname.toLowerCase();
 
-    if (path.includes('/ventas/facturacion/create')) return 'ventas-facturacio-create';
-    if (path.includes('/ventas/facturacion')) return 'ventas-facturacio';
+    if (path.includes('/ventas/facturacion/create')) return 'ventas-facturacion-create';
+    if (path.includes('/ventas/facturacion')) return 'ventas-facturacion';
 
     if (path.includes('/inventario/precios/create')) return 'inventario-precios-create';
     if (path.includes('/inventario/precios')) return 'inventario-precios';
@@ -102,7 +97,7 @@ function detectActiveItem(pathname: string): string {
     if (path.includes('/productos')) return 'ventas-productos';
 
     if (path.includes('/ventas')) return 'ventas';
-    if (path.includes('/dashboard')) return 'dashboard';
+    if (path.includes('/dashboard')) return 'inicio';
 
     return 'inicio';
 }

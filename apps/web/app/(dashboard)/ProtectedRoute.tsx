@@ -37,9 +37,11 @@ export const ProtectedRoute = ({
   useEffect(() => {
     // Redirección de Onboarding
     if (!isLoading && isAuthenticated && user) {
-      if (user.onboardingCompleted === false && pathname !== '/Onboarding') {
-        router.push('/Onboarding');
-      } else if (user.onboardingCompleted !== false && pathname === '/Onboarding') {
+      // Normalizar el pathname para comparación (con o sin trailing slash)
+      const normalizedPath = pathname.endsWith('/') ? pathname : `${pathname}/`;
+      if (user.onboardingCompleted === false && normalizedPath !== '/Onboarding/') {
+        router.push('/Onboarding/');
+      } else if (user.onboardingCompleted === true && normalizedPath === '/Onboarding/') {
         router.push('/');
       }
     }

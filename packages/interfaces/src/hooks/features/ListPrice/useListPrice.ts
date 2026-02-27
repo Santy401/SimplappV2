@@ -42,7 +42,7 @@ export function useListPrice() {
             }
 
             const data = await response.json();
-            setListPrices(data);
+            setListPrices(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error desconocido');
             console.error('Error fetching List Prices:', err);
@@ -104,7 +104,7 @@ export function useListPrice() {
             if (!response.ok) throw new Error('Error al actualizar');
 
             const updatedListPrice = await response.json();
-            setListPrices(prev => prev.map(listPrice => 
+            setListPrices(prev => prev.map(listPrice =>
                 listPrice.id === id ? updatedListPrice : listPrice
             ));
             return updatedListPrice;

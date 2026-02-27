@@ -1,18 +1,18 @@
-
 import React, { useState } from 'react';
 import { FormBillItem } from "./FormBill";
 import { BillStatus, PaymentMethod, DianStatus } from '@domain/entities/Bill.entity';
-import { XCircle, Terminal, Info } from 'lucide-react';
+import { XCircle, Terminal, Info, Printer, Download, Share2, Edit2, Plus, ChevronDown } from 'lucide-react';
 
 export interface BillPreviewProps {
     formData: {
+        number?: number;
         date: string;
         dueDate: string;
         clientName: string;
         clientId: string; // identification
         email: string;
         paymentMethod: PaymentMethod;
-        status: BillStatus; /* ... other fields ... */
+        status: BillStatus | string;
         notes?: string;
         terms?: string;
         footerNote?: string;
@@ -40,35 +40,96 @@ export function BillPreview({
 }: BillPreviewProps) {
     const [showDianModal, setShowDianModal] = useState(false);
 
-    return (
-        <div className="fixed inset-0 z-200 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4 print:p-0">
-            <div className="bg-card text-card-foreground border border-border w-full max-w-4xl min-h-[800px] shadow-2xl rounded-lg flex flex-col relative animate-in zoom-in-99 scale-69 duration-200">
+    // Determines ribbon color and text
+    const getStatusRibbon = () => {
+        switch (formData.status) {
+            case BillStatus.PAID:
+            case 'PAID':
+                return { text: 'PAGADA', bg: 'bg-emerald-500' };
+            case BillStatus.TO_PAY:
+            case 'TO_PAY':
+                return { text: 'POR COBRAR', bg: 'bg-orange-500' };
+            case BillStatus.DRAFT:
+            case 'DRAFT':
+                return { text: 'BORRADOR', bg: 'bg-gray-400' };
+            case BillStatus.CANCELLED:
+            case 'CANCELLED':
+                return { text: 'CANCELADA', bg: 'bg-red-500' };
+            case BillStatus.PARTIALLY_PAID:
+            case 'PARTIALLY_PAID':
+                return { text: 'PAGO PARCIAL', bg: 'bg-blue-500' };
+            default:
+                return { text: formData.status || 'EMITIDA', bg: 'bg-zinc-600' };
+        }
+    };
 
-                {/* Toolbar */}
-                <div className="flex justify-between items-center p-4 border-b border-border bg-muted/30 rounded-t-lg print:hidden">
-                    <h2 className="font-semibold text-lg">Previsualización de Factura</h2>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => window.print()}
-                            className="px-4 py-2 bg-primary text-primary-foreground rounded hover:bg-primary/90 text-sm font-medium transition-colors"
-                        >
-                            Imprimir / Descargar PDF
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 bg-background border border-border rounded hover:bg-accent hover:text-accent-foreground text-sm font-medium transition-colors"
-                        >
-                            Cerrar
-                        </button>
+    const ribbon = getStatusRibbon();
+
+    return (
+        <div className="w-full flex items-start justify-center print:p-0 print:bg-white print:block">
+            <div className="w-full max-w-5xl py-8 px-4 flex flex-col items-center animate-in fade-in slide-in-from-bottom-8 duration-300 print:py-0 print:px-0">
+
+                {/* Header Toolbar */}
+                <div className="w-full max-w-4xl flex justify-between items-center mb-6 print:hidden">
+                    <h1 className="text-2xl font-bold text-slate-800">Factura de venta {formData.number ? formData.number : ''}</h1>
+                    <button onClick={onClose} className="text-slate-500 hover:text-slate-800 font-medium bg-slate-200/50 hover:bg-slate-200 px-4 py-2 rounded-lg transition-colors">
+                        Volver
+                    </button>
+                </div>
+
+                {/* Actions Toolbar */}
+                <div className="w-full max-w-4xl flex flex-wrap gap-3 mb-6 print:hidden">
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors">
+                        <Edit2 className="w-4 h-4" /> Editar
+                    </button>
+                    <button onClick={() => window.print()} className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors">
+                        <Printer className="w-4 h-4" /> Imprimir
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors">
+                        <Download className="w-4 h-4" /> Descargar PDF
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors">
+                        <Share2 className="w-4 h-4" /> Compartir
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors">
+                        <Plus className="w-4 h-4" /> Agregar pago
+                    </button>
+                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg shadow-sm hover:bg-slate-50 text-sm font-medium text-slate-700 transition-colors ml-auto md:ml-0">
+                        Más acciones <ChevronDown className="w-4 h-4" />
+                    </button>
+                </div>
+
+                {/* Summary Cards */}
+                <div className="w-full max-w-4xl bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex flex-wrap justify-between items-center mb-8 print:hidden">
+                    <div className="flex-1 min-w-[150px] mb-4 md:mb-0 border-r border-slate-100 pr-4">
+                        <p className="text-slate-500 text-sm mb-1">Valor total</p>
+                        <p className="text-2xl font-bold text-slate-800">${total.toLocaleString("es-CO")}</p>
+                    </div>
+                    <div className="flex-1 min-w-[150px] mb-4 md:mb-0 border-r border-slate-100 px-4">
+                        <p className="text-slate-500 text-sm mb-1">Retenido</p>
+                        <p className="text-2xl font-semibold text-orange-500">$ 0</p>
+                    </div>
+                    <div className="flex-1 min-w-[150px] mb-4 md:mb-0 border-r border-slate-100 px-4">
+                        <p className="text-slate-500 text-sm mb-1">Cobrado</p>
+                        <p className="text-2xl font-semibold text-emerald-500">$ {ribbon.text === 'PAGADA' ? total.toLocaleString("es-CO") : '0'}</p>
+                    </div>
+                    <div className="flex-1 min-w-[150px] pl-4">
+                        <p className="text-slate-500 text-sm mb-1">Por cobrar</p>
+                        <p className="text-2xl font-semibold text-orange-500">$ {ribbon.text !== 'PAGADA' ? total.toLocaleString("es-CO") : '0'}</p>
                     </div>
                 </div>
 
-                {/* Invoice Content */}
-                <div className="p-8 md:p-12 flex-1 bg-card overflow-y-auto" id="invoice-preview">
+                {/* Final Invoice Paper Document */}
+                <div className="w-full max-w-4xl bg-white shadow-2xl rounded-sm p-12 relative overflow-hidden print:shadow-none print:p-0">
 
-                    {/* DIAN Rejection Banner */}
+                    {/* Status Ribbon */}
+                    <div className={`absolute top-8 -left-14 transform -rotate-45 ${ribbon.bg} text-white py-1.5 px-16 font-bold text-xs tracking-[0.2em] shadow-md z-10`}>
+                        {ribbon.text}
+                    </div>
+
+                    {/* DIAN Error Message if applicable */}
                     {formData.dianStatus === DianStatus.REJECTED && (
-                        <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4 animate-in fade-in slide-in-from-top-4 duration-300 print:hidden">
+                        <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4 print:hidden">
                             <div className="p-2 bg-red-100 rounded-lg">
                                 <XCircle className="w-6 h-6 text-red-600" />
                             </div>
@@ -92,135 +153,144 @@ export function BillPreview({
                         </div>
                     )}
 
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-12">
-                        <div>
-                            {/* Company Logo Placeholder */}
-                            <div className={`w-32 h-32 flex items-center justify-center mb-4 ${!formData.logo ? 'bg-muted/20 border-2 border-dashed border-border rounded-lg text-muted-foreground' : ''}`}>
-                                {formData.logo ? (
-                                    <img src={formData.logo} alt="Company Logo" className="w-full h-full object-contain" />
-                                ) : (
-                                    <span className="text-sm">Logo</span>
-                                )}
-                            </div>
+                    {/* Document Header */}
+                    <div className="flex justify-between items-start mb-16 relative z-0">
+                        {/* Logo Space - Replicating the 'N. Logo' visual */}
+                        <div className={`w-64 h-24 flex items-center justify-start ${!formData.logo ? 'bg-zinc-900 rounded-sm' : ''}`}>
+                            {formData.logo ? (
+                                <img src={formData.logo} alt="Company Logo" className="w-auto h-full object-contain" />
+                            ) : (
+                                <div className="text-white font-serif font-bold text-6xl tracking-tighter pl-4">N.</div>
+                            )}
                         </div>
-                        <div className="text-right">
-                            <h1 className="text-3xl font-bold text-foreground mb-2">FACTURA DE VENTA</h1>
-                            <div className="text-muted-foreground">
-                                {/* Aquí se puede agregar el estado que tiene la factura sea pagada o pendiente */}
-                                <p className="font-semibold text-lg text-foreground">{formData.status}</p>
-                                {/* Este apartado se rellenada dependiendo de los datos de la empresa logeada*/}
-                                <p className="text-sm mt-2">Simplapp S.A.S</p>
-                                <p className="text-sm">NIT: 900.000.000-1</p>
-                            </div>
+
+                        {/* Company Details */}
+                        <div className="text-center absolute left-1/2 transform -translate-x-1/2">
+                            <h2 className="text-xl font-bold text-slate-800">Simplapp S.A.S</h2>
+                            <p className="text-sm text-slate-500 font-medium mt-1">Identificación: 900.000.000-1</p>
+                        </div>
+
+                        {/* Invoice Number */}
+                        <div className="text-right flex items-baseline gap-2">
+                            <span className="text-teal-600 font-bold text-xl">No.</span>
+                            <span className="text-slate-600 text-xl">{formData.number || 'Auto'}</span>
                         </div>
                     </div>
 
-                    {/* Client & Dates */}
-                    <div className="grid grid-cols-2 gap-8 mb-12">
-                        <div>
-                            <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-2">Facturar a</h3>
-                            <div className="text-foreground">
-                                <p className="font-bold text-lg">{formData.clientName || 'Unknow'}</p>
-                                <p>{formData.clientId ? `CC: ${formData.clientId}` : ''}</p>
-                                <p>{formData.email}</p>
+                    {/* Client & Dates Info Grid */}
+                    <div className="grid grid-cols-2 gap-x-12 gap-y-6 mb-12">
+                        {/* Client details */}
+                        <div className="space-y-4">
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Cliente</span>
+                                <span className="font-semibold text-teal-800 text-sm uppercase">{formData.clientName || 'Consumidor Final'}</span>
+                            </div>
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Identificación</span>
+                                <span className="text-slate-700 text-sm font-medium">{formData.clientId}</span>
+                            </div>
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Teléfono / Correo</span>
+                                <span className="text-slate-700 text-sm">{formData.email}</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Fecha de Emisión</h3>
-                                <p className="text-foreground font-medium">{formData.date}</p>
+
+                        {/* Dates details */}
+                        <div className="space-y-4">
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Creación</span>
+                                <span className="text-slate-700 text-sm font-medium">{new Date(formData.date).toLocaleDateString('es-CO')}</span>
                             </div>
-                            <div>
-                                <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Vencimiento</h3>
-                                <p className="text-foreground font-medium">{formData.dueDate}</p>
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Vencimiento</span>
+                                <span className="text-slate-700 text-sm font-medium">{new Date(formData.dueDate).toLocaleDateString('es-CO')}</span>
                             </div>
-                            <div>
-                                <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Método de Pago</h3>
-                                {/* Map PaymentMethod enum to string if needed */}
-                                <p className="text-foreground font-medium">{formData.paymentMethod}</p>
-                            </div>
-                            <div>
-                                <h3 className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Estado</h3>
-                                <p className="text-foreground font-medium">{formData.status}</p>
+                            <div className="flex border-b border-slate-100 pb-2">
+                                <span className="w-32 text-slate-500 text-sm">Plazo de pago</span>
+                                <span className="text-slate-700 text-sm font-bold uppercase">{formData.paymentMethod === 'CASH' ? 'De Contado' : 'Crédito'}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Items Table */}
-                    <div className="mb-12">
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="border-b border-border">
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider">Item</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider">Descripción</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider text-right">Cant</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider text-right">Precio</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider text-right">Desc%</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider text-right">Imp%</th>
-                                    <th className="py-3 text-sm font-bold text-muted-foreground uppercase tracking-wider text-right">Total</th>
+                    <div className="mb-12 rounded-lg overflow-hidden border border-slate-100">
+                        <table className="w-full text-left bg-white">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide">Item / Referencia</th>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Cant</th>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Precio</th>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Desc%</th>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Impto%</th>
+                                    <th className="py-4 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Total</th>
                                 </tr>
                             </thead>
-                            <tbody className="text-sm">
+                            <tbody className="divide-y divide-slate-100">
                                 {items.map((item, index) => (
-                                    <tr key={item.id} className="border-b border-border">
-                                        <td className="py-4 font-medium text-foreground">{item.productName}</td>
-                                        <td className="py-4 text-muted-foreground">{item.description}</td>
-                                        <td className="py-4 text-right text-foreground">{item.quantity}</td>
-                                        <td className="py-4 text-right text-foreground">${item.price.toLocaleString("es-CO")}</td>
-                                        <td className="py-4 text-right text-foreground">{item.discount}%</td>
-                                        <td className="py-4 text-right text-foreground">{item.taxRate}%</td>
-                                        <td className="py-4 text-right font-bold text-foreground">${item.total.toLocaleString("es-CO")}</td>
+                                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="py-4 px-4">
+                                            <p className="font-medium text-slate-800 text-sm">{item.productName}</p>
+                                            <p className="text-xs text-slate-500 mt-1">{item.description}</p>
+                                        </td>
+                                        <td className="py-4 px-4 text-right text-slate-700 font-medium text-sm">{item.quantity}</td>
+                                        <td className="py-4 px-4 text-right text-slate-700 text-sm">${item.price.toLocaleString("es-CO")}</td>
+                                        <td className="py-4 px-4 text-right text-slate-700 text-sm">{item.discount}%</td>
+                                        <td className="py-4 px-4 text-right text-slate-700 text-sm">{item.taxRate}%</td>
+                                        <td className="py-4 px-4 text-right font-bold text-slate-800 text-sm">${item.total.toLocaleString("es-CO")}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
 
-                    {/* Totals */}
-                    <div className="flex justify-end mb-12">
-                        <div className="w-64 space-y-3">
-                            <div className="flex justify-between text-muted-foreground">
+                    {/* Totals Section */}
+                    <div className="flex justify-end mb-16">
+                        <div className="w-80 space-y-3">
+                            <div className="flex justify-between text-slate-600 text-sm">
                                 <span>Subtotal</span>
-                                <span>${subtotal.toLocaleString("es-CO")}</span>
+                                <span className="font-medium">${subtotal.toLocaleString("es-CO")}</span>
                             </div>
-                            <div className="flex justify-between text-destructive">
-                                <span>Descuento</span>
-                                <span>-${discountTotal.toLocaleString("es-CO")}</span>
+                            <div className="flex justify-between text-slate-600 text-sm">
+                                <span>Descuentos</span>
+                                <span className="font-medium text-orange-600">-${discountTotal.toLocaleString("es-CO")}</span>
                             </div>
-                            <div className="flex justify-between text-muted-foreground">
+                            <div className="flex justify-between text-slate-600 text-sm">
                                 <span>Impuestos</span>
-                                <span>${taxTotal.toLocaleString("es-CO")}</span>
+                                <span className="font-medium">${taxTotal.toLocaleString("es-CO")}</span>
                             </div>
-                            <div className="flex justify-between text-xl font-bold text-foreground border-t border-border pt-3">
-                                <span>Total</span>
-                                <span>${total.toLocaleString("es-CO")}</span>
+                            <div className="flex justify-between items-center text-lg font-bold text-slate-800 border-t border-slate-200 mt-4 pt-4">
+                                <span>Total General</span>
+                                <span className="text-2xl">${total.toLocaleString("es-CO")}</span>
                             </div>
                         </div>
                     </div>
 
-                    {/* Footer / Notes */}
-                    <div className="grid grid-cols-2 gap-8 text-sm text-foreground border-t border-border pt-8">
-                        <div>
-                            <h4 className="font-bold mb-2">Términos y Condiciones</h4>
-                            <p className="whitespace-pre-wrap text-muted-foreground">{formData.terms || "Sin términos especificados."}</p>
+                    {/* Footer Notes & Terms */}
+                    <div className="border-t border-slate-100 pt-8 mt-12 text-sm">
+                        <div className="grid grid-cols-2 gap-12">
+                            <div>
+                                <h4 className="font-bold text-slate-800 mb-3 text-sm tracking-wide uppercase">Notas Adicionales</h4>
+                                <p className="text-slate-500 whitespace-pre-wrap leading-relaxed">{formData.notes || "Sin notas."}</p>
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-slate-800 mb-3 text-sm tracking-wide uppercase">Términos y Condiciones</h4>
+                                <p className="text-slate-500 whitespace-pre-wrap leading-relaxed">{formData.terms || "Esta factura se rige bajo los términos convencionales de pago."}</p>
+                            </div>
                         </div>
-                        <div>
-                            <h4 className="font-bold mb-2">Notas</h4>
-                            <p className="whitespace-pre-wrap text-muted-foreground">{formData.notes || "Sin notas adicionales."}</p>
-                        </div>
+                        {formData.footerNote && (
+                            <div className="mt-12 text-center text-xs text-slate-400 font-medium">
+                                {formData.footerNote}
+                            </div>
+                        )}
                     </div>
-                    {formData.footerNote && (
-                        <div className="mt-8 text-center text-xs text-muted-foreground">
-                            {formData.footerNote}
-                        </div>
-                    )}
+
                 </div>
             </div>
 
-            {/* DIAN Raw Response Modal */}
+            {/* DIAN Modal */}
             {showDianModal && formData.dianResponse && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                    {/* ...existing dian modal code... */}
                     <div className="bg-zinc-900 text-zinc-100 border border-zinc-800 w-full max-w-2xl shadow-2xl rounded-2xl flex flex-col max-h-[80vh] animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center p-5 border-b border-zinc-800">
                             <div className="flex items-center gap-3">
@@ -229,10 +299,7 @@ export function BillPreview({
                                 </div>
                                 <h3 className="font-semibold text-lg text-white">Respuesta Técnica DIAN</h3>
                             </div>
-                            <button
-                                onClick={() => setShowDianModal(false)}
-                                className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white"
-                            >
+                            <button onClick={() => setShowDianModal(false)} className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-white">
                                 <XCircle className="w-5 h-5" />
                             </button>
                         </div>
@@ -240,28 +307,18 @@ export function BillPreview({
                             <div className="bg-black/50 rounded-xl p-4 border border-zinc-800 font-mono text-xs sm:text-sm leading-relaxed text-zinc-300">
                                 <pre className="whitespace-pre-wrap break-all">
                                     {(() => {
-                                        try {
-                                            return JSON.stringify(JSON.parse(formData.dianResponse), null, 2);
-                                        } catch (e) {
-                                            return formData.dianResponse;
-                                        }
+                                        try { return JSON.stringify(JSON.parse(formData.dianResponse), null, 2); }
+                                        catch { return formData.dianResponse; }
                                     })()}
                                 </pre>
                             </div>
                             <div className="mt-6 flex items-start gap-3 p-4 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
                                 <Info className="w-5 h-5 text-zinc-400 mt-0.5" />
-                                <p className="text-xs text-zinc-400 leading-relaxed">
-                                    Esta es la respuesta cruda enviada por los servidores de la DIAN. Contiene detalles técnicos sobre el rechazo que pueden ser útiles para soporte técnico.
-                                </p>
+                                <p className="text-xs text-zinc-400 leading-relaxed">Esta es la respuesta cruda enviada por los servidores de la DIAN.</p>
                             </div>
                         </div>
                         <div className="p-5 border-t border-zinc-800 flex justify-end">
-                            <button
-                                onClick={() => setShowDianModal(false)}
-                                className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition-all"
-                            >
-                                Entendido
-                            </button>
+                            <button onClick={() => setShowDianModal(false)} className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-sm font-medium transition-all">Entendido</button>
                         </div>
                     </div>
                 </div>

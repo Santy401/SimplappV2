@@ -86,12 +86,18 @@ export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password'
 
 
 
+            // Después de crear el usuario y la empresa, actualizamos lastCompanyId
+            const finalUser = await tx.user.update({
+                where: { id: user.id },
+                data: { lastCompanyId: user.companies[0].companyId }
+            });
+
             return {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                typeAccount: user.typeAccount,
-                country: user.country,
+                id: finalUser.id,
+                name: finalUser.name,
+                email: finalUser.email,
+                typeAccount: finalUser.typeAccount,
+                country: finalUser.country,
                 company: {
                     id: user.companies[0].company.id,
                     companyName: user.companies[0].company.companyName,

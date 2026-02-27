@@ -24,7 +24,7 @@ export const createColumns = (
             header: "Direccion",
             cell: (store: Store) => (
                 <div className="flex items-center gap-3">
-                    {store.address || "No Hay Direccion"}
+                    {store.address || ""}
                 </div>
             )
         },
@@ -33,7 +33,7 @@ export const createColumns = (
             header: "Observaciones",
             cell: (store: Store) => (
                 <div className="flex items-center gap-3">
-                    {store.observation || "No Hay Observaciones"}
+                    {store.observation || ""}
                 </div>
             )
         },
