@@ -45,32 +45,40 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ─── Actualizar usuario con datos de onboarding ───────────────────────
-        const updatedUser = await prisma.user.update({
-            where: { id: payload.id },
-            data: {
-                userType,
-                companyName,
-                country,
-                currency,
-                invoicePrefix: invoicePrefix.toUpperCase(),
-                defaultTax,  // String validado como numérico por Zod
-                onboardingCompleted: true,
-                // Solo guardar logo si se proporcionó
-                ...(companyLogo !== undefined && { companyLogo }),
-            },
-        });
-
-        // No devolver el logo en la respuesta (puede ser muy grande)
-        const { companyLogo: _logo, ...safeUser } = updatedUser;
-
-        // 🔔 Notificación de bienvenida — ahora que el usuario tiene empresa asignada
+        // Buscar compañía asociada
         const userCompanies = await prisma.userCompany.findMany({
             where: { userId: payload.id },
-            select: { companyId: true },
+            select: { companyId: true, role: true },
         });
         const companyId = userCompanies[0]?.companyId;
 
+        if (!companyId) {
+            return NextResponse.json({ error: 'Compañía no encontrada para este usuario' }, { status: 404 });
+        }
+
+        // ─── Actualizar usuario con país y onboarding ───────────────────────
+        const updatedUser = await prisma.user.update({
+            where: { id: payload.id },
+            data: {
+                country,
+                onboardingCompleted: true,
+            },
+        });
+
+        // ─── Actualizar compañía con datos fiscales ───────────────────────
+        await prisma.company.update({
+            where: { id: companyId },
+            data: {
+                companyName,
+                currency,
+                invoicePrefix: invoicePrefix.toUpperCase(),
+                defaultTax,  // String validado como numérico por Zod
+                // Solo guardar logo si se proporcionó
+                ...(companyLogo !== undefined && { logoUrl: companyLogo }),
+            }
+        });
+
+        // 🔔 Notificación de bienvenida — ahora que el usuario completó onboarding
         if (companyId) {
             void createNotification({
                 userId: payload.id,
@@ -84,7 +92,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             message: 'Onboarding completado exitosamente',
-            user: safeUser,
+            user: updatedUser,
         });
     } catch (error) {
         console.error('Error en onboarding:', error);
