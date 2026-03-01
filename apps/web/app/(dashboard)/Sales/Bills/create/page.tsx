@@ -11,6 +11,7 @@ import { useBill } from "@hooks/features/Bills/useBill";
 import { toast } from "react-toastify";
 import { BillPreview } from "@ui/molecules/BillPreview";
 import { useState, useEffect } from 'react';
+import { useSession } from "@hooks/features/auth/use-session";
 
 interface BillsCreatePageProps {
     onSaveDraft?: (data: CreateBillInput) => Promise<void>;
@@ -39,6 +40,7 @@ export default function BillsCreatePage({
     const { listPrices, isLoading: listPricesLoading } = useListPrice();
     const { sellers, isLoading: sellersLoading } = useSeller();
     const { createBill, updateBill, isLoading: billLoading, getBill } = useBill();
+    const { user } = useSession();
 
     const [currentBillId, setCurrentBillId] = useState<string | undefined>(initialData?.id);
 
@@ -280,6 +282,7 @@ export default function BillsCreatePage({
             stores={stores}
             listPrices={listPrices}
             sellers={sellers}
+            companyId={user?.companyId || ''}
         />
     );
 }
