@@ -9,7 +9,7 @@ export interface SessionResponse {
   name: string;
   typeAccount: string;
   country: string;
-  companyId?: string;
+  companyId: string;
   companyName?: string | null;
   companyLogo?: string | null;
   userType?: string | null;

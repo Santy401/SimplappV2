@@ -37,7 +37,7 @@ model User {
   language    String? @default("es")
   timezone    String? @default("America/Bogota")
 
-  lastCompanyId String? // ID de la última empresa seleccionada
+  lastcompanyId String // ID de la última empresa seleccionada
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -213,7 +213,7 @@ model Client {
 
   bills Bill[]
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   createdAt DateTime  @default(now())
@@ -256,7 +256,7 @@ model Store {
 
   bills Bill[]
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
@@ -355,7 +355,7 @@ model ListPrice {
   description String?
   percentage  String?
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   prices ProductPrice[]

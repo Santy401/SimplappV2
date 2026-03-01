@@ -90,7 +90,7 @@ interface FormBillProps {
   // IDs requeridos (normalmente vendrían del contexto de usuario)
   userId?: string;
   storeId?: string;
-  companyId?: string;
+  companyId: string;
 }
 
 export function FormBill({
