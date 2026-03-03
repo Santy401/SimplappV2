@@ -14,7 +14,7 @@ jobs:
     
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      NEXT_PUBLIC_ROOT_DOMAIN: "simplapp.com.co"
+      NEXT_PUBLIC_ROOT_DOMAIN: ${{ secrets.NEXT_PUBLIC_ROOT_DOMAIN }}
 
     steps:
       - name: Checkout repository
@@ -31,8 +31,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-        env:
-          DATABASE_URL: "postgresql://postgres.wajuavushbvlvzkdjhta:Santy401_401@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
 
       - name: Prisma Generate
         working-directory: ./apps/web
