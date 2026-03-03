@@ -31,6 +31,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: "postgresql://postgres.wajuavushbvlvzkdjhta:Santy401_401@aws-1-us-east-2.pooler.supabase.com:5432/postgres"
 
       - name: Prisma Generate
         working-directory: ./apps/web
