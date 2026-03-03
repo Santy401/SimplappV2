@@ -259,6 +259,7 @@ model Store {
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
+  products           Product[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -300,6 +301,8 @@ model Product {
   inventoryMovements InventoryMovement[]
   billItems          BillItem[]
 
+  storeId           String?
+  store             Store?    @relation(fields: [storeId], references: [id])
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
@@ -308,6 +311,7 @@ model Product {
   @@index([companyId])
   @@index([code])
   @@index([deletedAt])
+  @@index([storeId])
 }
 
 model CategoryProduct {

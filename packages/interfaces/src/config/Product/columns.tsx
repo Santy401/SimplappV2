@@ -117,6 +117,16 @@ export const createColumns = (
             )
         },
         {
+            key: "store",
+            header: "Bodega",
+            className: "min-w-[120px] whitespace-nowrap",
+            cell: (product: any) => (
+                <div className="flex items-center gap-2 text-gray-600">
+                    <span className="text-sm font-medium">{product.store?.name || 'Sin bodega'}</span>
+                </div>
+            )
+        },
+        {
             key: "unit",
             header: "Unidad",
             className: "min-w-[130px] whitespace-nowrap",

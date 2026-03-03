@@ -36,6 +36,7 @@ export async function GET(
                         listPrice: true,
                     },
                 },
+                store: true,
             },
         });
 
@@ -92,6 +93,8 @@ export async function PUT(
             unitOfMeasure,
             taxRate,
             basePrice,
+            storeId,
+            initialAmount,
             ...data
         } = rawData;
 
@@ -125,6 +128,7 @@ export async function PUT(
                 ...data,
                 category: categoryConnect,
                 code: codeProduct || undefined,
+                store: storeId ? { connect: { id: storeId } } : undefined,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 taxRate: taxRate != null && taxRate !== '' ? String(taxRate) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
@@ -138,6 +142,7 @@ export async function PUT(
                         listPrice: true,
                     },
                 },
+                store: true,
             },
         });
 

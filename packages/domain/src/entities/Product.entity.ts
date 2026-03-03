@@ -1,3 +1,5 @@
+import { Store } from "./Store.entity";
+
 export interface ProductProps {
   id?: string;
   name: string;
@@ -18,7 +20,8 @@ export interface ProductProps {
 
   active: boolean;
 
-  store?: [];
+  storeId?: string;
+  store?: Store;
 
   priceList?: [];
   valuePrice?: number;
@@ -49,7 +52,8 @@ export interface Product {
 
   active: boolean;
 
-  store?: [];
+  storeId?: string;
+  store?: Store;
 
   priceList?: [];
   valuePrice?: number;
@@ -74,6 +78,10 @@ export interface CreateProductDto {
   description: string | null;
   active: boolean;
   valuePrice: number;          // Mapped to 'finalPrice' in backend
+  storeId?: string;
+  trackStock?: boolean;
+  allowNegativeStock?: boolean;
+  initialAmount?: string;
 }
 
 export interface UpdateProductDto {
@@ -89,6 +97,10 @@ export interface UpdateProductDto {
   description: string | null;
   active: boolean;
   valuePrice: number;
+  storeId?: string;
+  trackStock?: boolean;
+  allowNegativeStock?: boolean;
+  initialAmount?: string;
 }
 
 export enum ProductCategory {

@@ -47,6 +47,7 @@ export interface FormBillItem {
   taxAmount: number;
   description: string;
   total: number;
+  storeId?: string;
 }
 
 interface FormBillData {
@@ -201,6 +202,7 @@ export function FormBill({
             taxAmount: parseFloat(item.taxAmount) || 0,
             description: item.description || "",
             total: parseFloat(item.total) || 0,
+            storeId: item.storeId,
           }),
         );
 
@@ -224,6 +226,7 @@ export function FormBill({
               description: "",
               total: 0,
               productId: undefined,
+              storeId: formData.storeId,
             },
           ]);
         } else {
@@ -244,6 +247,7 @@ export function FormBill({
           description: "",
           total: 0,
           productId: undefined,
+          storeId: formData.storeId,
         },
       ]);
     }
@@ -293,6 +297,7 @@ export function FormBill({
         description: "",
         total: 0,
         productId: undefined,
+        storeId: formData.storeId,
       },
     ]);
   };
@@ -341,6 +346,7 @@ export function FormBill({
               reference: product.reference || "",
               price: parseFloat(product.basePrice as any) || 0,
               taxRate: parseFloat(product.taxRate) || 0,
+              storeId: product.storeId || item.storeId || formData.storeId,
             };
             const calc = calculateItemTotals({
               price: updatedItem.price,
@@ -409,6 +415,7 @@ export function FormBill({
             discount: item.discount.toString(),
             taxRate: item.taxRate.toString(),
             taxAmount: (item.taxAmount || 0).toString(),
+            storeId: item.storeId,
           }) as CreateBillItemInput,
       ),
     };
@@ -565,26 +572,7 @@ export function FormBill({
           </div> */}
 
           {/* Bodega */}
-          <div className="space-y-2">
-            <Label>Bodega</Label>
-            <Select
-              value={formData.storeId}
-              onValueChange={(v) => setFormData({ ...formData, storeId: v })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Seleccionar bodega" />
-              </SelectTrigger>
-              <SelectContent>
-                {stores && stores.length > 0 ? (
-                  stores.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="none" disabled>No hay bodegas disponibles</SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Bodega removida de acá */}
 
           {/* Lista de precios */}
           <div className="space-y-2">
@@ -885,6 +873,7 @@ export function FormBill({
                 <th className="text-right p-3 text-sm font-medium">Cantidad</th>
                 <th className="text-right p-3 text-sm font-medium">Precio</th>
                 <th className="text-right p-3 text-sm font-medium">Impuesto</th>
+                <th className="text-right p-3 text-sm font-medium">Bodega</th>
                 <th className="text-right p-3 text-sm font-medium">Desc %</th>
                 <th className="text-right p-3 text-sm font-medium">Total</th>
                 <th className="w-10"></th>
@@ -999,6 +988,23 @@ export function FormBill({
                           <SelectItem value="10.5">10.5%</SelectItem>
                           <SelectItem value="19">19%</SelectItem>
                           <SelectItem value="21">21%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </td>
+                    <td className="p-2">
+                      <Select
+                        value={item.storeId || ""}
+                        onValueChange={(v) => handleItemChange(item.id, "storeId", v)}
+                      >
+                        <SelectTrigger className="w-32">
+                          <SelectValue placeholder="Bodega" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {stores.map((s) => (
+                            <SelectItem key={s.id} value={s.id}>
+                              {s.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </td>
