@@ -346,7 +346,7 @@ export function FormBill({
               reference: product.reference || "",
               price: parseFloat(product.basePrice as any) || 0,
               taxRate: parseFloat(product.taxRate) || 0,
-              storeId: product.storeId || item.storeId || formData.storeId,
+              storeId: (product as any).storeId || item.storeId || formData.storeId,
             };
             const calc = calculateItemTotals({
               price: updatedItem.price,

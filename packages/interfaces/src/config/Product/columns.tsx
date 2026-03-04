@@ -7,13 +7,15 @@ import { Badge } from "@ui/index";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/atoms/CardHover/hover-card";
 import { toast } from "react-toastify";
 
-interface TableProduct {
-    id: string;
-    code: string | null;
+export interface TableProduct {
+    id?: string;
+    code?: string | null;
+    codeProduct?: string | null;
     name: string;
     reference?: string | null;
-    category?: { name: string } | null;
+    category?: any;
     unit?: string;
+    unitOfMeasure?: any;
     description?: string;
     active: boolean;
     cost?: string | number;
@@ -21,12 +23,15 @@ interface TableProduct {
     finalPrice?: string | number;
     taxRate?: string;
     store?: { name: string } | null;
+    type?: string;
+    initialAmount?: number | string | null;
+    prices?: any[];
 }
 
 export const createColumns = (
-    handleViewProduct: (product: TableProduct) => void,
-    handleEditProduct: (product: TableProduct) => void,
-    handleDeleteProduct: (product: TableProduct) => void
+    handleViewProduct: (product: any) => void,
+    handleEditProduct: (product: any) => void,
+    handleDeleteProduct: (product: any) => void
 ) => {
     return [
         {
@@ -34,7 +39,7 @@ export const createColumns = (
             header: "Código",
             className: "min-w-[120px] whitespace-nowrap",
             cell: (product: TableProduct) => {
-                const code = product.code || 'N/A';
+                const code = product.code || product.codeProduct || 'N/A';
                 const maxLength = 10;
                 const truncatedCode = code.length > maxLength ? `${code.substring(0, maxLength)}...` : code;
 
@@ -111,7 +116,7 @@ export const createColumns = (
             className: "min-w-[140px] whitespace-nowrap",
             cell: (product: TableProduct) => (
                 <div className="flex items-center gap-2 text-gray-600">
-                    <span className="text-sm font-medium">{product.category?.name || 'Sin categoría'}</span>
+                    <span className="text-sm font-medium">{product.category?.name || (typeof product.category === 'string' ? product.category : 'Sin categoría')}</span>
                 </div>
             )
         },
@@ -128,7 +133,7 @@ export const createColumns = (
                                 "outline"
                     }
                 >
-                    {getTypeLabel(product.type)}
+                    {getTypeLabel(product.type || 'PRODUCT')}
                 </Badge>
             )
         },
@@ -149,7 +154,7 @@ export const createColumns = (
             cell: (product: TableProduct) => (
                 <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
                     <Tag className="w-3.5 h-3.5 shrink-0 text-gray-400" />
-                    <span className="text-sm font-medium">{getUnitLabel(product.unit)}</span>
+                    <span className="text-sm font-medium">{getUnitLabel(product.unit || product.unitOfMeasure || 'UNIDAD')}</span>
                 </div>
             )
         },
@@ -289,7 +294,7 @@ export const ProductTable = (handleEditCustomer: (product: Product) => void, han
                         <tr key={product.id} className="hover:bg-gray-50">
                             {columns.map((column) => (
                                 <td key={column.key} className="px-6 py-4 whitespace-nowrap">
-                                    {column.cell(product)}
+                                    {column.cell(product as any)}
                                 </td>
                             ))}
                         </tr>
@@ -317,7 +322,7 @@ export const createCompactProductColumns = (
                     </div>
                     <div className="flex gap-4 mt-1 text-sm text-gray-500">
                         <span>Código: {product.codeProduct || 'N/A'}</span>
-                        <span>Categoría: {getCategoryLabel(product.category || 'N/A')}</span>
+                        <span>Categoría: {getCategoryLabel(typeof product.category === 'string' ? product.category : (product.category?.name || 'N/A'))}</span>
                     </div>
                 </div>
             )
@@ -329,11 +334,11 @@ export const createCompactProductColumns = (
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                         <Tag className="w-3 h-3" />
-                        <span>{getUnitLabel(product.unitOfMeasure)}</span>
+                        <span>{getUnitLabel(String(product.unitOfMeasure || 'UNIDAD'))}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-sm">
-                            Inv: {product.initialAmount !== null ? product.initialAmount : 'N/A'}
+                            Inv: {product.initialAmount !== undefined && product.initialAmount !== null ? product.initialAmount : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -346,7 +351,7 @@ export const createCompactProductColumns = (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
-                        {product.basePrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {Number(product.basePrice || 0).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm text-gray-500">
                         Impuesto: {product.taxRate}
