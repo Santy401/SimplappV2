@@ -101,13 +101,13 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         onSelect={(id, item) => {
           if (item?.backendType && item.raw) {
             if (item.backendType === 'client') {
-              setSelectedClient(item.raw);
+              setSelectedClient(item.raw as any);
               navigateTo('ventas-clientes-view');
             } else if (item.backendType === 'product') {
-              setSelectedProduct(item.raw);
+              setSelectedProduct(item.raw as any);
               navigateTo('productos-producto-view');
             } else if (item.backendType === 'bill') {
-              setSelectedBill(item.raw);
+              setSelectedBill(item.raw as any);
               navigateTo('ventas-facturacion-view');
             } else {
               navigateTo(id);

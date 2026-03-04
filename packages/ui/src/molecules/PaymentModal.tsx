@@ -12,7 +12,7 @@ export interface PaymentModalProps {
     onClose: () => void;
     bill: {
         id: string;
-        clientName: string;
+        clientName?: string | null;
         number: string | number;
         balance: string | number;
     } | null;
