@@ -7,7 +7,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 
 export function useProduct() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [error, setError] = useState<String | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loadingStates, setLoadingStates] = useState({
     fetch: false,
     create: false,

@@ -80,21 +80,21 @@ export async function PUT(
 
         const {
             id: _,
-            companyId,
-            createdAt,
-            updatedAt,
+            companyId: _companyId,
+            createdAt: _createdAt,
+            updatedAt: _updatedAt,
             category,
-            images,
-            prices,
+            images: _images,
+            prices: _prices,
             codeProduct,
-            codeBarcode,
+            codeBarcode: _codeBarcode,
             costForUnit,
             valuePrice,
             unitOfMeasure,
             taxRate,
-            basePrice,
+            basePrice: _basePrice,
             storeId,
-            initialAmount,
+            initialAmount: _initialAmount,
             ...data
         } = rawData;
 

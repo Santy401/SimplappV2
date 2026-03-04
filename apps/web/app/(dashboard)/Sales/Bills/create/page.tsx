@@ -25,21 +25,21 @@ interface BillsCreatePageProps {
 }
 
 export default function BillsCreatePage({
-    onSaveDraft,
-    onEmitBill,
-    onAutoSave,
+    onSaveDraft: _onSaveDraft,
+    onEmitBill: _onEmitBill,
+    onAutoSave: _onAutoSave,
     onSelect,
     onSelectBill,
     initialData,
     mode = 'create',
-    isLoading = false,
+    isLoading: _isLoading = false,
 }: BillsCreatePageProps) {
-    const { clients, isLoading: clientsLoading } = useClients();
-    const { products, isLoading: productsLoading } = useProduct();
-    const { stores, isLoading: storesLoading } = useStore();
-    const { listPrices, isLoading: listPricesLoading } = useListPrice();
-    const { sellers, isLoading: sellersLoading } = useSeller();
-    const { createBill, updateBill, isLoading: billLoading, getBill } = useBill();
+    const { clients, isLoading: _clientsLoading } = useClients();
+    const { products, isLoading: _productsLoading } = useProduct();
+    const { stores, isLoading: _storesLoading } = useStore();
+    const { listPrices, isLoading: _listPricesLoading } = useListPrice();
+    const { sellers, isLoading: _sellersLoading } = useSeller();
+    const { createBill, updateBill, isLoading: _billLoading, getBill } = useBill();
     const { user } = useSession();
 
     const [currentBillId, setCurrentBillId] = useState<string | undefined>(initialData?.id);
@@ -50,8 +50,8 @@ export default function BillsCreatePage({
     }, [initialData?.id]);
 
     // Estado para la factura completa en modo view
-    const [fullBill, setFullBill] = useState<Bill | null>(null);
-    const [isFetchingBill, setIsFetchingBill] = useState(false);
+    const [_fullBill, _setFullBill] = useState<Bill | null>(null);
+    const [_isFetchingBill, setIsFetchingBill] = useState(false);
 
     // Cargar factura completa cuando esté en modo view
     useEffect(() => {
@@ -61,7 +61,7 @@ export default function BillsCreatePage({
                 try {
                     const bill = await getBill(initialData.id);
                     if (bill) {
-                        setFullBill(bill);
+                        _setFullBill(bill);
                     }
                 } catch (error) {
                     console.error('Error loading bill:', error);
@@ -191,7 +191,7 @@ export default function BillsCreatePage({
                 }
             }
             onSelect?.('ventas-facturacion');
-        } catch (error) {
+        } catch (_error) {
             toast.error('Error al guardar borrador');
         }
     };
@@ -213,7 +213,7 @@ export default function BillsCreatePage({
 
             // Navegar de vuelta después de emitir
             onSelect?.('ventas-facturacion');
-        } catch (error) {
+        } catch (_error) {
             toast.error('Error al emitir factura');
         }
     };

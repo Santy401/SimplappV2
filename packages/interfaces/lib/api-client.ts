@@ -93,7 +93,9 @@ class ApiClient {
         let errorData;
         try {
           errorData = await response.json();
-        } catch (e) { }
+        } catch (e) {
+          // Ignore parse errors for error data
+        }
 
         const error: any = new Error(errorData?.error || `HTTP error! status: ${response.status}`);
         error.response = { status: response.status, data: errorData };

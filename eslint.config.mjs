@@ -55,6 +55,11 @@ export default [
       '**/.next/**',
       '**/out/**',
       '**/build/**',
+      'dist/**',
+      '**/dist/**',
+      'patch_companies.js',
+      'create-routes.js',
+      'apps/web/prisma/backfill.js',
     ],
   },
 ];

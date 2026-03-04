@@ -25,7 +25,7 @@ export default function CreateClient({ onBack, initialData, mode = 'create' }: C
   const [opcionesOpen, setOpcionesOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { createClient, updateClient } = useClients();
+  const { createClient, updateClient, deleteClient } = useClients();
 
   const [formData, setFormData] = useState<ClientFormData>({
     organizationType: OrganizationType.NATURAL_PERSON,
@@ -57,7 +57,7 @@ export default function CreateClient({ onBack, initialData, mode = 'create' }: C
 
   useEffect(() => {
     if (initialData) {
-      const { id, bills, createdAt, updatedAt, ...formDataFields } = initialData;
+      const { id: _id, bills: _bills, createdAt: _createdAt, updatedAt: _updatedAt, ...formDataFields } = initialData;
       setFormData(prev => ({
         ...prev,
         ...formDataFields as ClientFormData,
@@ -184,7 +184,7 @@ export default function CreateClient({ onBack, initialData, mode = 'create' }: C
         return;
       }
 
-      const { deleteClient } = useClients();
+      // useClients is already called at top level
       const result = await deleteClient(initialData.id);
 
       if (result) {

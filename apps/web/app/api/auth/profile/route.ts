@@ -18,8 +18,8 @@ export async function PUT(request: NextRequest) {
         const {
             name, country, companyName, companyLogo,
             profileLogo, language, timezone,
-            legalName, businessType, industry,
-            taxIdentification, taxRegime, taxResponsibilities,
+            legalName, _businessType, industry,
+            taxIdentification, _taxRegime, _taxResponsibilities,
             state, city, address, zipCode,
             currency, invoicePrefix, invoiceInitialNumber, defaultTax,
             phone, billingEmail, website
@@ -71,7 +71,7 @@ export async function PUT(request: NextRequest) {
     } catch (error) {
         console.error('Error actualizando perfil:', error);
         return NextResponse.json(
-            { error: 'Error interno del servidor al procesar la actualización', details: (error as any).message || String(error) },
+            { error: 'Error interno del servidor al procesar la actualización', details: error instanceof Error ? error.message : String(error) },
             { status: 500 }
         );
     }

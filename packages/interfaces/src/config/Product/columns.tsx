@@ -1,23 +1,39 @@
 "use client";
 
-import { Product, ProductCategory, UnitOfMeasure } from "@domain/entities/Product.entity";
+import { Product } from "@domain/entities/Product.entity";
 import { TableActionsDropdown } from "@ui/index";
 import { Package, Tag, DollarSign, Percent, Check, X } from "lucide-react";
 import { Badge } from "@ui/index";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/atoms/CardHover/hover-card";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
+
+interface TableProduct {
+    id: string;
+    code: string | null;
+    name: string;
+    reference?: string | null;
+    category?: { name: string } | null;
+    unit?: string;
+    description?: string;
+    active: boolean;
+    cost?: string | number;
+    basePrice?: string | number;
+    finalPrice?: string | number;
+    taxRate?: string;
+    store?: { name: string } | null;
+}
 
 export const createColumns = (
-    handleViewProduct: (product: any) => void,
-    handleEditProduct: (product: any) => void,
-    handleDeleteProduct: (product: any) => void
+    handleViewProduct: (product: TableProduct) => void,
+    handleEditProduct: (product: TableProduct) => void,
+    handleDeleteProduct: (product: TableProduct) => void
 ) => {
     return [
         {
             key: "code",
             header: "Código",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => {
+            cell: (product: TableProduct) => {
                 const code = product.code || 'N/A';
                 const maxLength = 10;
                 const truncatedCode = code.length > maxLength ? `${code.substring(0, maxLength)}...` : code;
@@ -80,7 +96,7 @@ export const createColumns = (
             key: "name",
             header: "Nombre",
             className: "min-w-[250px] w-full",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col min-w-[200px]">
                     <span className="font-semibold text-gray-900 truncate" title={product.name}>{product.name}</span>
                     {product.reference && (
@@ -93,7 +109,7 @@ export const createColumns = (
             key: "category",
             header: "Categoría",
             className: "min-w-[140px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-2 text-gray-600">
                     <span className="text-sm font-medium">{product.category?.name || 'Sin categoría'}</span>
                 </div>
@@ -103,7 +119,7 @@ export const createColumns = (
             key: "type",
             header: "Tipo",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <Badge
                     className="w-24 h-6 px-0 text-xs justify-center font-medium shadow-sm transition-colors"
                     variant={
@@ -120,7 +136,7 @@ export const createColumns = (
             key: "store",
             header: "Bodega",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-2 text-gray-600">
                     <span className="text-sm font-medium">{product.store?.name || 'Sin bodega'}</span>
                 </div>
@@ -130,7 +146,7 @@ export const createColumns = (
             key: "unit",
             header: "Unidad",
             className: "min-w-[130px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
                     <Tag className="w-3.5 h-3.5 shrink-0 text-gray-400" />
                     <span className="text-sm font-medium">{getUnitLabel(product.unit)}</span>
@@ -141,7 +157,7 @@ export const createColumns = (
             key: "price",
             header: "Precio",
             className: "min-w-[180px] whitespace-nowrap",
-            cell: (product: any) => {
+            cell: (product: TableProduct) => {
                 const price = product.prices?.[0]?.value || product.basePrice || product.finalPrice || '0';
                 const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 
@@ -157,7 +173,7 @@ export const createColumns = (
             key: "tax",
             header: "Impuestos",
             className: "min-w-[110px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
                     <Percent className="w-3 h-3 shrink-0 text-gray-400" />
                     <span className="text-sm font-medium">{product.taxRate}%</span>
@@ -168,7 +184,7 @@ export const createColumns = (
             key: "status",
             header: "Estado",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center">
                     {product.active ? (
                         <Badge
@@ -194,7 +210,7 @@ export const createColumns = (
             key: "actions",
             header: "Acciones",
             className: "min-w-[100px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <TableActionsDropdown
                     onView={() => handleViewProduct(product)}
                     onEdit={() => handleEditProduct(product)}
@@ -293,7 +309,7 @@ export const createCompactProductColumns = (
         {
             key: "name",
             header: "Producto",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                         <Package className="w-4 h-4 text-gray-500" />
@@ -309,7 +325,7 @@ export const createCompactProductColumns = (
         {
             key: "details",
             header: "Detalles",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                         <Tag className="w-3 h-3" />
@@ -326,7 +342,7 @@ export const createCompactProductColumns = (
         {
             key: "financial",
             header: "Financiero",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
@@ -341,7 +357,7 @@ export const createCompactProductColumns = (
         {
             key: "actions",
             header: "Acciones",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <TableActionsDropdown
                     onView={() => handleViewProduct(product)}
                     onEdit={() => handleEditProduct(product)}
