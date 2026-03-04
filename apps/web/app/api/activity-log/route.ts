@@ -3,7 +3,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
         const cookieStore = await cookies();
         const accessToken = cookieStore.get('access-token')?.value;

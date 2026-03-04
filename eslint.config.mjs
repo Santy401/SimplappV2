@@ -64,6 +64,8 @@ export default [
       '**/build/**',
       'dist/**',
       '**/dist/**',
+      '**/storybook-static/**',
+      'storybook-static/**',
       'patch_companies.js',
       'create-routes.js',
       'apps/web/prisma/backfill.js',
