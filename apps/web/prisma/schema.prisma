@@ -13,6 +13,13 @@ datasource db {
   provider = "postgresql"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "erd.svg"
+  theme    = "dark"
+  mmdcPath = "C:/Users/usuario/AppData/Roaming/npm"
+}
+
 /**
  * =========================================
  * 👤 USER & AUTH MODELS
