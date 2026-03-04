@@ -4,16 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import {
     Home,
-    BarChart3,
     TrendingUp,
-    Bell,
-    Globe,
-    Newspaper,
-    LineChart,
-    Vault,
-    Wallet,
-    AlertCircle,
-    Search,
     ChevronDown,
     ChevronRight,
     ChevronLeft,

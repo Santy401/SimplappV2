@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
         const parsed = schema.safeParse(body);
 
         if (!parsed.success) {
-            const issues = (parsed.error as any).issues ?? [];
+            const issues = parsed.error.issues ?? [];
             return NextResponse.json(
                 { error: issues[0]?.message ?? 'Datos inválidos' },
                 { status: 400 }

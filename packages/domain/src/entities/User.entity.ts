@@ -5,7 +5,7 @@ export interface User {
     password: string;
     typeAccount: string;
     country: string;
-    companyId?: string | null;
+    companyId: string | null;
     companyName?: string | null;
     companyLogo?: string | null;
     userType?: string | null;

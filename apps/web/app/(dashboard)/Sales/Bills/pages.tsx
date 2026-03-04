@@ -3,7 +3,7 @@
 import { DataTable } from "@simplapp/ui";
 import { Button } from "@simplapp/ui";
 import { UserCheck, UserPlus } from "lucide-react";
-import { Loading, DataTableSkeleton, Skeleton, PaymentModal } from "@simplapp/ui";
+import { DataTableSkeleton, Skeleton, PaymentModal } from "@simplapp/ui";
 import { useState, useEffect } from "react";
 import { Bill, BillDetail, BillStatus } from "@domain/entities/Bill.entity";
 import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
@@ -28,9 +28,9 @@ export default function BillsPage({
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [selectedBillForPayment, setSelectedBillForPayment] = useState<Bill | null>(null);
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, _setDeletingId] = useState<string | null>(null);
 
-  const [localLoading, setLocalLoading] = useState({
+  const [localLoading, _setLocalLoading] = useState({
     export: false,
     delete: false,
     create: false,
@@ -64,7 +64,7 @@ export default function BillsPage({
 
   const columns = originalColumns;
 
-  const handlePaymentSubmit = async (paymentData: any) => {
+  const handlePaymentSubmit = async (paymentData: { value: string | number }) => {
     if (!selectedBillForPayment) return;
 
     // Convert strings to proper types
@@ -90,7 +90,7 @@ export default function BillsPage({
       } else {
         toast.error("Error al registrar el pago");
       }
-    } catch (err) {
+    } catch (_err) {
       toast.error("Error al registrar el pago");
     }
   };
@@ -104,22 +104,28 @@ export default function BillsPage({
     refetch();
   }, [tableversion]);
 
-  const preparePreviewData = (bill: BillDetail) => {
-    const items = (bill as any).items || [];
+  const preparePreviewData = (bill: BillDetail & { items?: any[] }) => {
+    const items = bill.items || [];
 
-    const formattedItems = items.map((item: any, index: number) => ({
-      id: item.id?.toString() || `item-${index}`,
-      productId: item.productId,
-      productName: item.productName,
-      name: item.productName || item.name || "",
-      reference: item.productCode || item.reference || "",
-      price: parseFloat(item.price) || 0,
-      quantity: parseFloat(item.quantity) || 0,
-      discount: parseFloat(item.discount) || 0,
-      taxRate: parseFloat(item.taxRate) || 0,
-      description: item.description || "",
-      total: parseFloat(item.total) || 0,
-    }));
+    const formattedItems = items.map((item: any, index: number) => {
+      const price = parseFloat(item.price) || 0;
+      const quantity = parseFloat(item.quantity) || 0;
+      const taxRate = parseFloat(item.taxRate) || 0;
+      return {
+        id: item.id?.toString() || `item-${index}`,
+        productId: item.productId,
+        productName: item.productName,
+        name: item.productName || item.name || "",
+        reference: item.productCode || item.reference || "",
+        price: price,
+        quantity: quantity,
+        discount: parseFloat(item.discount) || 0,
+        taxRate: taxRate,
+        taxAmount: (price * quantity * taxRate) / 100,
+        description: item.description || "",
+        total: parseFloat(item.total) || 0,
+      };
+    });
 
     return {
       formData: {

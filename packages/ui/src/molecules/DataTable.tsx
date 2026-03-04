@@ -2,46 +2,41 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import {
-  Search,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  Edit2,
   Trash2,
-  Eye,
-  Settings,
-  Plus,
   X,
   Loader2,
 } from "lucide-react";
 import { Button } from '../atoms/Button/Button';;
 import { Checkbox } from "../atoms/Checkbox/Checkbox";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../molecules/Tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "../molecules/Tabs";
 import { TableColumn, TableProps } from "../types/table.entity";
 
 export function DataTable<T extends { id: string | string }>({
   data,
   columns,
-  title = "Data Table",
-  searchable = true,
+  title: _title = "Data Table",
+  searchable: _searchable = true,
   pagination = true,
   itemsPerPage: initialItemsPerPage = 10,
-  onEdit,
-  onDelete,
+  onEdit: _onEdit,
+  onDelete: _onDelete,
   onDeleteMany,
   onView,
-  onAdd,
-  onExport,
-  actions,
+  onAdd: _onAdd,
+  onExport: _onExport,
+  actions: _actions,
   className = "",
   isBillView,
   isLoading,
 }: TableProps<T>) {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, _setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(initialItemsPerPage);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [statusFilter, _setStatusFilter] = useState("all");
 
   // Multi-select state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -55,7 +50,7 @@ export function DataTable<T extends { id: string | string }>({
 
     if (isBillView && statusFilter !== 'all') {
       processedData = processedData.filter((item: any) => {
-        const status = item.status;
+        const status = item.status as string;
         const dueDate = item.dueDate ? new Date(item.dueDate) : null;
         const today = new Date();
         today.setHours(0, 0, 0, 0);

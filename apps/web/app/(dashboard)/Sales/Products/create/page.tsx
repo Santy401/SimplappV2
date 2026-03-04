@@ -42,6 +42,7 @@ type ProductFormData = {
   taxExempt: boolean;
   codeBarcode: string | null;
   initialAmount: string;
+  storeId?: string;
 };
 
 export default function CreateProduct({
@@ -51,7 +52,7 @@ export default function CreateProduct({
 }: CreateProductProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { createProduct, updateProduct } = useProduct();
-  const [isService, setIsService] = useState(false);
+  const [_isService, _setIsService] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
   >({});
@@ -59,6 +60,7 @@ export default function CreateProduct({
     Array<{ id: string; name: string }>
   >([]);
   const [isCategoriesLoading, setIsCategoriesLoading] = useState(true); // ✅ Nuevo estado
+  const [stores, setStores] = useState<Array<{ id: string; name: string }>>([]);
 
   const [formData, setFormData] = useState<ProductFormData>({
     name: "",
@@ -79,12 +81,13 @@ export default function CreateProduct({
     taxExempt: false,
     codeBarcode: null,
     initialAmount: "0",
+    storeId: "",
     ...initialData,
   });
 
   useEffect(() => {
     if (initialData) {
-      const { id, ...formDataFields } = initialData;
+      const { id: _id, ...formDataFields } = initialData;
       setFormData((prev) => ({
         ...prev,
         ...(formDataFields as ProductFormData),
@@ -126,7 +129,22 @@ export default function CreateProduct({
         setIsCategoriesLoading(false);
       }
     };
+    const fetchStores = async () => {
+      try {
+        const response = await fetch("/api/stores");
+        if (response.ok) {
+          const data = await response.json();
+          setStores(data);
+          if (data.length > 0 && !formData.storeId) {
+            setFormData(prev => ({ ...prev, storeId: data[0].id }));
+          }
+        }
+      } catch (error) {
+        console.error("Error loading stores:", error);
+      }
+    };
     fetchCategories();
+    fetchStores();
   }, []);
   useEffect(() => {
     const basePrice = parseFloat(formData.basePrice) || 0;
@@ -202,16 +220,14 @@ export default function CreateProduct({
       description: formData.description,
       active: formData.active,
       valuePrice: parseFloat(formData.finalPrice) || 0,
+      storeId: formData.storeId,
+      trackStock: formData.trackStock,
+      allowNegativeStock: formData.allowNegativeStock,
+      initialAmount: formData.initialAmount,
     };
   };
 
-  const hiddenChecks = () => {
-    if (formData.type === "SERVICE") {
-      setIsService(true);
-    } else {
-      setIsService(false);
-    }
-  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -384,6 +400,19 @@ export default function CreateProduct({
             setFormData((prev) => ({ ...prev, code: value }))
           }
           placeholder="Buscar..."
+        />
+
+        <SelectField
+          label="Bodega Principal"
+          value={formData.storeId || ""}
+          onChange={(value) =>
+            setFormData((prev) => ({ ...prev, storeId: value }))
+          }
+          options={stores.map((s) => ({
+            value: s.id,
+            label: s.name,
+          }))}
+          placeholder="Seleccionar bodega"
         />
       </FormSection>
 

@@ -1,12 +1,10 @@
 "use client";
 
-import { DataTable, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
+import { DataTable, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Button } from '@simplapp/ui';
 import {
     Package,
     ShoppingCart,
-    DollarSign,
-    Tag,
     Plus,
     Archive,
 } from "lucide-react";
@@ -33,12 +31,12 @@ export default function Productos({
     const totalProducts = validProducts.length;
     const activeProducts = validProducts.filter(p => p.active).length;
     const inactiveProducts = validProducts.filter(p => !p.active).length;
-    const totalValue = 0;
+    const _totalValue = 0;
 
     const [tableversion, setTableversion] = useState(0);
 
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [localLoading, setLocalLoading] = useState({
+    const [deletingId, _setDeletingId] = useState<string | null>(null);
+    const [localLoading, _setLocalLoading] = useState({
         export: false,
         delete: false,
         create: false,

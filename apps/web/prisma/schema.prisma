@@ -33,11 +33,10 @@ model User {
   emailVerified       Boolean @default(false)
 
   // Profile - User
-  profileLogo String?
-  language    String? @default("es")
-  timezone    String? @default("America/Bogota")
-
-  lastCompanyId String? // ID de la última empresa seleccionada
+  profileLogo   String?
+  language      String? @default("es")
+  timezone      String? @default("America/Bogota")
+  lastCompanyId String // ID de la última empresa seleccionada
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -145,8 +144,8 @@ model Company {
   municipality String? @default("")
   postalCode   String? @default("")
 
-  phone String? @default("")
-  email String? @default("")
+  phone   String? @default("")
+  email   String? @default("")
   website String? @default("")
 
   // Billing setup
@@ -169,8 +168,8 @@ model Company {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
 
-  listPrices   ListPrice[]
-  activityLogs ActivityLog[]
+  listPrices    ListPrice[]
+  activityLogs  ActivityLog[]
   notifications Notification[]
   subscription  Subscription?
 
@@ -213,7 +212,7 @@ model Client {
 
   bills Bill[]
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   createdAt DateTime  @default(now())
@@ -256,10 +255,11 @@ model Store {
 
   bills Bill[]
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   inventoryMovements InventoryMovement[]
+  products           Product[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -301,6 +301,8 @@ model Product {
   inventoryMovements InventoryMovement[]
   billItems          BillItem[]
 
+  storeId           String?
+  store             Store?    @relation(fields: [storeId], references: [id])
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   deletedAt         DateTime?
@@ -309,6 +311,7 @@ model Product {
   @@index([companyId])
   @@index([code])
   @@index([deletedAt])
+  @@index([storeId])
 }
 
 model CategoryProduct {
@@ -355,7 +358,7 @@ model ListPrice {
   description String?
   percentage  String?
 
-  companyId String?
+  companyId String
   company   Company? @relation(fields: [companyId], references: [id])
 
   prices ProductPrice[]
@@ -508,19 +511,19 @@ model ActivityLog {
  * =========================================
  */
 model Notification {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
   userId    String
   companyId String
   title     String
   message   String
   type      NotificationType @default(INFO)
-  read      Boolean  @default(false)
-  archived  Boolean  @default(false)
-  link      String?  // Optional URL to navigate to when clicked
-  createdAt DateTime @default(now())
+  read      Boolean          @default(false)
+  archived  Boolean          @default(false)
+  link      String? // Optional URL to navigate to when clicked
+  createdAt DateTime         @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([companyId])
@@ -533,15 +536,15 @@ model Notification {
  * =========================================
  */
 model Subscription {
-  id              String   @id @default(uuid())
-  companyId       String   @unique
-  plan            PlanType @default(FREE)
-  status          SubscriptionStatus @default(ACTIVE)
-  startDate       DateTime @default(now())
-  endDate         DateTime?
-  stripeId        String?  // Optional for Stripe integration
-  
-  company         Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  id        String             @id @default(uuid())
+  companyId String             @unique
+  plan      PlanType           @default(FREE)
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime?
+  stripeId  String? // Optional for Stripe integration
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 /**

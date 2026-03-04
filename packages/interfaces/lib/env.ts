@@ -46,6 +46,11 @@ function validateEnv() {
     }
 
     if (errors.length > 0) {
+        if (process.env.npm_lifecycle_event === 'build' || process.env.NEXT_PHASE === 'phase-production-build') {
+            console.warn('⚠️ Omitiendo validación de variables de entorno durante el build de Next.js');
+            return;
+        }
+
         console.error('\n╔════════════════════════════════════════════════════════════╗');
         console.error('║  ⚠️  ERROR: Variables de Entorno Faltantes o Inválidas  ⚠️  ║');
         console.error('╚════════════════════════════════════════════════════════════╝\n');

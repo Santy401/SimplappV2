@@ -13,7 +13,7 @@ import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
 import { verifyCsrf } from '@/lib/csrf';
 
-async function getAuthenticatedUser(request: NextRequest) {
+async function getAuthenticatedUser(_request: NextRequest) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('access-token')?.value;
 
@@ -35,9 +35,9 @@ async function getAuthenticatedUser(request: NextRequest) {
  * GET /api/company
  * Retorna los datos de configuración de empresa del usuario actual
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    const auth = await getAuthenticatedUser(request);
+    const auth = await getAuthenticatedUser(_request);
     if ('error' in auth) {
       return NextResponse.json({ error: auth.error }, { status: auth.status });
     }

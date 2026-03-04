@@ -21,7 +21,7 @@ type SellerFormData = Omit<CreateSellerDto, 'id'> & { id?: string };
 export default function CreateSeller({ onBack, initialData, mode = 'create' }: CreateSellerProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { createSeller, updateSeller } = useSeller();
-    const [errors, setErrors] = useState<Partial<Record<keyof Seller, string>>>({});
+    const [errors, _setErrors] = useState<Partial<Record<keyof Seller, string>>>({});
     const [formData, setFormData] = useState<SellerFormData>({
         name: '',
         identification: null,
@@ -31,7 +31,7 @@ export default function CreateSeller({ onBack, initialData, mode = 'create' }: C
 
     useEffect(() => {
         if (initialData) {
-            const { id, ...formDataFields } = initialData;
+            const { id: _id, ...formDataFields } = initialData;
             setFormData(prev => ({
                 ...prev,
                 ...formDataFields as SellerFormData

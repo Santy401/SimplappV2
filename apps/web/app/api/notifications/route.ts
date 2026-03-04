@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
 
         const tab = req.nextUrl.searchParams.get("tab") ?? "principal";
 
-        let where: any = { userId: payload.id, companyId };
+        const where: any = { userId: payload.id, companyId };
 
         if (tab === "archivo") {
             where.archived = true;
