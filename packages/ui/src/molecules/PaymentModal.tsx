@@ -10,8 +10,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 export interface PaymentModalProps {
     isOpen: boolean;
     onClose: () => void;
-    bill: any;
-    onSubmit: (payment: any) => void;
+    bill: {
+        id: string;
+        clientName: string;
+        number: string | number;
+        balance: string | number;
+    } | null;
+    onSubmit: (payment: {
+        date: string;
+        bankAccount: string;
+        value: string | number;
+        paymentMethod: string;
+        billId: string;
+    }) => void;
 }
 
 export function PaymentModal({ isOpen, onClose, bill, onSubmit }: PaymentModalProps) {

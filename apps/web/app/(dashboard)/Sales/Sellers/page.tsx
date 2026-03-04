@@ -3,7 +3,7 @@
 import { Seller } from "@domain/entities/Seller.entity";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
-import { DataTable, Button, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
+import { DataTable, Button, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Receipt, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -18,8 +18,8 @@ export default function Sellers({
 }: SellerProps) {
     const { sellers, isLoading, error, refetch } = useSeller();
     const [tableVersion, setTableVersion] = useState(0);
-    const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [localLoading, setLocalLoading] = useState({
+    const [deletingId, _setDeletingId] = useState<string | null>(null);
+    const [localLoading, _setLocalLoading] = useState({
         export: false,
         delete: false,
         create: false,

@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     } = data;
 
     // Si el usuario nos pasa items, pero son un array vacio de Drafts o sin validar cantdades, los limpia.
-    const validItems = items?.filter((item: any) => item.productId) || [];
+    const validItems = items?.filter((item: { productId: string }) => item.productId) || [];
 
     if (!clientId || !date || (status !== 'DRAFT' && (!validItems || validItems.length === 0 || !subtotal || !total))) {
       return NextResponse.json(
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
-    const billData: any = {
+    const billData: Record<string, unknown> = {
       number: nextNumber,
       date: new Date(date),
       dueDate: dueDate ? new Date(dueDate) : new Date(date),
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
       client: { connect: { id: String(clientId) } },
 
       items: {
-        create: validItems.map((item: any) => ({
+        create: validItems.map((item: { productId: string, quantity: number, price: string, subtotal: string, total: string, taxRate: string, taxAmount: string, discount: string, productName: string, name: string }) => ({
           productId: String(item.productId),
           quantity: Number(item.quantity) || 1,
           price: String(item.price || 0),

@@ -5,7 +5,7 @@ import { prisma } from '@interfaces/lib/prisma';
  * GET /api/categories
  * Obtiene el listado de categorías ordenadas alfabéticamente
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
         const categories = await prisma.categoryProduct.findMany({
             orderBy: {

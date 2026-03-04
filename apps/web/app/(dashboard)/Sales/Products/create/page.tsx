@@ -52,7 +52,7 @@ export default function CreateProduct({
 }: CreateProductProps) {
   const [isLoading, setIsLoading] = useState(false);
   const { createProduct, updateProduct } = useProduct();
-  const [isService, setIsService] = useState(false);
+  const [_isService, _setIsService] = useState(false);
   const [errors, setErrors] = useState<
     Partial<Record<keyof ProductFormData, string>>
   >({});
@@ -87,7 +87,7 @@ export default function CreateProduct({
 
   useEffect(() => {
     if (initialData) {
-      const { id, ...formDataFields } = initialData;
+      const { id: _id, ...formDataFields } = initialData;
       setFormData((prev) => ({
         ...prev,
         ...(formDataFields as ProductFormData),
@@ -227,13 +227,7 @@ export default function CreateProduct({
     };
   };
 
-  const hiddenChecks = () => {
-    if (formData.type === "SERVICE") {
-      setIsService(true);
-    } else {
-      setIsService(false);
-    }
-  }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

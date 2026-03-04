@@ -13,7 +13,7 @@ import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { useClients } from "@interfaces/src/hooks/index"
 import { useClientTable } from "@interfaces/src/hooks/index";
 import { Loading, DataTableSkeleton, Skeleton } from '@simplapp/ui'
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 interface ClientesProps {
   onSelect?: (view: string) => void;
@@ -29,10 +29,10 @@ export default function ClientesPage({
 
   const [tableversion, setTableversion] = useState(0);
 
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingId, _setDeletingId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'natural' | 'juridical' | 'suppliers' | 'branches'>('all');
 
-  const [localLoading, setLocalLoading] = useState({
+  const [localLoading, _setLocalLoading] = useState({
     export: false,
     delete: false,
     create: false,

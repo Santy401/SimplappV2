@@ -9,8 +9,8 @@ interface ActivityLogItem {
     action: string;
     entityType: string;
     entityId: string;
-    changes: any;
-    metadata: any;
+    changes: Record<string, unknown>;
+    metadata: Record<string, unknown>;
     ipAddress: string | null;
     userAgent: string | null;
     createdAt: string;
@@ -34,8 +34,8 @@ export function ActivityLogViewer() {
             if (!res.ok) throw new Error('Error al cargar logs');
             const data = await res.json();
             setLogs(data);
-        } catch (err: any) {
-            setError(err.message || 'Error desconocido');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
             setLoading(false);
         }

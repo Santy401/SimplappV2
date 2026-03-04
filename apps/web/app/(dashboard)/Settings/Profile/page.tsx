@@ -122,8 +122,7 @@ export default function ProfileConfig() {
             refetch();
         } catch (error) {
             console.error(error);
-            const errDecoded = error as any;
-            const errText = errDecoded?.response?.data?.details || errDecoded?.message || "Error al actualizar";
+            const errText = error instanceof Error ? error.message : "Error al actualizar";
             toast.error("Error: " + errText);
         } finally {
             setIsSaving(false);

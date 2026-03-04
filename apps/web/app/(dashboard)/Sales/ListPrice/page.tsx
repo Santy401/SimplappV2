@@ -3,7 +3,7 @@
 import { ListPrice } from "@domain/entities/ListPrice.entity";
 import { useListPrice } from "@interfaces/src/hooks/features/ListPrice/useListPrice";
 import { useListPriceTable } from "@interfaces/src/hooks/features/ListPrice/useListPriceTable";
-import { DataTable, Button, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
+import { DataTable, Button, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Tag, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
