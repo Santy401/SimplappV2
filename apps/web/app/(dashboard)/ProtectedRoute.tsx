@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({
   children,
-  fallback
+  fallback: _fallback
 }: ProtectedRouteProps) => {
   const { user, isAuthenticated, isLoading } = useSession();
   const { setGlobalLoading, isAnyLoading } = useLoading();

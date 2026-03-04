@@ -5,7 +5,7 @@ import { prisma } from '@interfaces/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
     try {
         const cookieStore = await cookies();
         const accessToken = cookieStore.get('access-token')?.value;
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
             _sum: { total: true },
             where: {
                 companyId,
-                status: { in: validStatuses as any },
+                status: { in: validStatuses as string[] },
                 deletedAt: null,
                 date: { gte: startCurrentMonth, lte: endCurrentMonth }
             }
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
         const pendingBillsCount = await prisma.bill.count({
             where: {
                 companyId,
-                status: { in: ['ISSUED', 'PARTIALLY_PAID', 'TO_PAY'] as any },
+                status: { in: ['ISSUED', 'PARTIALLY_PAID', 'TO_PAY'] },
                 deletedAt: null,
                 balance: { gt: 0 }
             }
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
             _sum: { balance: true },
             where: {
                 companyId,
-                status: { in: ['ISSUED', 'PARTIALLY_PAID', 'TO_PAY'] as any },
+                status: { in: ['ISSUED', 'PARTIALLY_PAID', 'TO_PAY'] },
                 deletedAt: null,
                 balance: { gt: 0 }
             }
@@ -107,7 +107,7 @@ export async function GET(request: NextRequest) {
         const all6MonthsBills = await prisma.bill.findMany({
             where: {
                 companyId,
-                status: { in: validStatuses as any },
+                status: { in: validStatuses as string[] },
                 deletedAt: null,
                 date: { gte: sixMonthsAgo }
             },
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
             monthlySalesMap[mKey] = 0;
         }
 
-        all6MonthsBills.forEach((b: any) => {
+        all6MonthsBills.forEach((b: { date: Date, total: string | number }) => {
             const label = format(b.date, "MMM", { locale: es }).toUpperCase();
             if (monthlySalesMap[label] !== undefined) {
                 monthlySalesMap[label] += Number(b.total);

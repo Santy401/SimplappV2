@@ -9,7 +9,7 @@ export interface SessionResponse {
   name: string;
   typeAccount: string;
   country: string;
-  companyId?: string;
+  companyId: string;
   companyName?: string | null;
   companyLogo?: string | null;
   userType?: string | null;
@@ -45,7 +45,7 @@ export interface SessionResponse {
  * GET /api/auth/session
  * Verifica el access token y retorna los datos del usuario
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('access-token')?.value;
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest) {
     }
 
     const currentCompanyEntry = user.lastCompanyId
-      ? user.companies.find((uc: { companyId: string; company: any; role: string }) => uc.companyId === user.lastCompanyId)
+      ? user.companies.find((uc: { companyId: string; company: unknown; role: string }) => uc.companyId === user.lastCompanyId)
       : user.companies[0];
     const currentCompany = currentCompanyEntry?.company;
 
@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
       phone: currentCompany?.phone,
       billingEmail: currentCompany?.email,
       website: currentCompany?.website,
-      companies: user.companies.map((uc: any) => ({
+      companies: user.companies.map((uc: { company: { id: string, companyName: string }, role: string }) => ({
         id: uc.company.id,
         companyName: uc.company.companyName,
         role: uc.role

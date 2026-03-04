@@ -5,7 +5,7 @@ import {
     Bell, X, Trash2, Archive, ArchiveRestore,
     CheckCheck, Info, AlertTriangle, XOctagon,
     CheckCircle2, Inbox, Sparkles, ArchiveIcon,
-    BellOff, MoreHorizontal
+    BellOff
 } from "lucide-react";
 import { formatDistanceToNow, format, isToday, isYesterday } from "date-fns";
 import { es } from "date-fns/locale";
@@ -278,9 +278,9 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                                                 >
                                                     {/* Type icon */}
                                                     <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${notif.type === "SUCCESS" ? "bg-emerald-50 dark:bg-emerald-900/20" :
-                                                            notif.type === "WARNING" || notif.type === "BILL_OVERDUE" ? "bg-amber-50 dark:bg-amber-900/20" :
-                                                                notif.type === "ERROR" || notif.type === "DIAN_REJECTED" ? "bg-rose-50 dark:bg-rose-900/20" :
-                                                                    "bg-blue-50 dark:bg-blue-900/20"
+                                                        notif.type === "WARNING" || notif.type === "BILL_OVERDUE" ? "bg-amber-50 dark:bg-amber-900/20" :
+                                                            notif.type === "ERROR" || notif.type === "DIAN_REJECTED" ? "bg-rose-50 dark:bg-rose-900/20" :
+                                                                "bg-blue-50 dark:bg-blue-900/20"
                                                         }`}>
                                                         {getIcon(notif.type)}
                                                     </div>

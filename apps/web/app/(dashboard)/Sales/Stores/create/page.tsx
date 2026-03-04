@@ -23,7 +23,7 @@ type StoresFormData = Omit<CreateStoreDto, 'id'> & { id?: string };
 export default function CreateStore({ onBack, initialData, mode = 'create' }: CreateStoreProps) {
     const [isLoading, setIsLoading] = useState(false);
     const { createStore, updateStore } = useStore();
-    const [errors, setErrors] = useState<Partial<Record<keyof Store, string>>>({});
+    const [errors, _setErrors] = useState<Partial<Record<keyof Store, string>>>({});
     const [formData, setFormData] = useState<StoresFormData>({
         name: '',
         address: null,
@@ -33,7 +33,7 @@ export default function CreateStore({ onBack, initialData, mode = 'create' }: Cr
 
     useEffect(() => {
         if (initialData) {
-            const { id, ...formDataFields } = initialData;
+            const { id: _id, ...formDataFields } = initialData;
             setFormData(prev => ({
                 ...prev,
                 ...formDataFields as StoresFormData,
@@ -84,7 +84,7 @@ export default function CreateStore({ onBack, initialData, mode = 'create' }: Cr
         }
     }
 
-    const [opcionesOpen, setOpcionesOpen] = useState(false);
+    const [_opcionesOpen, _setOpcionesOpen] = useState(false);
 
     return (
         <FormModalLayout

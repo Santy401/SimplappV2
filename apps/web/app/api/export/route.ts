@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
 
         // Consultar datos según la entidad y preparar para el CSV (aplanar objetos anidados)
         switch (entityParam) {
-            case 'clients':
+            case 'clients': {
                 const clients = await prisma.client.findMany({
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
@@ -73,8 +73,9 @@ export async function GET(request: NextRequest) {
                 }));
                 filename = `clientes_${new Date().toISOString().split('T')[0]}.csv`;
                 break;
+            }
 
-            case 'products':
+            case 'products': {
                 const products = await prisma.product.findMany({
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
@@ -95,8 +96,9 @@ export async function GET(request: NextRequest) {
                 }));
                 filename = `productos_${new Date().toISOString().split('T')[0]}.csv`;
                 break;
+            }
 
-            case 'sellers':
+            case 'sellers': {
                 const sellers = await prisma.seller.findMany({
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
@@ -110,8 +112,9 @@ export async function GET(request: NextRequest) {
                 }));
                 filename = `vendedores_${new Date().toISOString().split('T')[0]}.csv`;
                 break;
+            }
 
-            case 'stores':
+            case 'stores': {
                 const stores = await prisma.store.findMany({
                     where: { companyId, deletedAt: null },
                     orderBy: { createdAt: 'desc' },
@@ -125,6 +128,7 @@ export async function GET(request: NextRequest) {
                 }));
                 filename = `bodegas_${new Date().toISOString().split('T')[0]}.csv`;
                 break;
+            }
         }
 
         if (data.length === 0) {

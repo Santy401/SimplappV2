@@ -39,6 +39,12 @@ const SIDEBAR_ITEMS = [
     { id: "inventario-precios-edit", label: "Editar Lista De Precios", parentId: "inventario" },
 ];
 
+interface SidebarItem {
+    id: string;
+    label: string;
+    parentId?: string | null;
+}
+
 interface BreadcrumbProps {
     activeItem?: string;
 }
@@ -103,7 +109,7 @@ function detectActiveItem(pathname: string): string {
 }
 
 
-function getBreadcrumbChain(currentItem: any): any[] {
+function getBreadcrumbChain(currentItem: SidebarItem): SidebarItem[] {
     const chain = [currentItem];
     let parentId = currentItem.parentId;
 

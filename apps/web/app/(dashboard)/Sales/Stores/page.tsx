@@ -3,7 +3,7 @@
 import { Store as Storee } from "@domain/entities/Store.entity";
 import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
 import { useStoreTable } from "@interfaces/src/hooks/features/Stores/useStoreTable";
-import { Button, DataTable, Loading, DataTableSkeleton, Skeleton } from "@simplapp/ui";
+import { Button, DataTable, DataTableSkeleton, Skeleton } from "@simplapp/ui";
 import { Store } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -24,8 +24,8 @@ export default function Bodega({
   }
   const { columns, handleAddCustomer, handleDeleteManyCustomers } = useStoreTable({ onSelect, onSelectStores, onDeleteSuccess: refetchTable });
   const [tableVersion, setTableVersion] = useState(0);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [localLoading, setLocalLoading] = useState({
+  const [deletingId, _setDeletingId] = useState<string | null>(null);
+  const [localLoading, _setLocalLoading] = useState({
     export: false,
     delete: false,
     create: false,

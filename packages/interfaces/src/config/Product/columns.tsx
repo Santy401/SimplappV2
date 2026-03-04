@@ -1,11 +1,32 @@
 "use client";
 
-import { Product, ProductCategory, UnitOfMeasure } from "@domain/entities/Product.entity";
+import { Product } from "@domain/entities/Product.entity";
 import { TableActionsDropdown } from "@ui/index";
 import { Package, Tag, DollarSign, Percent, Check, X } from "lucide-react";
 import { Badge } from "@ui/index";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@ui/atoms/CardHover/hover-card";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "react-toastify";
+
+export interface TableProduct {
+    id?: string;
+    code?: string | null;
+    codeProduct?: string | null;
+    name: string;
+    reference?: string | null;
+    category?: any;
+    unit?: string;
+    unitOfMeasure?: any;
+    description?: string;
+    active: boolean;
+    cost?: string | number;
+    basePrice?: string | number;
+    finalPrice?: string | number;
+    taxRate?: string;
+    store?: { name: string } | null;
+    type?: string;
+    initialAmount?: number | string | null;
+    prices?: any[];
+}
 
 export const createColumns = (
     handleViewProduct: (product: any) => void,
@@ -17,8 +38,8 @@ export const createColumns = (
             key: "code",
             header: "Código",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => {
-                const code = product.code || 'N/A';
+            cell: (product: TableProduct) => {
+                const code = product.code || product.codeProduct || 'N/A';
                 const maxLength = 10;
                 const truncatedCode = code.length > maxLength ? `${code.substring(0, maxLength)}...` : code;
 
@@ -80,7 +101,7 @@ export const createColumns = (
             key: "name",
             header: "Nombre",
             className: "min-w-[250px] w-full",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col min-w-[200px]">
                     <span className="font-semibold text-gray-900 truncate" title={product.name}>{product.name}</span>
                     {product.reference && (
@@ -93,9 +114,9 @@ export const createColumns = (
             key: "category",
             header: "Categoría",
             className: "min-w-[140px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-2 text-gray-600">
-                    <span className="text-sm font-medium">{product.category?.name || 'Sin categoría'}</span>
+                    <span className="text-sm font-medium">{product.category?.name || (typeof product.category === 'string' ? product.category : 'Sin categoría')}</span>
                 </div>
             )
         },
@@ -103,7 +124,7 @@ export const createColumns = (
             key: "type",
             header: "Tipo",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <Badge
                     className="w-24 h-6 px-0 text-xs justify-center font-medium shadow-sm transition-colors"
                     variant={
@@ -112,18 +133,28 @@ export const createColumns = (
                                 "outline"
                     }
                 >
-                    {getTypeLabel(product.type)}
+                    {getTypeLabel(product.type || 'PRODUCT')}
                 </Badge>
+            )
+        },
+        {
+            key: "store",
+            header: "Bodega",
+            className: "min-w-[120px] whitespace-nowrap",
+            cell: (product: TableProduct) => (
+                <div className="flex items-center gap-2 text-gray-600">
+                    <span className="text-sm font-medium">{product.store?.name || 'Sin bodega'}</span>
+                </div>
             )
         },
         {
             key: "unit",
             header: "Unidad",
             className: "min-w-[130px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
                     <Tag className="w-3.5 h-3.5 shrink-0 text-gray-400" />
-                    <span className="text-sm font-medium">{getUnitLabel(product.unit)}</span>
+                    <span className="text-sm font-medium">{getUnitLabel(product.unit || product.unitOfMeasure || 'UNIDAD')}</span>
                 </div>
             )
         },
@@ -131,7 +162,7 @@ export const createColumns = (
             key: "price",
             header: "Precio",
             className: "min-w-[180px] whitespace-nowrap",
-            cell: (product: any) => {
+            cell: (product: TableProduct) => {
                 const price = product.prices?.[0]?.value || product.basePrice || product.finalPrice || '0';
                 const numericPrice = typeof price === 'string' ? parseFloat(price) : price;
 
@@ -147,7 +178,7 @@ export const createColumns = (
             key: "tax",
             header: "Impuestos",
             className: "min-w-[110px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center gap-1.5 text-gray-600 bg-gray-50 px-2 py-1 rounded-md w-fit border border-gray-100">
                     <Percent className="w-3 h-3 shrink-0 text-gray-400" />
                     <span className="text-sm font-medium">{product.taxRate}%</span>
@@ -158,7 +189,7 @@ export const createColumns = (
             key: "status",
             header: "Estado",
             className: "min-w-[120px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex items-center">
                     {product.active ? (
                         <Badge
@@ -184,7 +215,7 @@ export const createColumns = (
             key: "actions",
             header: "Acciones",
             className: "min-w-[100px] whitespace-nowrap",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <TableActionsDropdown
                     onView={() => handleViewProduct(product)}
                     onEdit={() => handleEditProduct(product)}
@@ -263,7 +294,7 @@ export const ProductTable = (handleEditCustomer: (product: Product) => void, han
                         <tr key={product.id} className="hover:bg-gray-50">
                             {columns.map((column) => (
                                 <td key={column.key} className="px-6 py-4 whitespace-nowrap">
-                                    {column.cell(product)}
+                                    {column.cell(product as any)}
                                 </td>
                             ))}
                         </tr>
@@ -283,7 +314,7 @@ export const createCompactProductColumns = (
         {
             key: "name",
             header: "Producto",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2">
                         <Package className="w-4 h-4 text-gray-500" />
@@ -291,7 +322,7 @@ export const createCompactProductColumns = (
                     </div>
                     <div className="flex gap-4 mt-1 text-sm text-gray-500">
                         <span>Código: {product.codeProduct || 'N/A'}</span>
-                        <span>Categoría: {getCategoryLabel(product.category || 'N/A')}</span>
+                        <span>Categoría: {getCategoryLabel(typeof product.category === 'string' ? product.category : (product.category?.name || 'N/A'))}</span>
                     </div>
                 </div>
             )
@@ -299,15 +330,15 @@ export const createCompactProductColumns = (
         {
             key: "details",
             header: "Detalles",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2">
                         <Tag className="w-3 h-3" />
-                        <span>{getUnitLabel(product.unitOfMeasure)}</span>
+                        <span>{getUnitLabel(String(product.unitOfMeasure || 'UNIDAD'))}</span>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-sm">
-                            Inv: {product.initialAmount !== null ? product.initialAmount : 'N/A'}
+                            Inv: {product.initialAmount !== undefined && product.initialAmount !== null ? product.initialAmount : 'N/A'}
                         </span>
                     </div>
                 </div>
@@ -316,11 +347,11 @@ export const createCompactProductColumns = (
         {
             key: "financial",
             header: "Financiero",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <div className="flex flex-col">
                     <div className="flex items-center gap-2 font-semibold text-green-700">
                         <DollarSign className="w-4 h-4" />
-                        {product.basePrice.toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {Number(product.basePrice || 0).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </div>
                     <div className="text-sm text-gray-500">
                         Impuesto: {product.taxRate}
@@ -331,7 +362,7 @@ export const createCompactProductColumns = (
         {
             key: "actions",
             header: "Acciones",
-            cell: (product: any) => (
+            cell: (product: TableProduct) => (
                 <TableActionsDropdown
                     onView={() => handleViewProduct(product)}
                     onEdit={() => handleEditProduct(product)}

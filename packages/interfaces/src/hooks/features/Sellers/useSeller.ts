@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 
 export function useSeller() {
     const [sellers, setSellers] = useState<Seller[]>([]);
-    const [error, setError] = useState<String | null>(null)
+    const [error, setError] = useState<string | null>(null)
     const [LoadingStates, setIsLoadingStates] = useState({
         fetch: true,
         create: false,

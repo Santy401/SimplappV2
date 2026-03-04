@@ -36,6 +36,7 @@ export async function GET(
                         listPrice: true,
                     },
                 },
+                store: true,
             },
         });
 
@@ -79,19 +80,21 @@ export async function PUT(
 
         const {
             id: _,
-            companyId,
-            createdAt,
-            updatedAt,
+            companyId: _companyId,
+            createdAt: _createdAt,
+            updatedAt: _updatedAt,
             category,
-            images,
-            prices,
+            images: _images,
+            prices: _prices,
             codeProduct,
-            codeBarcode,
+            codeBarcode: _codeBarcode,
             costForUnit,
             valuePrice,
             unitOfMeasure,
             taxRate,
-            basePrice,
+            basePrice: _basePrice,
+            storeId,
+            initialAmount: _initialAmount,
             ...data
         } = rawData;
 
@@ -125,6 +128,7 @@ export async function PUT(
                 ...data,
                 category: categoryConnect,
                 code: codeProduct || undefined,
+                store: storeId ? { connect: { id: storeId } } : undefined,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 taxRate: taxRate != null && taxRate !== '' ? String(taxRate) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
@@ -138,6 +142,7 @@ export async function PUT(
                         listPrice: true,
                     },
                 },
+                store: true,
             },
         });
 

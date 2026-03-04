@@ -8,7 +8,7 @@ import { TypePrice } from "@domain/entities/ListPrice.entity";
  * GET /api/list-prices
  * Obtiene el listado de listas de precios de la empresa
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const cookieListPrice = await cookies();
     const accessToken = cookieListPrice.get("access-token")?.value;

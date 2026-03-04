@@ -1,6 +1,6 @@
 "use client";
 
-import { ListPrice, CreateListPriceDto, UpdateListPriceDto, TypePrice } from "@domain/entities/ListPrice.entity";
+import { ListPrice, CreateListPriceDto, TypePrice } from "@domain/entities/ListPrice.entity";
 import { useEffect, useState } from "react";
 import { useListPrice } from "@interfaces/src/hooks/features/ListPrice/useListPrice";
 import {
@@ -38,7 +38,7 @@ export default function CreateListPrice({ onBack, initialData, mode = 'create' }
 
     useEffect(() => {
         if (initialData) {
-            const { id, ...formDataFields } = initialData;
+            const { id: _id, ...formDataFields } = initialData;
             setFormData(prev => ({
                 ...prev,
                 ...formDataFields as ListPriceFormData

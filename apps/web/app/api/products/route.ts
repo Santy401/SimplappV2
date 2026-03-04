@@ -38,6 +38,7 @@ export async function GET(request: NextRequest) {
             category: true,
             images: true,
             prices: { include: { listPrice: true } },
+            store: true,
         };
 
         const [products, total] = await prisma.$transaction([
@@ -71,24 +72,25 @@ export async function POST(request: NextRequest) {
         const rawData = await request.json();
 
         const {
-            id,
-            createdAt,
-            updatedAt,
+            id: _id,
+            createdAt: _createdAt,
+            updatedAt: _updatedAt,
             category,
-            images,
-            prices,
-            initialStock,
+            images: _images,
+            prices: _prices,
+            initialStock: _initialStock,
             unitOfMeasure,
             codeProduct,
-            codeBarcode,
+            codeBarcode: _codeBarcode,
             costForUnit,
             valuePrice,
             initialAmount,
-            store,
-            priceList,
-            bills,
-            goodExcluded,
-            taxExempt,
+            store: _store,
+            storeId,
+            priceList: _priceList,
+            bills: _bills,
+            goodExcluded: _goodExcluded,
+            taxExempt: _taxExempt,
             observation,
             basePrice,
             type,
@@ -98,7 +100,6 @@ export async function POST(request: NextRequest) {
         const categoryId = category && typeof category === 'object' && 'id' in category
             ? (category as any).id
             : category;
-        const parsedCategoryId = categoryId;
 
         if (!categoryId || typeof categoryId !== 'string') {
             return NextResponse.json(
@@ -116,6 +117,7 @@ export async function POST(request: NextRequest) {
                 unit: unitOfMeasure || UnitOfMeansureList.UNIDAD,
                 categoryProductId: categoryId,
                 code: codeProduct,
+                storeId: storeId,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 basePrice: basePrice ? String(basePrice) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
@@ -130,6 +132,23 @@ export async function POST(request: NextRequest) {
                 },
             },
         });
+
+        // Crear movimiento de inventario inicial si se especifica
+        if (storeId && initialAmount && Number(initialAmount) > 0) {
+            try {
+                await prisma.inventoryMovement.create({
+                    data: {
+                        productId: product.id,
+                        storeId: storeId,
+                        quantity: Number(initialAmount),
+                        type: 'IN',
+                    }
+                });
+            } catch (inventoryError) {
+                console.error('Error creating initial inventory movement:', inventoryError);
+                // No fallamos el proceso principal si solo falla el inventario inicial
+            }
+        }
 
         return NextResponse.json(product, { status: 201 });
     } catch (error) {

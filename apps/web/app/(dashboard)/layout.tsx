@@ -8,8 +8,6 @@ import Breadcrumb from "./Breadcrumb";
 import { Navbar, GlobalSearch } from "@simplapp/ui";
 import { SettingsModal } from "./SettingsModal/SettingsModal";
 
-import dynamic from 'next/dynamic';
-
 import { ProtectedRoute } from "./ProtectedRoute";
 import { NavigationProvider, useNavigation } from "@/app/context/NavigationContext";
 import { AppStateProvider, useAppState } from "@/app/context/AppStateContext";
@@ -23,17 +21,17 @@ function AdminContent({ children }: { children: React.ReactNode }) {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false); // Mobile sidebar state
   const {
-    selectedClient,
-    selectedSeller,
-    selectedStore,
-    selectedProduct,
-    selectedListPrice,
-    selectedBill,
+    selectedClient: _selectedClient,
+    selectedSeller: _selectedSeller,
+    selectedStore: _selectedStore,
+    selectedProduct: _selectedProduct,
+    selectedListPrice: _selectedListPrice,
+    selectedBill: _selectedBill,
     setSelectedClient,
-    setSelectedSeller,
-    setSelectedStore,
+    setSelectedSeller: _setSelectedSeller,
+    setSelectedStore: _setSelectedStore,
     setSelectedProduct,
-    setSelectedListPrice,
+    setSelectedListPrice: _setSelectedListPrice,
     setSelectedBill,
   } = useAppState();
 
@@ -103,13 +101,13 @@ function AdminContent({ children }: { children: React.ReactNode }) {
         onSelect={(id, item) => {
           if (item?.backendType && item.raw) {
             if (item.backendType === 'client') {
-              setSelectedClient(item.raw);
+              setSelectedClient(item.raw as any);
               navigateTo('ventas-clientes-view');
             } else if (item.backendType === 'product') {
-              setSelectedProduct(item.raw);
+              setSelectedProduct(item.raw as any);
               navigateTo('productos-producto-view');
             } else if (item.backendType === 'bill') {
-              setSelectedBill(item.raw);
+              setSelectedBill(item.raw as any);
               navigateTo('ventas-facturacion-view');
             } else {
               navigateTo(id);

@@ -12,7 +12,6 @@ import {
     User,
     Store,
     Tag,
-    ArrowRight,
     Loader2,
     Receipt
 } from "lucide-react"
@@ -26,7 +25,7 @@ interface SearchResult {
     category: string
     backendType?: string
     backendId?: string
-    raw?: any
+    raw?: unknown
 }
 
 // Catálogo de vistas navegables locales que se pueden buscar
@@ -89,7 +88,7 @@ export function NavbarDropdownSearch({ onSelect, onOpenModal }: NavbarDropdownSe
                 const data = await res.json()
 
                 if (current) {
-                    const mappedResults: SearchResult[] = data.results.map((r: any) => {
+                    const mappedResults: SearchResult[] = data.results.map((r: { id: string, type: string, label: string, description: string, raw?: unknown }) => {
                         let icon = <FileText size={18} />
                         let category = "Datos"
 

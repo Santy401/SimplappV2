@@ -1,0 +1,46 @@
+name: CI - Simplapp V2
+
+on:
+  push:
+    branches: [main, master, "feature/**", "fix/**", "feat/**", "refactor/**"]
+  pull_request:
+    branches: [main, master, "feature/**", "fix/**", "feat/**", "refactor/**"]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+    
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      NEXT_PUBLIC_ROOT_DOMAIN: ${{ secrets.NEXT_PUBLIC_ROOT_DOMAIN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Prisma Generate
+        working-directory: ./apps/web
+        run: npx prisma generate
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build
+        run: pnpm build
+
+      # - name: Test
+      #   run: pnpm test

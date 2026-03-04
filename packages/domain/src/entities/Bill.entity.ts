@@ -96,6 +96,7 @@ export interface BillItem {
 
     productName?: string | null;
     productCode?: string | null;
+    storeId?: string | null;
 }
 
 export interface Payment {
@@ -162,6 +163,7 @@ export interface CreateBillItemInput {
     taxRate?: string;
     taxAmount?: string;
     total?: string;
+    storeId?: string;
 }
 
 export interface CreatePaymentInput {

@@ -4,7 +4,7 @@ import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.en
 
 export function useStore() {
     const [stores, setStores] = useState<Store[]>([]);
-    const [error, setError] = useState<String | null>(null)
+    const [error, setError] = useState<string | null>(null)
     const [loadingStates, setLoadingStates] = useState({
         fetch: false,
         delete: false,
