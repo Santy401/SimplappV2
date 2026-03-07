@@ -17,7 +17,6 @@ generator erd {
   provider = "prisma-erd-generator"
   output   = "erd.svg"
   theme    = "dark"
-  mmdcPath = "C:/Users/usuario/AppData/Roaming/npm"
 }
 
 /**
