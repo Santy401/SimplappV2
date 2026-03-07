@@ -3,13 +3,14 @@
 import React from 'react';
 import { useSettings } from '@/app/context/SettingsContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Maximize2, Minimize2, User, Building2, Receipt, Activity, Shield, Bell, CreditCard } from 'lucide-react';
+import { X, Maximize2, Minimize2, User, Building2, Receipt, Activity, Shield, Bell, CreditCard, Landmark } from 'lucide-react';
 import { cn } from '@simplapp/ui';
 import { ActivityLogViewer } from './ActivityLogViewer';
 import { ProfileSettings } from './ProfileSettings';
 import { CompanySettings } from './CompanySettings';
 import { BillingSettings } from './BillingSettings';
 import { SubscriptionSettings } from './SubscriptionSettings';
+import { BankAccountsSettings } from './BankAccountsSettings';
 
 export function SettingsModal() {
     const { isOpen, isMaximized, currentView, setCurrentView, closeSettings, toggleMaximized } = useSettings();
@@ -17,6 +18,7 @@ export function SettingsModal() {
     const sidebarItems = [
         { id: 'perfil', label: 'Perfil', icon: User },
         { id: 'empresa', label: 'Empresa', icon: Building2 },
+        { id: 'bancos', label: 'Cuentas Bancarias', icon: Landmark },
         { id: 'suscripcion', label: 'Planes y Suscripción', icon: CreditCard },
         { id: 'facturacion', label: 'Facturación y DIAN', icon: Receipt },
         { id: 'actividad', label: 'Registro de Actividad', icon: Activity },
@@ -27,7 +29,7 @@ export function SettingsModal() {
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center">
+                <div className="fixed inset-0 z-100 flex items-center justify-center">
                     {/* Backdrop */}
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -107,6 +109,7 @@ export function SettingsModal() {
                             <div className="flex-1 overflow-y-auto p-6 bg-slate-50/30 dark:bg-transparent">
                                 {currentView === 'perfil' && <ProfileSettings />}
                                 {currentView === 'empresa' && <CompanySettings />}
+                                {currentView === 'bancos' && <BankAccountsSettings />}
                                 {currentView === 'suscripcion' && <SubscriptionSettings />}
                                 {currentView === 'facturacion' && <BillingSettings />}
                                 {currentView === 'actividad' && <ActivityLogViewer />}

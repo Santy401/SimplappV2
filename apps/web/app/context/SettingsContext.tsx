@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type SettingsView = 'perfil' | 'empresa' | 'suscripcion' | 'facturacion' | 'actividad' | 'seguridad' | 'notificaciones';
+type SettingsView = 'perfil' | 'empresa' | 'bancos' | 'suscripcion' | 'facturacion' | 'actividad' | 'seguridad' | 'notificaciones';
 
 interface SettingsContextProps {
     isOpen: boolean;

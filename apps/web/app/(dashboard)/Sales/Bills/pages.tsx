@@ -5,7 +5,7 @@ import { Button } from "@simplapp/ui";
 import { UserCheck, UserPlus } from "lucide-react";
 import { DataTableSkeleton, Skeleton, PaymentModal } from "@simplapp/ui";
 import { useState, useEffect } from "react";
-import { Bill, BillDetail, BillStatus } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
 import { BillPreview } from "@ui/molecules/BillPreview";
@@ -20,7 +20,7 @@ export default function BillsPage({
   onSelect = () => { },
   onSelectBill = () => { },
 }: BillsPageProps) {
-  const { bills, isLoading, error, refetch, updateBill } = useBill();
+  const { bills, isLoading, error, refetch } = useBill();
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
@@ -64,31 +64,22 @@ export default function BillsPage({
 
   const columns = originalColumns;
 
-  const handlePaymentSubmit = async (paymentData: { value: string | number }) => {
+  const handlePaymentSubmit = async (paymentData: { value: string | number; date: string; bankAccount: string; paymentMethod: string; billId: string }) => {
     if (!selectedBillForPayment) return;
 
-    // Convert strings to proper types
-    const paymentValue = Number(paymentData.value) || 0;
-    const currentBalance = Number(selectedBillForPayment.balance) || 0;
-    const newBalance = currentBalance - paymentValue;
-
-    if (newBalance < 0) {
-      toast.error('El monto del pago no puede exceder el balance actual.');
-      return;
-    }
-
     try {
-      const updated = await updateBill({
-        ...selectedBillForPayment,
-        balance: newBalance.toString(),
-        status: newBalance <= 0 ? BillStatus.PAID : BillStatus.PARTIALLY_PAID,
-        updatedAt: new Date(),
+      const response = await fetch(`/api/bills/${selectedBillForPayment.id}/payments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(paymentData),
       });
-      if (updated) {
+
+      if (response.ok) {
         toast.success("Pago registrado correctamente");
         refetchTable();
       } else {
-        toast.error("Error al registrar el pago");
+        const errorData = await response.json();
+        toast.error(errorData.error || "Error al registrar el pago");
       }
     } catch (_err) {
       toast.error("Error al registrar el pago");

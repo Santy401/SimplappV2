@@ -3,6 +3,15 @@ import { FormBillItem } from "./FormBill";
 import { BillStatus, PaymentMethod, DianStatus } from '@domain/entities/Bill.entity';
 import { XCircle, Terminal, Info, Printer, Download, Share2, Edit2, Plus, ChevronDown } from 'lucide-react';
 
+export interface PaymentPreview {
+    id: string;
+    date: string | Date;
+    receiptNumber?: string | null;
+    method: string;
+    account?: { name: string } | null;
+    amount: number | string;
+}
+
 export interface BillPreviewProps {
     formData: {
         number?: number;
@@ -26,6 +35,7 @@ export interface BillPreviewProps {
     discountTotal: number;
     taxTotal: number;
     total: number;
+    payments?: PaymentPreview[];
     onClose: () => void;
 }
 
@@ -36,6 +46,7 @@ export function BillPreview({
     discountTotal,
     taxTotal,
     total,
+    payments,
     onClose,
 }: BillPreviewProps) {
     const [showDianModal, setShowDianModal] = useState(false);
@@ -286,6 +297,47 @@ export function BillPreview({
 
                 </div>
             </div>
+
+            {/* Pagos Recibidos Section */}
+            {payments && payments.length > 0 && (
+                <div className="w-full max-w-4xl bg-white shadow-2xl rounded-sm p-8 mt-8 border border-slate-100 print:hidden">
+                    <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-4 mb-6">Historial de Pagos</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left bg-white">
+                            <thead className="bg-slate-50">
+                                <tr>
+                                    <th className="py-3 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide">Fecha</th>
+                                    <th className="py-3 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide">Recibo / Ref</th>
+                                    <th className="py-3 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide">Método</th>
+                                    <th className="py-3 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide">Cuenta / Caja</th>
+                                    <th className="py-3 px-4 text-xs font-bold text-slate-600 uppercase tracking-wide text-right">Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {payments.map((payment: PaymentPreview) => (
+                                    <tr key={payment.id} className="hover:bg-slate-50/50 transition-colors">
+                                        <td className="py-3 px-4 text-slate-700 text-sm">
+                                            {new Date(payment.date).toLocaleDateString('es-CO')}
+                                        </td>
+                                        <td className="py-3 px-4 text-emerald-600 font-medium text-sm">
+                                            {payment.receiptNumber || payment.id.substring(0, 8)}
+                                        </td>
+                                        <td className="py-3 px-4 text-slate-700 text-sm">
+                                            {payment.method === 'CASH' ? 'Efectivo' : payment.method === 'TRANSFER' ? 'Transferencia' : payment.method === 'CREDIT_CARD' ? 'Tarjeta' : payment.method}
+                                        </td>
+                                        <td className="py-3 px-4 text-slate-500 text-sm">
+                                            {payment.account?.name || 'No asociada'}
+                                        </td>
+                                        <td className="py-3 px-4 text-right font-bold text-slate-800 text-sm">
+                                            ${Number(payment.amount).toLocaleString("es-CO")}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             {/* DIAN Modal */}
             {showDianModal && formData.dianResponse && (

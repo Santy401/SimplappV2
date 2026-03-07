@@ -219,7 +219,7 @@ export default function BillsCreatePage({
     };
 
     if (mode === 'view') {
-        const billToShow = initialData;
+        const billToShow = _fullBill || initialData;
 
         if (!billToShow) {
             return (
@@ -256,6 +256,7 @@ export default function BillsCreatePage({
             discountTotal: parseFloat(billToShow.discountTotal || '0'),
             taxTotal: parseFloat(billToShow.taxTotal || '0'),
             total: parseFloat(billToShow.total || '0'),
+            payments: (billToShow as any).payments || [],
         };
 
         return (

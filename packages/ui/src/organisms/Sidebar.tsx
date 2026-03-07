@@ -48,6 +48,7 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
             icon: <TrendingUp size={20} />,
             submenu: [
                 { id: "ventas-facturacion", label: "Facturacion", icon: null },
+                { id: "ventas-pagos", label: "Pagos Recibidos", icon: null },
                 { id: "ventas-clientes", label: "Clientes", icon: null },
                 { id: "ventas-productos", label: "Productos De Venta", icon: null },
                 { id: "ventas-vendedor", label: "Vendedores", icon: null },

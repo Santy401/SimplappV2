@@ -13,6 +13,13 @@ datasource db {
   provider = "postgresql"
 }
 
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "erd.svg"
+  theme    = "dark"
+  mmdcPath = "C:/Users/usuario/AppData/Roaming/npm"
+}
+
 /**
  * =========================================
  * 👤 USER & AUTH MODELS
@@ -154,11 +161,12 @@ model Company {
   invoiceInitialNumber Int?    @default(1)
   defaultTax           String? @default("19")
 
-  stores   Store[]
-  clients  Client[]
-  sellers  Seller[]
-  products Product[]
-  bills    Bill[]
+  stores       Store[]
+  clients      Client[]
+  sellers      Seller[]
+  products     Product[]
+  bills        Bill[]
+  bankAccounts BankAccount[]
 
   categories CategoryProduct[]
 
@@ -453,9 +461,38 @@ model Payment {
   billId String
   bill   Bill   @relation(fields: [billId], references: [id])
 
+  accountId String?
+  account   BankAccount? @relation(fields: [accountId], references: [id])
+
   amount Decimal
   method PaymentMethod
   date   DateTime      @default(now())
+
+  receiptNumber String?
+  notes         String?
+}
+
+model BankAccount {
+  id        String  @id @default(uuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        BankAccountType @default(CASH)
+  currency    String          @default("COP")
+  description String?
+
+  balance Decimal @default(0)
+  active  Boolean @default(true)
+
+  payments Payment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
 model BillItem {
@@ -670,4 +707,11 @@ enum PaymentMethod {
   DEPOSIT
   OTHER
   CREDIT
+}
+
+enum BankAccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+  OTHER
 }

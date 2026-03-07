@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowUpRight, X } from "lucide-react";
 import { Button } from "../atoms/Button/Button";
 import { Input } from "../atoms/Input/Input";
@@ -33,11 +33,31 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit }: PaymentModalPr
         paymentMethod: "",
     });
 
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [isLoadingAccounts, setIsLoadingAccounts] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsLoadingAccounts(true);
+            fetch('/api/bank-accounts')
+                .then(res => res.json())
+                .then(({ data }) => {
+                    setAccounts(data || []);
+                    if (data && data.length > 0 && !formData.bankAccount) {
+                        setFormData(prev => ({ ...prev, bankAccount: data[0].id }));
+                    }
+                })
+                .catch(err => console.error("Error fetching bank accounts:", err))
+                .finally(() => setIsLoadingAccounts(false));
+        }
+    }, [isOpen]);
+
     if (!isOpen || !bill) return null;
 
     const handleSubmit = () => {
         onSubmit({
             ...formData,
+            bankAccount: formData.bankAccount === "none" ? "" : formData.bankAccount,
             billId: bill.id,
         });
         onClose();
@@ -79,11 +99,13 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit }: PaymentModalPr
                             <Label>Cuenta bancaria</Label>
                             <Select value={formData.bankAccount} onValueChange={(v) => setFormData({ ...formData, bankAccount: v })}>
                                 <SelectTrigger className="h-10">
-                                    <SelectValue placeholder="Seleccionar..." />
+                                    <SelectValue placeholder={isLoadingAccounts ? "Cargando..." : "Seleccionar..."} />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="caja_general">Caja general</SelectItem>
-                                    <SelectItem value="banco">Banco</SelectItem>
+                                    <SelectItem value="none">Sin cuenta (No asociado)</SelectItem>
+                                    {accounts.map(acc => (
+                                        <SelectItem key={acc.id} value={acc.id}>{acc.name}</SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
@@ -104,7 +126,7 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit }: PaymentModalPr
                         </div>
                         <div className="space-y-2">
                             <Label>Método de pago</Label>
-                            <Select value={formData.paymentMethod} onValueChange={(v) => setFormData({ ...formData, paymentMethod: v })}>
+                            <Select value={formData.paymentMethod || "efectivo"} onValueChange={(v) => setFormData({ ...formData, paymentMethod: v })}>
                                 <SelectTrigger className="h-10">
                                     <SelectValue placeholder="Seleccionar..." />
                                 </SelectTrigger>
