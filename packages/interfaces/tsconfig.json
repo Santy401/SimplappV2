@@ -35,7 +35,7 @@
         "./src/hooks/*"
       ],
       "@prisma/client": [
-        "../../apps/web/node_modules/@prisma/client"
+        "../../apps/web/prisma/src/generated/prisma"
       ]
     }
   },
