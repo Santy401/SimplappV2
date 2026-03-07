@@ -15,6 +15,7 @@
       "@hooks/*": ["../../packages/interfaces/src/hooks/*"],
       "@ui/*": ["../../packages/ui/src/*"],
       "@web/*": ["./app/*"],
+      "@prisma/client": ["./prisma/src/generated/prisma"]
     }
   },
   "include": [
