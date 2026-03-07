@@ -16,7 +16,7 @@ const prismaClientSingleton = () => {
   return client.$extends({
     query: {
       $allModels: {
-        async $allOperations({ model, operation, args, query }) {
+        async $allOperations({ model, operation, args, query }: any) {
           const softDeleteModels = ['Bill', 'Client', 'Product', 'Company']
           
           if (softDeleteModels.includes(model)) {
