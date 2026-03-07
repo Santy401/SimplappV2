@@ -31,8 +31,10 @@
   },
   "include": [
     "packages/**/*",
-    "apps/**/*"
-, "prisma.config.ts"  ],
+    "apps/**/*",
+    "tools/**/*",
+    "prisma.config.ts"
+  ],
   "references": [
     { "path": "./packages/domain" },
     { "path": "./packages/interfaces" },
