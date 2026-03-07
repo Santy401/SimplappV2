@@ -2,7 +2,7 @@
 
 import { TableActionsDropdown } from "@ui/index";
 import { Bill, BillStatus } from "@domain/entities";
-import { Eye, Edit, Trash2, Coins } from "lucide-react";
+import { Coins } from "lucide-react";
 
 export const createColumns = (handleEditCustomer: (bill: Bill) => void,
     handleDeleteCustomer: (bill: Bill) => Promise<void>,
@@ -100,7 +100,7 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
             header: "Acciones",
             cell: (bill: Bill) => (
                 <div className="flex items-center justify-end gap-2">
-                    {(bill.status === BillStatus.TO_PAY || bill.status === BillStatus.PARTIALLY_PAID) && (
+                    {(bill.status === BillStatus.ISSUED || bill.status === BillStatus.TO_PAY || bill.status === BillStatus.PARTIALLY_PAID) && (
                         <button
                             onClick={(e) => { e.stopPropagation(); handleMarkAsPaid(bill); }}
                             className="text-gray-500 hover:text-green-600 transition-colors"
