@@ -32,19 +32,18 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Prisma v7 generates typed client code at build time.
-      # We must run generate for EVERY workspace that has @prisma/client
-      # so each workspace's resolved instance gets the generated types.
-      # apps/web has the schema, interfaces/lib/prisma.ts imports the client.
-      - name: Prisma Generate (apps/web)
+      # Explicitly approve prisma build scripts so the .prisma/client/
+      # directory with all generated types gets created during install.
+      # Without this step, pnpm blocks prisma's postinstall and
+      # types like PrismaClient, BankAccountType, etc never exist in CI.
+      - name: Approve Prisma build scripts
+        run: pnpm approve-builds -f
+
+      # Regenerate Prisma Client after approving builds to ensure
+      # all workspace instances have the generated types.
+      - name: Prisma Generate
         working-directory: ./apps/web
         run: pnpm exec prisma generate
 
       - name: Build
         run: pnpm build
-
-      # - name: Lint
-      #   run: pnpm lint
-
-      # - name: Test
-      #   run: pnpm test
