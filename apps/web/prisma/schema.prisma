@@ -13,12 +13,6 @@ datasource db {
   provider = "postgresql"
 }
 
-generator erd {
-  provider = "prisma-erd-generator"
-  output   = "erd.svg"
-  theme    = "dark"
-}
-
 /**
  * =========================================
  * 👤 USER & AUTH MODELS
