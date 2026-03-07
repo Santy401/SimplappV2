@@ -4,6 +4,7 @@
   "main": "src/hooks/index.ts",
   "types": "src/hooks/index.ts",
   "scripts": {
+    "prebuild": "prisma generate --schema=../../apps/web/prisma/schema.prisma",
     "build": "tsc"
   },
   "devDependencies": {
