@@ -32,15 +32,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Explicitly approve prisma build scripts so the .prisma/client/
-      # directory with all generated types gets created during install.
-      # Without this step, pnpm blocks prisma's postinstall and
-      # types like PrismaClient, BankAccountType, etc never exist in CI.
-      - name: Approve Prisma build scripts
-        run: pnpm approve-builds -f
-
-      # Regenerate Prisma Client after approving builds to ensure
-      # all workspace instances have the generated types.
       - name: Prisma Generate
         working-directory: ./apps/web
         run: pnpm exec prisma generate
