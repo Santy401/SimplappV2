@@ -238,8 +238,9 @@ export default function BillsPage({
             </Button>
             <Button
               onClick={handleAddCustomer}
+              variant="WithIcon"
               disabled={localLoading.create}
-              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
+              // className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               {localLoading.create ? "Creando..." : "Nueva Factura De Venta"}
