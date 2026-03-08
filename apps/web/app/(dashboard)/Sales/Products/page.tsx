@@ -75,14 +75,15 @@ export default function Productos({
                         </div>
                         <div className="flex gap-3">
                             <Button
-                                variant="outline"
+                                variant="default"
                                 className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
                                 disabled
                             >
                                 <Skeleton className="w-full h-full rounded" />
                             </Button>
                             <Button
-                                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[150px] h-[38px] p-0 border-0"
+                                variant="defaultLoading"
+                                // className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[150px] h-[38px] p-0 border-0"
                                 disabled
                             >
                                 <Skeleton className="w-full h-full rounded-lg" />
@@ -154,7 +155,7 @@ export default function Productos({
                         <Button
                             onClick={handleAddCustomer}
                             disabled={localLoading.create}
-                            className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
+                            variant="default"
                         >
                             <Plus className="w-4 h-4" />
                             {localLoading.create ? 'Creando...' : 'Nuevo Producto'}

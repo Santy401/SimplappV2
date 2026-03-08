@@ -33,6 +33,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-brand cursor-pointer text-brand-foreground hover:bg-brand-hover",
+        defaultLoading: "bg-brand py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0",
         // WithIcon: igual al default — semánticamente indica que el botón lleva un ícono
         WithIcon: "bg-brand cursor-pointer text-brand-foreground hover:bg-brand-hover",
         destructive: "bg-destructive text-white hover:bg-destructive/90",

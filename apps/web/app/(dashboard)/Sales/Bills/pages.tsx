@@ -163,14 +163,15 @@ export default function BillsPage({
             </div>
             <div className="flex gap-3">
               <Button
-                variant="outline"
+                variant="default"
                 className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
                 disabled
               >
                 <Skeleton className="w-full h-full rounded" />
               </Button>
               <Button
-                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
+                variant="defaultLoading"
+                // className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
                 disabled
               >
                 <Skeleton className="w-full h-full rounded-lg" />
