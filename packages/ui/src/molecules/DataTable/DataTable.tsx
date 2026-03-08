@@ -13,7 +13,7 @@ import {
 import { Button } from '../../atoms/Button/Button';;
 import { Checkbox } from "../../atoms/Checkbox/Checkbox";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "../molecules/Tabs";
-import { TableColumn, TableProps } from "../types/table.entity";
+import { TableColumn, TableProps } from "../../types/table.entity";
 
 export function DataTable<T extends { id: string | string }>({
   data,
@@ -75,8 +75,8 @@ export function DataTable<T extends { id: string | string }>({
 
     const searchLower = searchQuery.toLowerCase();
 
-    return processedData.filter((item) =>
-      columns.some((column) => {
+    return processedData.filter((item: T) =>
+      columns.some((column: TableColumn<T>) => {
         const value = item[column.key as keyof T];
 
         if (value === null || value === undefined) return false;
@@ -113,12 +113,12 @@ export function DataTable<T extends { id: string | string }>({
 
   const allCurrentPageSelected = useMemo(() => {
     if (paginatedData.length === 0) return false;
-    return paginatedData.every((item) => selectedIds.has(item.id));
+    return paginatedData.every((item: T) => selectedIds.has(item.id));
   }, [paginatedData, selectedIds]);
 
   const someCurrentPageSelected = useMemo(() => {
     if (paginatedData.length === 0) return false;
-    const someSelected = paginatedData.some((item) => selectedIds.has(item.id));
+    const someSelected = paginatedData.some((item: T) => selectedIds.has(item.id));
     return someSelected && !allCurrentPageSelected;
   }, [paginatedData, selectedIds, allCurrentPageSelected]);
 
@@ -127,10 +127,10 @@ export function DataTable<T extends { id: string | string }>({
       const next = new Set(prev);
       if (allCurrentPageSelected) {
         // Deselect all on current page
-        paginatedData.forEach((item) => next.delete(item.id));
+        paginatedData.forEach((item: T) => next.delete(item.id));
       } else {
         // Select all on current page
-        paginatedData.forEach((item) => next.add(item.id));
+        paginatedData.forEach((item: T) => next.add(item.id));
       }
       return next;
     });
@@ -196,7 +196,7 @@ export function DataTable<T extends { id: string | string }>({
   const handleBulkDelete = useCallback(async () => {
     if (!onDeleteMany || selectedIds.size === 0) return;
 
-    const selectedItems = data.filter((item) => selectedIds.has(item.id));
+    const selectedItems = data.filter((item: T) => selectedIds.has(item.id));
     if (selectedItems.length === 0) return;
 
     if (!confirm(`¿Estás seguro de eliminar ${selectedItems.length} elemento(s)?`)) return;
@@ -337,7 +337,7 @@ export function DataTable<T extends { id: string | string }>({
                     onCheckedChange={toggleSelectAll}
                   />
                 </th>
-                {columns.map((column) => (
+                {columns.map((column: TableColumn<T>) => (
                   <th
                     key={String(column.key)}
                     className={`px-4 py-3 text-left text-[13px] font-medium text-muted-foreground ${column.className || ""}`}
@@ -348,7 +348,7 @@ export function DataTable<T extends { id: string | string }>({
               </tr>
             </thead>
             <tbody className="divide-y divide-sidebar-border">
-              {paginatedData.map((item) => {
+              {paginatedData.map((item: T) => {
                 const isSelected = selectedIds.has(item.id);
                 return (
                   <tr
@@ -366,7 +366,7 @@ export function DataTable<T extends { id: string | string }>({
                         onCheckedChange={() => toggleSelectItem(item.id)}
                       />
                     </td>
-                    {columns.map((column) => (
+                    {columns.map((column: TableColumn<T>) => (
                       <td
                         key={String(column.key)}
                         className={`px-4 py-1 ${column.className || ""}`}

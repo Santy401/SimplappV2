@@ -13,7 +13,7 @@ export * from './atoms/LoadingV2/Loading';
 export * from './atoms/DropdownMenu/dropdown-menu';
 export * from './atoms/DropdownProfile/dropdown-profile';
 export * from './atoms/ThemeToggle/ThemeToggle';
-export * from './atoms/ThemeProvider/ThemeProvider';
+// export * from './atoms/ThemeProvider/ThemeProvider'; // Conflicts with molecules/ThemeProvider
 
 // ─── MOLECULES ────────────────────────────────────────────────────────────────
 export * from './molecules/FormFields/FormFields';
