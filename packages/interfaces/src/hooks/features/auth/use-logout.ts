@@ -15,8 +15,8 @@ export const useLogout = () => {
         credentials: 'include',
       });
 
-      // Redirigir al login en el dominio público
-      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+      const isProcessDefined = typeof process !== 'undefined' && process.env;
+      const rootDomain = isProcessDefined ? process.env.NEXT_PUBLIC_ROOT_DOMAIN : undefined;
       const loginUrl = rootDomain
         ? `https://${rootDomain}/colombia/Login/`
         : '/colombia/Login';
@@ -24,7 +24,8 @@ export const useLogout = () => {
 
     } catch (err) {
       console.error('Logout error:', err);
-      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+      const isProcessDefined = typeof process !== 'undefined' && process.env;
+      const rootDomain = isProcessDefined ? process.env.NEXT_PUBLIC_ROOT_DOMAIN : undefined;
       const loginUrl = rootDomain
         ? `https://${rootDomain}/colombia/Login/`
         : '/colombia/Login';
