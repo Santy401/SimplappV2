@@ -32,6 +32,7 @@ export * from './molecules/PaymentModal/PaymentModal';
 export * from './molecules/PaymentBillModal/PaymentBillModal';
 export * from './molecules/BillPreview/BillPreview';
 export * from './molecules/ThemeProvider/ThemeProvider';
+export * from './molecules/QuickCreateModal/QuickCreateModal';
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 export * from './utils/utils';
@@ -43,6 +44,12 @@ export * from './organisms/GlobalSearch/GlobalSearch';
 export * from './organisms/NavbarDropdownSearch/NavbarDropdownSearch';
 export * from './organisms/NotificationDropdown/NotificationDropdown';
 export * from './organisms/Onboarding/Onboarding';
+export * from './organisms/Dashboard/Dashboard';
+export * from './organisms/Dashboard/DashboardAtoms';
+export * from './organisms/Dashboard/DashboardChart';
+export * from './organisms/Dashboard/RecentActivityWidget';
+export * from './organisms/Dashboard/StatsWidget';
+export * from './organisms/Dashboard/InventoryWidget';
 
 // ─── HOOKS (TABLES) ──────────────────────────────────────────────────────────
 export * from './hooks/tables/useBillTable';
