@@ -1,17 +1,30 @@
 @import "tailwindcss";
-@source "../../../packages/ui";
 @import "tw-animate-css";
+@source "../../../packages/ui";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
   --darkbg: #696969;
-  --bt-color: #5037ec;
-  --bt-color-hover: #5037ec;
+
+  /* ── Simplapp Brand Color ─────────────────────────────────────────────
+     Violeta-azulado vibrante característico de Simplapp.
+     NUNCA usar hex directos en componentes — siempre usar estas variables.
+     Tailwind: bg-brand | text-brand | border-brand | etc.
+  ──────────────────────────────────────────────────────────────────── */
+  --brand: #6C47FF;             /* ★ color principal de marca */
+  --brand-hover: #5835E8;       /* hover / estado activo (10% más oscuro) */
+  --brand-light: #8B6EFF;       /* variante clara (textos sobre fondos oscuros) */
+  --brand-subtle-bg: #6C47FF12; /* fondo sutil — alerts, empty states, info banners */
+  --brand-subtle-border: #6C47FF25; /* borde sutil — cards con acento de marca */
+  --brand-foreground: #ffffff;  /* texto/icono sobre botón de marca */
+
+  --bt-color: var(--brand);
+  --bt-color-hover: var(--brand-hover);
   --input-color: #fff;
 
   --radius: 0.625rem;
-  --background: #F5F7FB;
+  --background: #f5f7fb;
   --foreground: oklch(0.145 0 0);
   --foreground-text: #000000da;
   --foreground-text-second: #000000bd;
@@ -57,6 +70,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Brand tokens — disponibles como bg-brand, text-brand, etc. en Tailwind */
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-light: var(--brand-light);
+  --color-brand-subtle-bg: var(--brand-subtle-bg);
+  --color-brand-subtle-border: var(--brand-subtle-border);
+  --color-brand-foreground: var(--brand-foreground);
+
   --color-bt-color: var(--bt-color);
   --color-bt-color-hover: var(--bt-color-hover);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -109,14 +131,22 @@
 }
 
 :root:not(.dark) {
-  --bt-color: #5037ec;
-  --bt-color-hover: #5037ec;
+  --bt-color: var(--brand);
+  --bt-color-hover: var(--brand-hover);
   --input-color: #ededed;
 }
 
 .dark {
-  --darkbg: #0A0A0A;
-  --background: #0C0C0C;
+  --darkbg: #0a0a0a;
+
+  /* Brand overrides para dark mode */
+  --brand: #7b5cf6; /* más claro y vibrante en dark */
+  --brand-hover: #6d4fee;
+  --brand-light: #a78bfa;
+  --brand-subtle-bg: #7b5cf610;
+  --brand-subtle-border: #7b5cf620;
+  --brand-foreground: #ffffff;
+  --background: #0c0c0c;
   --foreground: oklch(0.985 0 0);
   --foreground-text: #c1c1c1;
   --foreground-text-second: #fff;
@@ -156,11 +186,10 @@
 
 body {
   background-color: var(--background);
-  overflow: hidden;
-  display: flex;
-  min-height: 90vh;
-  /* height: 100vh; */
-  transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 span {
@@ -175,7 +204,9 @@ span {
 
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
@@ -219,7 +250,9 @@ body.antialiased *::-webkit-scrollbar-thumb,
   border: 1px solid transparent;
   background-clip: padding-box;
   min-height: 40px;
-  transition: background-color 0.2s ease, opacity 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    opacity 0.2s ease;
 }
 
 /* Dark theme */
@@ -254,7 +287,6 @@ body.antialiased *::-webkit-scrollbar-thumb:active,
 .dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:active {
   background: rgba(255, 255, 255, 0.3);
 }
-
 
 @layer utilities {
   .animate-in {

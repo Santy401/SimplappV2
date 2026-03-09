@@ -1,12 +1,9 @@
 "use client";
 
-import { DataTable } from "@simplapp/ui";
-import { Button } from "@simplapp/ui";
+import { ModernTable, useBillTable, ModernTableSkeleton, Skeleton, PaymentModal, Button } from "@simplapp/ui";
 import { UserCheck, UserPlus } from "lucide-react";
-import { DataTableSkeleton, Skeleton, PaymentModal } from "@simplapp/ui";
 import { useState, useEffect } from "react";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
-import { useBillTable } from "@interfaces/src/hooks/features/Bills/useBillTable";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
 import { BillPreview } from "@ui/molecules/BillPreview";
 import { toast } from "react-toastify";
@@ -95,26 +92,46 @@ export default function BillsPage({
     refetch();
   }, [tableversion]);
 
-  const preparePreviewData = (bill: BillDetail & { items?: any[] }) => {
+  interface PreviewItem {
+    id?: string | number;
+    productId?: string;
+    productName?: string | null;
+    name?: string | null;
+    reference?: string | null;
+    productCode?: string | null;
+    price?: string | number;
+    quantity?: string | number;
+    taxRate?: string | number;
+    discount?: string | number;
+    description?: string;
+    total?: string | number;
+  }
+
+  const preparePreviewData = (bill: BillDetail & { 
+    items?: PreviewItem[]; 
+    dianStatus?: string | null;
+    rejectedReason?: string | null;
+    dianResponse?: string | null;
+  }) => {
     const items = bill.items || [];
 
-    const formattedItems = items.map((item: any, index: number) => {
-      const price = parseFloat(item.price) || 0;
-      const quantity = parseFloat(item.quantity) || 0;
-      const taxRate = parseFloat(item.taxRate) || 0;
+    const formattedItems = items.map((item: PreviewItem, index: number) => {
+      const price = parseFloat(String(item.price || 0));
+      const quantity = parseFloat(String(item.quantity || 0));
+      const taxRate = parseFloat(String(item.taxRate || 0));
       return {
         id: item.id?.toString() || `item-${index}`,
         productId: item.productId,
-        productName: item.productName,
+        productName: item.productName || undefined,
         name: item.productName || item.name || "",
         reference: item.productCode || item.reference || "",
         price: price,
         quantity: quantity,
-        discount: parseFloat(item.discount) || 0,
+        discount: parseFloat(String(item.discount || 0)),
         taxRate: taxRate,
         taxAmount: (price * quantity * taxRate) / 100,
         description: item.description || "",
-        total: parseFloat(item.total) || 0,
+        total: parseFloat(String(item.total || 0)),
       };
     });
 
@@ -132,13 +149,13 @@ export default function BillsPage({
         paymentMethod: bill.paymentMethod || "CASH",
         status: bill.status || "DRAFT",
         notes: bill.notes || "",
-        billItems: (bill as any).items || [],
+        billItems: bill.items || [],
         footerNote: "",
         terms: "",
         logo: undefined,
-        dianStatus: (bill as any).dianStatus,
-        rejectedReason: (bill as any).rejectedReason,
-        dianResponse: (bill as any).dianResponse,
+        dianStatus: bill.dianStatus || undefined,
+        rejectedReason: bill.rejectedReason || undefined,
+        dianResponse: bill.dianResponse || undefined,
       },
       items: formattedItems,
       subtotal: parseFloat(bill.subtotal || "0"),
@@ -163,21 +180,22 @@ export default function BillsPage({
             </div>
             <div className="flex gap-3">
               <Button
-                variant="outline"
+                variant="default"
                 className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
                 disabled
               >
                 <Skeleton className="w-full h-full rounded" />
               </Button>
               <Button
-                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
+                variant="defaultLoading"
+                // className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
                 disabled
               >
                 <Skeleton className="w-full h-full rounded-lg" />
               </Button>
             </div>
           </div>
-          <DataTableSkeleton />
+          <ModernTableSkeleton rowCount={5} columnCount={6} />
         </div>
       </div>
     );
@@ -238,8 +256,9 @@ export default function BillsPage({
             </Button>
             <Button
               onClick={handleAddCustomer}
+              variant="WithIcon"
               disabled={localLoading.create}
-              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
+              // className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
             >
               <UserPlus className="w-4 h-4" />
               {localLoading.create ? "Creando..." : "Nueva Factura De Venta"}
@@ -249,7 +268,7 @@ export default function BillsPage({
 
         {validBills.length > 0 ? (
           <div className="rounded-xl overflow-hidden">
-            <DataTable
+            <ModernTable
               key={`bills-table-version-${tableversion}`}
               data={validBills}
               isBillView={true}
@@ -260,7 +279,6 @@ export default function BillsPage({
               pagination={true}
               itemsPerPage={10}
               onView={handleViewBill}
-              onAdd={handleAddCustomer}
               onDelete={handleDeleteCustomer}
               onDeleteMany={handleDeleteManyCustomers}
               onEdit={handleEditCustomer}

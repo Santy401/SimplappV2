@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
-import { motion, type MotionValue, type HTMLMotionProps } from "framer-motion"
+import { motion, type HTMLMotionProps } from "framer-motion"
 
 import { cn } from "../../utils/utils"
 
@@ -32,12 +32,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-foreground cursor-pointer text-primary-foreground hover:bg-foreground/86",
+        default: "bg-brand cursor-pointer text-brand-foreground hover:bg-brand-hover",
+        defaultLoading: "bg-brand py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0",
+        // WithIcon: igual al default — semánticamente indica que el botón lleva un ícono
+        WithIcon: "bg-brand cursor-pointer text-brand-foreground hover:bg-brand-hover",
         destructive: "bg-destructive text-white hover:bg-destructive/90",
         outline: "border bg-background hover:bg-accent",
         secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent",
         link: "text-foreground underline-offset-4 hover:underline",
+        // Botón CTA oscuro — para acciones principales con ícono (ej. "Nueva Factura")
+        // WithIcon: "bg-foreground text-background hover:bg-foreground/90 gap-2 font-medium",
       },
       size: {
         default: "h-9 px-4 py-2",
@@ -67,7 +72,7 @@ function Button(props: ButtonProps) {
     )
   }
 
-  const { asChild, ...buttonProps } = props
+  const { asChild: _asChild, ...buttonProps } = props
 
   return (
     <MotionButton

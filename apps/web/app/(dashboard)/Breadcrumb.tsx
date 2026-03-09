@@ -13,6 +13,7 @@ const SIDEBAR_ITEMS = [
     { id: "ventas", label: "Ventas" },
     { id: "ventas-venta", label: "Comprobante De Venta", parentId: "ventas" },
     { id: "ventas-venta-edit", label: "Editar Comprobante De Venta", parentId: "ventas" },
+    { id: "ventas-pagos", label: "Pagos Recibidos", parentId: "ventas" },
 
     { id: "ventas-cotizaciones", label: "Cotizaciones", parentId: "ventas" },
     { id: "ventas-remisiones", label: "Remisiones", parentId: "ventas" },
@@ -82,6 +83,7 @@ function detectActiveItem(pathname: string): string {
 
     if (path.includes('/ventas/facturacion/create')) return 'ventas-facturacion-create';
     if (path.includes('/ventas/facturacion')) return 'ventas-facturacion';
+    if (path.includes('/ventas/pagos')) return 'ventas-pagos';
 
     if (path.includes('/inventario/precios/create')) return 'inventario-precios-create';
     if (path.includes('/inventario/precios')) return 'inventario-precios';
