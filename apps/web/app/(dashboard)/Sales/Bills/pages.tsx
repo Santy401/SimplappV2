@@ -1,7 +1,7 @@
 "use client";
 
 import { ModernTable, useBillTable, ModernTableSkeleton, Skeleton, PaymentModal, Button } from "@simplapp/ui";
-import { UserCheck, UserPlus } from "lucide-react";
+import { ReceiptText } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
@@ -76,7 +76,6 @@ export default function BillsPage({
         toast.success("Pago registrado correctamente");
         refetchTable();
         
-        // Si el preview está abierto, refrescamos la data de la factura específica
         if (showPreview && selectedBill) {
           const freshBill = await getBill(selectedBill.id);
           if (freshBill) setSelectedBill(freshBill);
@@ -99,31 +98,16 @@ export default function BillsPage({
     refetch();
   }, [tableversion]);
 
-  interface PreviewItem {
-    id?: string | number;
-    productId?: string;
-    productName?: string | null;
-    name?: string | null;
-    reference?: string | null;
-    productCode?: string | null;
-    price?: string | number;
-    quantity?: string | number;
-    taxRate?: string | number;
-    discount?: string | number;
-    description?: string;
-    total?: string | number;
-  }
-
   const preparePreviewData = (bill: BillDetail & { 
-    items?: PreviewItem[]; 
+    items?: any[]; 
     dianStatus?: string | null;
     rejectedReason?: string | null;
     dianResponse?: string | null;
-    payments?: any[]; // Agregamos payments aquí
+    payments?: any[]; 
   }) => {
     const items = bill.items || [];
 
-    const formattedItems = items.map((item: PreviewItem, index: number) => {
+    const formattedItems = items.map((item: any, index: number) => {
       const price = parseFloat(String(item.price || 0));
       const quantity = parseFloat(String(item.quantity || 0));
       const taxRate = parseFloat(String(item.taxRate || 0));
@@ -176,7 +160,7 @@ export default function BillsPage({
         dianResponse: bill.dianResponse || undefined,
       },
       items: formattedItems,
-      payments: formattedPayments, // Pasamos los pagos formateados
+      payments: formattedPayments,
       subtotal: parseFloat(bill.subtotal || "0"),
       discountTotal: parseFloat(bill.discountTotal || "0"),
       taxTotal: parseFloat(bill.taxTotal || "0"),
@@ -197,14 +181,14 @@ export default function BillsPage({
   if (error) {
     return (
       <div className="h-[70vh] flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md text-center">
           <h3 className="text-lg font-semibold mb-2">
             Error al cargar facturas
           </h3>
           <p className="mb-4">{error}</p>
           <Button
             onClick={() => window.location.reload()}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white h-10 px-6"
           >
             Reintentar
           </Button>
@@ -231,86 +215,43 @@ export default function BillsPage({
   return (
     <div className="min-h-fit animate-in fade-in duration-500">
       <div className="max-w-6xl mx-auto px-2 py-8">
-        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              Facturas De Venta
-            </h1>
-            <div className="text-muted-foreground mt-2">
-              Gestiona tus facturas de venta
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={handleExportCustomers}
-              className="gap-2 text-[15px] bg-input/55 cursor-pointer py-2 px-2 rounded"
-            >
-              Exportar
-            </Button>
-            <Button
-              onClick={handleAddCustomer}
-              variant="WithIcon"
-              disabled={localLoading.create}
-              // className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4" />
-              {localLoading.create ? "Creando..." : "Nueva Factura De Venta"}
-            </Button>
-          </div>
-        </div> */}
-
-        {validBills.length > 0 ? (
-          <div className="rounded-xl overflow-hidden">
-            <ModernTable
-              key={`bills-table-version-${tableversion}`}
-              data={validBills}
-              isBillView={true}
-              actions={true}
-              columns={columns}
-              title="Facturas De Venta"
-              description="Gestiona tus facturas de venta"
-              onAdd={handleAddCustomer}
-              addActionLabel="Nueva Factura"
-              searchable={true}
-              pagination={true}
-              itemsPerPage={10}
-              onView={handleViewBill}
-              onDelete={handleDeleteCustomer}
-              onDeleteMany={handleDeleteManyCustomers}
-              onEdit={handleEditCustomer}
-              onExport={handleExportCustomers}
-              className="bg-transparent"
-              isLoading={{
-                fetch: isLoading.fetch,
-                create: isLoading.create,
-                update: isLoading.update,
-                deleteId: deletingId,
-                deleteMany: false,
-                export: localLoading.export,
-                view: false,
-                rowId: deletingId,
-              }}
-            />
-          </div>
-        ) : (
-          <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
-            <UserCheck className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              No hay facturas registradas
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Comienza agregando tu primera factura con datos completos
-            </p>
-            <Button
-              onClick={handleAddCustomer}
-              className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4" />
-              Agregar Primera Factura
-            </Button>
-          </div>
-        )}
+        <ModernTable
+          key={`bills-table-version-${tableversion}`}
+          data={validBills}
+          isBillView={true}
+          actions={true}
+          columns={columns}
+          title="Facturas de Venta"
+          description="Gestiona y emite tus documentos electrónicos."
+          onAdd={handleAddCustomer}
+          addActionLabel="Nueva Factura"
+          searchable={true}
+          pagination={true}
+          itemsPerPage={10}
+          onView={handleViewBill}
+          onDelete={handleDeleteCustomer}
+          onDeleteMany={handleDeleteManyCustomers}
+          onEdit={handleEditCustomer}
+          onExport={handleExportCustomers}
+          className="bg-transparent"
+          
+          // --- Empty State Config ---
+          emptyIcon={ReceiptText}
+          emptyTitle="No hay facturas registradas"
+          emptyDescription="Comienza agregando tu primera factura para llevar el control de tus ventas."
+          emptyActionLabel="Crear mi primera factura"
+          
+          isLoading={{
+            fetch: isLoading.fetch,
+            create: isLoading.create,
+            update: isLoading.update,
+            deleteId: deletingId,
+            deleteMany: false,
+            export: localLoading.export,
+            view: false,
+            rowId: deletingId,
+          }}
+        />
       </div>
 
       {selectedBillForPayment && (
