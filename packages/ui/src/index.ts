@@ -32,9 +32,11 @@ export * from './molecules/PaymentModal/PaymentModal';
 export * from './molecules/PaymentBillModal/PaymentBillModal';
 export * from './molecules/BillPreview/BillPreview';
 export * from './molecules/ThemeProvider/ThemeProvider';
+export * from './molecules/QuickCreateModal/QuickCreateModal';
 
 // ─── UTILS ────────────────────────────────────────────────────────────────────
 export * from './utils/utils';
+export * from './utils/SmoothScroll';
 
 // ─── ORGANISMS ────────────────────────────────────────────────────────────────
 export * from './organisms/Sidebar/Sidebar';
@@ -43,6 +45,22 @@ export * from './organisms/GlobalSearch/GlobalSearch';
 export * from './organisms/NavbarDropdownSearch/NavbarDropdownSearch';
 export * from './organisms/NotificationDropdown/NotificationDropdown';
 export * from './organisms/Onboarding/Onboarding';
+export * from './organisms/Dashboard/Dashboard';
+export * from './organisms/Dashboard/DashboardAtoms';
+export * from './organisms/Dashboard/DashboardChart';
+export * from './organisms/Dashboard/RecentActivityWidget';
+export * from './organisms/Dashboard/StatsWidget';
+export * from './organisms/Dashboard/InventoryWidget';
+export * from './organisms/Auth/AuthAtoms';
+export * from './organisms/Auth/AuthForm';
+export * from './organisms/Auth/AuthLayout';
+export * from './organisms/Marketing/LandingHero';
+export * from './organisms/Marketing/LandingBentoGrid';
+export * from './organisms/Marketing/LandingCTA';
+export * from './organisms/Marketing/LandingFooter';
+export * from './organisms/Docs/DocsNavbar';
+export * from './organisms/Docs/DocsSidebar';
+export * from './organisms/Docs/DocsLayout';
 
 // ─── HOOKS (TABLES) ──────────────────────────────────────────────────────────
 export * from './hooks/tables/useBillTable';

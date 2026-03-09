@@ -244,14 +244,14 @@ export function ModernTable<T extends { id: string }>({
               ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length + 2} className="p-0">
-                     <div className="flex flex-col items-center justify-center py-20 px-6 text-center animate-in fade-in zoom-in-95 duration-500">
+                     <div className="flex flex-col items-center justify-center py-24 px-6 text-center animate-in fade-in zoom-in-95 duration-500 w-full">
                         <div className="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
                            <EmptyIcon className="w-10 h-10 text-slate-300 dark:text-slate-600" />
                         </div>
                         <h3 className="text-xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">
                            {emptyTitle}
                         </h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto leading-relaxed mb-8">
+                        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
                            {emptyDescription}
                         </p>
                         {(onEmptyAction || onAdd) && (

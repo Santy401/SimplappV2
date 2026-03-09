@@ -6,312 +6,62 @@
 
 :root {
   --darkbg: #696969;
-
-  /* ── Simplapp Brand Color ─────────────────────────────────────────────
-     Violeta-azulado vibrante característico de Simplapp.
-     NUNCA usar hex directos en componentes — siempre usar estas variables.
-     Tailwind: bg-brand | text-brand | border-brand | etc.
-  ──────────────────────────────────────────────────────────────────── */
-  --brand: #6C47FF;             /* ★ color principal de marca */
-  --brand-hover: #5835E8;       /* hover / estado activo (10% más oscuro) */
-  --brand-light: #8B6EFF;       /* variante clara (textos sobre fondos oscuros) */
-  --brand-subtle-bg: #6C47FF12; /* fondo sutil — alerts, empty states, info banners */
-  --brand-subtle-border: #6C47FF25; /* borde sutil — cards con acento de marca */
-  --brand-foreground: #ffffff;  /* texto/icono sobre botón de marca */
-
-  --brand-border-color: @apply border-slate-200;
-
-  --bt-color: var(--brand);
-  --bt-color-hover: var(--brand-hover);
-  --input-color: #fff;
-
+  --brand: #6C47FF;
+  --brand-hover: #5835E8;
+  --brand-light: #8B6EFF;
+  --brand-subtle-bg: #6C47FF12;
+  --brand-subtle-border: #6C47FF25;
+  --brand-foreground: #ffffff;
   --radius: 0.625rem;
   --background: #f5f7fb;
   --foreground: oklch(0.145 0 0);
-  --foreground-text: #000000da;
-  --foreground-text-second: #000000bd;
-  --foreground-text-select: oklch(71.4% 0.203 305.504);
-  --itemss-bar: #000;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #d2d2d2;
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0% 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
   --border: #2d2d2d;
-  --form-input-bg: #262626;
-  --input: oklch(0.922 0 0);
   --ring: oklch(43.29% 0.2347 297.309 / 0.863);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: @apply border-slate-200;
-  --sidebar-ring: oklch(0.708 0 0);
-
-  --form-bg: rgba(233, 233, 233, 0);
-  --form-input-bg: #fffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  /* Brand tokens — disponibles como bg-brand, text-brand, etc. en Tailwind */
   --color-brand: var(--brand);
   --color-brand-hover: var(--brand-hover);
-  --color-brand-light: var(--brand-light);
-  --color-brand-subtle-bg: var(--brand-subtle-bg);
-  --color-brand-subtle-border: var(--brand-subtle-border);
-  --color-brand-foreground: var(--brand-foreground);
-
-  --color-bt-color: var(--bt-color);
-  --color-bt-color-hover: var(--bt-color-hover);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
-  --color-input: var(--input);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
-
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-
-  --sidebar-width: 240px;
-  --sidebar-width-icon: 3rem;
-  --sidebar-width-inset: 16rem;
-
-  --itemss-bar: var(--itemss-bar);
-  --color-foreground-text: var(--foreground-text);
-  --color-foreground-text-second: var(--foreground-text-second);
-  --color-foreground-bg-bar: var(--foreground-text-select);
-
-  --color-darkbg: var(--darkbg);
-  --color-form-bg: var(--form-bg);
-  --color-form-input-bg: var(--form-input-bg);
 }
 
-:root:not(.dark) {
-  --bt-color: var(--brand);
-  --bt-color-hover: var(--brand-hover);
-  --input-color: #ededed;
+/* ── Smooth Scroll Configuration ────────────────────────────────────────── */
+html {
+  scroll-behavior: initial; /* Lenis lo maneja */
+  overflow-y: scroll; /* Forzar área de scroll */
 }
 
-.dark {
-  --darkbg: #0a0a0a;
-
-  /* Brand overrides para dark mode */
-  --brand: #7b5cf6; /* más claro y vibrante en dark */
-  --brand-hover: #6d4fee;
-  --brand-light: #a78bfa;
-  --brand-subtle-bg: #7b5cf610;
-  --brand-subtle-border: #7b5cf620;
-  --brand-foreground: #ffffff;
-  --background: #0c0c0c;
-  --foreground: oklch(0.985 0 0);
-  --foreground-text: #c1c1c1;
-  --foreground-text-second: #fff;
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: #cfa4ff46;
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: #2d2d2d;
-  --sidebar-ring: oklch(0.556 0 0);
-
-  --form-input-bg: #262626;
-  --form-bg: #00000000;
+html.lenis, html.lenis body {
+  height: auto;
 }
 
-body {
-  background-color: var(--background);
-  min-height: 100vh;
-  transition:
-    background-color 0.3s ease,
-    color 0.3s ease;
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
 }
 
-span {
-  padding: 0;
-  margin: 0;
+/* Ocultar scrollbar globalmente pero mantener funcionalidad */
+/* ::-webkit-scrollbar {
+  display: none;
+} */
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1;
+  * { @apply border-border outline-ring/50; }
+  body { 
+    @apply bg-background text-foreground antialiased;
+    min-height: 100vh;
   }
 }
-
-/* Minimal, modern scrollbar — pill-shaped, semi-transparent */
-/* Firefox - scrollbar delgada y moderna */
-:root:not(.dark) html,
-:root:not(.dark) body,
-:root:not(.dark) * {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
-}
-
-.dark html,
-.dark body,
-.dark * {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
-}
-
-/* WebKit (Chrome/Edge/Safari) - scrollbar más delgada */
-body.antialiased::-webkit-scrollbar,
-body.antialiased *::-webkit-scrollbar,
-[data-nextjs-scrollable-content]::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-body.antialiased::-webkit-scrollbar-track,
-body.antialiased *::-webkit-scrollbar-track,
-[data-nextjs-scrollable-content]::-webkit-scrollbar-track {
-  background: transparent;
-  margin: 4px 0; /* espacio en extremos */
-}
-
-/* Thumb con diseño pill moderno */
-body.antialiased::-webkit-scrollbar-thumb,
-body.antialiased *::-webkit-scrollbar-thumb,
-[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 10px; /* completamente redondeado */
-  border: 1px solid transparent;
-  background-clip: padding-box;
-  min-height: 40px;
-  transition:
-    background-color 0.2s ease,
-    opacity 0.2s ease;
-}
-
-/* Dark theme */
-.dark body.antialiased::-webkit-scrollbar-thumb,
-.dark body.antialiased *::-webkit-scrollbar-thumb,
-.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Hover - más visible */
-body.antialiased::-webkit-scrollbar-thumb:hover,
-body.antialiased *::-webkit-scrollbar-thumb:hover,
-[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.dark body.antialiased::-webkit-scrollbar-thumb:hover,
-.dark body.antialiased *::-webkit-scrollbar-thumb:hover,
-.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-/* Active state */
-body.antialiased::-webkit-scrollbar-thumb:active,
-body.antialiased *::-webkit-scrollbar-thumb:active,
-[data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:active {
-  background: rgba(0, 0, 0, 0.3);
-}
-
-.dark body.antialiased::-webkit-scrollbar-thumb:active,
-.dark body.antialiased *::-webkit-scrollbar-thumb:active,
-.dark [data-nextjs-scrollable-content]::-webkit-scrollbar-thumb:active {
-  background: rgba(255, 255, 255, 0.3);
-}
-
+/* 
 @layer utilities {
-  .animate-in {
-    animation: animate-in 0.2s ease-out;
-  }
-
-  .fade-in-0 {
-    opacity: 0;
-  }
-
-  .zoom-in-95 {
-    transform: scale(0.95);
-  }
-
-  @keyframes animate-in {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-}
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+} */
