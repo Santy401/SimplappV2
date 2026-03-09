@@ -42,6 +42,7 @@ export * from './organisms/Navbar/Navbar';
 export * from './organisms/GlobalSearch/GlobalSearch';
 export * from './organisms/NavbarDropdownSearch/NavbarDropdownSearch';
 export * from './organisms/NotificationDropdown/NotificationDropdown';
+export * from './organisms/Onboarding/Onboarding';
 
 // ─── HOOKS (TABLES) ──────────────────────────────────────────────────────────
 export * from './hooks/tables/useBillTable';

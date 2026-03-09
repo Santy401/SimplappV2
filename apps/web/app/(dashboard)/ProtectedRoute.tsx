@@ -61,8 +61,15 @@ export const ProtectedRoute = ({
       <Loading isVisible={isAnyLoading} />
       {!isLoading && (
         <>
-          {/* Si no está autenticado, no renderizar nada (el modal aparecerá) */}
-          {!isAuthenticated ? null : children}
+          {/* 
+            Si no está autenticado, no renderizar nada.
+            Si el onboarding no está completado y no estamos en la página de Onboarding, NO renderizar children 
+            para evitar el flash del dashboard antes de que el router.push haga efecto.
+          */}
+          {!isAuthenticated || (user?.onboardingCompleted === false && !pathname.includes('/Onboarding')) 
+            ? null 
+            : children
+          }
         </>
       )}
     </>

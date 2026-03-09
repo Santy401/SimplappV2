@@ -13,7 +13,7 @@ export default defineConfig({
     alias: {
       'next/navigation': resolve(__dirname, './.storybook/mocks/next-navigation.ts'),
       '@domain': resolve(__dirname, '../domain/src'),
-      '@interfaces': resolve(__dirname, '../interfaces/src'),
+      '@interfaces': resolve(__dirname, '../interfaces'),
       '@hooks': resolve(__dirname, '../interfaces/src/hooks'),
       '@ui': resolve(__dirname, './src'),
     },
