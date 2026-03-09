@@ -17,7 +17,7 @@ import {
 import { X, Plus, Settings, ArrowLeft } from "lucide-react";
 
 // Importar interfaces desde domain
-import {
+import type {
   Bill,
   BillItem as BillItemEntity,
   BillStatus,
@@ -26,7 +26,7 @@ import {
   CreateBillItemInput,
   BillDetail,
 } from "@domain/entities/Bill.entity";
-import { Client, IdentificationType } from "@domain/entities/Client.entity";
+import type { Client, IdentificationType } from "@domain/entities/Client.entity";
 import { Product } from "@domain/entities/Product.entity";
 import { Store } from "@domain/entities/Store.entity";
 import { Seller } from "@domain/entities/Seller.entity";
@@ -130,12 +130,12 @@ export function FormBill({
     dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       .toISOString()
       .split("T")[0],
-    paymentMethod: PaymentMethod.CASH,
+    paymentMethod: "CASH" as PaymentMethod,
     paymentType: "",
     terms: "",
     notes: "",
     footerNote: "",
-    status: BillStatus.DRAFT,
+    status: "DRAFT" as BillStatus,
     logo: undefined,
     signature: undefined,
   });
@@ -173,9 +173,9 @@ export function FormBill({
         dueDate: initialData.dueDate
           ? new Date(initialData.dueDate).toISOString().split("T")[0]
           : prev.dueDate,
-        paymentMethod: initialData.paymentMethod || PaymentMethod.CASH,
+        paymentMethod: initialData.paymentMethod || ("CASH" as PaymentMethod),
         notes: initialData.notes || "",
-        status: initialData.status || BillStatus.DRAFT,
+        status: initialData.status || ("DRAFT" as BillStatus),
         selectedClientId: extractId((initialData as any).clientId) || prev.selectedClientId,
         clientName: initialData.clientName || "",
         email: initialData.clientEmail || "",
@@ -373,7 +373,7 @@ export function FormBill({
         clientName: `${client.firstName} ${client.firstLastName}`,
         clientId: client.identificationNumber,
         clientType:
-          client.identificationType === IdentificationType.NIT ? "NIT" : "CC",
+          client.identificationType === "NIT" ? "NIT" : "CC",
         email: client.email || "",
       }));
     }
@@ -460,7 +460,7 @@ export function FormBill({
 
   const handleBack = () => {
     if (onAutoSave && mode !== 'view') {
-      const data = prepareBillData(BillStatus.DRAFT);
+      const data = prepareBillData("DRAFT" as BillStatus);
       if (data) {
         onAutoSave(data).catch(console.error);
       }
@@ -469,21 +469,21 @@ export function FormBill({
   };
 
   const handleSaveDraft = () => {
-    setFormData((prev) => ({ ...prev, status: BillStatus.DRAFT }));
+    setFormData((prev) => ({ ...prev, status: "DRAFT" as BillStatus }));
 
     if (!formData.selectedClientId) {
       alert("Debe seleccionar un cliente para guardar el borrador");
       return;
     }
 
-    // Usar statusOverride === BillStatus.DRAFT en prepareBillData debido a que setFormData es async
-    const data = prepareBillData(BillStatus.DRAFT);
+    // Usar statusOverride === "DRAFT" en prepareBillData debido a que setFormData es async
+    const data = prepareBillData("DRAFT" as BillStatus);
     if (data) {
       onSaveDraft?.(data);
     }
   };
   const handleEmitBill = () => {
-    setFormData((prev) => ({ ...prev, status: BillStatus.TO_PAY }));
+    setFormData((prev) => ({ ...prev, status: "TO_PAY" as BillStatus }));
     const validItems = items.filter(
       (item) => item.productId && item.quantity > 0,
     );
@@ -491,7 +491,7 @@ export function FormBill({
       alert("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
       return;
     }
-    const data = prepareBillData(BillStatus.TO_PAY);
+    const data = prepareBillData("TO_PAY" as BillStatus);
     if (data) {
       // Llama a una función específica para emitir
       onEmitBill?.(data); // ← Nuevo prop
@@ -527,7 +527,7 @@ export function FormBill({
   }
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-background">
+    <div className="max-w-7xl mx-auto p-6 space-y-6 bg-slate-50 dark:bg-slate-950 min-h-screen">
       {/* Header con navegación */}
       <div className="flex items-center gap-4 mb-4">
         <Button
@@ -540,7 +540,7 @@ export function FormBill({
         </Button>
       </div>
 
-      <div className="bg-card border border-sidebar-border rounded-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3">
           {/* Tipo de documento */}
           {/* <div className="space-y-2">
@@ -621,7 +621,7 @@ export function FormBill({
       </div>
 
       {/* Header con configuración */}
-      <div className="bg-card border border-sidebar-border rounded-lg p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm p-6 space-y-4">
         {/* Logo placeholder */}
         <div className="flex items-center w-full pb-6">
           {/* IZQUIERDA */}
@@ -810,20 +810,20 @@ export function FormBill({
                     <SelectValue placeholder="Contado" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={PaymentMethod.CASH}>Contado</SelectItem>
-                    <SelectItem value={PaymentMethod.CREDIT}>
+                    <SelectItem value={"CASH"}>Contado</SelectItem>
+                    <SelectItem value={"CREDIT"}>
                       Crédito
                     </SelectItem>
-                    <SelectItem value={PaymentMethod.TRANSFER}>
+                    <SelectItem value={"TRANSFER"}>
                       Transferencia
                     </SelectItem>
-                    <SelectItem value={PaymentMethod.CREDIT_CARD}>
+                    <SelectItem value={"CREDIT_CARD"}>
                       Tarjeta de Crédito
                     </SelectItem>
-                    <SelectItem value={PaymentMethod.DEBIT_CARD}>
+                    <SelectItem value={"DEBIT_CARD"}>
                       Tarjeta Débito
                     </SelectItem>
-                    <SelectItem value={PaymentMethod.CHECK}>Cheque</SelectItem>
+                    <SelectItem value={"CHECK"}>Cheque</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -840,16 +840,16 @@ export function FormBill({
                     <SelectValue placeholder="Estado" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={BillStatus.DRAFT}>Borrador</SelectItem>
-                    <SelectItem value={BillStatus.ISSUED}>Emitida</SelectItem>
-                    <SelectItem value={BillStatus.PAID}>Pagada</SelectItem>
-                    <SelectItem value={BillStatus.PARTIALLY_PAID}>
+                    <SelectItem value={"DRAFT"}>Borrador</SelectItem>
+                    <SelectItem value={"ISSUED"}>Emitida</SelectItem>
+                    <SelectItem value={"PAID"}>Pagada</SelectItem>
+                    <SelectItem value={"PARTIALLY_PAID"}>
                       Pago Parcial
                     </SelectItem>
-                    <SelectItem value={BillStatus.CANCELLED}>
+                    <SelectItem value={"CANCELLED"}>
                       Cancelada
                     </SelectItem>
-                    <SelectItem value={BillStatus.TO_PAY}>
+                    <SelectItem value={"TO_PAY"}>
                       Por Pagar
                     </SelectItem>
                   </SelectContent>
@@ -861,38 +861,38 @@ export function FormBill({
       </div>
 
       {/* Tabla de items */}
-      <div className="bg-card border border-sidebar-border rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-muted/50 border-b border-sidebar-border">
+          <table className="w-full min-w-[900px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="text-left p-3 text-sm font-medium">Item</th>
-                <th className="text-left p-3 text-sm font-medium">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Item</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
                   Descripción
                 </th>
-                <th className="text-right p-3 text-sm font-medium">Cantidad</th>
-                <th className="text-right p-3 text-sm font-medium">Precio</th>
-                <th className="text-right p-3 text-sm font-medium">Impuesto</th>
-                <th className="text-right p-3 text-sm font-medium">Bodega</th>
-                <th className="text-right p-3 text-sm font-medium">Desc %</th>
-                <th className="text-right p-3 text-sm font-medium">Total</th>
-                <th className="w-10"></th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Cantidad</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Precio</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Impuesto</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Bodega</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Desc %</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Total</th>
+                <th className="w-10 px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {items.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
-                    className="p-8 text-center text-muted-foreground"
+                    className="p-8 text-center text-slate-500 font-medium"
                   >
                     No hay items en esta factura
                   </td>
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="border-b border-sidebar-border hover:bg-muted/20">
-                    <td className="p-2">
+                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                    <td className="px-4 py-3">
                       <Select
                         value={item.productId || ""}
                         onValueChange={(v) =>
@@ -927,7 +927,7 @@ export function FormBill({
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Input
                         placeholder="Descripción"
                         value={item.description}
@@ -941,7 +941,7 @@ export function FormBill({
                         className="text-sm"
                       />
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Input
                         type="number"
                         placeholder="0"
@@ -958,7 +958,7 @@ export function FormBill({
                         step="any"
                       />
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <InputCurrency
                         placeholder="Precio uni"
                         value={item.price || 0}
@@ -972,7 +972,7 @@ export function FormBill({
                         className="text-right text-sm px-2 w-32"
                       />
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Select
                         value={item.taxRate.toString()}
                         onValueChange={(v) =>
@@ -991,7 +991,7 @@ export function FormBill({
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Select
                         value={item.storeId || ""}
                         onValueChange={(v) => handleItemChange(item.id, "storeId", v)}
@@ -1008,7 +1008,7 @@ export function FormBill({
                         </SelectContent>
                       </Select>
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Input
                         type="number"
                         placeholder="%"
@@ -1024,14 +1024,14 @@ export function FormBill({
                         step="any"
                       />
                     </td>
-                    <td className="p-2 text-right font-medium whitespace-nowrap">
+                    <td className="px-4 py-3 text-right text-slate-500 font-medium whitespace-nowrap">
                       ${" "}
                       {item.total.toLocaleString("es-CO", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
                     </td>
-                    <td className="p-2">
+                    <td className="px-4 py-3">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -1098,15 +1098,15 @@ export function FormBill({
               </div>
             )}
           </div>
-          <div className="mt-2 h-[2px] w-full block bg-sidebar-border"></div>
+          <div className="mt-2 h-[2px] w-full block bg-slate-200 dark:bg-slate-800"></div>
           <span className="text flex justify-center text-gray-400 mt-1">
             ELABORADOR POR
           </span>
         </div>
 
-        <div className="w-1/3 flex flex-col border border-sidebar-border rounded-lg p-4 space-y-3">
+        <div className="w-1/3 flex flex-col border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 shadow-sm p-5 space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Subtotal</span>
+            <span className="text-slate-500">Subtotal</span>
             <span className="font-medium">
               ${" "}
               {subtotal.toLocaleString("es-CO", {
@@ -1116,7 +1116,7 @@ export function FormBill({
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Descuento</span>
+            <span className="text-slate-500">Descuento</span>
             <span className="font-medium text-red-500">
               -${" "}
               {discountTotal.toLocaleString("es-CO", {
@@ -1126,7 +1126,7 @@ export function FormBill({
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-muted-foreground">Impuestos</span>
+            <span className="text-slate-500">Impuestos</span>
             <span className="font-medium">
               ${" "}
               {taxTotal.toLocaleString("es-CO", {
@@ -1135,8 +1135,8 @@ export function FormBill({
               })}
             </span>
           </div>
-          <div className="border-t border-sidebar-border pt-3 flex justify-between items-center">
-            <span className="text-lg font-semibold">Total</span>
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-3 mt-1 flex justify-between items-center">
+            <span className="text-lg font-semibold text-slate-700 dark:text-slate-300">Total</span>
             <span className="text-2xl font-bold">
               ${" "}
               {total.toLocaleString("es-CO", {

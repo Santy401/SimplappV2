@@ -1,3 +1,4 @@
+"use client";
 import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { formSchema, FormValues } from "../../../../lib/validations/form.schema";

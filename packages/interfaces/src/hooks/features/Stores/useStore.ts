@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.entity"

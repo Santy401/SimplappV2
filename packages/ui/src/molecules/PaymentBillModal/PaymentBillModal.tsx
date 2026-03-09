@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Info, ExternalLink, Receipt } from "lucide-react";
+import { X, Info, ExternalLink, Receipt, ChevronLeft, ChevronRight, Edit2 } from "lucide-react";
 import { Button } from "../../atoms/Button/Button";
 import { Input } from "../../atoms/Input/Input";
 import { Label } from "../../atoms/Label/Label";
@@ -16,7 +16,7 @@ export type PaymentIncomeType = "CLIENT_INVOICE" | "OTHER";
 
 export interface BankAccount { id: string; name: string; }
 export interface Client { id: string; name: string; }
-export interface BillOption { id: string; number: string | number; balance: number; }
+export interface BillOption { id: string; number: string | number; balance: number; clientId: string; dueDate?: string; total?: number; }
 
 export interface PaymentBillModalProps {
   receiptNumber?: number;
@@ -57,16 +57,32 @@ export function PaymentBillModal({
   const [costCenter, setCostCenter] = useState("");
   const [incomeType, setIncomeType] = useState<PaymentIncomeType>("CLIENT_INVOICE");
   const [notes, setNotes] = useState("");
+  const [invoiceAmounts, setInvoiceAmounts] = useState<Record<string, number>>({});
+  
+  const filteredBills = React.useMemo(() => bills.filter(b => b.clientId === clientId), [bills, clientId]);
+  
+  React.useEffect(() => {
+    const initialAmounts: Record<string, number> = {};
+    filteredBills.forEach(b => {
+      initialAmounts[b.id] = b.balance;
+    });
+    setInvoiceAmounts(initialAmounts);
+  }, [filteredBills]);
 
-  const total = bills.reduce((acc, b) => acc + b.balance, 0);
+  const total = Object.values(invoiceAmounts).reduce((acc, val) => acc + (Number(val) || 0), 0);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.({ clientId, bankAccountId, paymentDate, paymentMethod, costCenter, incomeType, invoicePayments: bills.map((b) => ({ billId: b.id, amount: b.balance })), notes });
+    const invoicePayments = filteredBills.map((b) => ({
+      billId: b.id,
+      amount: Number(invoiceAmounts[b.id]) || 0
+    })).filter(p => p.amount > 0);
+
+    onSubmit?.({ clientId, bankAccountId, paymentDate, paymentMethod, costCenter, incomeType, invoicePayments, notes });
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F7FB] dark:bg-[#0C0C0C] px-4 py-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 px-4 py-8">
       {/* Page title */}
       <div className="max-w-4xl mx-auto mb-6 flex items-center gap-3">
         <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-brand-subtle-bg shrink-0">
@@ -76,10 +92,10 @@ export function PaymentBillModal({
       </div>
 
       {/* Card principal */}
-      <div className="max-w-4xl mx-auto bg-white dark:bg-[#141414] border border-[#ddd] dark:border-[#2d2d2d] rounded-xl shadow-sm">
+      <div className="max-w-4xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
 
         {/* Header del documento */}
-        <div className="flex items-start justify-between px-6 py-4 border-b border-[#ddd] dark:border-[#2d2d2d]">
+        <div className="flex items-start justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800">
           <div className="flex flex-col">
             <span className="font-semibold text-foreground text-sm leading-tight">{companyName}</span>
             <span className="text-xs text-muted-foreground mt-0.5">Recibo de caja en proceso</span>
@@ -170,17 +186,17 @@ export function PaymentBillModal({
 
           {/* Divisor */}
           <div className="relative flex items-center">
-            <div className="flex-1 border-t border-[#ddd] dark:border-[#2d2d2d]" />
-            <span className="mx-3 text-xs font-medium text-muted-foreground uppercase tracking-widest">Tipo de ingreso</span>
-            <div className="flex-1 border-t border-[#ddd] dark:border-[#2d2d2d]" />
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
+            <span className="mx-3 text-xs font-medium text-slate-500 uppercase tracking-widest">Tipo de ingreso</span>
+            <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
           </div>
 
           {/* Tab toggle */}
-          <div className="flex gap-2 p-1 rounded-lg bg-[#F5F7FB] dark:bg-[#1a1a1a] border border-[#ddd] dark:border-[#2d2d2d]">
-            <button type="button" onClick={() => setIncomeType("CLIENT_INVOICE")} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-150 ${incomeType === "CLIENT_INVOICE" ? "bg-white dark:bg-[#262626] text-brand shadow-sm border border-[#ddd] dark:border-[#2d2d2d]" : "text-muted-foreground hover:text-foreground"}`}>
+          <div className="flex gap-2 p-1 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+            <button type="button" onClick={() => setIncomeType("CLIENT_INVOICE")} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-150 ${incomeType === "CLIENT_INVOICE" ? "bg-white dark:bg-slate-800 text-brand shadow-sm border border-slate-200 dark:border-slate-700" : "text-muted-foreground hover:text-foreground"}`}>
               Pago a factura de cliente
             </button>
-            <button type="button" onClick={() => setIncomeType("OTHER")} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-150 ${incomeType === "OTHER" ? "bg-white dark:bg-[#262626] text-brand shadow-sm border border-[#ddd] dark:border-[#2d2d2d]" : "text-muted-foreground hover:text-foreground"}`}>
+            <button type="button" onClick={() => setIncomeType("OTHER")} className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-150 ${incomeType === "OTHER" ? "bg-white dark:bg-slate-800 text-brand shadow-sm border border-slate-200 dark:border-slate-700" : "text-muted-foreground hover:text-foreground"}`}>
               Otros ingresos
             </button>
           </div>
@@ -193,40 +209,104 @@ export function PaymentBillModal({
                   <Info className="w-4 h-4 text-brand shrink-0 mt-0.5" />
                   <p className="text-sm text-brand dark:text-brand-light">Selecciona un cliente para traer sus facturas por cobrar.</p>
                 </div>
-              ) : bills.length === 0 ? (
-                <div className="flex items-center gap-3 border border-dashed border-[#ddd] dark:border-[#2d2d2d] rounded-lg px-4 py-4 text-sm text-muted-foreground">
+              ) : filteredBills.length === 0 ? (
+                <div className="flex items-center gap-3 border border-dashed border-slate-200 dark:border-slate-700 rounded-xl px-4 py-4 text-sm text-slate-500">
                   <Info className="w-4 h-4 shrink-0" /> Este cliente no tiene facturas pendientes de cobro.
                 </div>
               ) : (
-                <div className="border border-[#ddd] dark:border-[#2d2d2d] rounded-lg overflow-hidden text-sm">
-                  <table className="w-full">
-                    <thead className="bg-[#F5F7FB] dark:bg-[#1a1a1a] border-b border-[#ddd] dark:border-[#2d2d2d]">
-                      <tr>
-                        <th className="text-left px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Factura</th>
-                        <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Saldo pendiente</th>
-                        <th className="text-right px-4 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide">Importe a pagar</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[#ddd] dark:divide-[#2d2d2d]">
-                      {bills.map((bill) => (
-                        <tr key={bill.id} className="hover:bg-[#F5F7FB] dark:hover:bg-[#1a1a1a] transition-colors">
-                          <td className="px-4 py-3 font-medium text-foreground"><span className="text-muted-foreground">#</span>{bill.number}</td>
-                          <td className="px-4 py-3 text-right text-muted-foreground">$ {bill.balance.toLocaleString("es-CO")}</td>
-                          <td className="px-4 py-3 text-right"><Input type="number" defaultValue={bill.balance} className="w-32 ml-auto h-8 text-right text-sm" /></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="mt-4">
+                  <div className="flex flex-col mb-4">
+                    <h3 className="text-base font-semibold text-foreground">Facturas por cobrar</h3>
+                    <p className="text-sm text-muted-foreground">Agrega el monto recibido a las facturas relacionadas con este ingreso.</p>
+                  </div>
+                  
+                  <div className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden text-sm bg-white dark:bg-slate-900">
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[700px]">
+                        <thead className="border-b border-slate-200 dark:border-slate-800">
+                          <tr>
+                            <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Número</th>
+                            <th className="text-left px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Vencimiento</th>
+                            <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Total</th>
+                            <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Retenciones</th>
+                            <th className="text-center px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Por cobrar</th>
+                            <th className="text-right px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">Monto recibido</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                          {filteredBills.map((bill) => {
+                            const isOverdue = bill.dueDate ? new Date(bill.dueDate) < new Date() : false;
+                            
+                            // Formato manual simple dd/mm/yyyy
+                            const formattedDate = bill.dueDate ? (() => {
+                              const [y, m, d] = bill.dueDate.split("T")[0].split("-");
+                              return `${d}/${m}/${y}`;
+                            })() : '---';
+
+                            return (
+                              <tr key={bill.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                                <td className="px-4 py-3 text-foreground font-medium">{bill.number}</td>
+                                <td className={`px-4 py-3 font-medium ${isOverdue ? 'text-red-500' : 'text-slate-500'}`}>
+                                  {formattedDate}
+                                </td>
+                                <td className="px-4 py-3 text-center text-slate-500 whitespace-nowrap">
+                                  $ {(bill.total || bill.balance).toLocaleString("es-CO")}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center justify-center gap-2 text-slate-500 group">
+                                    <span className="font-medium">$</span>
+                                    <div className="relative">
+                                      <Input type="number" defaultValue={0} className="w-[100px] h-9 text-left px-3 text-sm" />
+                                      <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors bg-white dark:bg-slate-800">
+                                        <Edit2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-3 text-center text-slate-500 whitespace-nowrap">
+                                  $ {bill.balance.toLocaleString("es-CO")}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center justify-end gap-2 text-slate-500">
+                                    <span className="font-medium">$</span>
+                                    <Input 
+                                      type="number" 
+                                      value={invoiceAmounts[bill.id] === undefined ? '' : invoiceAmounts[bill.id]} 
+                                      onChange={(e) => setInvoiceAmounts(prev => ({ ...prev, [bill.id]: parseFloat(e.target.value) }))}
+                                      className="w-[120px] h-9 text-left text-sm" 
+                                    />
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* Pagination */}
+                    <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end text-sm text-slate-400">
+                      <span>1-{filteredBills.length} de {filteredBills.length}</span>
+                      <button type="button" className="ml-4 hover:text-slate-700 transition-colors disabled:opacity-50" disabled>
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button type="button" className="ml-2 hover:text-slate-700 transition-colors disabled:opacity-50" disabled>
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Total Amount below table */}
+                  <div className="flex items-center justify-end py-6 mt-4 pr-4">
+                    <div className="text-xl font-bold flex items-center justify-between w-64">
+                      <span className="text-foreground -mr-4">Total</span>
+                      <span className="text-foreground">$ {(clientId ? total : 0).toLocaleString("es-CO")}</span>
+                    </div>
+                  </div>
                 </div>
               )}
             </>
           )}
-
-          {/* Total */}
-          <div className="flex items-center justify-between py-3 px-4 rounded-lg bg-[#F5F7FB] dark:bg-[#1a1a1a] border border-[#ddd] dark:border-[#2d2d2d]">
-            <span className="text-sm font-medium text-muted-foreground">Total del recibo</span>
-            <span className="text-lg font-semibold text-foreground">$ {(clientId ? total : 0).toLocaleString("es-CO")}</span>
-          </div>
 
           {/* Notas */}
           <div className="space-y-1.5">
@@ -235,9 +315,9 @@ export function PaymentBillModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 pt-2 border-t border-[#ddd] dark:border-[#2d2d2d]">
+          <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
             {onClose && <Button type="button" variant="outline" onClick={onClose} className="h-9 px-4 text-sm">Cancelar</Button>}
-            <Button type="submit" className="h-9 px-5 text-sm bg-brand hover:bg-brand-hover text-brand-foreground font-medium border-none shadow-sm">Guardar recibo</Button>
+            <Button type="submit" variant="default" className="h-9 px-5 text-sm">Guardar recibo</Button>
           </div>
         </form>
       </div>

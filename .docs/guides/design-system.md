@@ -27,18 +27,18 @@ El color de Simplapp es un **violeta-azulado vibrante** (`#6C47FF`) — el tono 
 
 ### Superficies (Backgrounds)
 
-| Nombre          | Light     | Dark      | Uso                                     |
-| --------------- | --------- | --------- | --------------------------------------- |
-| **Page BG**     | `#F5F7FB` | `#0C0C0C` | Fondo de página, fondo de tablas, pills |
-| **Card BG**     | `#ffffff` | `#141414` | Tarjetas, modales, formularios          |
-| **Elevated BG** | `#ffffff` | `#262626` | Tab activo, inputs elevados, tooltips   |
-| **Inner BG**    | `#F5F7FB` | `#1a1a1a` | Filas hover, totales, headers de tabla  |
+| Nombre          | Light                  | Dark                    | Uso                                     |
+| --------------- | ---------------------- | ----------------------- | --------------------------------------- |
+| **Page BG**     | `slate-50` (`#f8fafc`) | `slate-950` (`#020617`) | Fondo de página, fondo de tablas, pills |
+| **Card BG**     | `white` (`#ffffff`)    | `slate-900` (`#0f172a`) | Tarjetas, modales, formularios          |
+| **Elevated BG** | `white` (`#ffffff`)    | `slate-800` (`#1e293b`) | Tab activo, inputs elevados, tooltips   |
+| **Inner BG**    | `slate-50/50`          | `slate-900/50`          | Filas hover, totales, headers de tabla  |
 
 ### Bordes
 
-| Nombre          | Light  | Dark      | Uso                                        |
-| --------------- | ------ | --------- | ------------------------------------------ |
-| **Border Base** | `#ddd` | `#2d2d2d` | Bordes de cards, tablas, inputs, divisores |
+| Nombre          | Light                   | Dark                    | Uso                                        |
+| --------------- | ----------------------- | ----------------------- | ------------------------------------------ |
+| **Border Base** | `slate-200` (`#e2e8f0`) | `slate-800` (`#1e293b`) | Bordes de cards, tablas, inputs, divisores |
 
 > ✅ Usa las **clases de Tailwind derivadas de CSS variables** (`bg-brand`, `text-brand`, `bg-brand-subtle-bg`) en lugar de `bg-[#6438F0]` o variables directas. Tailwind las traduce automáticamente a las variables CSS.
 
@@ -76,9 +76,9 @@ Los formularios de alta complejidad (como "Nuevo pago recibido" o "Nueva factura
 ### Estructura obligatoria
 
 ```
-[Page BG: #F5F7FB / #0C0C0C]
+[Page BG: slate-50 / slate-950]
   ↳ [Título de página con ícono de acento]
-  ↳ [Card principal: bg-white / #141414+ border + rounded-xl + shadow-sm]
+  ↳ [Card principal: bg-white / slate-900 + border + rounded-xl + shadow-sm]
        ↳ [Header del documento] — borde inferior, compañía + badge No.X
        ↳ [Body del formulario] — grid de campos
        ↳ [Footer de acciones] — borde superior, botones a la derecha
@@ -87,18 +87,18 @@ Los formularios de alta complejidad (como "Nuevo pago recibido" o "Nueva factura
 ### Reglas de Cards
 
 ```tsx
-// ✅ Correcto
-<div className="bg-white dark:bg-[#141414] border border-[#ddd] dark:border-[#2d2d2d] rounded-xl shadow-sm">
+// ✅ Correcto (Suave y Moderno)
+<div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm">
 
-// ❌ Evitar — borde demasiado pronunciado, no es nuestra paleta
-<div className="bg-card border border-border rounded-2xl shadow-lg">
+// ❌ Evitar — bordes grises fuertes sin matiz (ej: #ddd o padding ajustado)
+<div className="bg-card border border-[#ddd] rounded-xl shadow-sm">
 ```
 
 ### Header del documento (recibos, facturas)
 
 - Lado izquierdo: nombre empresa + subtítulo en gris
 - Lado derecho: badge con número (`No. X`) en color de marca + link discreto
-- Separado del body con `border-b border-[#ddd] dark:border-[#2d2d2d]`
+- Separado del body con `border-b border-slate-200 dark:border-slate-800`
 
 ---
 
@@ -185,12 +185,12 @@ Los campos **obligatorios** usan:
 Para alternar entre vistas o modos dentro de una sección, se usa el **pill toggle** de Simplapp:
 
 ```tsx
-<div className="flex gap-2 p-1 rounded-lg bg-[#F5F7FB] dark:bg-[#1a1a1a] border border-[#ddd] dark:border-[#2d2d2d]">
+<div className="flex gap-2 p-1 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
   <button
     className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all duration-150 ${
       active
-        ? "bg-white dark:bg-[#262626] text-brand shadow-sm border border-[#ddd] dark:border-[#2d2d2d]"
-        : "text-muted-foreground hover:text-foreground"
+        ? "bg-white dark:bg-slate-800 text-brand shadow-sm border border-slate-200 dark:border-slate-700"
+        : "text-slate-500 hover:text-slate-900 dark:hover:text-slate-100"
     }`}
   >
     Opción A
@@ -225,7 +225,7 @@ Para alternar entre vistas o modos dentro de una sección, se usa el **pill togg
 ### Empty state neutro (sin datos)
 
 ```tsx
-<div className="flex items-center gap-3 border border-dashed border-[#ddd] dark:border-[#2d2d2d] rounded-lg px-4 py-4 text-sm text-muted-foreground">
+<div className="flex items-center gap-3 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl px-8 py-8 text-sm text-slate-500">
   <Info className="w-4 h-4 shrink-0" />
   No hay registros para mostrar.
 </div>
@@ -236,14 +236,14 @@ Para alternar entre vistas o modos dentro de una sección, se usa el **pill togg
 ## 8. 📊 Tablas
 
 ```
-header: bg-[#F5F7FB] / #1a1a1a, text uppercase tracking-wide
-filas:  hover:bg-[#F5F7FB] / #1a1a1a, divide-y divide-[#ddd] / #2d2d2d
-borde contenedor: border border-[#ddd] / #2d2d2d, rounded-lg, overflow-hidden
+header: bg-slate-50/50 dark:bg-slate-900/50, text font-medium, sin uppercase (para un look más limpio)
+filas:  hover:bg-slate-50 dark:hover:bg-slate-800/50, divide-y divide-slate-100 dark:divide-slate-800
+borde contenedor: border border-slate-200 dark:border-slate-800, rounded-xl, overflow-hidden
 ```
 
-- Los headers usan el mismo estilo que los labels de formulario: `text-xs font-medium uppercase tracking-wide text-muted-foreground`.
+- Los headers usan texto normal para un estilo moderno (`text-slate-500 font-medium`), omitiendo en la mayoría de casos el uppercase para pantallas anchas.
 - Sin líneas de separación verticales entre columnas.
-- El `hover` de fila usa el mismo color que el fondo de página (`#F5F7FB`).
+- El `hover` de fila usa el mismo color sutil (`slate-50`).
 
 ---
 
@@ -268,11 +268,11 @@ Para separar secciones dentro de un formulario:
 
 ```tsx
 <div className="relative flex items-center">
-  <div className="flex-1 border-t border-[#ddd] dark:border-[#2d2d2d]" />
-  <span className="mx-3 text-xs font-medium text-muted-foreground uppercase tracking-widest">
+  <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
+  <span className="mx-3 text-xs font-medium text-slate-500 uppercase tracking-widest">
     Sección
   </span>
-  <div className="flex-1 border-t border-[#ddd] dark:border-[#2d2d2d]" />
+  <div className="flex-1 border-t border-slate-200 dark:border-slate-800" />
 </div>
 ```
 
@@ -280,15 +280,15 @@ Para separar secciones dentro de un formulario:
 
 ## 11. 🌗 Dark Mode
 
-El dark mode de Simplapp es **oscuro real** (`#0C0C0C`), no gris oscuro.
+El dark mode de Simplapp utiliza matices azulados (slate) para un contraste más suave y premium.
 
-| Superficie         | Light     | Dark      |
-| ------------------ | --------- | --------- |
-| Página             | `#F5F7FB` | `#0C0C0C` |
-| Card               | `#ffffff` | `#141414` |
-| Borde              | `#ddd`    | `#2d2d2d` |
-| Elevado            | `#F5F7FB` | `#1a1a1a` |
-| Input / Tab activo | `#ffffff` | `#262626` |
+| Superficie         | Light                   | Dark                    |
+| ------------------ | ----------------------- | ----------------------- |
+| Página             | `slate-50` (`#f8fafc`)  | `slate-950` (`#020617`) |
+| Card               | `white` (`#ffffff`)     | `slate-900` (`#0f172a`) |
+| Borde              | `slate-200` (`#e2e8f0`) | `slate-800` (`#1e293b`) |
+| Elevado            | `slate-100` (`#f1f5f9`) | `slate-800` (`#1e293b`) |
+| Input / Tab activo | `white`                 | `slate-800` (`#1e293b`) |
 
 Nunca uses `bg-card`, `bg-muted` para superficies principales — usa las variables hex directas documentadas aquí para mantener consistencia.
 
@@ -299,8 +299,8 @@ Nunca uses `bg-card`, `bg-muted` para superficies principales — usa las variab
 - [ ] Los labels usan `text-xs font-medium uppercase tracking-wide`
 - [ ] El botón primario usa `variant="default"` o `variant="WithIcon"` (nunca `bg-[#6C47FF]` directo)
 - [ ] El asterisco de campo requerido es `text-brand` (no rojo)
-- [ ] El fondo de página es `#F5F7FB` / `#0C0C0C`
-- [ ] Los bordes son `#ddd` / `#2d2d2d`
+- [ ] El fondo de página usa `bg-slate-50` / `bg-slate-950`
+- [ ] Los bordes usan `border-slate-200` / `border-slate-800`
 - [ ] Los tab toggles tienen `p-1` + borde en el contenedor
 - [ ] El empty state informativo usa `bg-brand-subtle-bg` con icóno `text-brand`
 - [ ] El ícono del título de página tiene fondo `bg-brand-subtle-bg` con el icóno en `text-brand`

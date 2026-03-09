@@ -1,265 +1,53 @@
 "use client";
 
-import { DataTable, DataTableSkeleton, Skeleton } from "@simplapp/ui";
-import { Button } from '@simplapp/ui';
-import {
-    Package,
-    ShoppingCart,
-    Plus,
-    Archive,
-} from "lucide-react";
-import { Product } from "@domain/entities/Product.entity";
+import { ModernTable, useProductTable, ModernTableSkeleton, Button } from "@simplapp/ui";
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
 import { useProduct } from "@interfaces/src/hooks/features/Products/useProduct";
-import { useProductTable } from "@interfaces/src/hooks/index";
-import { useEffect, useState } from "react";
 
-interface ProductosProps {
-    onSelect?: (view: string) => void;
-    onSelectProduct?: (product: Product) => void;
-}
+export default function ProductsPage({
+  onSelect = () => { },
+  onSelectProduct = () => { }
+}: any) {
+  const { products, isLoading, error, refetch } = useProduct();
+  const [tableversion, setTableversion] = useState(0);
 
-export default function Productos({
-    onSelect = () => { },
-    onSelectProduct = () => { }
-}: ProductosProps) {
+  const refetchTable = () => {
+    refetch();
+    setTableversion(prev => prev + 1);
+  };
 
-    const { products, isLoading, error, refetch } = useProduct();
+  const {
+    columns,
+    handleAddCustomer,
+    handleDeleteCustomer,
+    handleDeleteManyCustomers,
+    handleEditCustomer,
+    handleExportCustomers,
+  } = useProductTable({ onSelect, onSelectProduct, onDeleteSuccess: refetchTable });
 
+  const validProducts = (Array.isArray(products) ? products : []) as any[];
 
-    const validProducts = (products || []).filter(p => p.id) as (Product & { id: string })[];
+  if (isLoading.fetch && validProducts.length === 0) {
+    return <div className="max-w-5xl mx-auto px-4 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+  }
 
-    const totalProducts = validProducts.length;
-    const activeProducts = validProducts.filter(p => p.active).length;
-    const inactiveProducts = validProducts.filter(p => !p.active).length;
-    const _totalValue = 0;
-
-    const [tableversion, setTableversion] = useState(0);
-
-    const [deletingId, _setDeletingId] = useState<string | null>(null);
-    const [localLoading, _setLocalLoading] = useState({
-        export: false,
-        delete: false,
-        create: false,
-        update: false,
-        get: false,
-    });
-
-    const refetchTable = () => {
-        setTableversion((prev) => prev + 1);
-    };
-
-    const {
-        columns,
-        handleAddCustomer,
-        handleExportCustomers,
-        handleDeleteManyCustomers,
-    } = useProductTable({ onSelect, onSelectProduct, onDeleteSuccess: refetchTable });
-
-    useEffect(() => {
-        refetch();
-    }, [tableversion]);
-
-
-    if (isLoading.fetch && products.length === 0) {
-        return (
-            <div className="min-h-fit w-full animate-in fade-in duration-200">
-                <div className="max-w-5xl mx-auto px-4 py-8">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-foreground">
-                                <Skeleton className="h-9 w-64" />
-                            </h1>
-                            <div className="text-muted-foreground mt-2">
-                                <Skeleton className="h-5 w-64" />
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <Button
-                                variant="default"
-                                className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
-                                disabled
-                            >
-                                <Skeleton className="w-full h-full rounded" />
-                            </Button>
-                            <Button
-                                variant="defaultLoading"
-                                // className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[150px] h-[38px] p-0 border-0"
-                                disabled
-                            >
-                                <Skeleton className="w-full h-full rounded-lg" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                        {Array.from({ length: 3 }).map((_, i) => (
-                            <div key={i} className="border border-sidebar-border rounded-xl p-4 bg-white">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm text-muted-foreground mb-1">
-                                            <Skeleton className="h-4 w-16" />
-                                        </div>
-                                        <div className="text-2xl font-bold text-foreground">
-                                            <Skeleton className="h-8 w-12" />
-                                        </div>
-                                    </div>
-                                    <div className="p-2 rounded-lg bg-muted/20">
-                                        <Skeleton className="w-6 h-6 rounded" />
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    <DataTableSkeleton />
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="h-[70vh] flex items-center justify-center">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
-                    <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
-                    <p className="mb-4">{error}</p>
-                    <Button
-                        onClick={() => window.location.reload()}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                        Reintentar
-                    </Button>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-fit animate-in fade-in duration-500">
-            <div className="max-w-5xl mx-auto px-4 py-8">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground">Productos De Venta</h1>
-                        <div className="text-muted-foreground mt-2">
-                            Gestiona tu catálogo de productos y servicios
-                        </div>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={handleExportCustomers}
-                            className="gap-2 text-[15px] bg-input/55 cursor-pointer py-2 px-2 rounded"
-                        >
-                            Exportar
-                        </Button>
-                        <Button
-                            onClick={handleAddCustomer}
-                            disabled={localLoading.create}
-                            variant="default"
-                        >
-                            <Plus className="w-4 h-4" />
-                            {localLoading.create ? 'Creando...' : 'Nuevo Producto'}
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-sm text-muted-foreground">Total</div>
-                                <div className="text-2xl font-bold text-foreground">
-                                    {totalProducts}
-                                </div>
-                            </div>
-                            <div className="p-2 rounded-lg bg-blue-500/10">
-                                <Package className="w-6 h-6 text-blue-500" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-sm text-muted-foreground">Activos</div>
-                                <div className="text-2xl font-bold text-foreground">
-                                    {activeProducts}
-                                </div>
-                            </div>
-                            <div className="p-2 rounded-lg bg-green-500/10">
-                                <ShoppingCart className="w-6 h-6 text-green-500" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="border border-sidebar-border rounded-xl p-4 bg-white">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-sm text-muted-foreground">Inactivos</div>
-                                <div className="text-2xl font-bold text-foreground">
-                                    {inactiveProducts}
-                                </div>
-                            </div>
-                            <div className="p-2 rounded-lg bg-orange-500/10">
-                                <Archive className="w-6 h-6 text-orange-500" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* <div className="border border-sidebar-border rounded-xl p-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-sm text-muted-foreground">Valor Total</div>
-                                <div className="text-2xl font-bold text-foreground">
-                                    ${totalValue.toFixed(2)}
-                                </div>
-                            </div>
-                            <div className="p-2 rounded-lg bg-purple-500/10">
-                                <DollarSign className="w-6 h-6 text-purple-500" />
-                            </div>
-                        </div>
-                    </div> */}
-                </div>
-
-                {validProducts.length > 0 ? (
-                    <div className="rounded-xl overflow-hidden">
-                        <DataTable
-                            data={validProducts}
-                            columns={columns}
-                            title=""
-                            searchable={true}
-                            pagination={true}
-                            itemsPerPage={10}
-                            onAdd={handleAddCustomer}
-                            onExport={handleExportCustomers}
-                            className="bg-transparent"
-                            onDeleteMany={handleDeleteManyCustomers}
-                            isLoading={{
-                                fetch: isLoading.fetch,
-                                create: isLoading.create,
-                                update: isLoading.update,
-                                deleteId: deletingId,
-                                deleteMany: false,
-                                export: localLoading.export,
-                                view: false,
-                                rowId: deletingId,
-                            }}
-                        />
-                    </div>
-                ) : (
-                    <div className="text-center p-12 border border-sidebar-border bg-white rounded-xl mt-4">
-                        <Package className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No hay productos registrados</h3>
-                        <p className="text-muted-foreground mb-6">
-                            Comienza agregando tu primer producto al catálogo
-                        </p>
-                        <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
-                            <Plus className="w-4 h-4" />
-                            Agregar Primer Producto
-                        </Button>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Productos</h1>
+        <Button onClick={handleAddCustomer} variant="default">
+          <UserPlus className="w-4 h-4" /> Nuevo Producto
+        </Button>
+      </div>
+      <ModernTable
+        data={validProducts}
+        columns={columns as any}
+        onDelete={handleDeleteCustomer as any}
+        onDeleteMany={handleDeleteManyCustomers as any}
+        onEdit={handleEditCustomer as any}
+        onExport={handleExportCustomers}
+      />
+    </div>
+  );
 }

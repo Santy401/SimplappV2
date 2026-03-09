@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { ListPrice, CreateListPriceDto, UpdateListPriceDto } from "@domain/entities/ListPrice.entity";
 import { set } from "zod";

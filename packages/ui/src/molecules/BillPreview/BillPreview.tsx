@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { FormBillItem } from "../FormBill/FormBill";
-import { BillStatus, PaymentMethod, DianStatus } from '@domain/entities/Bill.entity';
+import type { BillStatus, PaymentMethod, DianStatus } from '@domain/entities/Bill.entity';
 import { XCircle, Terminal, Info, Printer, Download, Share2, Edit2, Plus, ChevronDown } from 'lucide-react';
 
 export interface PaymentPreview {
@@ -56,19 +56,14 @@ export function BillPreview({
     // Determines ribbon color and text
     const getStatusRibbon = () => {
         switch (formData.status) {
-            case BillStatus.PAID:
             case 'PAID':
                 return { text: 'PAGADA', bg: 'bg-emerald-500' };
-            case BillStatus.TO_PAY:
             case 'TO_PAY':
                 return { text: 'POR COBRAR', bg: 'bg-orange-500' };
-            case BillStatus.DRAFT:
             case 'DRAFT':
                 return { text: 'BORRADOR', bg: 'bg-gray-400' };
-            case BillStatus.CANCELLED:
             case 'CANCELLED':
                 return { text: 'CANCELADA', bg: 'bg-red-500' };
-            case BillStatus.PARTIALLY_PAID:
             case 'PARTIALLY_PAID':
                 return { text: 'PAGO PARCIAL', bg: 'bg-blue-500' };
             default:
@@ -141,7 +136,7 @@ export function BillPreview({
                     </div>
 
                     {/* DIAN Error Message if applicable */}
-                    {formData.dianStatus === DianStatus.REJECTED && (
+                    {formData.dianStatus === 'REJECTED' && (
                         <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4 print:hidden">
                             <div className="p-2 bg-red-100 rounded-lg">
                                 <XCircle className="w-6 h-6 text-red-600" />
