@@ -78,9 +78,9 @@ const MOCK_CLIENTS = [
 ];
 
 const MOCK_BILLS = [
-  { id: 'bill-1', number: 1021, balance: 450_000 },
-  { id: 'bill-2', number: 1036, balance: 1_200_000 },
-  { id: 'bill-3', number: 1041, balance: 87_500 },
+  { id: 'bill-1', number: 1021, balance: 450_000, clientId: 'cli-1' },
+  { id: 'bill-2', number: 1036, balance: 1_200_000, clientId: 'cli-1' },
+  { id: 'bill-3', number: 1041, balance: 87_500, clientId: 'cli-1' },
 ];
 
 // ─── Stories ─────────────────────────────────────────────────────────────────
