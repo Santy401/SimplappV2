@@ -14,7 +14,7 @@ export function PageSkeleton({ cardsCount = 0 }: PageSkeletonProps) {
 
     return (
         <div className="min-h-fit w-full">
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="max-w-6xl mx-auto px-2 py-8">
 
                 {/* Header Skeleton mimicking title and buttons layouts */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">

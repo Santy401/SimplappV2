@@ -8,9 +8,21 @@ interface ModernTableSkeletonProps {
 
 export function ModernTableSkeleton({ rowCount = 5, columnCount = 6 }: ModernTableSkeletonProps) {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden w-full">
-      {/* Toolbar Skeleton */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-3 items-center justify-between">
+    <div className="flex-1 w-full overflow-y-auto">
+      {/* Header Skeleton */}
+      {/* <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-5 w-72 rounded" />
+        </div>
+        <div className="mt-4 sm:mt-0">
+          <Skeleton className="h-[38px] w-36 rounded-lg" />
+        </div>
+      </div> */}
+
+      <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden w-full">
+        {/* Toolbar Skeleton */}
+        <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-wrap gap-3 items-center justify-between">
         <div className="flex gap-2">
           <Skeleton className="h-10 w-24 rounded-md" />
         </div>
@@ -77,6 +89,7 @@ export function ModernTableSkeleton({ rowCount = 5, columnCount = 6 }: ModernTab
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }
