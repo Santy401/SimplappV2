@@ -226,7 +226,7 @@ export function DataTable<T extends { id: string | string }>({
       {/* Bulk loading overlay */}
       {/* Bulk loading overlay */}
       {isBulkDeleting && (
-        <div className="fixed inset-0 top-0 left-0 w-screen h-screen bg-background/80 backdrop-blur-md z-[9999] flex items-center justify-center">
+        <div className="fixed inset-0 top-0 left-0 w-screen h-screen bg-background/80 backdrop-blur-md z-9999 flex items-center justify-center">
           <div className="flex flex-col items-center gap-3 p-6 bg-card border border-sidebar-border rounded-xl shadow-2xl animate-in fade-in zoom-in duration-300">
             <Loader2 className="w-10 h-10 animate-spin text-primary" />
             <p className="text-lg text-foreground font-medium">Eliminando {selectedIds.size} elemento(s)...</p>

@@ -124,9 +124,9 @@ function StyledTextarea({ className = '', ...props }: React.TextareaHTMLAttribut
 // ─── Anchor position classes ──────────────────────────────────────────────────
 
 const anchorMap = {
-  center:       'fixed inset-0 flex items-center justify-center z-50',
-  'bottom-right': 'fixed bottom-6 right-6 z-50 flex items-end justify-end',
-  'bottom-left':  'fixed bottom-6 left-6 z-50 flex items-end justify-start',
+  center:       'fixed inset-0 flex items-center justify-center z-[120]',
+  'bottom-right': 'fixed bottom-6 right-6 z-[120] flex items-end justify-end',
+  'bottom-left':  'fixed bottom-6 left-6 z-[120] flex items-end justify-start',
 };
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -179,7 +179,7 @@ export function QuickCreateModal({
       {/* Backdrop — solo en modo center */}
       {isCenter && (
         <div
-          className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm animate-in fade-in duration-150"
+          className="fixed inset-0 z-[110] bg-black/30 backdrop-blur-sm animate-in fade-in duration-150"
           onClick={onClose}
         />
       )}
