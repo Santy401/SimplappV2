@@ -40,20 +40,24 @@ export default function ClientesPage({
   });
 
   if (isLoading.fetch && validClients.length === 0) {
-    return <div className="max-w-5xl mx-auto px-4 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+    return <div className="max-w-6xl mx-auto px-2 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-6xl mx-auto px-2 py-8">
+      {/* <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Clientes</h1>
         <Button onClick={handleAddCustomer} variant="default">
           <UserPlus className="w-4 h-4" /> Nuevo Cliente
         </Button>
-      </div>
+      </div> */}
       <ModernTable
         data={filteredClients}
         columns={columns}
+        title="Clientes"
+        description="Gestiona tus clientes"
+        onAdd={handleAddCustomer}
+        addActionLabel="Nuevo Cliente"
         onExport={handleExportCustomers}
         onDeleteMany={handleDeleteManyCustomers}
       />

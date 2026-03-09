@@ -29,20 +29,24 @@ export default function ProductsPage({
   const validProducts = (Array.isArray(products) ? products : []) as any[];
 
   if (isLoading.fetch && validProducts.length === 0) {
-    return <div className="max-w-5xl mx-auto px-4 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+    return <div className="max-w-6xl mx-auto px-2 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="max-w-6xl mx-auto px-2 py-8">
+      {/* <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Productos</h1>
         <Button onClick={handleAddCustomer} variant="default">
           <UserPlus className="w-4 h-4" /> Nuevo Producto
         </Button>
-      </div>
+      </div> */}
       <ModernTable
         data={validProducts}
         columns={columns as any}
+        title="Productos"
+        description="Gestiona tus productos"
+        onAdd={handleAddCustomer}
+        addActionLabel="Nuevo Producto"
         onDelete={handleDeleteCustomer as any}
         onDeleteMany={handleDeleteManyCustomers as any}
         onEdit={handleEditCustomer as any}

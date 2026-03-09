@@ -168,33 +168,7 @@ export default function BillsPage({
   if (isLoading.fetch && bills.length === 0) {
     return (
       <div className="min-h-fit w-full animate-in fade-in duration-200">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">
-                <Skeleton className="h-9 w-64" />
-              </h1>
-              <div className="text-muted-foreground mt-2">
-                <Skeleton className="h-5 w-52" />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                variant="default"
-                className="gap-2 text-[15px] bg-input/55 py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
-                disabled
-              >
-                <Skeleton className="w-full h-full rounded" />
-              </Button>
-              <Button
-                variant="defaultLoading"
-                // className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[200px] h-[38px] p-0 border-0"
-                disabled
-              >
-                <Skeleton className="w-full h-full rounded-lg" />
-              </Button>
-            </div>
-          </div>
+        <div className="max-w-6xl mx-auto px-2 py-8">
           <ModernTableSkeleton rowCount={5} columnCount={6} />
         </div>
       </div>
@@ -236,8 +210,8 @@ export default function BillsPage({
 
   return (
     <div className="min-h-fit animate-in fade-in duration-500">
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      <div className="max-w-6xl mx-auto px-2 py-8">
+        {/* <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               Facturas De Venta
@@ -264,7 +238,7 @@ export default function BillsPage({
               {localLoading.create ? "Creando..." : "Nueva Factura De Venta"}
             </Button>
           </div>
-        </div>
+        </div> */}
 
         {validBills.length > 0 ? (
           <div className="rounded-xl overflow-hidden">
@@ -274,7 +248,10 @@ export default function BillsPage({
               isBillView={true}
               actions={true}
               columns={columns}
-              title=""
+              title="Facturas De Venta"
+              description="Gestiona tus facturas de venta"
+              onAdd={handleAddCustomer}
+              addActionLabel="Nueva Factura"
               searchable={true}
               pagination={true}
               itemsPerPage={10}
