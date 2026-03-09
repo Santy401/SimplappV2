@@ -87,9 +87,9 @@ function AdminContent({ children }: { children: React.ReactNode }) {
           onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
         <main className="flex-1 overflow-y-auto w-full">
-          <div className="flex justify-center ml-7 mt-7 mb-7">
-            <div className="w-full pr-7">
-              <Breadcrumb activeItem={currentView} />
+          <div className="">
+            <div className="">
+              {/* <Breadcrumb activeItem={currentView} /> */}
               {children}
             </div>
           </div>
