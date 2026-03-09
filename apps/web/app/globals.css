@@ -19,6 +19,8 @@
   --brand-subtle-border: #6C47FF25; /* borde sutil — cards con acento de marca */
   --brand-foreground: #ffffff;  /* texto/icono sobre botón de marca */
 
+  --brand-border-color: @apply border-slate-200;
+
   --bt-color: var(--brand);
   --bt-color-hover: var(--brand-hover);
   --input-color: #fff;
@@ -58,7 +60,7 @@
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: #ddd;
+  --sidebar-border: @apply border-slate-200;
   --sidebar-ring: oklch(0.708 0 0);
 
   --form-bg: rgba(233, 233, 233, 0);
