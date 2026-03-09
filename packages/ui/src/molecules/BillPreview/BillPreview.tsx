@@ -9,6 +9,8 @@ import {
   User, Calendar, CreditCard, CheckCircle2, Clock, Ban,
   AlertCircle, ReceiptText
 } from 'lucide-react';
+import { PaymentBillModal, PaymentBillFormData } from '../PaymentBillModal/PaymentBillModal';
+import { PaymentModal } from '../PaymentModal/PaymentModal';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -23,6 +25,7 @@ export interface PaymentPreview {
 
 export interface BillPreviewProps {
   formData: {
+    id?: string;
     number?: number;
     date: string;
     dueDate: string;
@@ -46,6 +49,9 @@ export interface BillPreviewProps {
   total: number;
   payments?: PaymentPreview[];
   onClose: () => void;
+  // Para el modal de pagos
+  bankAccounts?: { id: string; name: string }[];
+  onAddPayment?: (data: any) => void;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -123,10 +129,24 @@ export function BillPreview({
   total,
   payments,
   onClose,
+  bankAccounts = [],
+  onAddPayment,
 }: BillPreviewProps) {
   const [showDianModal, setShowDianModal] = useState(false);
+  const [showQuickPayment, setShowQuickPayment] = useState(false);
+  const [showAdvancedPayment, setShowAdvancedPayment] = useState(false);
+  
   const status = getStatus(formData.status as string);
   const StatusIcon = status.icon;
+
+  const currentBalance = total - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
+
+  const billForPayment = {
+    id: formData.id || '',
+    clientName: formData.clientName,
+    number: formData.number || 0,
+    balance: currentBalance
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 print:bg-white">
@@ -177,10 +197,15 @@ export function BillPreview({
               <Edit2 className="w-3.5 h-3.5" />
               Editar
             </button>
-            <button className="h-8 px-4 rounded-lg text-sm font-semibold text-white bg-[#6C47FF] hover:bg-[#5835E8] transition-colors flex items-center gap-1.5 shadow-sm shadow-[#6C47FF]/25">
-              <Plus className="w-3.5 h-3.5" />
-              Agregar pago
-            </button>
+            {formData.status !== 'PAID' && (
+              <button 
+                onClick={() => setShowQuickPayment(true)}
+                className="h-8 px-4 rounded-lg text-sm font-semibold text-white bg-[#6C47FF] hover:bg-[#5835E8] transition-colors flex items-center gap-1.5 shadow-sm shadow-[#6C47FF]/25"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Agregar pago
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -192,8 +217,8 @@ export function BillPreview({
           {[
             { label: "Valor total",  value: fmt(total),       color: "text-slate-800 dark:text-slate-100" },
             { label: "Retenido",     value: "0.00",           color: "text-amber-500" },
-            { label: "Cobrado",      value: status.label === "Pagada" ? fmt(total) : "0.00", color: "text-emerald-500" },
-            { label: "Por cobrar",   value: status.label !== "Pagada" ? fmt(total) : "0.00", color: "text-violet-500" },
+            { label: "Cobrado",      value: fmt(total - currentBalance), color: "text-emerald-500" },
+            { label: "Por cobrar",   value: fmt(currentBalance), color: "text-violet-500" },
           ].map(({ label, value, color }) => (
             <SectionCard key={label} className="px-5 py-4">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">{label}</p>
@@ -411,6 +436,15 @@ export function BillPreview({
               </div>
               <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Aún no hay pagos registrados</p>
               <p className="text-xs text-slate-500 mt-1 max-w-xs">Esta factura no tiene abonos o pagos asociados en este momento.</p>
+              {formData.status !== 'PAID' && (
+                <button
+                  onClick={() => setShowQuickPayment(true)}
+                  className="mt-4 flex items-center gap-2 text-sm font-semibold text-[#6C47FF] hover:text-[#5835E8] transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  Registrar primer pago
+                </button>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -454,6 +488,21 @@ export function BillPreview({
         </SectionCard>
 
       </div>
+
+      {/* ── Mini Modal (Quick) ── */}
+      <PaymentModal
+        isOpen={showQuickPayment}
+        onClose={() => setShowQuickPayment(false)}
+        onAdvanced={() => {
+          setShowQuickPayment(false);
+          setShowAdvancedPayment(true);
+        }}
+        bill={billForPayment}
+        onSubmit={(data) => {
+          onAddPayment?.(data);
+          setShowQuickPayment(false);
+        }}
+      />
 
       {/* ── DIAN modal ── */}
       {showDianModal && formData.dianResponse && (

@@ -17,7 +17,7 @@ export default function BillsPage({
   onSelect = () => { },
   onSelectBill = () => { },
 }: BillsPageProps) {
-  const { bills, isLoading, error, refetch } = useBill();
+  const { bills, isLoading, error, refetch, getBill } = useBill();
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
@@ -62,10 +62,11 @@ export default function BillsPage({
   const columns = originalColumns;
 
   const handlePaymentSubmit = async (paymentData: { value: string | number; date: string; bankAccount: string; paymentMethod: string; billId: string }) => {
-    if (!selectedBillForPayment) return;
+    const targetBill = selectedBill || selectedBillForPayment;
+    if (!targetBill) return;
 
     try {
-      const response = await fetch(`/api/bills/${selectedBillForPayment.id}/payments`, {
+      const response = await fetch(`/api/bills/${targetBill.id}/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(paymentData),
@@ -74,6 +75,12 @@ export default function BillsPage({
       if (response.ok) {
         toast.success("Pago registrado correctamente");
         refetchTable();
+        
+        // Si el preview está abierto, refrescamos la data de la factura específica
+        if (showPreview && selectedBill) {
+          const freshBill = await getBill(selectedBill.id);
+          if (freshBill) setSelectedBill(freshBill);
+        }
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || "Error al registrar el pago");
@@ -112,6 +119,7 @@ export default function BillsPage({
     dianStatus?: string | null;
     rejectedReason?: string | null;
     dianResponse?: string | null;
+    payments?: any[]; // Agregamos payments aquí
   }) => {
     const items = bill.items || [];
 
@@ -135,8 +143,18 @@ export default function BillsPage({
       };
     });
 
+    const formattedPayments = (bill.payments || []).map((p: any) => ({
+      id: p.id,
+      date: p.date,
+      receiptNumber: p.receiptNumber || (p.id ? p.id.substring(0, 8) : "---"),
+      method: p.method,
+      amount: p.amount,
+      account: p.account ? { name: p.account.name } : null
+    }));
+
     return {
       formData: {
+        id: bill.id,
         date: bill.date
           ? new Date(bill.date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
@@ -158,6 +176,7 @@ export default function BillsPage({
         dianResponse: bill.dianResponse || undefined,
       },
       items: formattedItems,
+      payments: formattedPayments, // Pasamos los pagos formateados
       subtotal: parseFloat(bill.subtotal || "0"),
       discountTotal: parseFloat(bill.discountTotal || "0"),
       taxTotal: parseFloat(bill.taxTotal || "0"),
@@ -203,6 +222,7 @@ export default function BillsPage({
             setShowPreview(false);
             setSelectedBill(null);
           }}
+          onAddPayment={handlePaymentSubmit}
         />
       </div>
     );
