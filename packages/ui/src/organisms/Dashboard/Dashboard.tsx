@@ -28,10 +28,12 @@ const AVAILABLE_WIDGETS = [
   { type: 'activity', title: 'Actividad Reciente', icon: ListChecks, color: 'orange' },
 ];
 
+const ResponsiveGrid = Responsive as any;
+
 export function Dashboard({ userName = "Administrador", initialWidgets, initialLayout, onSaveLayout, metrics }: any) {
   const [isEditing, setIsEditing] = useState(false);
   const [widgets, setWidgets] = useState<any[]>(initialWidgets || []);
-  const [layout, setLayout] = useState<GridLayout[]>(initialLayout || []);
+  const [layout, setLayout] = useState<any[]>(initialLayout || []);
   const [width, setWidth] = useState(1200);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -55,7 +57,7 @@ export function Dashboard({ userName = "Administrador", initialWidgets, initialL
         { id: 'chart', type: 'chart', title: 'Crecimiento', props: { data: metrics.monthlySales, variant: 'area' } },
         { id: 'activity', type: 'activity', title: 'Recientes', props: { items: metrics.recentBills } },
       ];
-      const defaultLayout = [
+      const defaultLayout: any[] = [
         { i: 'sales', x: 0, y: 0, w: 1, h: 2 },
         { i: 'receivable', x: 1, y: 0, w: 1, h: 2 },
         { i: 'clients', x: 2, y: 0, w: 1, h: 2 },
@@ -111,12 +113,26 @@ export function Dashboard({ userName = "Administrador", initialWidgets, initialL
         </div>
       )}
       <div ref={containerRef} className="relative w-full">
-        <Responsive className="layout" layouts={{ lg: layout }} breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }} cols={{ lg: 4, md: 2, sm: 2, xs: 1, xxs: 1 }} rowHeight={60} width={width} isDraggable={isEditing} isResizable={isEditing} draggableHandle=".drag-handle" onLayoutChange={(l) => setLayout(l)} margin={[32, 32]} containerPadding={[0, 0]} compactType="vertical">
+        <ResponsiveGrid
+          className="layout"
+          layouts={{ lg: layout }}
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 4, md: 2, sm: 2, xs: 1, xxs: 1 }}
+          rowHeight={60}
+          width={width}
+          isDraggable={isEditing}
+          isResizable={isEditing}
+          draggableHandle=".drag-handle"
+          onLayoutChange={(l: any) => setLayout(l)}
+          margin={[32, 32]}
+          containerPadding={[0, 0]}
+          compactType="vertical"
+        >
           {widgets.map((widget: any) => (
             <div key={widget.id} className="group/item relative">
               {isEditing && (
                 <div className="absolute top-4 right-4 z-50 flex gap-1.5 animate-in fade-in scale-90">
-                  <button className="drag-handle w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-purple-600 shadow-xl transition-all"><GripVertical size={16} /></button>
+                  <button className="drag-handle w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-purple-600 shadow-xl transition-all"><GripVertical size={16} /></button>
                   <button onClick={() => removeWidget(widget.id)} className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-rose-500 hover:bg-rose-50 shadow-xl transition-all"><X size={16} /></button>
                 </div>
               )}
@@ -128,7 +144,7 @@ export function Dashboard({ userName = "Administrador", initialWidgets, initialL
               </div>
             </div>
           ))}
-        </Responsive>
+        </ResponsiveGrid>
       </div>
     </div>
   );

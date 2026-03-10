@@ -21,20 +21,22 @@ export function SettingsModal() {
 
     const handleSaveProfile = async (data: any) => {
         console.log("Saving profile in Web:", data);
-        // Aquí iría la lógica de API de la web
     };
 
     const handleSaveCompany = async (data: any) => {
         console.log("Saving company in Web:", data);
-        // Aquí iría la lógica de API de la web
     };
 
     const renderContent = () => {
+        // Extraemos la empresa del primer registro de UserCompany
+        const firstUserCompany = user?.companies && user.companies.length > 0 ? user.companies[0] : null;
+        const company = (firstUserCompany as any)?.company || null;
+
         switch (currentView) {
             case 'perfil':
                 return <ProfileSettings user={user} onSave={handleSaveProfile} />;
             case 'empresa':
-                return <CompanySettings company={user?.companies?.[0]?.company} onSave={handleSaveCompany} />;
+                return <CompanySettings company={company} onSave={handleSaveCompany} />;
             case 'facturacion':
                 return <BillingSettings />;
             case 'suscripcion':

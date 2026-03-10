@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Plus, MoreVertical, Filter } from 'lucide-react';
+import { Plus, MoreVertical, Filter, Landmark } from 'lucide-react';
 import { Button, ModernTable, ModernTableSkeleton } from '@simplapp/ui';
 import type { TableColumn } from '@simplapp/ui/src/types/table.entity';
 import { Skeleton, PaymentBillModal } from '@simplapp/ui';
@@ -153,7 +153,9 @@ export default function ReceivedPaymentsPage() {
                addActionLabel="Nuevo pago recibido"
                onAdd={() => setIsModalOpen(true)}
                isLoading={isLoading}
-               emptyStateMessage="No hay pagos registrados."
+               emptyIcon={Landmark}
+               emptyTitle="No hay pagos registrados"
+               emptyDescription="Registra los abonos y pagos que recibes para mantener tus cuentas al día."
                searchable={true}
                pagination={true}
             />
