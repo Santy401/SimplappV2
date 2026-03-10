@@ -4,7 +4,7 @@ export default function MarketingLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="h-screen overflow-hidden">
+        <div className="min-h-screen">
             {children}
         </div>
     );

@@ -50,6 +50,7 @@ export async function createUsers(User: Pick<Data, 'email' | 'name' | 'password'
                     password: User.password,
                     typeAccount: User.typeAccount,
                     country: User.country,
+                    lastCompanyId: "",
                     companies: {
                         create: {
                             role: 'OWNER',

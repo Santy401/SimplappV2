@@ -61,11 +61,18 @@ export async function POST(
     }
 
     let prismaPaymentMethod: PaymentMethod = PaymentMethod.UNDEFINED;
-    if (data.paymentMethod === 'efectivo') prismaPaymentMethod = PaymentMethod.CASH;
-    if (data.paymentMethod === 'transferencia') prismaPaymentMethod = PaymentMethod.TRANSFER;
-    if (data.paymentMethod === 'tarjeta') prismaPaymentMethod = PaymentMethod.CREDIT_CARD;
+    const incomingMethod = data.paymentMethod?.toUpperCase();
+    
+    if (incomingMethod === 'CASH' || incomingMethod === 'EFECTIVO') prismaPaymentMethod = PaymentMethod.CASH;
+    else if (incomingMethod === 'TRANSFER' || incomingMethod === 'TRANSFERENCIA') prismaPaymentMethod = PaymentMethod.TRANSFER;
+    else if (incomingMethod === 'CREDIT_CARD' || incomingMethod === 'TARJETA') prismaPaymentMethod = PaymentMethod.CREDIT_CARD;
+    else if (incomingMethod === 'DEBIT_CARD') prismaPaymentMethod = PaymentMethod.DEBIT_CARD;
+    else if (incomingMethod === 'CHECK') prismaPaymentMethod = PaymentMethod.CHECK;
+    else if (Object.values(PaymentMethod).includes(incomingMethod)) {
+      prismaPaymentMethod = incomingMethod as PaymentMethod;
+    }
 
-    const newStatus = newBalance <= 0 ? BillStatus.PAID : BillStatus.PARTIALLY_PAID;
+    const newStatus = (newBalance <= 0) ? BillStatus.PAID : BillStatus.PARTIALLY_PAID;
 
     const transaction = await prisma.$transaction([
       prisma.payment.create({

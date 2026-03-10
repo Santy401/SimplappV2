@@ -1,9 +1,0 @@
-"use client";
-import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { Archive, CheckCircle, Copy, Edit, Eye, MoreHorizontal, Share2, Trash2, } from "lucide-react";
-import { Button } from "../../atoms/Button/Button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "../../atoms/DropdownMenu/dropdown-menu";
-export function TableActionsDropdown({ onView, onEdit, onDelete, onDuplicate, onExport, onArchive, onMarkAsPaid, className, }) {
-    return (_jsxs(DropdownMenu, { children: [_jsx(DropdownMenuTrigger, { asChild: true, children: _jsx(Button, { className: "h-8 w-8 flex items-center justify-center cursor-pointer", size: "icon", variant: "ghost", title: "Acciones", children: _jsx(MoreHorizontal, { className: "h-5 w-5" }) }) }), _jsxs(DropdownMenuContent, { align: "end", className: `w-44 ${className ?? ""}`, children: [onView && _jsxs(DropdownMenuItem, { onClick: onView, children: [_jsx(Eye, { className: "mr-2 size-4" }), "Ver"] }), onEdit && _jsxs(DropdownMenuItem, { onClick: onEdit, children: [_jsx(Edit, { className: "mr-2 size-4" }), "Editar"] }), onDuplicate && _jsxs(DropdownMenuItem, { onClick: onDuplicate, children: [_jsx(Copy, { className: "mr-2 size-4" }), "Duplicar"] }), onExport && _jsxs(DropdownMenuItem, { onClick: onExport, children: [_jsx(Share2, { className: "mr-2 size-4" }), "Exportar"] }), onArchive && _jsxs(DropdownMenuItem, { onClick: onArchive, children: [_jsx(Archive, { className: "mr-2 size-4" }), "Archivar"] }), onMarkAsPaid && _jsxs(DropdownMenuItem, { onClick: onMarkAsPaid, children: [_jsx(CheckCircle, { className: "mr-2 size-4 text-green-600" }), "Marcar como pagada"] }), onDelete && _jsx(DropdownMenuSeparator, {}), onDelete && _jsxs(DropdownMenuItem, { variant: "destructive", onClick: onDelete, children: [_jsx(Trash2, { className: "mr-2 size-4" }), "Eliminar"] })] })] }));
-}
-export default TableActionsDropdown;

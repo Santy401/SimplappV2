@@ -1,0 +1,47 @@
+'use client';
+
+import React from 'react';
+import { Receipt, ArrowUpRight } from 'lucide-react';
+import { DashboardCard, currencyFormat } from './DashboardAtoms';
+import { cn } from '../../utils/utils';
+
+export function RecentActivityWidget({ title, items, onViewAll }: any) {
+  const formatShortName = (name: string) => {
+    if (!name) return "Consumidor Final";
+    const parts = name.split(" ");
+    return parts.length > 2 ? `${parts[0]} ${parts[parts.length - 1]}` : name;
+  };
+
+  return (
+    <DashboardCard className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-black text-slate-800 dark:text-white tracking-tight">{title}</h3>
+        {onViewAll && (
+          <button onClick={onViewAll} className="w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:text-purple-600 transition-all shadow-sm">
+            <ArrowUpRight size={18} />
+          </button>
+        )}
+      </div>
+      <div className="space-y-3">
+        {items.map((item: any) => (
+          <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-purple-200 transition-all group">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex flex-col items-center justify-center group-hover:bg-purple-600 transition-colors">
+                <span className="text-[10px] text-slate-400 font-black uppercase leading-none group-hover:text-purple-200">{item.prefix || 'FAC'}</span>
+                <span className="text-sm font-black text-slate-700 dark:text-slate-200 group-hover:text-white">{item.number}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-bold text-slate-700 dark:text-slate-200 truncate max-w-[140px] group-hover:text-slate-900 dark:group-hover:text-white">{formatShortName(item.clientName)}</span>
+                <span className="text-xs font-medium text-slate-400">{new Date(item.date).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' })}</span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">{currencyFormat(item.total)}</div>
+              <div className={cn("text-[9px] uppercase font-black px-2 py-0.5 rounded-full inline-block mt-1", item.status === 'PAID' ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600")}>{item.status}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </DashboardCard>
+  );
+}

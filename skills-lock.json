@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "skills": {
+    "code-refactoring": {
+      "source": "supercent-io/skills-template",
+      "sourceType": "github",
+      "computedHash": "61312d5f71ec3240606dab042c0a86b62b421031e4aa8252d61dc3b2885ef2a2"
+    },
+    "interface-design": {
+      "source": "dammyjay93/interface-design",
+      "sourceType": "github",
+      "computedHash": "4d5fe1dacfebc0c1b3837b061405150ed2e4971c096543afc46c23161c5a4f7a"
+    }
+  }
+}

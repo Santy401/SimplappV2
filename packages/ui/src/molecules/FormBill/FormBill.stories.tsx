@@ -74,9 +74,9 @@ export const ViewMode: Story = {
       clientName: 'John Doe',
       clientEmail: 'john@example.com',
       date: new Date(),
-      subtotal: 1000,
-      total: 1190,
-      balance: 1190,
+      subtotal: "1000",
+      total: "1190",
+      balance: "1190",
       status: 'ISSUED' as BillStatus,
       paymentMethod: 'CASH' as PaymentMethod,
       items: [
