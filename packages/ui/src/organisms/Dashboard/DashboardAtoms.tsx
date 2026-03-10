@@ -3,8 +3,11 @@
 import React from 'react';
 import { cn } from '../../utils/utils';
 
+<<<<<<< HEAD
 // ─── Formatting Utils ────────────────────────────────────────────────────────
 
+=======
+>>>>>>> feat/rebuild-ui-components
 export const currencyFormat = (val: number) => {
   if (val === undefined || val === null || isNaN(val)) return '$ 0';
   return new Intl.NumberFormat('es-CO', {
@@ -14,6 +17,7 @@ export const currencyFormat = (val: number) => {
   }).format(val);
 };
 
+<<<<<<< HEAD
 // ─── Dashboard Card ──────────────────────────────────────────────────────────
 
 interface DashboardCardProps {
@@ -23,17 +27,28 @@ interface DashboardCardProps {
 }
 
 export function DashboardCard({ children, className, glowColor = 'none' }: DashboardCardProps) {
+=======
+export function DashboardCard({ children, className, glowColor = 'none' }: any) {
+>>>>>>> feat/rebuild-ui-components
   const glowStyles = {
     purple: 'after:bg-purple-500/5',
     emerald: 'after:bg-emerald-500/5',
     orange: 'after:bg-orange-500/5',
     blue: 'after:bg-blue-500/5',
     none: ''
+<<<<<<< HEAD
   };
 
   return (
     <div className={cn(
       "relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-xl hover:shadow-slate-200/20 dark:hover:shadow-black/20",
+=======
+  } as any;
+
+  return (
+    <div className={cn(
+      "relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-xl",
+>>>>>>> feat/rebuild-ui-components
       glowColor !== 'none' && `after:absolute after:top-0 after:right-0 after:w-32 after:h-32 after:rounded-full after:blur-[60px] after:pointer-events-none ${glowStyles[glowColor]}`,
       className
     )}>
@@ -44,6 +59,7 @@ export function DashboardCard({ children, className, glowColor = 'none' }: Dashb
   );
 }
 
+<<<<<<< HEAD
 // ─── Dashboard Grid ──────────────────────────────────────────────────────────
 
 export function DashboardGrid({ children, className }: { children: React.ReactNode; className?: string }) {
@@ -57,6 +73,9 @@ export function DashboardGrid({ children, className }: { children: React.ReactNo
 // ─── Section Header ──────────────────────────────────────────────────────────
 
 export function DashboardSectionHeader({ title, description, icon: Icon }: { title: string; description?: string; icon?: React.ElementType }) {
+=======
+export function DashboardSectionHeader({ title, description, icon: Icon }: any) {
+>>>>>>> feat/rebuild-ui-components
   return (
     <div className="flex items-center justify-between mb-6">
       <div>
