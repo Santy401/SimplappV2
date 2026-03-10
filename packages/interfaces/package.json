@@ -7,7 +7,12 @@
     "prebuild": "prisma generate --schema=../../apps/web/prisma/schema.prisma",
     "build": "tsc"
   },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.0.0",
+    "react": "^19.0.0"
+  },
   "devDependencies": {
+    "@tanstack/react-query": "^5.90.12",
     "@types/node": "^20.19.26",
     "@types/pg": "^8.11.10",
     "@types/react": "^19.2.7",
@@ -20,7 +25,6 @@
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@simplapp/domain": "workspace:*",
-    "@tanstack/react-query": "^5.90.12",
     "jose": "^6.1.3",
     "lucide-react": "^0.555.0",
     "pg": "^8.16.3",

@@ -129,12 +129,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ProtectedRoute>
-      <NavigationProvider>
-        <AppStateProvider>
+    <NavigationProvider>
+      <AppStateProvider>
+        <ProtectedRoute>
           <AdminContent>{children}</AdminContent>
-        </AppStateProvider>
-      </NavigationProvider>
-    </ProtectedRoute>
+        </ProtectedRoute>
+      </AppStateProvider>
+    </NavigationProvider>
   );
 }
