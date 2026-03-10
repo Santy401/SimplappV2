@@ -1,4 +1,5 @@
-import React from 'react';
+"use client";
+
 import { Skeleton } from '../../atoms/Skeleton/skeleton';
 
 export function DataTableSkeleton() {
