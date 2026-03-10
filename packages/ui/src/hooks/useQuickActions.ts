@@ -1,12 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { User, Package, Store } from 'lucide-react';
+import { User, Package, Store, UserCheck, Tag } from 'lucide-react';
 import { QuickField } from '../molecules/QuickCreateModal/QuickCreateModal';
 import { OrganizationType, IdentificationType } from '@domain/entities/Client.entity';
 import { ProductCategory, UnitOfMeasure } from '@domain/entities/Product.entity';
 
-export type QuickActionType = 'client' | 'product' | 'store' | null;
+export type QuickActionType = 'client' | 'product' | 'store' | 'seller' | 'listPrice' | null;
 
 export const useQuickActions = (onSelect?: (view: string) => void) => {
   const [activeAction, setActiveAction] = useState<QuickActionType>(null);
@@ -67,7 +67,7 @@ export const useQuickActions = (onSelect?: (view: string) => void) => {
           required: true 
         },
         { key: 'identificationNumber', label: 'Número ID', type: 'text', placeholder: '123456789', required: true, colSpan: 2 },
-        { key: 'email', label: 'Correo', type: 'email', placeholder: 'correo@ejemplo.com', colSpan: 2 },
+        { key: 'email', label: 'Correo', type: 'email', placeholder: 'correo@empresa.com', colSpan: 2 },
       ] as QuickField[],
     },
     product: {
@@ -123,6 +123,37 @@ export const useQuickActions = (onSelect?: (view: string) => void) => {
         { key: 'address', label: 'Dirección física', type: 'textarea', placeholder: 'Calle 100 #15-30', colSpan: 2 },
       ] as QuickField[],
     },
+    seller: {
+      title: 'Nuevo vendedor',
+      icon: UserCheck,
+      description: 'Registra una nueva persona para gestionar ventas.',
+      submitLabel: 'Crear vendedor',
+      advancedLabel: 'Lista de vendedores',
+      onAdvanced: () => {
+        onSelect?.('ventas-vendedor');
+        closeAction();
+      },
+      fields: [
+        { key: 'name', label: 'Nombre completo', type: 'text', placeholder: 'Ej: Alexander García', required: true, colSpan: 2 },
+        { key: 'identification', label: 'Identificación', type: 'text', placeholder: '123456789' },
+        { key: 'phone', label: 'Teléfono', type: 'text', placeholder: '300 123 4567' },
+      ] as QuickField[],
+    },
+    listPrice: {
+      title: 'Nueva lista de precios',
+      icon: Tag,
+      description: 'Crea una categoría de precios para tus productos.',
+      submitLabel: 'Crear lista',
+      advancedLabel: 'Gestionar listas',
+      onAdvanced: () => {
+        onSelect?.('inventario-precios');
+        closeAction();
+      },
+      fields: [
+        { key: 'name', label: 'Nombre de la lista', type: 'text', placeholder: 'Ej: Mayoristas', required: true, colSpan: 2 },
+        { key: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Precios especiales para clientes frecuentes', colSpan: 2 },
+      ] as QuickField[],
+    },
   };
 
   const handleQuickSubmit = async (vals: Record<string, string>) => {
@@ -143,39 +174,45 @@ export const useQuickActions = (onSelect?: (view: string) => void) => {
           country: 'Colombia',
         };
       } else if (activeAction === 'product') {
-        // Obtenemos categorías reales
         const catRes = await fetch('/api/categories');
         const catData = await catRes.json();
         const categories = Array.isArray(catData) ? catData : catData.data || [];
-        
-        // Si no hay categorías, no podemos crear el producto (la API requiere categoryId)
-        if (categories.length === 0) {
-          throw new Error('No hay categorías disponibles. Crea una categoría primero.');
-        }
-
+        if (categories.length === 0) throw new Error('Crea una categoría primero.');
         const defaultCatId = categories[0].id;
 
         endpoint = '/api/products';
         const basePrice = parseFloat(vals.basePrice) || 0;
         const taxRate = parseFloat(vals.taxRate || '19');
-        
-        // El backend desestructura estos nombres específicos:
         body = {
           name: vals.name,
-          basePrice: basePrice, // El backend hará String(basePrice)
+          basePrice: basePrice,
           taxRate: vals.taxRate || '19',
           unitOfMeasure: vals.unitOfMeasure || UnitOfMeasure.UNIT,
-          category: defaultCatId, // El backend lo mapeará a categoryProductId
+          category: defaultCatId,
           active: true,
           type: 'PRODUCT',
           valuePrice: basePrice * (1 + (taxRate / 100)),
-          categoryProductId: defaultCatId // Por si acaso
         };
       } else if (activeAction === 'store') {
         endpoint = '/api/stores';
         body = {
           name: vals.name,
           address: vals.address || null,
+        };
+      } else if (activeAction === 'seller') {
+        endpoint = '/api/sellers';
+        body = {
+          name: vals.name,
+          identification: vals.identification || null,
+          phone: vals.phone || null,
+          active: true
+        };
+      } else if (activeAction === 'listPrice') {
+        endpoint = '/api/list-prices';
+        body = {
+          name: vals.name,
+          description: vals.description || null,
+          active: true
         };
       }
 
@@ -190,7 +227,6 @@ export const useQuickActions = (onSelect?: (view: string) => void) => {
         throw new Error(errorData.error || errorData.message || 'Error al crear el registro');
       }
 
-      console.log(`${activeAction} creado exitosamente`);
       closeAction();
       alert(`${configs[activeAction!].title} creado correctamente`);
       

@@ -1,6 +1,6 @@
 "use client"
 
-import { Plus, CircleHelp, ChevronDown, Menu, User, Package, Store, FileText, Search } from "lucide-react"
+import { ChevronDown, Menu, Search } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,6 +14,7 @@ import { ProfileDropdown } from "../../atoms/DropdownProfile/dropdown-profile";
 import { NavbarDropdownSearch } from "../NavbarDropdownSearch/NavbarDropdownSearch";
 import { NotificationDropdown } from "../NotificationDropdown/NotificationDropdown";
 import { QuickCreateModal } from "../../molecules/QuickCreateModal/QuickCreateModal";
+import { QuickCreateDropdown } from "./components/QuickCreateDropdown";
 import { useQuickActions } from "../../hooks/useQuickActions";
 import { useSession } from "@hooks/features/auth/use-session";
 import { cn } from "../../utils/utils";
@@ -86,49 +87,8 @@ export const Navbar = ({ onSearchOpen, onSelect, onMobileMenuToggle }: NavbarPro
                 {/* Right side: Actions & User */}
                 <div className="flex items-center gap-3">
                     
-                    {/* Quick Create Dropdown */}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <button className="h-10 px-4 flex items-center justify-center gap-2 bg-[#6C47FF] text-white rounded-xl hover:bg-[#5835E8] transition-all shadow-lg shadow-purple-500/20 group">
-                                <Plus className="w-4 h-4 group-hover:rotate-90 transition-transform duration-300" />
-                                <span className="text-xs font-bold uppercase tracking-wider hidden md:block">Crear</span>
-                            </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl border-slate-200 dark:border-slate-800 shadow-2xl">
-                            <DropdownMenuLabel className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Acciones Rápidas</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            
-                            <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3" onClick={() => onSelect?.('ventas-facturacion-create')}>
-                                <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center text-blue-600">
-                                    <FileText size={16} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-sm">Nueva Factura</span>
-                                    <span className="text-[10px] text-slate-400">Emisión inmediata</span>
-                                </div>
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3" onClick={() => openAction('client')}>
-                                <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-                                    <User size={16} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-sm">Nuevo Cliente</span>
-                                    <span className="text-[10px] text-slate-400">Registro rápido</span>
-                                </div>
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem className="p-3 rounded-xl cursor-pointer gap-3" onClick={() => openAction('product')}>
-                                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center text-amber-600">
-                                    <Package size={16} />
-                                </div>
-                                <div className="flex flex-col">
-                                    <span className="font-bold text-sm">Nuevo Producto</span>
-                                    <span className="text-[10px] text-slate-400">Catálogo de venta</span>
-                                </div>
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Modular Quick Create Dropdown */}
+                    <QuickCreateDropdown onOpenAction={openAction} onSelectView={onSelect} />
 
                     <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block" />
 

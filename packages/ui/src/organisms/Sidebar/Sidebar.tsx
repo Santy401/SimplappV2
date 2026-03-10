@@ -76,7 +76,7 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
             )}
             <div
                 className={cn(
-                    "h-screen z-[100] transition-all duration-500 ease-in-out flex-shrink-0",
+                    "h-screen z-100 transition-all duration-500 ease-in-out flex-shrink-0",
                     "fixed sm:sticky top-0 left-0",
                     isPinned ? "sm:w-64" : "sm:w-20",
                     isMobileOpen ? "translate-x-0 w-64" : "-translate-x-full sm:translate-x-0"
@@ -88,14 +88,17 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
                     className={cn(
                         "absolute top-0 left-0 h-screen border-r flex flex-col overflow-hidden transition-all duration-500",
                         "bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800",
-                        isExpanded || isMobileOpen ? "w-64" : "w-20",
+                        isExpanded || isMobileOpen ? "w-64" : "w-23",
                         !isPinned && isHovered && "shadow-[20px_0_50px_rgba(0,0,0,0.1)] dark:shadow-[20px_0_50px_rgba(0,0,0,0.3)]"
                     )}
                 >
                     {/* ── Header / Logo ── */}
-                    <div className="h-[72px] px-6 flex items-center justify-between border-b border-slate-100 dark:border-slate-900">
+                    <div className={cn(
+                        "h-[64px] flex items-center border-b border-slate-100 dark:border-slate-900 transition-all duration-500",
+                        isExpanded || isMobileOpen ? "px-6 justify-between" : "justify-center"
+                    )}>
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#6C47FF] via-[#5835E8] to-[#4318FF] p-[1px] shadow-lg shadow-purple-500/20 shrink-0">
+                            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#6C47FF] via-[#5835E8] to-[#4318FF] p-px shadow-lg shadow-purple-500/20 shrink-0">
                                 <div className="w-full h-full rounded-[14px] bg-gradient-to-br from-white/20 to-transparent flex items-center justify-center">
                                     <span className="text-white font-black text-xl tracking-tighter">S</span>
                                 </div>
@@ -134,7 +137,8 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
                                             }
                                         }}
                                         className={cn(
-                                            "w-full flex items-center justify-between h-11 px-3 rounded-xl transition-all duration-300 group relative",
+                                            "w-full flex items-center h-11 rounded-xl transition-all duration-300 group relative",
+                                            isExpanded || isMobileOpen ? "px-3 justify-between" : "px-0 justify-center",
                                             isActive 
                                                 ? "bg-purple-50 dark:bg-purple-900/10 text-purple-600 dark:text-purple-400 shadow-sm shadow-purple-500/5" 
                                                 : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 hover:text-slate-900 dark:hover:text-slate-200"
@@ -192,7 +196,10 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
                     {/* ── Footer / Actions ── */}
                     <div className="px-3 py-4 border-t border-slate-100 dark:border-slate-900 space-y-1">
                         <button 
-                            className="w-full flex items-center h-11 px-3 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all group"
+                            className={cn(
+                                "w-full flex items-center h-11 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all group",
+                                isExpanded || isMobileOpen ? "px-3" : "justify-center px-0"
+                            )}
                             onClick={() => onSelect?.('settings')}
                         >
                             <div className="w-8 h-8 rounded-lg flex items-center justify-center group-hover:rotate-45 transition-transform duration-500">
