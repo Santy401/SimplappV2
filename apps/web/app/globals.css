@@ -27,6 +27,7 @@
   --color-brand-hover: var(--brand-hover);
   --color-ring: var(--ring);
   --color-border: var(--border);
+  --sidebar-border: var(--sidebar-border);
 }
 
 /* ── Smooth Scroll Configuration ────────────────────────────────────────── */

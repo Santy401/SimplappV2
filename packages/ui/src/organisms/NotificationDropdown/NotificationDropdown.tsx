@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import {
@@ -19,6 +19,7 @@ import {
     NotificationTab,
     NotificationType,
 } from "@hooks/features/notifications/use-notifications";
+import { cn } from "../../utils/utils";
 
 interface NotificationPanelProps {
     onSelectLink?: (link: string) => void;
@@ -131,16 +132,16 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                 {/* Bell trigger */}
                 <button
                     onClick={toggleOpen}
-                    className="relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                    className="relative w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition shadow-sm group"
                     aria-label="Notificaciones"
                 >
-                    <Bell className={[
-                        "w-5 h-5 transition-colors duration-300",
-                        unreadCount > 0 ? "text-amber-500" : "text-muted-foreground",
+                    <Bell className={cn(
+                        "w-4.5 h-4.5 transition-all duration-300",
+                        unreadCount > 0 ? "text-amber-500" : "text-slate-400 group-hover:text-purple-600",
                         ringing ? "bell-ring" : "",
-                    ].join(" ")} />
+                    )} />
                     {unreadCount > 0 && (
-                        <span key={unreadCount} className="badge-pop absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 flex items-center justify-center bg-rose-500 rounded-full border-2 border-white dark:border-background text-[9px] font-bold text-white">
+                        <span key={unreadCount} className="badge-pop absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-rose-500 rounded-lg border-2 border-white dark:border-slate-900 text-[10px] font-black text-white shadow-lg shadow-rose-500/20">
                             {unreadCount > 9 ? "9+" : unreadCount}
                         </span>
                     )}
@@ -150,61 +151,43 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                 <AnimatePresence>
                     {open && (
                         <motion.div
-                            initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                            initial={{ opacity: 0, y: 12, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
-                            exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                            transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
-                            className="absolute right-0 top-10 w-[480px] max-h-[80vh] bg-white dark:bg-slate-950 border border-sidebar-border rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 flex flex-col overflow-hidden z-50"
+                            exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                            transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                            className="absolute right-0 top-12 w-[420px] max-h-[85vh] bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/60 flex flex-col overflow-hidden z-[100]"
                         >
                             {/* Header */}
-                            <div className="flex items-center justify-between px-5 pt-5 pb-3">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-50 dark:border-slate-900">
                                 <div>
-                                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Notificaciones</h2>
+                                    <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Notificaciones</h2>
                                     {(counts?.unread ?? 0) > 0 && (
-                                        <p className="text-xs text-slate-500 mt-0.5">
-                                            {counts!.unread} sin leer
+                                        <p className="text-xs font-bold text-blue-500 mt-0.5 uppercase tracking-wider">
+                                            {counts!.unread} por leer
                                         </p>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-1">
+                                <div className="flex items-center gap-1.5">
                                     {(counts?.unread ?? 0) > 0 && (
                                         <button
                                             onClick={() => markRead.mutate({ markAllRead: true })}
-                                            title="Marcar todas como leÃ­das"
-                                            className="p-1.5 text-slate-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition text-xs flex items-center gap-1"
+                                            title="Marcar todas como leídas"
+                                            className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"
                                         >
-                                            <CheckCheck className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                    {notifications.length > 0 && activeTab !== "archivo" && (
-                                        <button
-                                            onClick={() => archive.mutate({ archiveAll: true })}
-                                            title="Archivar todas"
-                                            className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 rounded-lg transition"
-                                        >
-                                            <Archive className="w-4 h-4" />
-                                        </button>
-                                    )}
-                                    {notifications.length > 0 && (
-                                        <button
-                                            onClick={() => remove.mutate({ deleteAll: true })}
-                                            title="Eliminar todas"
-                                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
+                                            <CheckCheck className="w-4.5 h-4.5" />
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setOpen(false)}
-                                        className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition"
+                                        className="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all"
                                     >
-                                        <X className="w-4 h-4" />
+                                        <X className="w-4.5 h-4.5" />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Tabs */}
-                            <div className="flex gap-0 px-5 border-b border-sidebar-border mb-0">
+                            <div className="flex px-4 pt-2 border-b border-slate-50 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/30">
                                 {TAB_CONFIG.map((tab) => {
                                     const isActive = activeTab === tab.key;
                                     const badge = tab.key === "novedades"
@@ -216,17 +199,20 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                                         <button
                                             key={tab.key}
                                             onClick={() => handleTabChange(tab.key)}
-                                            className={[
-                                                "flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors relative -mb-px",
+                                            className={cn(
+                                                "flex items-center gap-2 px-4 py-3 text-xs font-black uppercase tracking-widest transition-all relative",
                                                 isActive
-                                                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
-                                                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
-                                            ].join(" ")}
+                                                    ? "text-blue-600 dark:text-blue-400 after:absolute after:bottom-0 after:left-4 after:right-4 after:h-0.5 after:bg-blue-600 after:rounded-full"
+                                                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+                                            )}
                                         >
                                             <tab.icon className="w-3.5 h-3.5" />
                                             {tab.label}
                                             {(badge ?? 0) > 0 && (
-                                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${isActive ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400" : "bg-slate-100 dark:bg-slate-800 text-slate-500"}`}>
+                                                <span className={cn(
+                                                    "text-[9px] font-black px-1.5 py-0.5 rounded-md", 
+                                                    isActive ? "bg-blue-100 dark:bg-blue-900/40 text-blue-600" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                                )}>
                                                     {badge}
                                                 </span>
                                             )}
@@ -236,25 +222,25 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                             </div>
 
                             {/* Notification list */}
-                            <div className="flex-1 overflow-y-auto">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {notifications.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-16 text-center px-8">
-                                        <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                                            <BellOff className="w-7 h-7 text-slate-400" />
+                                    <div className="flex flex-col items-center justify-center py-20 text-center px-10 animate-in fade-in zoom-in-95 duration-500">
+                                        <div className="w-16 h-16 rounded-[24px] bg-slate-50 dark:bg-slate-900 flex items-center justify-center mb-6 shadow-inner">
+                                            <BellOff className="w-8 h-8 text-slate-300 dark:text-slate-700" />
                                         </div>
-                                        <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                            {activeTab === "archivo" ? "Archivo vacÃ­o" : activeTab === "novedades" ? "Sin novedades" : "Todo al dÃ­a"}
-                                        </p>
-                                        <p className="text-xs text-slate-400 mt-1">
-                                            {activeTab === "archivo" ? "Las notificaciones archivadas aparecerÃ¡n aquÃ­." : "No tienes notificaciones pendientes."}
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                                            {activeTab === "archivo" ? "Archivo vacío" : "Todo al día"}
+                                        </h3>
+                                        <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                                            {activeTab === "archivo" ? "Las notificaciones que archives aparecerán aquí para tu registro." : "No tienes notificaciones pendientes por revisar."}
                                         </p>
                                     </div>
                                 ) : (
                                     grouped.map(({ label, items }) => (
                                         <div key={label}>
                                             {/* Date separator */}
-                                            <div className="px-5 py-2 bg-slate-50/80 dark:bg-slate-900/50 border-b border-sidebar-border/50">
-                                                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
+                                            <div className="px-6 py-2.5 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-900 flex items-center justify-between">
+                                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">{label}</span>
                                             </div>
 
                                             {items.map((notif) => (
@@ -262,12 +248,12 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                                                     key={notif.id}
                                                     onMouseEnter={() => setHoveredId(notif.id)}
                                                     onMouseLeave={() => setHoveredId(null)}
-                                                    className={[
-                                                        "group relative flex items-start gap-3 px-5 py-3.5 border-b border-sidebar-border/30 last:border-0 cursor-pointer transition-colors",
+                                                    className={cn(
+                                                        "group relative flex items-start gap-4 px-6 py-5 border-b border-slate-50 dark:border-slate-900 last:border-0 cursor-pointer transition-all",
                                                         notif.read
                                                             ? "hover:bg-slate-50 dark:hover:bg-slate-900/40"
-                                                            : "bg-blue-50/40 dark:bg-blue-950/20 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                                                    ].join(" ")}
+                                                            : "bg-blue-50/30 dark:bg-blue-900/10 hover:bg-blue-50/50"
+                                                    )}
                                                     onClick={() => {
                                                         if (!notif.read) markRead.mutate({ notificationId: notif.id });
                                                         if (notif.link && onSelectLink) {
@@ -277,59 +263,66 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
                                                     }}
                                                 >
                                                     {/* Type icon */}
-                                                    <div className={`mt-0.5 shrink-0 w-8 h-8 rounded-xl flex items-center justify-center ${notif.type === "SUCCESS" ? "bg-emerald-50 dark:bg-emerald-900/20" :
-                                                        notif.type === "WARNING" || notif.type === "BILL_OVERDUE" ? "bg-amber-50 dark:bg-amber-900/20" :
-                                                            notif.type === "ERROR" || notif.type === "DIAN_REJECTED" ? "bg-rose-50 dark:bg-rose-900/20" :
-                                                                "bg-blue-50 dark:bg-blue-900/20"
-                                                        }`}>
+                                                    <div className={cn(
+                                                        "mt-0.5 shrink-0 w-10 h-10 rounded-2xl flex items-center justify-center border transition-transform group-hover:scale-110",
+                                                        notif.type === "SUCCESS" ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-100 dark:border-emerald-800" :
+                                                        notif.type === "WARNING" || notif.type === "BILL_OVERDUE" ? "bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-800" :
+                                                        notif.type === "ERROR" || notif.type === "DIAN_REJECTED" ? "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-800" :
+                                                        "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-800"
+                                                    )}>
                                                         {getIcon(notif.type)}
                                                     </div>
 
                                                     {/* Content */}
                                                     <div className="flex-1 min-w-0">
-                                                        <p className={`text-sm leading-snug ${notif.read ? "text-slate-600 dark:text-slate-400" : "text-slate-900 dark:text-white font-medium"}`}>
-                                                            {notif.title}
-                                                        </p>
-                                                        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2 leading-relaxed">
+                                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                                            <p className={cn(
+                                                                "text-sm leading-snug tracking-tight truncate", 
+                                                                notif.read ? "text-slate-600 dark:text-slate-400 font-medium" : "text-slate-900 dark:text-white font-black"
+                                                            )}>
+                                                                {notif.title}
+                                                            </p>
+                                                            {!notif.read && (
+                                                                <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/40 shrink-0" />
+                                                            )}
+                                                        </div>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                                                             {notif.message}
                                                         </p>
-                                                        <p className="text-[10px] text-slate-400 mt-1">
-                                                            {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: es })}
-                                                        </p>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
+                                                                {formatDistanceToNow(new Date(notif.createdAt), { addSuffix: true, locale: es })}
+                                                            </span>
+                                                        </div>
                                                     </div>
 
-                                                    {/* Unread dot */}
-                                                    {!notif.read && (
-                                                        <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 mt-1.5" />
-                                                    )}
-
                                                     {/* Actions on hover */}
-                                                    <div className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 transition-opacity ${hoveredId === notif.id ? "opacity-100" : "opacity-0"}`}
+                                                    <div className={cn(
+                                                        "absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 transition-all duration-300",
+                                                        hoveredId === notif.id ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 pointer-events-none"
+                                                    )}
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
                                                         {notif.archived ? (
                                                             <button
                                                                 onClick={() => archive.mutate({ unarchiveId: notif.id })}
-                                                                title="Desarchivar"
-                                                                className="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-sidebar-border text-slate-400 hover:text-amber-500 hover:border-amber-300 transition shadow-sm"
+                                                                className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-amber-600 hover:border-amber-200 transition-all shadow-xl"
                                                             >
-                                                                <ArchiveRestore className="w-3.5 h-3.5" />
+                                                                <ArchiveRestore size={14} className="mx-auto" />
                                                             </button>
                                                         ) : (
                                                             <button
                                                                 onClick={() => archive.mutate({ archiveId: notif.id })}
-                                                                title="Archivar"
-                                                                className="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-sidebar-border text-slate-400 hover:text-amber-500 hover:border-amber-300 transition shadow-sm"
+                                                                className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-amber-600 hover:border-amber-200 transition-all shadow-xl"
                                                             >
-                                                                <Archive className="w-3.5 h-3.5" />
+                                                                <Archive size={14} className="mx-auto" />
                                                             </button>
                                                         )}
                                                         <button
                                                             onClick={() => remove.mutate({ notificationId: notif.id })}
-                                                            title="Eliminar"
-                                                            className="p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-sidebar-border text-slate-400 hover:text-rose-500 hover:border-rose-300 transition shadow-sm"
+                                                            className="w-8 h-8 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-600 hover:border-rose-200 transition-all shadow-xl"
                                                         >
-                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                            <Trash2 size={14} className="mx-auto" />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -341,16 +334,16 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
 
                             {/* Footer */}
                             {notifications.length > 0 && (
-                                <div className="px-5 py-3 border-t border-sidebar-border bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
-                                    <span className="text-xs text-slate-400">
-                                        {notifications.length} notificaciones
+                                <div className="px-6 py-4 border-t border-slate-50 dark:border-slate-900 bg-slate-50/30 dark:bg-slate-900/30 flex justify-between items-center">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                        {notifications.length} documentos
                                     </span>
                                     {activeTab !== "archivo" && (
                                         <button
-                                            className="text-xs text-blue-500 hover:text-blue-600 font-medium transition"
+                                            className="text-xs text-blue-600 dark:text-blue-400 font-black uppercase tracking-tighter hover:underline"
                                             onClick={() => handleTabChange("archivo")}
                                         >
-                                            Ver archivo â†’
+                                            Ver archivo histórico →
                                         </button>
                                     )}
                                 </div>
@@ -362,4 +355,3 @@ export function NotificationDropdown({ onSelectLink }: NotificationPanelProps) {
         </>
     );
 }
-
