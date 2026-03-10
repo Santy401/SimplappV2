@@ -61,6 +61,10 @@ export * from './organisms/Marketing/LandingFooter';
 export * from './organisms/Docs/DocsNavbar';
 export * from './organisms/Docs/DocsSidebar';
 export * from './organisms/Docs/DocsLayout';
+export * from './organisms/Settings/SettingsModal';
+export * from './organisms/Settings/ProfileSettings';
+export * from './organisms/Settings/CompanySettings';
+export * from './organisms/Settings/SettingsAtoms';
 
 // ─── HOOKS (TABLES) ──────────────────────────────────────────────────────────
 export * from './hooks/tables/useBillTable';
