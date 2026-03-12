@@ -87,9 +87,9 @@ function AdminContent({ children }: { children: React.ReactNode }) {
           onMobileMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         />
         <main className="flex-1 overflow-y-auto w-full">
-          <div className="flex justify-center ml-7 mt-7 mb-7">
-            <div className="w-full pr-7">
-              <Breadcrumb activeItem={currentView} />
+          <div className="">
+            <div className="">
+              {/* <Breadcrumb activeItem={currentView} /> */}
               {children}
             </div>
           </div>
@@ -123,18 +123,22 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 }
 
 
+import { Suspense } from 'react';
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <ProtectedRoute>
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Cargando aplicación...</div>}>
       <NavigationProvider>
         <AppStateProvider>
-          <AdminContent>{children}</AdminContent>
+          <ProtectedRoute>
+            <AdminContent>{children}</AdminContent>
+          </ProtectedRoute>
         </AppStateProvider>
       </NavigationProvider>
-    </ProtectedRoute>
+    </Suspense>
   );
 }

@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "rootDir": "../../"
+  },
+  "include": [
+    "src/**/*.stories.tsx",
+    "src/**/*.tsx",
+    "src/**/*.ts",
+    "../domain/src/**/*.ts",
+    "../interfaces/src/**/*.ts",
+    "../interfaces/lib/**/*.ts"
+  ]
+}

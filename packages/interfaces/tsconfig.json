@@ -7,7 +7,7 @@
     "noEmit": false,
     "emitDeclarationOnly": false,
     "outDir": "./dist",
-    "rootDir": "../../",
+    "rootDir": ".",
     "baseUrl": ".",
     "jsx": "react-jsx",
     "lib": [
@@ -42,9 +42,7 @@
   "include": [
     "src/**/*",
     "lib/**/*",
-    "data/**/*",
-    "../domain/src/**/*",
-    "../ui/src/**/*"
+    "data/**/*"
   ],
   "exclude": [
     "node_modules",

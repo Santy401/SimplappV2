@@ -1,47 +1,47 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: [https://pris.ly/d/prisma-schema](https://pris.ly/d/prisma-schema)
+// ===========================================
+// 👤 AUTH DOMAIN
+// Models: User, UserCompany, RefreshToken,
+//         PasswordResetToken, EmailVerificationToken
+// Enums:  UserRole
+// ===========================================
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: [https://pris.ly/cli/accelerate-init](https://pris.ly/cli/accelerate-init)
+// --- ENUMS ---
 
-generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
-  output     = "./src/generated/prisma"
+/// Roles que puede tener un usuario dentro de una empresa
+enum UserRole {
+  OWNER // Dueño de la empresa — acceso total
+  ADMIN // Administrador — acceso casi total
+  ACCOUNTANT // Contador — acceso a facturación y reportes
+  EMPLOYEE // Empleado — acceso limitado
 }
 
-datasource db {
-  provider = "postgresql"
-}
+// --- MODELS ---
 
-/**
- * =========================================
- * 👤 USER & AUTH MODELS
- * =========================================
- */
-
+/// Usuario autenticado de la plataforma.
+/// Un usuario puede pertenecer a múltiples empresas (UserCompany).
 model User {
-  id          String        @id @default(uuid())
-  email       String        @unique
+  id          String @id @default(uuid())
+  email       String @unique
   name        String
   password    String
   typeAccount String
   country     String
-  companies   UserCompany[]
-  bills       Bill[]
 
   onboardingCompleted Boolean @default(false)
   emailVerified       Boolean @default(false)
 
-  // Profile - User
+  // Profile settings
   profileLogo   String?
   language      String? @default("es")
   timezone      String? @default("America/Bogota")
-  lastCompanyId String // ID de la última empresa seleccionada
+  lastCompanyId String // ID de la última empresa seleccionada por el usuario
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Relations
+  companies               UserCompany[]
+  bills                   Bill[]
   refreshTokens           RefreshToken[]
   activityLogs            ActivityLog[]
   passwordResetTokens     PasswordResetToken[]
@@ -49,6 +49,8 @@ model User {
   notifications           Notification[]
 }
 
+/// Tabla pivot que une Usuario ↔ Empresa con un rol específico.
+/// Un usuario puede ser OWNER en una empresa y EMPLOYEE en otra.
 model UserCompany {
   id        String   @id @default(cuid())
   userId    String
@@ -61,333 +63,118 @@ model UserCompany {
   @@unique([userId, companyId])
 }
 
-model ProductAccounting {
-  id String @id @default(uuid())
-
-  productId String
-  companyId String
-
-  incomeAccount    String
-  inventoryAccount String
-  costAccount      String
-
-  product Product @relation(fields: [productId], references: [id])
-  company Company @relation(fields: [companyId], references: [id])
-
-  @@unique([productId, companyId])
-}
-
+/// Token JWT de refresco para mantener sesiones activas.
+/// Se invalida automáticamente al expirar o hacer logout.
 model RefreshToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([token])
 }
 
+/// Token de un solo uso para recuperación de contraseña.
 model PasswordResetToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   used      Boolean  @default(false) // Evitar reutilización del token
   createdAt DateTime @default(now())
-  ipAddress String? // Auditoría de quién solicitó el reset
+  ipAddress String? // Auditoría: quién solicitó el reset
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([userId])
 }
 
+/// Token de un solo uso para verificación de correo electrónico.
 model EmailVerificationToken {
   id        String   @id @default(uuid())
   token     String   @unique
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([userId])
 }
 
-/**
- * =========================================
- * 🏢 COMPANY & ORGANIZATION MODELS
- * =========================================
- */
+// ===========================================
+// ⚙️  BASE CONFIGURATION
+// Generator + Datasource
+// ===========================================
 
-model Company {
-  id String @id @default(uuid())
-
-  users UserCompany[]
-
-  companyName      String           @default("")
-  logoUrl          String? // URL del logo de la empresa
-  accountId        String?          @default("")
-  commercialName   String?          @default("")
-  organizationType OrganizationType @default(COMPANY)
-  vatCondition     VatCondition     @default(SIMPLIFIED_REGIME)
-
-  identificationNumber String  @default("")
-  verificationDigit    String? @default("")
-
-  lastAccountingClose    DateTime?
-  economicActivity       String?   @default("")
-  industryAndCommerceTax Boolean   @default(false)
-
-  address      String  @default("")
-  department   String? @default("")
-  municipality String? @default("")
-  postalCode   String? @default("")
-
-  phone   String? @default("")
-  email   String? @default("")
-  website String? @default("")
-
-  // Billing setup
-  currency             String? @default("COP")
-  invoicePrefix        String? @default("FAC")
-  invoiceInitialNumber Int?    @default(1)
-  defaultTax           String? @default("19")
-
-  stores       Store[]
-  clients      Client[]
-  sellers      Seller[]
-  products     Product[]
-  bills        Bill[]
-  bankAccounts BankAccount[]
-
-  categories CategoryProduct[]
-
-  productAccountings ProductAccounting[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  listPrices    ListPrice[]
-  activityLogs  ActivityLog[]
-  notifications Notification[]
-  subscription  Subscription?
-
-  @@index([deletedAt])
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+  // Output path is relative to THIS file (prisma/schema/base.prisma)
+  // so we go up one level to reach prisma/src/generated/prisma
+  output     = "../src/generated/prisma"
 }
 
-/**
- * =========================================
- * 🤝 CLIENTS & SELLERS MODELS
- * =========================================
- */
-
-model Client {
-  id String @id @default(uuid())
-
-  organizationType OrganizationType
-  firstLastName    String
-  secondLastName   String?
-  firstName        String
-  otherNames       String?
-  commercialName   String?
-  code             String?
-
-  identificationType   IdentificationType
-  identificationNumber String
-
-  email        String?
-  includeCcBcc Boolean @default(false)
-  phone        String?
-
-  country      String
-  department   String?
-  municipality String?
-  postalCode   String?
-  address      String?
-
-  is_supplier  Boolean @default(false)
-  it_branches  Boolean @default(false)
-  observations String?
-
-  bills Bill[]
-
-  companyId String
-  company   Company? @relation(fields: [companyId], references: [id])
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@unique([companyId, identificationNumber])
-  @@index([companyId])
-  @@index([identificationNumber])
-  @@index([deletedAt])
+datasource db {
+  provider = "postgresql"
 }
 
-model Seller {
-  id             String   @id @default(uuid())
-  name           String
-  identification String?
-  observation    String?
-  companyId      String?
-  company        Company? @relation(fields: [companyId], references: [id])
+// ===========================================
+// 🧾 BILLING DOMAIN
+// Models: Bill, BillItem, Payment, BankAccount
+// Enums:  BillStatus, PaymentMethod, BankAccountType, DianStatus
+// ===========================================
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+// --- ENUMS ---
 
-  @@index([companyId])
-  @@index([deletedAt])
+/// Estado en la DIAN (Facturación Electrónica)
+enum DianStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  REJECTED
 }
 
-/**
- * =========================================
- * 🏬 STORES & PRODUCTS MODELS
- * =========================================
- */
-
-model Store {
-  id          String  @id @default(uuid())
-  name        String
-  address     String?
-  observation String?
-
-  bills Bill[]
-
-  companyId String
-  company   Company? @relation(fields: [companyId], references: [id])
-
-  inventoryMovements InventoryMovement[]
-  products           Product[]
-
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-
-  @@index([companyId])
-  @@index([deletedAt])
+/// Estado comercial de una factura
+enum BillStatus {
+  DRAFT // Borrador (no oficial)
+  ISSUED // Emitida / Timbrada
+  PAID // Pagada en su totalidad
+  PARTIALLY_PAID // Con abonos
+  CANCELLED // Anulada
+  TO_PAY // Por pagar (Crédito)
 }
 
-model Product {
-  id String @id @default(uuid())
-
-  name        String
-  description String?
-  reference   String?
-  code        String? @unique
-
-  type     ItemType
-  category CategoryProduct    @relation(fields: [categoryProductId], references: [id])
-  unit     UnitOfMeansureList
-
-  taxRate String
-
-  cost       Decimal?
-  basePrice  Decimal?
-  finalPrice Decimal?
-
-  trackStock         Boolean @default(true)
-  allowNegativeStock Boolean @default(false)
-  active             Boolean @default(true)
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  images      ProductImage[]
-  prices      ProductPrice[]
-  accountings ProductAccounting[]
-
-  inventoryMovements InventoryMovement[]
-  billItems          BillItem[]
-
-  storeId           String?
-  store             Store?    @relation(fields: [storeId], references: [id])
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  deletedAt         DateTime?
-  categoryProductId String
-
-  @@index([companyId])
-  @@index([code])
-  @@index([deletedAt])
-  @@index([storeId])
+/// Método o medio de pago (estandarizado)
+enum PaymentMethod {
+  UNDEFINED
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  TRANSFER
+  CHECK
+  DEPOSIT
+  OTHER
+  CREDIT
 }
 
-model CategoryProduct {
-  id          String @id @default(uuid())
-  name        String
-  description String
-
-  companyId String
-  company   Company @relation(fields: [companyId], references: [id])
-
-  products Product[]
-
-  @@index([companyId])
+/// Clasificación de la cuenta financiera
+enum BankAccountType {
+  CASH // Caja menor / Efectivo
+  BANK // Cuenta bancaria (Ahorros, Corriente)
+  CREDIT_CARD // Tarjeta de crédito corporativa
+  OTHER // Otros medios (Pasarelas, etc.)
 }
 
-model ProductImage {
-  id  String @id @default(uuid())
-  url String
+// --- MODELS ---
 
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
-}
-
-model InventoryMovement {
-  id String @id @default(uuid())
-
-  productId String
-  storeId   String
-
-  quantity Int
-  type     MovementType
-
-  product Product @relation(fields: [productId], references: [id])
-  store   Store   @relation(fields: [storeId], references: [id])
-
-  createdAt DateTime @default(now())
-}
-
-model ListPrice {
-  id String @id @default(uuid())
-
-  name        String
-  type        TypePrice @default(VALOR)
-  description String?
-  percentage  String?
-
-  companyId String
-  company   Company? @relation(fields: [companyId], references: [id])
-
-  prices ProductPrice[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model ProductPrice {
-  id String @id @default(uuid())
-
-  productId   String
-  listPriceId String
-
-  basePrice Decimal
-  value     Decimal
-
-  product   Product   @relation(fields: [productId], references: [id])
-  listPrice ListPrice @relation(fields: [listPriceId], references: [id])
-}
-
-/**
- * =========================================
- * 🧾 BILLING MODELS
- * =========================================
- */
-
+/// Factura de venta. Conecta transacción financiera, inventario y DIAN.
 model Bill {
   id          String  @id @default(uuid())
   userId      String
@@ -396,14 +183,17 @@ model Bill {
   listPriceId String?
   sellerId    String?
   companyId   String
-  user        User    @relation(fields: [userId], references: [id])
-  client      Client  @relation(fields: [clientId], references: [id])
-  store       Store   @relation(fields: [storeId], references: [id])
-  company     Company @relation(fields: [companyId], references: [id])
+
+  // Relaciones Base
+  user    User    @relation(fields: [userId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
   // --- 1. Control Legal y Numeración ---
-  prefix      String? @default("") // Ejemplo: "SETT"
+  prefix      String? @default("") // Ejemplo: "SETT" o "FV"
   number      Int
-  legalNumber String?
+  legalNumber String? // El consecutivo final autorizado
 
   // --- 2. Estados y Fechas ---
   status        BillStatus    @default(DRAFT)
@@ -412,31 +202,33 @@ model Bill {
   date    DateTime @default(now())
   dueDate DateTime
 
-  // --- 3. Totales (Cálculos guardados) ---
-  subtotal             Decimal    @default(0)
-  taxTotal             Decimal    @default(0)
-  discountTotal        Decimal    @default(0)
-  total                Decimal    @default(0)
-  balance              Decimal    @default(0)
-  // --- 4. Snapshot (Datos del cliente al momento de facturar) ---
+  // --- 3. Totales (Cálculos guardados para snapshot) ---
+  subtotal      Decimal @default(0)
+  taxTotal      Decimal @default(0)
+  discountTotal Decimal @default(0)
+  total         Decimal @default(0)
+  balance       Decimal @default(0)
+
+  // --- 4. Snapshot (Datos inmutables al momento de facturar) ---
   clientName           String?
   clientIdentification String?
   clientAddress        String?
   clientPhone          String?
   clientEmail          String?
-  items                BillItem[]
-  payments             Payment[]
   notes                String?
 
   // --- 5. Facturación Electrónica DIAN ---
   cufe           String? // Código único de factura electrónica
   dianStatus     DianStatus?
-  dianResponse   String? // Respuesta completa de DIAN
-  xml            String? // XML generado para DIAN
-  pdfUrl         String? // URL del PDF firmado
-  sentAt         DateTime? // Cuándo se envió a DIAN
-  acceptedAt     DateTime? // Cuándo fue aceptada
-  rejectedReason String? // Motivo de rechazo si fue rechazada
+  dianResponse   String? // Respuesta en bruto de la DIAN si aplica
+  xml            String? // Contenido XML firmado
+  pdfUrl         String? // Archivo generado
+  sentAt         DateTime?
+  acceptedAt     DateTime?
+  rejectedReason String?
+
+  items    BillItem[]
+  payments Payment[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -449,6 +241,30 @@ model Bill {
   @@index([deletedAt])
 }
 
+/// Detalle individual de una factura (línea de producto o servicio).
+model BillItem {
+  id        String @id @default(uuid())
+  billId    String
+  productId String
+  quantity  Int
+
+  price    Decimal
+  subtotal Decimal
+
+  taxRate   Decimal @default(0)
+  taxAmount Decimal @default(0)
+  discount  Decimal @default(0)
+  total     Decimal
+
+  // Snapshot del producto
+  productName String?
+  productCode String?
+
+  bill    Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+/// Recibo de pago asociado a una factura en específico.
 model Payment {
   id String @id @default(uuid())
 
@@ -466,6 +282,7 @@ model Payment {
   notes         String?
 }
 
+/// Cuenta bancaria, caja u otra entidad para el manejo de tesorería y recaudo.
 model BankAccount {
   id        String  @id @default(uuid())
   companyId String
@@ -489,83 +306,106 @@ model BankAccount {
   @@index([deletedAt])
 }
 
-model BillItem {
-  id        String @id @default(uuid())
-  billId    String
-  productId String
-  quantity  Int
+// ===========================================
+// 🏢 COMPANY DOMAIN
+// Models: Company, Subscription
+// Enums:  OrganizationType, VatCondition,
+//         PlanType, SubscriptionStatus
+// ===========================================
 
-  price    Decimal
-  subtotal Decimal
+// --- ENUMS ---
 
-  taxRate   Decimal @default(0)
-  taxAmount Decimal @default(0)
-  discount  Decimal @default(0)
-  total     Decimal
-
-  productName String?
-  productCode String?
-  bill        Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
-  product     Product @relation(fields: [productId], references: [id])
+/// Tipo de organización — aplica tanto a empresas como a clientes
+enum OrganizationType {
+  NATURAL_PERSON // Persona natural
+  PERSON_JURIDIC // Persona jurídica
+  LEGAL_ENTITY // Entidad legal
+  COMPANY // Empresa genérica
 }
 
-/**
- * =========================================
- * 📊 ACTIVITY LOG MODEL
- * =========================================
- */
-model ActivityLog {
-  id         String   @id @default(uuid())
-  companyId  String
-  userId     String?
-  action     String // CREATE, UPDATE, DELETE, SEND, CANCEL
-  entityType String // Bill, Client, Product, etc.
-  entityId   String
-  changes    Json? // Qué cambió (antes/después)
-  metadata   Json? // Info adicional
-  ipAddress  String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
-
-  company Company @relation(fields: [companyId], references: [id])
-  user    User?   @relation(fields: [userId], references: [id])
-
-  @@index([companyId])
-  @@index([entityType, entityId])
-  @@index([userId])
-  @@index([createdAt])
+/// Condición frente al IVA (para facturación DIAN)
+enum VatCondition {
+  RESPONSABLE // Responsable del IVA
+  NO_RESPONSABLE // No responsable del IVA
+  EXENTO // Exento del IVA
+  SIMPLIFIED_REGIME // Régimen simplificado
 }
 
-/**
- * =========================================
- * 🔔 NOTIFICATIONS MODEL
- * =========================================
- */
-model Notification {
-  id        String           @id @default(uuid())
-  userId    String
-  companyId String
-  title     String
-  message   String
-  type      NotificationType @default(INFO)
-  read      Boolean          @default(false)
-  archived  Boolean          @default(false)
-  link      String? // Optional URL to navigate to when clicked
-  createdAt DateTime         @default(now())
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([companyId])
-  @@index([createdAt])
+/// Plan de suscripción de la empresa en la plataforma
+enum PlanType {
+  FREE // Plan gratuito con límites
+  PRO // Plan profesional
+  ENTERPRISE // Plan empresarial sin límites
 }
 
-/**
- * =========================================
- * 💳 SUBSCRIPTION & BILLING MODEL
- * =========================================
- */
+/// Estado actual de la suscripción
+enum SubscriptionStatus {
+  ACTIVE // Suscripción activa y al día
+  CANCELED // Cancelada por el usuario
+  PAST_DUE // Vencida (pago pendiente)
+}
+
+// --- MODELS ---
+
+/// Entidad central del sistema. Cada empresa tiene su propio
+/// conjunto de clientes, productos, facturas, etc. (multitenant).
+model Company {
+  id String @id @default(uuid())
+
+  companyName      String           @default("")
+  logoUrl          String? // URL del logo de la empresa
+  accountId        String?          @default("")
+  commercialName   String?          @default("")
+  organizationType OrganizationType @default(COMPANY)
+  vatCondition     VatCondition     @default(SIMPLIFIED_REGIME)
+
+  identificationNumber String  @default("")
+  verificationDigit    String? @default("")
+
+  lastAccountingClose    DateTime?
+  economicActivity       String?   @default("")
+  industryAndCommerceTax Boolean   @default(false)
+
+  // Dirección
+  address      String  @default("")
+  department   String? @default("")
+  municipality String? @default("")
+  postalCode   String? @default("")
+
+  // Contacto
+  phone   String? @default("")
+  email   String? @default("")
+  website String? @default("")
+
+  // Configuración de facturación
+  currency             String? @default("COP")
+  invoicePrefix        String? @default("FAC")
+  invoiceInitialNumber Int?    @default(1)
+  defaultTax           String? @default("19")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  users              UserCompany[]
+  stores             Store[]
+  clients            Client[]
+  sellers            Seller[]
+  products           Product[]
+  bills              Bill[]
+  bankAccounts       BankAccount[]
+  categories         CategoryProduct[]
+  productAccountings ProductAccounting[]
+  listPrices         ListPrice[]
+  activityLogs       ActivityLog[]
+  notifications      Notification[]
+  subscription       Subscription?
+
+  @@index([deletedAt])
+}
+
+/// Suscripción activa de una empresa (relación 1:1 con Company).
 model Subscription {
   id        String             @id @default(uuid())
   companyId String             @unique
@@ -573,72 +413,128 @@ model Subscription {
   status    SubscriptionStatus @default(ACTIVE)
   startDate DateTime           @default(now())
   endDate   DateTime?
-  stripeId  String? // Optional for Stripe integration
+  stripeId  String? // ID de Stripe para gestión de pagos
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
-/**
- * =========================================
- * 🧩 ENUMS & CONSTANTS
- * =========================================
- */
+// ===========================================
+// 🤝 CRM DOMAIN
+// Models: Client, Seller
+// Enums:  IdentificationType
+// ===========================================
 
-enum NotificationType {
-  INFO
-  SUCCESS
-  WARNING
-  ERROR
-  DIAN_REJECTED
-  BILL_OVERDUE
-}
+// --- ENUMS ---
 
-enum PlanType {
-  FREE
-  PRO
-  ENTERPRISE
-}
-
-enum SubscriptionStatus {
-  ACTIVE
-  CANCELED
-  PAST_DUE
-}
-
-enum UserRole {
-  OWNER // Dueño de la empresa
-  ADMIN // Administrador
-  ACCOUNTANT // Contador
-  EMPLOYEE // Empleado
-}
-
-enum TypePrice {
-  VALOR
-  PORCENTAJE
-}
-
-enum OrganizationType {
-  NATURAL_PERSON
-  PERSON_JURIDIC
-  LEGAL_ENTITY
-  COMPANY
-}
-
+/// Tipo de documento de identidad
 enum IdentificationType {
-  CITIZEN_ID
-  NIT
-  PASSPORT
-  TAX_ID
-  FOREIGN_ID
+  CITIZEN_ID // Cédula de ciudadanía
+  NIT // Número de Identificación Tributaria
+  PASSPORT // Pasaporte
+  TAX_ID // Identificador fiscal extranjero
+  FOREIGN_ID // Cédula de extranjería
 }
 
-enum VatCondition {
-  RESPONSABLE
-  NO_RESPONSABLE
-  EXENTO
-  SIMPLIFIED_REGIME
+// --- MODELS ---
+
+/// Cliente de una empresa.
+/// Puede ser una persona natural o jurídica.
+model Client {
+  id String @id @default(uuid())
+
+  organizationType OrganizationType
+  firstLastName    String
+  secondLastName   String?
+  firstName        String
+  otherNames       String?
+  commercialName   String?
+  code             String?
+
+  identificationType   IdentificationType
+  identificationNumber String
+
+  email        String?
+  includeCcBcc Boolean @default(false)
+  phone        String?
+
+  // Localidad
+  country      String
+  department   String?
+  municipality String?
+  postalCode   String?
+  address      String?
+
+  // Configuraciones adicionales
+  is_supplier  Boolean @default(false)
+  it_branches  Boolean @default(false)
+  observations String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  bills Bill[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([companyId, identificationNumber])
+  @@index([companyId])
+  @@index([identificationNumber])
+  @@index([deletedAt])
 }
 
+/// Vendedor asociado a una empresa.
+/// Se usa para asignar comisiones en las facturas.
+model Seller {
+  id             String   @id @default(uuid())
+  name           String
+  identification String?
+  observation    String?
+  companyId      String?
+  company        Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+}
+
+// ===========================================
+// 🏬 INVENTORY DOMAIN
+// Models: Store, Product, CategoryProduct, ProductImage,
+//         ProductAccounting, InventoryMovement,
+//         ListPrice, ProductPrice
+// Enums:  ItemType, MovementType, TypePrice, UnitOfMeansureList
+// ===========================================
+
+// --- ENUMS ---
+
+/// Tipo de artículo en el inventario o facturación
+enum ItemType {
+  PRODUCT // Producto físico
+  SERVICE // Servicio prestado
+  COMBO // Agrupación de productos/servicios
+  VARIANT // Variante de un producto (ej. talla, color)
+}
+
+/// Tipo de movimiento en el kárdex (inventario)
+enum MovementType {
+  IN // Entrada de mercancía
+  OUT // Salida de mercancía
+  ADJUSTMENT // Ajuste manual de inventario
+  TRANSFER // Transferencia entre bodegas
+}
+
+/// Configuración para una lista de precios
+enum TypePrice {
+  VALOR // Monto fijo
+  PORCENTAJE // Porcentaje sobre el costo/base
+}
+
+/// Unidades de medida estandarizadas por la DIAN
 enum UnitOfMeansureList {
   UNIDAD
   PAR
@@ -661,51 +557,231 @@ enum UnitOfMeansureList {
   DIA
 }
 
-enum ItemType {
-  PRODUCT
-  SERVICE
-  COMBO
-  VARIANT
+// --- MODELS ---
+
+/// Bodega o sucursal de inventario.
+model Store {
+  id          String  @id @default(uuid())
+  name        String
+  address     String?
+  observation String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  bills              Bill[]
+  inventoryMovements InventoryMovement[]
+  products           Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
 }
 
-enum MovementType {
-  IN
-  OUT
-  ADJUSTMENT
-  TRANSFER
+/// Categoría para agrupar productos y servicios.
+model CategoryProduct {
+  id          String @id @default(uuid())
+  name        String
+  description String
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  products Product[]
+
+  @@index([companyId])
 }
 
-enum DianStatus {
-  PENDING
-  SENT
-  ACCEPTED
-  REJECTED
+/// Producto o servicio ofrecido por la empresa.
+model Product {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+  reference   String?
+  code        String? @unique
+
+  type ItemType
+  unit UnitOfMeansureList
+
+  taxRate String
+
+  cost       Decimal?
+  basePrice  Decimal?
+  finalPrice Decimal?
+
+  trackStock         Boolean @default(true)
+  allowNegativeStock Boolean @default(false)
+  active             Boolean @default(true)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  categoryProductId String
+  category          CategoryProduct @relation(fields: [categoryProductId], references: [id])
+
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  images             ProductImage[]
+  prices             ProductPrice[]
+  accountings        ProductAccounting[]
+  inventoryMovements InventoryMovement[]
+  billItems          BillItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([code])
+  @@index([deletedAt])
+  @@index([storeId])
 }
 
-enum BillStatus {
-  DRAFT
-  ISSUED
-  PAID
-  PARTIALLY_PAID
-  CANCELLED
-  TO_PAY
+/// Imágenes asociadas a un producto.
+model ProductImage {
+  id  String @id @default(uuid())
+  url String
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
 }
 
-enum PaymentMethod {
-  UNDEFINED
-  CASH
-  CREDIT_CARD
-  DEBIT_CARD
-  TRANSFER
-  CHECK
-  DEPOSIT
-  OTHER
-  CREDIT
+/// Configuración contable de un producto específico.
+model ProductAccounting {
+  id String @id @default(uuid())
+
+  productId String
+  companyId String
+
+  incomeAccount    String
+  inventoryAccount String
+  costAccount      String
+
+  product Product @relation(fields: [productId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([productId, companyId])
 }
 
-enum BankAccountType {
-  CASH
-  BANK
-  CREDIT_CARD
-  OTHER
+/// Registro de movimientos de inventario (Kárdex).
+model InventoryMovement {
+  id String @id @default(uuid())
+
+  productId String
+  storeId   String
+
+  quantity Int
+  type     MovementType
+
+  product Product @relation(fields: [productId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+/// Lista de precios (ej. Mayorista, Minorista).
+model ListPrice {
+  id String @id @default(uuid())
+
+  name        String
+  type        TypePrice @default(VALOR)
+  description String?
+  percentage  String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  prices ProductPrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Precio asignado a un producto en una lista de precios específica.
+model ProductPrice {
+  id String @id @default(uuid())
+
+  productId   String
+  listPriceId String
+
+  basePrice Decimal
+  value     Decimal
+
+  product   Product   @relation(fields: [productId], references: [id])
+  listPrice ListPrice @relation(fields: [listPriceId], references: [id])
+}
+
+// ===========================================
+// 📊 SYSTEM DOMAIN
+// Models: ActivityLog, Notification
+// Enums:  NotificationType
+// ===========================================
+
+// --- ENUMS ---
+
+/// Nivel o tipo de notificación en el sistema.
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  DIAN_REJECTED // Específico para errores críticos de DIAN
+  BILL_OVERDUE // Específico para facturas vencidas
+}
+
+// --- MODELS ---
+
+/// Log de auditoría para trazar los cambios críticos
+/// (qué cambió, quién lo hizo, cuándo, IP, etc.)
+model ActivityLog {
+  id        String  @id @default(uuid())
+  companyId String
+  userId    String?
+
+  action     String // CREATE, UPDATE, DELETE, SEND, CANCEL
+  entityType String // Bill, Client, Product, etc.
+  entityId   String
+
+  changes   Json? // Objeto con 'before' y 'after' o diff
+  metadata  Json? // Otros datos contextuales útiles
+  ipAddress String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/// Notificación en la campana (in-app notification).
+model Notification {
+  id        String @id @default(uuid())
+  userId    String
+  companyId String
+
+  title    String
+  message  String
+  type     NotificationType @default(INFO)
+  read     Boolean          @default(false)
+  archived Boolean          @default(false)
+  link     String? // URL opcional al recurso relacionado
+
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
 }

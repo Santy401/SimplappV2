@@ -1,0 +1,109 @@
+// ===========================================
+// 👤 AUTH DOMAIN
+// Models: User, UserCompany, RefreshToken,
+//         PasswordResetToken, EmailVerificationToken
+// Enums:  UserRole
+// ===========================================
+
+// --- ENUMS ---
+
+/// Roles que puede tener un usuario dentro de una empresa
+enum UserRole {
+  OWNER      // Dueño de la empresa — acceso total
+  ADMIN      // Administrador — acceso casi total
+  ACCOUNTANT // Contador — acceso a facturación y reportes
+  EMPLOYEE   // Empleado — acceso limitado
+}
+
+// --- MODELS ---
+
+/// Usuario autenticado de la plataforma.
+/// Un usuario puede pertenecer a múltiples empresas (UserCompany).
+model User {
+  id          String  @id @default(uuid())
+  email       String  @unique
+  name        String
+  password    String
+  typeAccount String
+  country     String
+
+  onboardingCompleted Boolean @default(false)
+  emailVerified       Boolean @default(false)
+
+  // Profile settings
+  profileLogo   String?
+  language      String? @default("es")
+  timezone      String? @default("America/Bogota")
+  lastCompanyId String // ID de la última empresa seleccionada por el usuario
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  companies               UserCompany[]
+  bills                   Bill[]
+  refreshTokens           RefreshToken[]
+  activityLogs            ActivityLog[]
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+  notifications           Notification[]
+}
+
+/// Tabla pivot que une Usuario ↔ Empresa con un rol específico.
+/// Un usuario puede ser OWNER en una empresa y EMPLOYEE en otra.
+model UserCompany {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      UserRole @default(EMPLOYEE)
+
+  user    User    @relation(fields: [userId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([userId, companyId])
+}
+
+/// Token JWT de refresco para mantener sesiones activas.
+/// Se invalida automáticamente al expirar o hacer logout.
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+}
+
+/// Token de un solo uso para recuperación de contraseña.
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  used      Boolean  @default(false) // Evitar reutilización del token
+  createdAt DateTime @default(now())
+  ipAddress String?  // Auditoría: quién solicitó el reset
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}
+
+/// Token de un solo uso para verificación de correo electrónico.
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([userId])
+}

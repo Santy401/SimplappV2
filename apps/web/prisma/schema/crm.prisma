@@ -1,0 +1,83 @@
+// ===========================================
+// 🤝 CRM DOMAIN
+// Models: Client, Seller
+// Enums:  IdentificationType
+// ===========================================
+
+// --- ENUMS ---
+
+/// Tipo de documento de identidad
+enum IdentificationType {
+  CITIZEN_ID // Cédula de ciudadanía
+  NIT        // Número de Identificación Tributaria
+  PASSPORT   // Pasaporte
+  TAX_ID     // Identificador fiscal extranjero
+  FOREIGN_ID // Cédula de extranjería
+}
+
+// --- MODELS ---
+
+/// Cliente de una empresa.
+/// Puede ser una persona natural o jurídica.
+model Client {
+  id String @id @default(uuid())
+
+  organizationType OrganizationType
+  firstLastName    String
+  secondLastName   String?
+  firstName        String
+  otherNames       String?
+  commercialName   String?
+  code             String?
+
+  identificationType   IdentificationType
+  identificationNumber String
+
+  email        String?
+  includeCcBcc Boolean @default(false)
+  phone        String?
+
+  // Localidad
+  country      String
+  department   String?
+  municipality String?
+  postalCode   String?
+  address      String?
+
+  // Configuraciones adicionales
+  is_supplier  Boolean @default(false)
+  it_branches  Boolean @default(false)
+  observations String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  bills Bill[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([companyId, identificationNumber])
+  @@index([companyId])
+  @@index([identificationNumber])
+  @@index([deletedAt])
+}
+
+/// Vendedor asociado a una empresa.
+/// Se usa para asignar comisiones en las facturas.
+model Seller {
+  id             String   @id @default(uuid())
+  name           String
+  identification String?
+  observation    String?
+  companyId      String?
+  company        Company? @relation(fields: [companyId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+}

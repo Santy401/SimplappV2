@@ -1,0 +1,111 @@
+// ===========================================
+// 🏢 COMPANY DOMAIN
+// Models: Company, Subscription
+// Enums:  OrganizationType, VatCondition,
+//         PlanType, SubscriptionStatus
+// ===========================================
+
+// --- ENUMS ---
+
+/// Tipo de organización — aplica tanto a empresas como a clientes
+enum OrganizationType {
+  NATURAL_PERSON // Persona natural
+  PERSON_JURIDIC // Persona jurídica
+  LEGAL_ENTITY   // Entidad legal
+  COMPANY        // Empresa genérica
+}
+
+/// Condición frente al IVA (para facturación DIAN)
+enum VatCondition {
+  RESPONSABLE        // Responsable del IVA
+  NO_RESPONSABLE     // No responsable del IVA
+  EXENTO             // Exento del IVA
+  SIMPLIFIED_REGIME  // Régimen simplificado
+}
+
+/// Plan de suscripción de la empresa en la plataforma
+enum PlanType {
+  FREE       // Plan gratuito con límites
+  PRO        // Plan profesional
+  ENTERPRISE // Plan empresarial sin límites
+}
+
+/// Estado actual de la suscripción
+enum SubscriptionStatus {
+  ACTIVE    // Suscripción activa y al día
+  CANCELED  // Cancelada por el usuario
+  PAST_DUE  // Vencida (pago pendiente)
+}
+
+// --- MODELS ---
+
+/// Entidad central del sistema. Cada empresa tiene su propio
+/// conjunto de clientes, productos, facturas, etc. (multitenant).
+model Company {
+  id String @id @default(uuid())
+
+  companyName      String           @default("")
+  logoUrl          String?          // URL del logo de la empresa
+  accountId        String?          @default("")
+  commercialName   String?          @default("")
+  organizationType OrganizationType @default(COMPANY)
+  vatCondition     VatCondition     @default(SIMPLIFIED_REGIME)
+
+  identificationNumber String  @default("")
+  verificationDigit    String? @default("")
+
+  lastAccountingClose    DateTime?
+  economicActivity       String?   @default("")
+  industryAndCommerceTax Boolean   @default(false)
+
+  // Dirección
+  address      String  @default("")
+  department   String? @default("")
+  municipality String? @default("")
+  postalCode   String? @default("")
+
+  // Contacto
+  phone   String? @default("")
+  email   String? @default("")
+  website String? @default("")
+
+  // Configuración de facturación
+  currency             String? @default("COP")
+  invoicePrefix        String? @default("FAC")
+  invoiceInitialNumber Int?    @default(1)
+  defaultTax           String? @default("19")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  // Relations
+  users              UserCompany[]
+  stores             Store[]
+  clients            Client[]
+  sellers            Seller[]
+  products           Product[]
+  bills              Bill[]
+  bankAccounts       BankAccount[]
+  categories         CategoryProduct[]
+  productAccountings ProductAccounting[]
+  listPrices         ListPrice[]
+  activityLogs       ActivityLog[]
+  notifications      Notification[]
+  subscription       Subscription?
+
+  @@index([deletedAt])
+}
+
+/// Suscripción activa de una empresa (relación 1:1 con Company).
+model Subscription {
+  id        String             @id @default(uuid())
+  companyId String             @unique
+  plan      PlanType           @default(FREE)
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime           @default(now())
+  endDate   DateTime?
+  stripeId  String?            // ID de Stripe para gestión de pagos
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}

@@ -1,3 +1,4 @@
+"use client";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 

@@ -1,164 +1,57 @@
 "use client";
 
-import { Seller } from "@domain/entities/Seller.entity";
+import { ModernTable, useSellerTable, ModernTableSkeleton, Button } from "@simplapp/ui";
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
-import { useSellerTable } from "@interfaces/src/hooks/features/Sellers/useSellerTable";
-import { DataTable, Button, DataTableSkeleton, Skeleton } from "@simplapp/ui";
-import { Receipt, UserPlus } from "lucide-react";
-import { useEffect, useState } from "react";
 
-interface SellerProps {
-    onSelect?: (view: string) => void;
-    onSelectSeller?: (seller: Seller) => void;
-}
+export default function SellersPage({
+  onSelect = () => { },
+  onSelectClient = () => { }
+}: any) {
+  const { sellers, isLoading, error, refetch } = useSeller();
+  const [tableversion, setTableversion] = useState(0);
 
-export default function Sellers({
-    onSelect = () => { },
-    onSelectSeller = () => { }
-}: SellerProps) {
-    const { sellers, isLoading, error, refetch } = useSeller();
-    const [tableVersion, setTableVersion] = useState(0);
-    const [deletingId, _setDeletingId] = useState<string | null>(null);
-    const [localLoading, _setLocalLoading] = useState({
-        export: false,
-        delete: false,
-        create: false,
-        update: false,
-        get: false,
-    });
+  const refetchTable = () => {
+    refetch();
+    setTableversion(prev => prev + 1);
+  };
 
-    const refetchTable = () => {
-        setTableVersion(prev => prev + 1);
-    }
+  const {
+    columns,
+    handleAddCustomer,
+    handleDeleteCustomer,
+    handleDeleteManyCustomers,
+    handleEditCustomer,
+    handleExportCustomers,
+  } = useSellerTable({ onSelect, onSelectClient, onDeleteSuccess: refetchTable });
 
-    useEffect(() => {
-        refetch();
-    }, [tableVersion]);
+  const validData = Array.isArray(sellers) ? sellers : [];
 
-    const { columns, handleAddCustomer, handleDeleteManyCustomers } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetch });
+  if (isLoading.fetch && validData.length === 0) {
+    return <div className="max-w-6xl mx-auto px-2 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+  }
 
-    const ValidSellers = sellers || [];
-
-    if (isLoading.fetch && sellers.length === 0) {
-        return (
-            <div className="min-h-fit w-full animate-in fade-in duration-200">
-                <div className="max-w-5xl mx-auto px-4 py-8">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                        <div>
-                            <h1 className="text-3xl font-bold text-foreground">
-                                <Skeleton className="h-9 w-40" />
-                            </h1>
-                            <div className="text-muted-foreground mt-2">
-                                <Skeleton className="h-5 w-48" />
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <Button
-                                variant="outline"
-                                className="gap-2 text-[15px] py-2 px-2 rounded w-[90px] h-[38px] p-0 border-0"
-                                disabled
-                            >
-                                <Skeleton className="w-full h-full rounded" />
-                            </Button>
-                            <Button
-                                className="bg-foreground py-2 px-2 text-[14px] rounded-lg w-[160px] h-[38px] p-0 border-0"
-                                disabled
-                            >
-                                <Skeleton className="w-full h-full rounded-lg" />
-                            </Button>
-                        </div>
-                    </div>
-                    <DataTableSkeleton />
-                </div>
-            </div>
-        );
-    }
-
-    if (error) {
-        return (
-            <div className="h-[70vh] flex items-center justify-center">
-                <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md">
-                    <h3 className="text-lg font-semibold mb-2">Error al cargar clientes</h3>
-                    <p className="mb-4">{error}</p>
-                    <Button
-                        onClick={() => window.location.reload()}
-                        className="bg-red-600 hover:bg-red-700 text-white"
-                    >
-                        Reintentar
-                    </Button>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="min-h-fit animate-in fade-in duration-500">
-            <div className="max-w-5xl mx-auto px-4 py-8">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-foreground">Vendedores</h1>
-                        <div className="text-muted-foreground mt-2">
-                            Gestiona tus Vendedores
-                        </div>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button
-                            variant="outline"
-                            onClick={() => { }}
-                            className="gap-2 text-[15px]"
-                        >
-                            Exportar
-                        </Button>
-                        <Button
-                            onClick={handleAddCustomer}
-                            disabled={localLoading.create}
-                            className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background cursor-pointer"
-                        >
-                            <UserPlus className="w-4 h-4" />
-                            {localLoading.create ? 'Creando...' : 'Nuevo Vendedor'}
-                        </Button>
-                    </div>
-                </div>
-
-                {ValidSellers.length > 0 ? (
-                    <div className="rounded-xl overflow-hidden">
-                        <DataTable
-                            data={ValidSellers}
-                            columns={columns}
-                            title=""
-                            searchable={true}
-                            pagination={true}
-                            itemsPerPage={10}
-                            onAdd={handleAddCustomer}
-                            onExport={() => { }}
-                            onDeleteMany={handleDeleteManyCustomers}
-                            className="bg-transparent"
-                            isLoading={{
-                                fetch: isLoading.fetch,
-                                create: isLoading.create,
-                                update: isLoading.update,
-                                deleteId: deletingId,
-                                deleteMany: false,
-                                export: localLoading.export,
-                                view: false,
-                                rowId: deletingId,
-                            }}
-                        />
-                    </div>
-                ) : (
-                    <div className="text-center p-12 border border-sidebar-border rounded-xl bg-white mt-4">
-                        <Receipt className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No hay Vendedores registrados</h3>
-                        <p className="text-muted-foreground mb-6">
-                            Comienza agregando tu primer Vendedor
-                        </p>
-                        <Button onClick={handleAddCustomer} className="bg-foreground hover:bg-foreground py-2 px-2 text-[14px] rounded-lg font-medium flex items-center justify-center gap-2 transition text-background m-auto cursor-pointer">
-                            {/* <UserPlus className="w-4 h-4" /> */}
-                            Agrega Tu Primer Vendedor
-                        </Button>
-                    </div>
-                )}
-            </div>
-        </div>
-    )
+  return (
+    <div className="max-w-6xl mx-auto px-2 py-8">
+      {/* <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">Vendedores</h1>
+        <Button onClick={handleAddCustomer} variant="default">
+          <UserPlus className="w-4 h-4" /> Nuevo Vendedor
+        </Button>
+      </div> */}
+      <ModernTable
+        data={validData}
+        columns={columns}
+        title="Vendedores"
+        description="Gestiona tus vendedores"
+        onAdd={handleAddCustomer}
+        addActionLabel="Nuevo Vendedor"
+        onDelete={handleDeleteCustomer}
+        onDeleteMany={handleDeleteManyCustomers}
+        onEdit={handleEditCustomer}
+        onExport={handleExportCustomers}
+      />
+    </div>
+  );
 }

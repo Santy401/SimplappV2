@@ -55,6 +55,11 @@ export async function GET(
             name: true,
             email: true
           }
+        },
+        payments: {
+          include: {
+            account: true
+          }
         }
       },
     });
