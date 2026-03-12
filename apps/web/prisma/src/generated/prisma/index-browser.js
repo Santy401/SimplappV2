@@ -144,15 +144,6 @@ exports.Prisma.UserCompanyScalarFieldEnum = {
   role: 'role'
 };
 
-exports.Prisma.ProductAccountingScalarFieldEnum = {
-  id: 'id',
-  productId: 'productId',
-  companyId: 'companyId',
-  incomeAccount: 'incomeAccount',
-  inventoryAccount: 'inventoryAccount',
-  costAccount: 'costAccount'
-};
-
 exports.Prisma.RefreshTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
@@ -177,6 +168,85 @@ exports.Prisma.EmailVerificationTokenScalarFieldEnum = {
   userId: 'userId',
   expiresAt: 'expiresAt',
   createdAt: 'createdAt'
+};
+
+exports.Prisma.BillScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  clientId: 'clientId',
+  storeId: 'storeId',
+  listPriceId: 'listPriceId',
+  sellerId: 'sellerId',
+  companyId: 'companyId',
+  prefix: 'prefix',
+  number: 'number',
+  legalNumber: 'legalNumber',
+  status: 'status',
+  paymentMethod: 'paymentMethod',
+  date: 'date',
+  dueDate: 'dueDate',
+  subtotal: 'subtotal',
+  taxTotal: 'taxTotal',
+  discountTotal: 'discountTotal',
+  total: 'total',
+  balance: 'balance',
+  clientName: 'clientName',
+  clientIdentification: 'clientIdentification',
+  clientAddress: 'clientAddress',
+  clientPhone: 'clientPhone',
+  clientEmail: 'clientEmail',
+  notes: 'notes',
+  cufe: 'cufe',
+  dianStatus: 'dianStatus',
+  dianResponse: 'dianResponse',
+  xml: 'xml',
+  pdfUrl: 'pdfUrl',
+  sentAt: 'sentAt',
+  acceptedAt: 'acceptedAt',
+  rejectedReason: 'rejectedReason',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+};
+
+exports.Prisma.BillItemScalarFieldEnum = {
+  id: 'id',
+  billId: 'billId',
+  productId: 'productId',
+  quantity: 'quantity',
+  price: 'price',
+  subtotal: 'subtotal',
+  taxRate: 'taxRate',
+  taxAmount: 'taxAmount',
+  discount: 'discount',
+  total: 'total',
+  productName: 'productName',
+  productCode: 'productCode'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  billId: 'billId',
+  accountId: 'accountId',
+  amount: 'amount',
+  method: 'method',
+  date: 'date',
+  receiptNumber: 'receiptNumber',
+  notes: 'notes'
+};
+
+exports.Prisma.BankAccountScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  name: 'name',
+  type: 'type',
+  currency: 'currency',
+  description: 'description',
+  balance: 'balance',
+  active: 'active',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.CompanyScalarFieldEnum = {
@@ -206,6 +276,16 @@ exports.Prisma.CompanyScalarFieldEnum = {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  companyId: 'companyId',
+  plan: 'plan',
+  status: 'status',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  stripeId: 'stripeId'
 };
 
 exports.Prisma.ClientScalarFieldEnum = {
@@ -258,6 +338,13 @@ exports.Prisma.StoreScalarFieldEnum = {
   deletedAt: 'deletedAt'
 };
 
+exports.Prisma.CategoryProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  companyId: 'companyId'
+};
+
 exports.Prisma.ProductScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -274,24 +361,26 @@ exports.Prisma.ProductScalarFieldEnum = {
   allowNegativeStock: 'allowNegativeStock',
   active: 'active',
   companyId: 'companyId',
+  categoryProductId: 'categoryProductId',
   storeId: 'storeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt',
-  categoryProductId: 'categoryProductId'
-};
-
-exports.Prisma.CategoryProductScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  description: 'description',
-  companyId: 'companyId'
+  deletedAt: 'deletedAt'
 };
 
 exports.Prisma.ProductImageScalarFieldEnum = {
   id: 'id',
   url: 'url',
   productId: 'productId'
+};
+
+exports.Prisma.ProductAccountingScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  companyId: 'companyId',
+  incomeAccount: 'incomeAccount',
+  inventoryAccount: 'inventoryAccount',
+  costAccount: 'costAccount'
 };
 
 exports.Prisma.InventoryMovementScalarFieldEnum = {
@@ -322,85 +411,6 @@ exports.Prisma.ProductPriceScalarFieldEnum = {
   value: 'value'
 };
 
-exports.Prisma.BillScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  clientId: 'clientId',
-  storeId: 'storeId',
-  listPriceId: 'listPriceId',
-  sellerId: 'sellerId',
-  companyId: 'companyId',
-  prefix: 'prefix',
-  number: 'number',
-  legalNumber: 'legalNumber',
-  status: 'status',
-  paymentMethod: 'paymentMethod',
-  date: 'date',
-  dueDate: 'dueDate',
-  subtotal: 'subtotal',
-  taxTotal: 'taxTotal',
-  discountTotal: 'discountTotal',
-  total: 'total',
-  balance: 'balance',
-  clientName: 'clientName',
-  clientIdentification: 'clientIdentification',
-  clientAddress: 'clientAddress',
-  clientPhone: 'clientPhone',
-  clientEmail: 'clientEmail',
-  notes: 'notes',
-  cufe: 'cufe',
-  dianStatus: 'dianStatus',
-  dianResponse: 'dianResponse',
-  xml: 'xml',
-  pdfUrl: 'pdfUrl',
-  sentAt: 'sentAt',
-  acceptedAt: 'acceptedAt',
-  rejectedReason: 'rejectedReason',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.PaymentScalarFieldEnum = {
-  id: 'id',
-  billId: 'billId',
-  accountId: 'accountId',
-  amount: 'amount',
-  method: 'method',
-  date: 'date',
-  receiptNumber: 'receiptNumber',
-  notes: 'notes'
-};
-
-exports.Prisma.BankAccountScalarFieldEnum = {
-  id: 'id',
-  companyId: 'companyId',
-  name: 'name',
-  type: 'type',
-  currency: 'currency',
-  description: 'description',
-  balance: 'balance',
-  active: 'active',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
-};
-
-exports.Prisma.BillItemScalarFieldEnum = {
-  id: 'id',
-  billId: 'billId',
-  productId: 'productId',
-  quantity: 'quantity',
-  price: 'price',
-  subtotal: 'subtotal',
-  taxRate: 'taxRate',
-  taxAmount: 'taxAmount',
-  discount: 'discount',
-  total: 'total',
-  productName: 'productName',
-  productCode: 'productCode'
-};
-
 exports.Prisma.ActivityLogScalarFieldEnum = {
   id: 'id',
   companyId: 'companyId',
@@ -426,16 +436,6 @@ exports.Prisma.NotificationScalarFieldEnum = {
   archived: 'archived',
   link: 'link',
   createdAt: 'createdAt'
-};
-
-exports.Prisma.SubscriptionScalarFieldEnum = {
-  id: 'id',
-  companyId: 'companyId',
-  plan: 'plan',
-  status: 'status',
-  startDate: 'startDate',
-  endDate: 'endDate',
-  stripeId: 'stripeId'
 };
 
 exports.Prisma.SortOrder = {
@@ -470,6 +470,41 @@ exports.UserRole = exports.$Enums.UserRole = {
   EMPLOYEE: 'EMPLOYEE'
 };
 
+exports.BillStatus = exports.$Enums.BillStatus = {
+  DRAFT: 'DRAFT',
+  ISSUED: 'ISSUED',
+  PAID: 'PAID',
+  PARTIALLY_PAID: 'PARTIALLY_PAID',
+  CANCELLED: 'CANCELLED',
+  TO_PAY: 'TO_PAY'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  UNDEFINED: 'UNDEFINED',
+  CASH: 'CASH',
+  CREDIT_CARD: 'CREDIT_CARD',
+  DEBIT_CARD: 'DEBIT_CARD',
+  TRANSFER: 'TRANSFER',
+  CHECK: 'CHECK',
+  DEPOSIT: 'DEPOSIT',
+  OTHER: 'OTHER',
+  CREDIT: 'CREDIT'
+};
+
+exports.DianStatus = exports.$Enums.DianStatus = {
+  PENDING: 'PENDING',
+  SENT: 'SENT',
+  ACCEPTED: 'ACCEPTED',
+  REJECTED: 'REJECTED'
+};
+
+exports.BankAccountType = exports.$Enums.BankAccountType = {
+  CASH: 'CASH',
+  BANK: 'BANK',
+  CREDIT_CARD: 'CREDIT_CARD',
+  OTHER: 'OTHER'
+};
+
 exports.OrganizationType = exports.$Enums.OrganizationType = {
   NATURAL_PERSON: 'NATURAL_PERSON',
   PERSON_JURIDIC: 'PERSON_JURIDIC',
@@ -482,6 +517,18 @@ exports.VatCondition = exports.$Enums.VatCondition = {
   NO_RESPONSABLE: 'NO_RESPONSABLE',
   EXENTO: 'EXENTO',
   SIMPLIFIED_REGIME: 'SIMPLIFIED_REGIME'
+};
+
+exports.PlanType = exports.$Enums.PlanType = {
+  FREE: 'FREE',
+  PRO: 'PRO',
+  ENTERPRISE: 'ENTERPRISE'
+};
+
+exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
+  ACTIVE: 'ACTIVE',
+  CANCELED: 'CANCELED',
+  PAST_DUE: 'PAST_DUE'
 };
 
 exports.IdentificationType = exports.$Enums.IdentificationType = {
@@ -533,41 +580,6 @@ exports.TypePrice = exports.$Enums.TypePrice = {
   PORCENTAJE: 'PORCENTAJE'
 };
 
-exports.BillStatus = exports.$Enums.BillStatus = {
-  DRAFT: 'DRAFT',
-  ISSUED: 'ISSUED',
-  PAID: 'PAID',
-  PARTIALLY_PAID: 'PARTIALLY_PAID',
-  CANCELLED: 'CANCELLED',
-  TO_PAY: 'TO_PAY'
-};
-
-exports.PaymentMethod = exports.$Enums.PaymentMethod = {
-  UNDEFINED: 'UNDEFINED',
-  CASH: 'CASH',
-  CREDIT_CARD: 'CREDIT_CARD',
-  DEBIT_CARD: 'DEBIT_CARD',
-  TRANSFER: 'TRANSFER',
-  CHECK: 'CHECK',
-  DEPOSIT: 'DEPOSIT',
-  OTHER: 'OTHER',
-  CREDIT: 'CREDIT'
-};
-
-exports.DianStatus = exports.$Enums.DianStatus = {
-  PENDING: 'PENDING',
-  SENT: 'SENT',
-  ACCEPTED: 'ACCEPTED',
-  REJECTED: 'REJECTED'
-};
-
-exports.BankAccountType = exports.$Enums.BankAccountType = {
-  CASH: 'CASH',
-  BANK: 'BANK',
-  CREDIT_CARD: 'CREDIT_CARD',
-  OTHER: 'OTHER'
-};
-
 exports.NotificationType = exports.$Enums.NotificationType = {
   INFO: 'INFO',
   SUCCESS: 'SUCCESS',
@@ -577,42 +589,30 @@ exports.NotificationType = exports.$Enums.NotificationType = {
   BILL_OVERDUE: 'BILL_OVERDUE'
 };
 
-exports.PlanType = exports.$Enums.PlanType = {
-  FREE: 'FREE',
-  PRO: 'PRO',
-  ENTERPRISE: 'ENTERPRISE'
-};
-
-exports.SubscriptionStatus = exports.$Enums.SubscriptionStatus = {
-  ACTIVE: 'ACTIVE',
-  CANCELED: 'CANCELED',
-  PAST_DUE: 'PAST_DUE'
-};
-
 exports.Prisma.ModelName = {
   User: 'User',
   UserCompany: 'UserCompany',
-  ProductAccounting: 'ProductAccounting',
   RefreshToken: 'RefreshToken',
   PasswordResetToken: 'PasswordResetToken',
   EmailVerificationToken: 'EmailVerificationToken',
+  Bill: 'Bill',
+  BillItem: 'BillItem',
+  Payment: 'Payment',
+  BankAccount: 'BankAccount',
   Company: 'Company',
+  Subscription: 'Subscription',
   Client: 'Client',
   Seller: 'Seller',
   Store: 'Store',
-  Product: 'Product',
   CategoryProduct: 'CategoryProduct',
+  Product: 'Product',
   ProductImage: 'ProductImage',
+  ProductAccounting: 'ProductAccounting',
   InventoryMovement: 'InventoryMovement',
   ListPrice: 'ListPrice',
   ProductPrice: 'ProductPrice',
-  Bill: 'Bill',
-  Payment: 'Payment',
-  BankAccount: 'BankAccount',
-  BillItem: 'BillItem',
   ActivityLog: 'ActivityLog',
-  Notification: 'Notification',
-  Subscription: 'Subscription'
+  Notification: 'Notification'
 };
 
 /**

@@ -1,0 +1,69 @@
+// ===========================================
+// 📊 SYSTEM DOMAIN
+// Models: ActivityLog, Notification
+// Enums:  NotificationType
+// ===========================================
+
+// --- ENUMS ---
+
+/// Nivel o tipo de notificación en el sistema.
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  DIAN_REJECTED // Específico para errores críticos de DIAN
+  BILL_OVERDUE  // Específico para facturas vencidas
+}
+
+// --- MODELS ---
+
+/// Log de auditoría para trazar los cambios críticos
+/// (qué cambió, quién lo hizo, cuándo, IP, etc.)
+model ActivityLog {
+  id         String   @id @default(uuid())
+  companyId  String
+  userId     String?
+
+  action     String // CREATE, UPDATE, DELETE, SEND, CANCEL
+  entityType String // Bill, Client, Product, etc.
+  entityId   String
+
+  changes    Json? // Objeto con 'before' y 'after' o diff
+  metadata   Json? // Otros datos contextuales útiles
+  ipAddress  String?
+  userAgent  String?
+
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id])
+  user    User?   @relation(fields: [userId], references: [id])
+
+  @@index([companyId])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+/// Notificación en la campana (in-app notification).
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  companyId String
+
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  read      Boolean          @default(false)
+  archived  Boolean          @default(false)
+  link      String?          // URL opcional al recurso relacionado
+
+  createdAt DateTime         @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([createdAt])
+}

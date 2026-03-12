@@ -1,3 +1,4 @@
+"use client";
 import { useState, useCallback, useMemo } from "react";
 import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
 

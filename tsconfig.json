@@ -3,41 +3,20 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./apps/*"
-      ],
-      "@simplapp/*": [
-        "./packages/*/src"
-      ],
-      "@apps/*": [
-        "./apps/*"
-      ],
-      "@domain/*": [
-        "packages/domain/src/*"
-      ],
-      "@interfaces/*": [
-        "packages/interfaces/src/*"
-      ],
-      "@hooks/*": [
-        "packages/interfaces/src/hoooks/*"
-      ],
-      "@ui/*": [
-        "packages/ui/src/*"
-      ],
-      "@web/*": [
-        "./apps/web/app/*"
-      ],
+      "@simplapp/domain": ["packages/domain/src"],
+      "@simplapp/interfaces": ["packages/interfaces/src"],
+      "@simplapp/ui": ["packages/ui/src"],
+      "@domain/*": ["packages/domain/src/*"],
+      "@interfaces/*": ["packages/interfaces/src/*"],
+      "@hooks/*": ["packages/interfaces/src/hooks/*"],
+      "@ui/*": ["packages/ui/src/*"]
     }
   },
-  "include": [
-    "packages/**/*",
-    "apps/**/*",
-    "tools/**/*",
-    "prisma.config.ts"
-  ],
+  "files": [],
   "references": [
     { "path": "./packages/domain" },
     { "path": "./packages/interfaces" },
-    { "path": "./packages/ui" }
+    { "path": "./packages/ui" },
+    { "path": "./apps/web" }
   ]
 }

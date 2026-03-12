@@ -1,0 +1,16 @@
+// ===========================================
+// ⚙️  BASE CONFIGURATION
+// Generator + Datasource
+// ===========================================
+
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+  // Output path is relative to THIS file (prisma/schema/base.prisma)
+  // so we go up one level to reach prisma/src/generated/prisma
+  output     = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

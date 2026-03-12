@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
       store: true,
       user: true,
       items: { include: { product: true } },
+      payments: { include: { account: true } },
     };
 
     const [bills, total] = await prisma.$transaction([

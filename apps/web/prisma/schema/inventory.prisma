@@ -1,0 +1,213 @@
+// ===========================================
+// 🏬 INVENTORY DOMAIN
+// Models: Store, Product, CategoryProduct, ProductImage,
+//         ProductAccounting, InventoryMovement,
+//         ListPrice, ProductPrice
+// Enums:  ItemType, MovementType, TypePrice, UnitOfMeansureList
+// ===========================================
+
+// --- ENUMS ---
+
+/// Tipo de artículo en el inventario o facturación
+enum ItemType {
+  PRODUCT // Producto físico
+  SERVICE // Servicio prestado
+  COMBO   // Agrupación de productos/servicios
+  VARIANT // Variante de un producto (ej. talla, color)
+}
+
+/// Tipo de movimiento en el kárdex (inventario)
+enum MovementType {
+  IN         // Entrada de mercancía
+  OUT        // Salida de mercancía
+  ADJUSTMENT // Ajuste manual de inventario
+  TRANSFER   // Transferencia entre bodegas
+}
+
+/// Configuración para una lista de precios
+enum TypePrice {
+  VALOR      // Monto fijo
+  PORCENTAJE // Porcentaje sobre el costo/base
+}
+
+/// Unidades de medida estandarizadas por la DIAN
+enum UnitOfMeansureList {
+  UNIDAD
+  PAR
+  CAJA
+  BOTELLA
+  CENTIMETRO
+  CENTIMETRO_CUADRADO
+  METRO_CUADRADO
+  PULGADA
+  MILILITRO
+  LITRO
+  GALON
+  METRO_CUBICO
+  GRAMO
+  KILOGRAMO
+  TONELADA
+  LIBRA
+  HORA
+  MINUTO
+  DIA
+}
+
+// --- MODELS ---
+
+/// Bodega o sucursal de inventario.
+model Store {
+  id          String  @id @default(uuid())
+  name        String
+  address     String?
+  observation String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  bills              Bill[]
+  inventoryMovements InventoryMovement[]
+  products           Product[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+}
+
+/// Categoría para agrupar productos y servicios.
+model CategoryProduct {
+  id          String @id @default(uuid())
+  name        String
+  description String
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  products Product[]
+
+  @@index([companyId])
+}
+
+/// Producto o servicio ofrecido por la empresa.
+model Product {
+  id String @id @default(uuid())
+
+  name        String
+  description String?
+  reference   String?
+  code        String? @unique
+
+  type     ItemType
+  unit     UnitOfMeansureList
+
+  taxRate String
+
+  cost       Decimal?
+  basePrice  Decimal?
+  finalPrice Decimal?
+
+  trackStock         Boolean @default(true)
+  allowNegativeStock Boolean @default(false)
+  active             Boolean @default(true)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+
+  categoryProductId String
+  category          CategoryProduct @relation(fields: [categoryProductId], references: [id])
+
+  storeId String?
+  store   Store?  @relation(fields: [storeId], references: [id])
+
+  images             ProductImage[]
+  prices             ProductPrice[]
+  accountings        ProductAccounting[]
+  inventoryMovements InventoryMovement[]
+  billItems          BillItem[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([code])
+  @@index([deletedAt])
+  @@index([storeId])
+}
+
+/// Imágenes asociadas a un producto.
+model ProductImage {
+  id  String @id @default(uuid())
+  url String
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+/// Configuración contable de un producto específico.
+model ProductAccounting {
+  id String @id @default(uuid())
+
+  productId String
+  companyId String
+
+  incomeAccount    String
+  inventoryAccount String
+  costAccount      String
+
+  product Product @relation(fields: [productId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  @@unique([productId, companyId])
+}
+
+/// Registro de movimientos de inventario (Kárdex).
+model InventoryMovement {
+  id String @id @default(uuid())
+
+  productId String
+  storeId   String
+
+  quantity Int
+  type     MovementType
+
+  product Product @relation(fields: [productId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+/// Lista de precios (ej. Mayorista, Minorista).
+model ListPrice {
+  id String @id @default(uuid())
+
+  name        String
+  type        TypePrice @default(VALOR)
+  description String?
+  percentage  String?
+
+  companyId String
+  company   Company? @relation(fields: [companyId], references: [id])
+
+  prices ProductPrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+/// Precio asignado a un producto en una lista de precios específica.
+model ProductPrice {
+  id String @id @default(uuid())
+
+  productId   String
+  listPriceId String
+
+  basePrice Decimal
+  value     Decimal
+
+  product   Product   @relation(fields: [productId], references: [id])
+  listPrice ListPrice @relation(fields: [listPriceId], references: [id])
+}

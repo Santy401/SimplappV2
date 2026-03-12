@@ -83,14 +83,16 @@ export function useAuth() {
                 credentials: 'include',
             });
 
-            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const isProcessDefined = typeof process !== 'undefined' && process.env;
+            const rootDomain = isProcessDefined ? process.env.NEXT_PUBLIC_ROOT_DOMAIN : undefined;
             const loginUrl = rootDomain
                 ? `https://${rootDomain}/colombia/Login/`
                 : '/colombia/Login/';
             window.location.href = loginUrl;
         } catch (error) {
             console.error('Logout error:', error);
-            const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+            const isProcessDefined = typeof process !== 'undefined' && process.env;
+            const rootDomain = isProcessDefined ? process.env.NEXT_PUBLIC_ROOT_DOMAIN : undefined;
             const loginUrl = rootDomain
                 ? `https://${rootDomain}/colombia/Login/`
                 : '/colombia/Login/';
