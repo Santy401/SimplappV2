@@ -123,18 +123,22 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 }
 
 
+import { Suspense } from 'react';
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <NavigationProvider>
-      <AppStateProvider>
-        <ProtectedRoute>
-          <AdminContent>{children}</AdminContent>
-        </ProtectedRoute>
-      </AppStateProvider>
-    </NavigationProvider>
+    <Suspense fallback={<div className="flex h-screen w-full items-center justify-center">Cargando aplicación...</div>}>
+      <NavigationProvider>
+        <AppStateProvider>
+          <ProtectedRoute>
+            <AdminContent>{children}</AdminContent>
+          </ProtectedRoute>
+        </AppStateProvider>
+      </NavigationProvider>
+    </Suspense>
   );
 }

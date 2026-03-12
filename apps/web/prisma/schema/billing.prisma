@@ -1,0 +1,180 @@
+// ===========================================
+// 🧾 BILLING DOMAIN
+// Models: Bill, BillItem, Payment, BankAccount
+// Enums:  BillStatus, PaymentMethod, BankAccountType, DianStatus
+// ===========================================
+
+// --- ENUMS ---
+
+/// Estado en la DIAN (Facturación Electrónica)
+enum DianStatus {
+  PENDING
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+/// Estado comercial de una factura
+enum BillStatus {
+  DRAFT          // Borrador (no oficial)
+  ISSUED         // Emitida / Timbrada
+  PAID           // Pagada en su totalidad
+  PARTIALLY_PAID // Con abonos
+  CANCELLED      // Anulada
+  TO_PAY         // Por pagar (Crédito)
+}
+
+/// Método o medio de pago (estandarizado)
+enum PaymentMethod {
+  UNDEFINED
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  TRANSFER
+  CHECK
+  DEPOSIT
+  OTHER
+  CREDIT
+}
+
+/// Clasificación de la cuenta financiera
+enum BankAccountType {
+  CASH        // Caja menor / Efectivo
+  BANK        // Cuenta bancaria (Ahorros, Corriente)
+  CREDIT_CARD // Tarjeta de crédito corporativa
+  OTHER       // Otros medios (Pasarelas, etc.)
+}
+
+// --- MODELS ---
+
+/// Factura de venta. Conecta transacción financiera, inventario y DIAN.
+model Bill {
+  id          String  @id @default(uuid())
+  userId      String
+  clientId    String
+  storeId     String
+  listPriceId String?
+  sellerId    String?
+  companyId   String
+
+  // Relaciones Base
+  user    User    @relation(fields: [userId], references: [id])
+  client  Client  @relation(fields: [clientId], references: [id])
+  store   Store   @relation(fields: [storeId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+
+  // --- 1. Control Legal y Numeración ---
+  prefix      String? @default("") // Ejemplo: "SETT" o "FV"
+  number      Int
+  legalNumber String?              // El consecutivo final autorizado
+
+  // --- 2. Estados y Fechas ---
+  status        BillStatus    @default(DRAFT)
+  paymentMethod PaymentMethod @default(CASH)
+
+  date    DateTime @default(now())
+  dueDate DateTime
+
+  // --- 3. Totales (Cálculos guardados para snapshot) ---
+  subtotal      Decimal @default(0)
+  taxTotal      Decimal @default(0)
+  discountTotal Decimal @default(0)
+  total         Decimal @default(0)
+  balance       Decimal @default(0)
+
+  // --- 4. Snapshot (Datos inmutables al momento de facturar) ---
+  clientName           String?
+  clientIdentification String?
+  clientAddress        String?
+  clientPhone          String?
+  clientEmail          String?
+  notes                String?
+
+  // --- 5. Facturación Electrónica DIAN ---
+  cufe           String?   // Código único de factura electrónica
+  dianStatus     DianStatus?
+  dianResponse   String?   // Respuesta en bruto de la DIAN si aplica
+  xml            String?   // Contenido XML firmado
+  pdfUrl         String?   // Archivo generado
+  sentAt         DateTime?
+  acceptedAt     DateTime?
+  rejectedReason String?
+
+  items    BillItem[]
+  payments Payment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@unique([companyId, prefix, number])
+  @@index([companyId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+/// Detalle individual de una factura (línea de producto o servicio).
+model BillItem {
+  id        String @id @default(uuid())
+  billId    String
+  productId String
+  quantity  Int
+
+  price    Decimal
+  subtotal Decimal
+
+  taxRate   Decimal @default(0)
+  taxAmount Decimal @default(0)
+  discount  Decimal @default(0)
+  total     Decimal
+
+  // Snapshot del producto
+  productName String?
+  productCode String?
+
+  bill    Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+}
+
+/// Recibo de pago asociado a una factura en específico.
+model Payment {
+  id String @id @default(uuid())
+
+  billId String
+  bill   Bill   @relation(fields: [billId], references: [id])
+
+  accountId String?
+  account   BankAccount? @relation(fields: [accountId], references: [id])
+
+  amount Decimal
+  method PaymentMethod
+  date   DateTime      @default(now())
+
+  receiptNumber String?
+  notes         String?
+}
+
+/// Cuenta bancaria, caja u otra entidad para el manejo de tesorería y recaudo.
+model BankAccount {
+  id        String  @id @default(uuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        BankAccountType @default(CASH)
+  currency    String          @default("COP")
+  description String?
+
+  balance Decimal @default(0)
+  active  Boolean @default(true)
+
+  payments Payment[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([companyId])
+  @@index([deletedAt])
+}
