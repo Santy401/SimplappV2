@@ -1,140 +1,95 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { toast } from "sonner";
-import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.entity"
+import { Store, CreateStoreDto, UpdateStoreDto } from "@domain/entities/Store.entity";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const STORES_QUERY_KEY = ['stores'];
 
 export function useStore() {
-    const [stores, setStores] = useState<Store[]>([]);
-    const [error, setError] = useState<string | null>(null)
-    const [loadingStates, setLoadingStates] = useState({
-        fetch: false,
-        delete: false,
-        create: false,
-        update: false,
-        get: false,
-    });
+    const queryClient = useQueryClient();
 
-    const isLoading = {
-        fetch: loadingStates.fetch,
-        delete: loadingStates.delete,
-        create: loadingStates.create,
-        update: loadingStates.update,
-        get: loadingStates.get,
-        any: Object.values(loadingStates).some(Boolean),
-    }
-
-    const setLoading = (key: keyof typeof loadingStates, value: boolean) => {
-        setLoadingStates({
-            ...loadingStates,
-            [key]: value,
-        })
-    }
-
-    useEffect(() => {
-        fetchStores();
-    }, [])
-
-    const fetchStores = async () => {
-        try {
-            setLoading('fetch', true)
-            setError(null)
-
+    const { 
+        data: storesData = [], 
+        isLoading: isFetchingInitial, 
+        error: queryError,
+        refetch 
+    } = useQuery({
+        queryKey: STORES_QUERY_KEY,
+        queryFn: async () => {
             const response = await fetch('/api/stores');
-
             if (!response.ok) {
                 throw new Error('Error al obtener Bodegas');
             }
+            const result = await response.json();
+            return Array.isArray(result) ? result : (result.data || []);
+        },
+        staleTime: 5 * 60 * 1000,
+    });
 
-            const data = await response.json();
-            setStores(data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido')
-            console.log('Error fetching Stores:', err)
-        } finally {
-            setLoading('fetch', false)
-        }
-    }
+    const stores = useMemo(() => storesData as Store[], [storesData]);
 
-    const deleteStore = async (id: string) => {
-        setLoading('delete', true)
-        try {
-            const response = await fetch(`/api/stores/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) throw new Error('Error al eliminar');
-
-            setStores(prev => prev.filter(store => store.id !== id));
-
-            return true;
-        } catch (err) {
-            console.error('Error deleting store:', err);
-            return false;
-        } finally {
-            setLoading('delete', false)
-        }
-    };
-
-    const createStore = async (data: CreateStoreDto) => {
-        setLoading('create', true)
-        try {
+    const createMutation = useMutation({
+        mutationFn: async (data: CreateStoreDto) => {
             const response = await fetch('/api/stores', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
             if (!response.ok) {
                 const errorData = await response.json().catch(() => null);
                 throw new Error(errorData?.error || 'Error al crear bodega');
             }
-
-            const newStore = await response.json();
-
-            setStores(prev => [...prev, newStore]);
-
-            return newStore;
-        } catch (err: any) {
-            console.error('Error creating store:', err);
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: STORES_QUERY_KEY }),
+        onError: (err: any) => {
             toast.error(err?.message || 'Error desconocido');
-            return null;
-        } finally {
-            setLoading('create', false)
         }
-    };
+    });
 
-    const updateStore = async (id: string, data: UpdateStoreDto) => {
-        setLoading('update', true)
-        try {
+    const updateMutation = useMutation({
+        mutationFn: async ({ id, data }: { id: string, data: UpdateStoreDto }) => {
             const response = await fetch(`/api/stores/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
             if (!response.ok) throw new Error('Error al actualizar');
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: STORES_QUERY_KEY }),
+    });
 
-            const updatedStore = await response.json();
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const response = await fetch(`/api/stores/${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Error al eliminar');
+            return true;
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: STORES_QUERY_KEY }),
+    });
 
-            setStores(prev => prev.map(store =>
-                store.id === id ? updatedStore : store
-            ));
+    const isLoading = useMemo(() => ({
+        fetch: isFetchingInitial,
+        create: createMutation.isPending,
+        update: updateMutation.isPending,
+        delete: deleteMutation.isPending,
+        get: false,
+        any: isFetchingInitial || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
+    }), [isFetchingInitial, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
 
-            return updatedStore;
-        } catch (err) {
-            console.error('Error updating store:', err);
-            return null;
-        } finally {
-            setLoading('update', false)
-        }
-    }
+    const error = queryError ? (queryError as Error).message : null;
 
     return {
         stores,
-        refrech: fetchStores,
-        deleteStore,
-        createStore,
-        updateStore,
+        refetch,
+        refrech: refetch, // Mantener compatibilidad por typo anterior
+        deleteStore: (id: string) => deleteMutation.mutateAsync(id),
+        createStore: (data: CreateStoreDto) => createMutation.mutateAsync(data),
+        updateStore: (id: string, data: UpdateStoreDto) => updateMutation.mutateAsync({ id, data }),
         error,
         isLoading
     }

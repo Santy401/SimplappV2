@@ -1,176 +1,93 @@
 "use client";
-import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity"
-import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema, FormValues } from "../../../../lib/validations/form.schema";
-import { useEffect, useState } from "react"
-import { SubmitHandler, useForm } from "react-hook-form";
+import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity";
+import { useMemo, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const SELLERS_QUERY_KEY = ['sellers'];
 
 export function useSeller() {
-    const [sellers, setSellers] = useState<Seller[]>([]);
-    const [error, setError] = useState<string | null>(null)
-    const [LoadingStates, setIsLoadingStates] = useState({
-        fetch: true,
-        create: false,
-        update: false,
-        delete: false,
-        deleteId: false,
-        export: false,
-        view: false,
-        rowId: false,
-    });
+  const queryClient = useQueryClient();
 
-    const isLoading = {
-        fetch: LoadingStates.fetch,
-        create: LoadingStates.create,
-        update: LoadingStates.update,
-        delete: LoadingStates.delete,
-        deleteId: LoadingStates.deleteId,
-        export: LoadingStates.export,
-        view: LoadingStates.view,
-        rowId: LoadingStates.rowId,
-    }
+  const { 
+    data: sellersData = [], 
+    isLoading: isFetchingInitial, 
+    error: queryError,
+    refetch 
+  } = useQuery({
+    queryKey: SELLERS_QUERY_KEY,
+    queryFn: async () => {
+      const response = await fetch('/api/sellers', {
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error('Error al obtener Vendedores');
+      }
+      const result = await response.json();
+      return Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+    },
+    staleTime: 5 * 60 * 1000,
+  });
 
-    const setIsLoading = (state: keyof typeof LoadingStates, value: boolean) => {
-        setIsLoadingStates(prev => ({
-            ...prev,
-            [state]: value,
-        }));
-    }
+  const sellers = useMemo(() => sellersData as Seller[], [sellersData]);
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        setError: setFormError,
-    } = useForm<FormValues>({
-        resolver: zodResolver(formSchema as any),
-        defaultValues: {
-            name: ''
-        },
-    });
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateSellerDto) => {
+      const response = await fetch(`/api/sellers`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Error al crear');
+      return response.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: SELLERS_QUERY_KEY }),
+  });
 
-    const onSubmit: SubmitHandler<FormValues> = async (values) => {
-        const dto: CreateSellerDto = {
-            // requiered
-            name: '',
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: UpdateSellerDto }) => {
+      const response = await fetch(`/api/sellers/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Error al actualizar');
+      return response.json();
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: SELLERS_QUERY_KEY }),
+  });
 
-            // Opcionals
-            identification: null,
-            observation: null
-        };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/sellers/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Error al eliminar');
+      return true;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: SELLERS_QUERY_KEY }),
+  });
 
-        await createSeller(dto);
-    };
+  const isLoading = useMemo(() => ({
+    fetch: isFetchingInitial,
+    create: createMutation.isPending,
+    update: updateMutation.isPending,
+    delete: deleteMutation.isPending,
+    deleteId: deleteMutation.isPending,
+    export: false,
+    view: false,
+    rowId: null,
+  }), [isFetchingInitial, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
 
-    useEffect(() => {
-        fetchSellers();
-    }, []);
+  const error = queryError ? (queryError as Error).message : null;
 
-
-    const fetchSellers = async () => {
-        try {
-            setIsLoading('fetch', true)
-            setError(null)
-
-            const respose = await fetch('/api/sellers', {
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            if (!respose.ok) {
-                throw new Error('Error al obtener Vendedores');
-            }
-
-            const data = await respose.json()
-            setSellers(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido')
-            console.log('Error fetching Sellers:', err)
-        } finally {
-            setIsLoading('fetch', false)
-        }
-    };
-
-    const deleteSeller = async (id: string) => {
-        setIsLoading('deleteId', true)
-        try {
-            const response = await fetch(`/api/sellers/${id}`, {
-                method: 'DELETE',
-            })
-
-            if (!response.ok) throw new Error('Error al eliminar');
-
-            setSellers(prev => prev.filter(seller => seller.id !== id));
-
-            return true
-        } catch (err) {
-            console.error('Error deleting seller:', err);
-            return false;
-        } finally {
-            setIsLoading('deleteId', false)
-        }
-    }
-
-    const createSeller = async (data: CreateSellerDto) => {
-        setIsLoading('create', true)
-        try {
-            const response = await fetch(`/api/sellers`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) throw new Error('Error al crear');
-
-            const newSeller = await response.json();
-
-            setSellers(prev => [...prev, newSeller]);
-
-            return newSeller;
-        } catch (err) {
-            console.error('Error creating seller', err);
-            return null;
-        } finally {
-            setIsLoading('create', false)
-        }
-    }
-
-    const updateSeller = async (id: string, data: UpdateSellerDto) => {
-        setIsLoading('update', true)
-        try {
-            const response = await fetch(`/api/sellers/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (!response.ok) throw new Error('Error al actualizar');
-
-            const updatedSeller = await response.json();
-
-            setSellers(prev => prev.map(store =>
-                store.id === id ? updatedSeller : store
-            ));
-
-            return updatedSeller;
-        } catch (err) {
-            console.error('Error updating store:', err);
-            return null;
-        } finally {
-            setIsLoading('update', false)
-        }
-    }
-
-    return {
-        sellers,
-        isLoading,
-        error,
-        refetch: fetchSellers,
-        handleSubmit: handleSubmit(onSubmit),
-        createSeller,
-        deleteSeller,
-        updateSeller,
-    }
+  return {
+    sellers,
+    isLoading,
+    error,
+    refetch,
+    createSeller: (data: CreateSellerDto) => createMutation.mutateAsync(data),
+    updateSeller: (id: string, data: UpdateSellerDto) => updateMutation.mutateAsync({ id, data }),
+    deleteSeller: (id: string) => deleteMutation.mutateAsync(id),
+  };
 }

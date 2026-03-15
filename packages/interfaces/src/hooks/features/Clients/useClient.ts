@@ -1,160 +1,131 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 
+const CLIENTS_QUERY_KEY = ['clients'];
+
 export function useClients() {
-  const [clients, setClients] = useState<Client[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState<string | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [LoadingState, setLoadingState] = useState({
-    fetch: true,
-    create: false,
-    update: false,
-    delete: false,
-    export: false,
-    view: false,
-    rowId: null,
-  });
+  const queryClient = useQueryClient();
 
-  const isLoading = useMemo(() => ({
-    fetch: LoadingState.fetch,
-    create: LoadingState.create,
-    update: LoadingState.update,
-    delete: LoadingState.delete,
-    export: LoadingState.export,
-    view: LoadingState.view,
-    rowId: LoadingState.rowId,
-  }), [LoadingState]);
-
-  const setLoading = useCallback((key: keyof typeof LoadingState, value: boolean) => {
-    setLoadingState(prev => ({ ...prev, [key]: value }));
-  }, []);
-
-  useEffect(() => {
-    fetchClients();
-  }, []);
-
-  const fetchClients = useCallback(async () => {
-    try {
-      setLoading('fetch', true);
-      setError(null);
-
+  // Fetching clients with React Query
+  const { 
+    data: clientsData = [], 
+    isLoading: isFetchingInitial, 
+    error: queryError,
+    refetch 
+  } = useQuery({
+    queryKey: CLIENTS_QUERY_KEY,
+    queryFn: async () => {
       const response = await fetch('/api/clients');
-
       if (!response.ok) {
         throw new Error('Error al obtener clientes');
       }
+      const result = await response.json();
+      return Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
-      const data = await response.json();
-      setClients(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-      console.error('Error fetching clients:', err);
-    } finally {
-      setLoading('fetch', false);
-    }
-  }, [setLoading]);
+  const clients = useMemo(() => clientsData as Client[], [clientsData]);
 
-  const updateClient = useCallback(async (id: string, data: Partial<Client>) => {
-    try {
-      setLoading('update', true);
-      console.log('Actualizando cliente:', { id, data });
-
-      const response = await fetch(`/api/clients/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-
-      console.log('Respuesta status:', response.status);
-
-      const responseText = await response.text();
-      console.log('Respuesta texto:', responseText);
-
-      if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${responseText}`);
-      }
-
-      const updatedClient = JSON.parse(responseText);
-
-      setClients(prev => prev.map(client =>
-        client.id === id ? { ...client, ...data } : client
-      ));
-
-      return true;
-    } catch (err) {
-      console.error('Error updating client:', err);
-      return false;
-    } finally {
-      setLoading('update', false);
-    }
-  }, [setLoading]);
-
-  const deleteClient = useCallback(async (id: string) => {
-    try {
-      setLoading('delete', true);
-      const response = await fetch(`/api/clients/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al eliminar cliente');
-      }
-
-      setClients(prev => prev.filter(client => client.id !== id));
-
-      return true;
-    } catch (err) {
-      console.error('Error deleting client:', err);
-      setError(err instanceof Error ? err.message : 'Error al eliminar cliente');
-      return false;
-    } finally {
-      setLoading('delete', false);
-    }
-  }, [setLoading]);
-
-  const createClient = useCallback(async (data: CreateClientDto) => {
-    try {
-      setLoading('create', true);
-      setError(null);
-
+  // Mutations
+  const createMutation = useMutation({
+    mutationFn: async (data: CreateClientDto) => {
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-
       if (!response.ok) {
         throw new Error('Error al crear cliente');
       }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CLIENTS_QUERY_KEY });
+    },
+  });
 
-      const newClient = await response.json();
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: Partial<Client> }) => {
+      const response = await fetch(`/api/clients/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Error ${response.status}: ${text}`);
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CLIENTS_QUERY_KEY });
+    },
+  });
 
-      setClients(prev => [...prev, newClient]);
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`/api/clients/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar cliente');
+      }
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: CLIENTS_QUERY_KEY });
+    },
+  });
 
-      return newClient;
-    } catch (err) {
-      console.error('Error creating client:', err);
-      setError(err instanceof Error ? err.message : 'Error al crear cliente');
-      return null;
-    } finally {
-      setLoading('create', false);
-    }
-  }, [setLoading]);
+  const isLoading = useMemo(() => ({
+    fetch: isFetchingInitial,
+    create: createMutation.isPending,
+    update: updateMutation.isPending,
+    delete: deleteMutation.isPending,
+    export: false,
+    view: false,
+    rowId: null,
+  }), [isFetchingInitial, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
+
+  const error = queryError ? (queryError as Error).message : null;
 
   return {
     clients,
     isLoading,
     error,
-    isDeleting,
-    isUpdating,
-    isCreating,
-    refetch: fetchClients,
-    updateClient,
-    deleteClient,
-    createClient,
-    setError,
+    isDeleting: deleteMutation.isPending ? 'deleting' : null,
+    isUpdating: updateMutation.isPending ? 'updating' : null,
+    isCreating: createMutation.isPending,
+    refetch,
+    updateClient: async (id: string, data: Partial<Client>) => {
+      try {
+        await updateMutation.mutateAsync({ id, data });
+        return true;
+      } catch (err) {
+        console.error('Error updating client:', err);
+        return false;
+      }
+    },
+    deleteClient: async (id: string) => {
+      try {
+        await deleteMutation.mutateAsync(id);
+        return true;
+      } catch (err) {
+        console.error('Error deleting client:', err);
+        return false;
+      }
+    },
+    createClient: async (data: CreateClientDto) => {
+      try {
+        return await createMutation.mutateAsync(data);
+      } catch (err) {
+        console.error('Error creating client:', err);
+        return null;
+      }
+    },
+    setError: () => {}, // Maintain compatibility
   };
 }
