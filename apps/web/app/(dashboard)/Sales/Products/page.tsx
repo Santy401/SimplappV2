@@ -1,7 +1,6 @@
 "use client";
 
-import { ModernTable, useProductTable, ModernTableSkeleton, Button } from "@simplapp/ui";
-import { UserPlus } from "lucide-react";
+import { ModernTable, useProductTable, ModernTableSkeleton } from "@simplapp/ui";
 import { useState } from "react";
 import { useProduct } from "@interfaces/src/hooks/features/Products/useProduct";
 
@@ -28,30 +27,41 @@ export default function ProductsPage({
 
   const validProducts = (Array.isArray(products) ? products : []) as any[];
 
-  if (isLoading.fetch && validProducts.length === 0) {
-    return <div className="max-w-6xl mx-auto px-2 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+  // LOGICA CLEAN: Solo esqueleto si no hay datos previos
+  const isInitialLoading = isLoading.fetch && validProducts.length === 0;
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-2 py-8 text-center text-red-500">
+        Error al cargar productos. Por favor reintente.
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-2 py-8">
-      {/* <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Productos</h1>
-        <Button onClick={handleAddCustomer} variant="default">
-          <UserPlus className="w-4 h-4" /> Nuevo Producto
-        </Button>
-      </div> */}
-      <ModernTable
-        data={validProducts}
-        columns={columns as any}
-        title="Productos"
-        description="Gestiona tus productos"
-        onAdd={handleAddCustomer}
-        addActionLabel="Nuevo Producto"
-        onDelete={handleDeleteCustomer as any}
-        onDeleteMany={handleDeleteManyCustomers as any}
-        onEdit={handleEditCustomer as any}
-        onExport={handleExportCustomers}
-      />
+    <div className="max-w-6xl mx-auto px-2 py-8 animate-in fade-in duration-500">
+      {isInitialLoading ? (
+        <ModernTableSkeleton rowCount={5} columnCount={6} />
+      ) : (
+        <ModernTable
+          key={`products-table-v-${tableversion}`}
+          data={validProducts}
+          columns={columns as any}
+          title="Productos"
+          description="Controla tu inventario, precios y stock en tiempo real."
+          onAdd={handleAddCustomer}
+          addActionLabel="Nuevo Producto"
+          onDelete={handleDeleteCustomer as any}
+          onDeleteMany={handleDeleteManyCustomers as any}
+          onEdit={handleEditCustomer as any}
+          onExport={handleExportCustomers}
+          isLoading={{
+            fetch: isLoading.fetch,
+            create: isLoading.create,
+            update: isLoading.update
+          }}
+        />
+      )}
     </div>
   );
 }
