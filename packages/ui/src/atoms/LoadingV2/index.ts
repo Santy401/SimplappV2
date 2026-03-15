@@ -1,1 +1,2 @@
-﻿export * from './Loading';
+export * from './LoadingV2';
+export * from './GlobalLoadingIndicator';

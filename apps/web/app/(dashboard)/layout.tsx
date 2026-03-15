@@ -124,6 +124,7 @@ function AdminContent({ children }: { children: React.ReactNode }) {
 
 
 import { Suspense } from 'react';
+import { GlobalLoadingIndicator } from "@simplapp/ui";
 
 export default function RootLayout({
   children,
@@ -135,6 +136,7 @@ export default function RootLayout({
       <NavigationProvider>
         <AppStateProvider>
           <ProtectedRoute>
+            <GlobalLoadingIndicator />
             <AdminContent>{children}</AdminContent>
           </ProtectedRoute>
         </AppStateProvider>
