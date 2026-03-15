@@ -41,6 +41,7 @@ export const FullExperience: StoryObj = {
           onSubmit={handleSubmit}
           isLoading={isLoading}
           error={error}
+          register={() => ({ onChange: () => {} })}
         />
       </AuthLayout>
     );
@@ -58,6 +59,7 @@ export const LoginFormOnly: StoryObj<typeof AuthForm> = {
     isLoading: false,
     onModeChange: (mode) => console.log('Change to:', mode),
     onSubmit: async (data) => console.log('Submit:', data),
+    register: () => ({ onChange: () => {} }),
   }
 };
 
@@ -72,6 +74,7 @@ export const RegisterFormOnly: StoryObj<typeof AuthForm> = {
     isLoading: false,
     onModeChange: (mode) => console.log('Change to:', mode),
     onSubmit: async (data) => console.log('Submit:', data),
+    register: () => ({ onChange: () => {} }),
   }
 };
 
