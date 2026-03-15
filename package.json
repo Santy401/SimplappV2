@@ -3,11 +3,12 @@
     "version": "0.0.0",
     "private": true,
     "scripts": {
-        "dev": "pnpm -r dev",
+        "dev": "turbo run dev",
         "dev:web": "pnpm --filter simplapp dev",
-        "build": "pnpm -r build",
-        "lint": "eslint .",
-        "lint:fix": "eslint . --fix"
+        "build": "turbo run build",
+        "lint": "turbo run lint",
+        "lint:fix": "eslint . --fix",
+        "clean": "turbo run clean"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.3",
@@ -18,12 +19,14 @@
         "@typescript-eslint/eslint-plugin": "^8.49.0",
         "@typescript-eslint/parser": "^8.49.0",
         "@vitest/coverage-v8": "^4.0.18",
+        "cross-env": "^10.1.0",
         "dotenv": "^17.2.3",
         "eslint": "^8.56.0",
         "eslint-config-next": "^14.0.0",
         "eslint-plugin-next": "^0.0.0",
         "prisma-erd-generator": "^2.4.2",
         "tsx": "^4.21.0",
+        "turbo": "^2.8.17",
         "typescript": "^5.0.0",
         "vitest": "^4.0.18"
     },
