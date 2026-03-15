@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Client, CreateClientDto } from '@domain/entities/Client.entity';
 
@@ -38,7 +38,14 @@ export function useClients() {
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        throw new Error('Error al crear cliente');
+        let errorMessage = 'Error al crear cliente';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          // Ignorar si no hay JSON
+        }
+        throw new Error(errorMessage);
       }
       return response.json();
     },

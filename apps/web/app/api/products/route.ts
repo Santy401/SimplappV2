@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
                 unit: unitOfMeasure || UnitOfMeansureList.UNIDAD,
                 categoryProductId: categoryId,
                 code: codeProduct,
-                storeId: storeId,
+                storeId: storeId && storeId !== "" ? storeId : undefined,
                 cost: costForUnit ? String(costForUnit) : undefined,
                 basePrice: basePrice ? String(basePrice) : undefined,
                 finalPrice: valuePrice ? String(valuePrice) : undefined,
