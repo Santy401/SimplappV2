@@ -1,15 +1,15 @@
 "use client";
 
-import { ModernTable, useSellerTable, ModernTableSkeleton, Button } from "@simplapp/ui";
-import { UserPlus } from "lucide-react";
+import { ModernTable, useSellerTable, ModernTableSkeleton } from "@simplapp/ui";
 import { useState } from "react";
 import { useSeller } from "@interfaces/src/hooks/features/Sellers/useSeller";
 
 export default function SellersPage({
   onSelect = () => { },
-  onSelectClient = () => { }
+  onSelectSeller = () => { }
 }: any) {
-  const { sellers, isLoading, error, refetch } = useSeller();
+  const { sellers, isLoading, refetch } = useSeller();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [tableversion, setTableversion] = useState(0);
 
   const refetchTable = () => {
@@ -24,7 +24,7 @@ export default function SellersPage({
     handleDeleteManyCustomers,
     handleEditCustomer,
     handleExportCustomers,
-  } = useSellerTable({ onSelect, onSelectClient, onDeleteSuccess: refetchTable });
+  } = useSellerTable({ onSelect, onSelectSeller, onDeleteSuccess: refetchTable });
 
   const validData = Array.isArray(sellers) ? sellers : [];
 

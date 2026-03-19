@@ -1,6 +1,6 @@
 "use client";
 import { CreateSellerDto, Seller, UpdateSellerDto } from "@domain/entities/Seller.entity";
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 const SELLERS_QUERY_KEY = ['sellers'];

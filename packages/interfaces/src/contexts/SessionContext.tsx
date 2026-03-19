@@ -55,6 +55,17 @@ export const SessionProvider = ({
       const data = await apiClient.get<User>("/api/auth/session");
       setUser(data);
       setError(null);
+    } catch (err: any) {
+      setUser(null);
+
+      const status = err?.status ?? err?.response?.status;
+
+      if (status === 401) {
+        return;
+      }
+
+      setError("No se pudo cargar la sesión.");
+      console.error("[SessionProvider] fetchSession error:", err);
     } finally {
       if (isRefresh) setIsRefreshing(false);
       else setLoading(false);
@@ -62,16 +73,17 @@ export const SessionProvider = ({
   }, []);
 
   const refreshSession = async () => {
-    await fetchSession(true); // ← marca que es un refresh, no carga inicial
+    await fetchSession(true);
   };
 
   const logout = async () => {
     try {
-      await apiClient.post("/api/auth/logout", {});
       setUser(null);
-      router.push("/colombia/Login");
+      await apiClient.post("/api/auth/logout", {});
     } catch (err) {
       console.error("Error logging out:", err);
+    } finally {
+      router.push("/colombia/Login");
     }
   };
 
