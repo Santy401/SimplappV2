@@ -43,3 +43,5 @@ MANIFESTO_EXITO.md
 
 # Prisma generated DB clients
 apps/web/prisma/src/generated/
+
+Engineering Notebook/
