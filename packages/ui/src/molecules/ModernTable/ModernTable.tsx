@@ -49,6 +49,7 @@ export function ModernTable<T extends { id: string }>({
   emptyDescription = "Aún no se ha creado ningún registro en esta sección.",
   emptyActionLabel,
   onEmptyAction,
+  isBillView = false,
 }: ModernTableProps<T>) {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,6 +111,12 @@ export function ModernTable<T extends { id: string }>({
       return next;
     });
   };
+  
+  const canBulkDelete = useMemo(() => {
+    if (!isBillView) return true;
+    const selectedItems = data.filter((item: T) => selectedIds.has(item.id));
+    return selectedItems.every((item: T & { status?: string }) => item.status === 'DRAFT');
+  }, [data, selectedIds, isBillView]);
 
   const handleBulkDelete = async () => {
     if (!onDeleteMany || selectedIds.size === 0) return;
@@ -181,8 +188,8 @@ export function ModernTable<T extends { id: string }>({
               >
                 Cancelar
               </button>
-              {onDeleteMany && (
-                <Button variant="destructive" onClick={handleBulkDelete} className="bg-red-500 hover:bg-red-600 h-9 px-4 text-white">
+              {onDeleteMany && canBulkDelete && (
+                <Button variant="destructive" onClick={handleBulkDelete} className="flex justify-center items-center rounded bg-red-500 hover:bg-red-600 h-9 px-4 text-white">
                   Eliminar
                   <Trash2 className="w-4 h-4 ml-2" />
                 </Button>
