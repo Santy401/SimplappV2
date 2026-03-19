@@ -13,6 +13,7 @@ export const useSession = () => {
     user: context.user,
     isLoading: context.loading,
     error: context.error,
+    isRefreshing: context.isRefreshing,
     isAuthenticated: !!context.user,
     refresh: context.refreshSession,
     logout: context.logout

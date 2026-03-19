@@ -129,9 +129,11 @@ export async function proxy(request: NextRequest) {
 
   // Login/Register en el dominio app
   if (isAuthPageRoute(pathname)) {
-    if (isTokenValid) return NextResponse.redirect(new URL('/', request.url));
-    if (isLocalhost(hostname)) return NextResponse.next();
-    return NextResponse.redirect(marketingUrl(pathname, request));
+    if (isTokenValid) {
+      const redirectTo = request.nextUrl.searchParams.get('redirect');
+      const safePath = redirectTo?.startsWith('/') ? redirectTo : '/';
+      return NextResponse.redirect(new URL(safePath, request.url));
+    }
   }
 
   // Rutas de marketing en app domain → redirigir al marketing domain
