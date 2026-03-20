@@ -169,6 +169,14 @@ export default function BillsPage({
   // Lógica de Skeleton Inteligente
   const isInitialLoading = isLoading.fetch && validBills.length === 0;
 
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-2 py-8 text-center text-red-500">
+        Error al cargar facturas. Por favor reintente.
+      </div>
+    );
+  }
+
   if (showPreview && selectedBill) {
     return (
       <div className="min-h-fit animate-in fade-in duration-500">

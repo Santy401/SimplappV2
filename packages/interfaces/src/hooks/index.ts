@@ -16,3 +16,5 @@ export * from './features/Sellers/useSeller';
 export * from './features/Sellers/useSellerCustomers';
 export * from './features/Stores/useStore';
 export * from './features/Stores/useStoreCustomers';
+export * from './features/Payments/usePayment';
+export * from './features/Payments/useBankAccount';

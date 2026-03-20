@@ -1,6 +1,7 @@
 "use client";
 
 import { ModernTable, useClientTable, ModernTableSkeleton } from "@simplapp/ui";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { useClients } from "@interfaces/src/hooks/features/Clients/useClient";
@@ -53,7 +54,9 @@ export default function ClientesPage({
   return (
     <div className="max-w-6xl mx-auto px-2 py-8 animate-in fade-in duration-500">
       {isInitialLoading ? (
-        <ModernTableSkeleton rowCount={5} columnCount={6} />
+        <div className="animate-in fade-in duration-200">
+          <ModernTableSkeleton rowCount={5} columnCount={6} />
+        </div>
       ) : (
         <ModernTable
           key={`clients-table-v-${tableversion}`}
@@ -65,10 +68,18 @@ export default function ClientesPage({
           addActionLabel="Nuevo Cliente"
           onExport={handleExportCustomers}
           onDeleteMany={handleDeleteManyCustomers}
+          emptyIcon={Users}
+          emptyTitle="No hay clientes registrados"
+          emptyDescription="Crea tu primer cliente para empezar a registrar transacciones."
           isLoading={{
             fetch: isLoading.fetch,
             create: isLoading.create,
-            update: isLoading.update
+            update: isLoading.update,
+            deleteId: null,
+            deleteMany: false,
+            export: false,
+            view: false,
+            rowId: null,
           }}
         />
       )}

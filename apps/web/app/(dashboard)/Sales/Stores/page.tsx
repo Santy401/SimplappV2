@@ -5,12 +5,17 @@ import { Warehouse } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "@interfaces/src/hooks/features/Stores/useStore";
 
+interface StoresPageProps {
+  onSelect?: (id: string) => void;
+  onSelectStores?: (id: string) => void;
+}
+
 export default function StoresPage({
   onSelect = () => { },
   onSelectStores = () => { }
-}: any) {
+}: StoresPageProps) {
   // isLoading.fetch en useStore (React Query) solo es true en el primer fetch sin cache
-  const { stores, isLoading, error, refetch } = useStore();
+  const { stores, isLoading, error } = useStore();
   const [tableversion, setTableversion] = useState(0);
 
   const refetchTable = () => {
@@ -66,8 +71,11 @@ export default function StoresPage({
              fetch: isLoading.fetch,
              create: isLoading.create,
              update: isLoading.update,
-             delete: isLoading.delete,
-             any: isLoading.any
+             deleteId: null,
+             deleteMany: isLoading.delete,
+             export: false,
+             view: false,
+             rowId: null,
           }}
         />
       )}
