@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { BillPreview } from "@ui/molecules/BillPreview";
 import { useState, useEffect } from 'react';
 import { useSession } from "@hooks/features/auth/use-session";
-import { useComponentLoading } from "@hooks/use-component-loading";
+import { useComponentLoading } from "@hooks/useComponentLoading";
 
 interface BillsCreatePageProps {
     onSaveDraft?: (data: CreateBillInput) => Promise<void>;
