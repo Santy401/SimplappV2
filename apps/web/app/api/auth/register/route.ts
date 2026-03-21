@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 import { createUsers } from '@interfaces/lib/users';
 import { prisma } from '@interfaces/lib/prisma';
 import { rateLimit } from '@/lib/rate-limit';
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body = await request.json();
 
     // ─── Validación con Zod ───────────────────────────────────────────────
-    const parsed = parseBody(body, registerApiSchema);
+    const parsed = parseBody<z.infer<typeof registerApiSchema>>(body, registerApiSchema);
     if (!parsed.success) return parsed.errorResponse;
     const { email, password, name, phone, typeAccount } = parsed.data;
 

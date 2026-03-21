@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 const BodegaContent = () => {
   const { navigateTo } = useNavigation();
   const { setSelectedStore } = useAppState(); 
-  return <Bodega onSelect={navigateTo} onSelectStores={setSelectedStore} />; 
+  return <Bodega onSelect={navigateTo} onSelectStores={(id) => setSelectedStore(id)} />; 
 };
 
 export default function Page() { 

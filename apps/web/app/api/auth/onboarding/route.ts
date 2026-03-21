@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
 
         // ─── Validación con Zod ────────────────────────────────────────────────
-        const parsed = parseBody(body, onboardingApiSchema);
+        const parsed = parseBody<z.infer<typeof onboardingApiSchema>>(body, onboardingApiSchema);
         if (!parsed.success) return parsed.errorResponse;
         const { userType, companyName, country, currency, companyLogo, invoicePrefix, defaultTax } = parsed.data;
 

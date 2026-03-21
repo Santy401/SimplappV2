@@ -16,6 +16,7 @@ export const useSession = () => {
     isRefreshing: context.isRefreshing,
     isAuthenticated: !!context.user,
     refresh: context.refreshSession,
+    refetch: context.refreshSession,
     logout: context.logout
   };
 };

@@ -3,47 +3,40 @@
   "globalDependencies": [
     "package.json",
     "tsconfig.base.json",
-    "pnpm-lock.yaml",
-    ".env"
+    "pnpm-lock.yaml"
   ],
   "tasks": {
     "build": {
       "dependsOn": [
         "^build"
       ],
-      "inputs": [
-        "src/**",
-        "app/**",
-        "lib/**",
-        "public/**",
-        "styles/**",
-        "components/**",
-        "prisma/schema.prisma",
-        "package.json",
-        "tsconfig.json",
-        "next.config.js",
-        "next.config.ts",
-        "tailwind.config.js",
-        "postcss.config.mjs"
-      ],
       "outputs": [
         ".next/**",
         "!.next/cache/**",
         "dist/**",
         "build/**"
+      ],
+      "inputs": [
+        "**/*",
+        "!.next/**",
+        "!node_modules/**"
+      ]
+    },
+    "check-types": {
+      "dependsOn": [
+        "^check-types"
+      ],
+      "inputs": [
+        "**/*.ts",
+        "**/*.tsx",
+        "tsconfig.json"
       ]
     },
     "lint": {
       "dependsOn": [
         "^lint"
       ],
-      "inputs": [
-        "src/**",
-        "app/**",
-        "lib/**",
-        "components/**",
-        "package.json"
-      ]
+      "cache": true
     },
     "dev": {
       "cache": false,

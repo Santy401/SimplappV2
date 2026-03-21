@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && cross-env NODE_OPTIONS=--max-old-space-size=8192 next build",
+    "check-types": "cross-env NODE_OPTIONS=--max-old-space-size=8192 tsc --noEmit",
     "start": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate",
@@ -48,7 +49,7 @@
     "resend": "^6.9.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
-    "zod": "^4.1.13"
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@prisma/client": "^7.1.0",

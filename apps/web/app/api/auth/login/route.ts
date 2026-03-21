@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { generateAccessToken, generateRefreshToken } from '@interfaces/lib/auth/token';
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     const body = await req.json();
 
     // ─── Validación con Zod ───────────────────────────────────────────────
-    const parsed = parseBody(body, loginApiSchema);
+    const parsed = parseBody<z.infer<typeof loginApiSchema>>(body, loginApiSchema);
     if (!parsed.success) return parsed.errorResponse;
     const { email, password } = parsed.data;
 

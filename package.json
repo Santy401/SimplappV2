@@ -6,6 +6,7 @@
         "dev": "turbo run dev",
         "dev:web": "pnpm --filter simplapp dev",
         "build": "turbo run build",
+        "check-types": "turbo run check-types",
         "lint": "turbo run lint",
         "lint:fix": "eslint . --fix",
         "clean": "turbo run clean"
