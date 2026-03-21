@@ -50,16 +50,35 @@ export async function POST(
         }
 
         if (bill.status !== 'DRAFT') {
+            // 🧑‍🏫 MENTOR FIX: Idempotencia. Si el frontend dispara 2 peticiones (PUT e ISSUE)
+            // y el PUT ya la emitió, no lanzamos error 400 ni duplicamos notificaciones, simplemente devolvemos.
+            if (['ISSUED', 'TO_PAY', 'PAID', 'PARTIALLY_PAID'].includes(bill.status)) {
+                 return NextResponse.json(bill);
+            }
+            
             return NextResponse.json(
                 { error: 'Solo se pueden emitir facturas en estado borrador.' },
                 { status: 400 }
             );
         }
 
+        // 🧑‍🏫 MENTOR FIX: Dependencia comercial del método de pago
+        let targetStatus = 'ISSUED';
+        let targetBalance = String(bill.balance);
+
+        if (bill.paymentMethod === 'CREDIT') {
+            targetStatus = 'TO_PAY';
+            targetBalance = String(bill.total); // Si emiten a crédito, el saldo exigible es todo el total
+        } else if (Number(bill.balance) <= 0) {
+            targetStatus = 'PAID';
+            targetBalance = '0';
+        }
+
         const updatedBill = await prisma.bill.update({
             where: { id },
             data: {
-                status: 'ISSUED',
+                status: targetStatus as any,
+                balance: targetBalance,
             },
         });
 
