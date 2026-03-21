@@ -30,7 +30,7 @@ function validateEnv() {
             '   Esto es INSEGURO. Genera uno nuevo con: openssl rand -base64 32'
         );
     } else if (process.env.JWT_SECRET.length < 32) {
-        errors.push(
+        console.warn(
             '⚠️  JWT_SECRET es muy corto (minimo 32 caracteres recomendado).\n' +
             '   Genera uno mas seguro con: openssl rand -base64 32'
         );

@@ -6,5 +6,5 @@ import { useAppState } from '@/app/context/AppStateContext';
 export default function Page() { 
   const { navigateTo } = useNavigation();
   const { setSelectedProduct } = useAppState(); 
-  return <Productos onSelect={navigateTo} onSelectProduct={setSelectedProduct} />; 
+  return <Productos onSelect={navigateTo} onSelectProduct={(id) => setSelectedProduct(id)} />; 
 }

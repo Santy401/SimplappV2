@@ -8,7 +8,7 @@ import { Onboarding } from '@simplapp/ui';
 
 export default function OnboardingPage() {
     const router = useRouter();
-    const { refetch, user } = useSession();
+    const { refresh, user } = useSession();
 
     const handleSubmit = async (data: any) => {
         try {
@@ -22,7 +22,8 @@ export default function OnboardingPage() {
                 defaultTax: data.defaultTax
             });
 
-            await refetch(); // Refrescar la sesión para aplicar onboardingCompleted
+            await refresh(); // Refrescar la sesión para aplicar onboardingCompleted
+            router.push('/')
         } catch (error) {
             console.error('Error al guardar onboarding:', error);
             toast.error('Ocurrió un error al guardar tu información.');
@@ -30,9 +31,7 @@ export default function OnboardingPage() {
         }
     };
 
-    const handleFinish = () => {
-        router.push('/');
-    };
+    const handleFinish = () => {};
 
     return (
         <Onboarding 

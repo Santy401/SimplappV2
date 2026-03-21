@@ -79,7 +79,7 @@ export function Onboarding({ initialData, onSubmit, onFinish }: OnboardingProps)
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white dark:bg-slate-950 overflow-x-hidden">
+    <div className="min-h-screen w-full flex bg-white dark:bg-slate-950 overflow-hidden">
       {/* Left Side: Info (Desktop only) */}
       <OnboardingInfoPanel />
 

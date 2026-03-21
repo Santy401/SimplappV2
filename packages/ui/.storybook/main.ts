@@ -13,6 +13,13 @@ const config: StorybookConfig = {
   },
   docs: {
     autodocs: "tag",
+  },
+  viteFinal: async (config) => {
+    config.define = {
+      ...config.define,
+      "process.env": {},
+    };
+    return config;
   }
 };
 

@@ -13,8 +13,12 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      NEXT_PUBLIC_ROOT_DOMAIN: ${{ secrets.NEXT_PUBLIC_ROOT_DOMAIN }}
+      # Dummy values for CI/CD build phase
+      DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/simplapp' }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET || 'ci-dummy-secret-at-least-32-chars-long' }}
+      JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET || 'ci-dummy-refresh-secret-at-least-32-chars-long' }}
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_ROOT_DOMAIN: ${{ secrets.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000' }}
 
     steps:
       - name: Checkout repository
@@ -31,10 +35,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      - name: Prisma Generate
-        working-directory: ./apps/web
-        run: pnpm exec prisma generate
 
       - name: Build
         run: pnpm build

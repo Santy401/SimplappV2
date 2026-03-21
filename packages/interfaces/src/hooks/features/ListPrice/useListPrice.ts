@@ -1,128 +1,88 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { ListPrice, CreateListPriceDto, UpdateListPriceDto } from "@domain/entities/ListPrice.entity";
-import { set } from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const LIST_PRICES_QUERY_KEY = ['list-prices'];
 
 export function useListPrice() {
-    const [listPrices, setListPrices] = useState<ListPrice[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loadingStates, setLoadingStates] = useState({
-        fetch: false,
-        create: false,
-        update: false,
-        delete: false,
-        get: false,
-    });
+    const queryClient = useQueryClient();
 
-    const isLoading = {
-        fetch: loadingStates.fetch,
-        create: loadingStates.create,
-        update: loadingStates.update,
-        delete: loadingStates.delete,
-        get: loadingStates.get,
-        any: Object.values(loadingStates).some(Boolean),
-    }
-
-    const setLoading = (key: keyof typeof loadingStates, value: boolean) => {
-        setLoadingStates(prev => ({ ...prev, [key]: value }));
-    }
-
-    useEffect(() => {
-        fetchListPrices();
-    }, []);
-
-    const fetchListPrices = async () => {
-        try {
-            setLoading('fetch', true);
-            setError(null);
-
+    const { 
+        data: listPricesData = [], 
+        isLoading: isFetchingInitial, 
+        error: queryError,
+        refetch 
+    } = useQuery({
+        queryKey: LIST_PRICES_QUERY_KEY,
+        queryFn: async () => {
             const response = await fetch('/api/list-prices');
-
             if (!response.ok) {
                 throw new Error('Error al obtener Listas de Precios');
             }
+            const result = await response.json();
+            return Array.isArray(result.data) ? result.data : (Array.isArray(result) ? result : []);
+        },
+        staleTime: 5 * 60 * 1000,
+    });
 
-            const data = await response.json();
-            setListPrices(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Error desconocido');
-            console.error('Error fetching List Prices:', err);
-        } finally {
-            setLoading('fetch', false);
-        }
-    };
+    const listPrices = useMemo(() => listPricesData as ListPrice[], [listPricesData]);
 
-    const deleteListPrice = async (id: string) => {
-        setLoading('delete', true);
-        try {
-            const response = await fetch(`/api/list-prices/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) throw new Error('Error al eliminar');
-
-            setListPrices(prev => prev.filter(listPrice => listPrice.id !== id));
-            return true;
-        } catch (err) {
-            console.error('Error deleting list price:', err);
-            return false;
-        } finally {
-            setLoading('delete', false);
-        }
-    };
-
-    const createListPrice = async (data: CreateListPriceDto) => {
-        setLoading('create', true);
-        try {
+    const createMutation = useMutation({
+        mutationFn: async (data: CreateListPriceDto) => {
             const response = await fetch('/api/list-prices', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
             if (!response.ok) throw new Error('Error al crear');
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: LIST_PRICES_QUERY_KEY }),
+    });
 
-            const newListPrice = await response.json();
-            setListPrices(prev => [...prev, newListPrice]);
-            return newListPrice;
-        } catch (err) {
-            console.error('Error creating list price:', err);
-            return null;
-        } finally {
-            setLoading('create', false);
-        }
-    };
-
-    const updateListPrice = async (id: string, data: UpdateListPriceDto) => {
-        setLoading('update', true);
-        try {
+    const updateMutation = useMutation({
+        mutationFn: async ({ id, data }: { id: string, data: UpdateListPriceDto }) => {
             const response = await fetch(`/api/list-prices/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
             });
-
             if (!response.ok) throw new Error('Error al actualizar');
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: LIST_PRICES_QUERY_KEY }),
+    });
 
-            const updatedListPrice = await response.json();
-            setListPrices(prev => prev.map(listPrice =>
-                listPrice.id === id ? updatedListPrice : listPrice
-            ));
-            return updatedListPrice;
-        } catch (err) {
-            console.error('Error updating list price:', err);
-            return null;
-        } finally {
-            setLoading('update', false);
-        }
-    };
+    const deleteMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const response = await fetch(`/api/list-prices/${id}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) throw new Error('Error al eliminar');
+            return true;
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: LIST_PRICES_QUERY_KEY }),
+    });
+
+    const isLoading = useMemo(() => ({
+        fetch: isFetchingInitial,
+        create: createMutation.isPending,
+        update: updateMutation.isPending,
+        delete: deleteMutation.isPending,
+        get: false,
+        any: isFetchingInitial || createMutation.isPending || updateMutation.isPending || deleteMutation.isPending,
+    }), [isFetchingInitial, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
+
+    const error = queryError ? (queryError as Error).message : null;
 
     return {
         listPrices,
-        refrech: fetchListPrices,
-        deleteListPrice,
-        createListPrice,
-        updateListPrice,
+        refetch,
+        refrech: refetch, // Compatibilidad
+        deleteListPrice: (id: string) => deleteMutation.mutateAsync(id),
+        createListPrice: (data: CreateListPriceDto) => createMutation.mutateAsync(data),
+        updateListPrice: (id: string, data: UpdateListPriceDto) => updateMutation.mutateAsync({ id, data }),
         error,
         isLoading
     };
