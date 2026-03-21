@@ -1,173 +1,109 @@
 "use client";
-import { useState, useCallback, useMemo } from "react";
-import { Bill, CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
+import { useMemo } from "react";
+import { CreateBillInput, BillDetail, UpdateBill } from '@domain/entities/Bill.entity';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+const BILLS_QUERY_KEY = ['bills'];
 
 export const useBill = () => {
-    const [bills, setBills] = useState<BillDetail[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loadingState, setLoadingState] = useState({
-        fetch: false,
-        create: false,
-        update: false,
-        delete: false,
-        export: false,
-        view: false,
-        rowId: null,
-    });
+    const queryClient = useQueryClient();
 
-    const isLoading = useMemo(() => ({
-        fetch: loadingState.fetch,
-        create: loadingState.create,
-        update: loadingState.update,
-        delete: loadingState.delete,
-        export: loadingState.export,
-        view: loadingState.view,
-        rowId: loadingState.rowId,
-    }), [loadingState]);
-
-    const setLoading = useCallback((key: keyof typeof loadingState, value: boolean) => {
-        setLoadingState(prev => ({ ...prev, [key]: value }));
-    }, []);
-
-    const fetchWithAuth = useCallback(async (url: string, options: RequestInit = {}) => {
-        const fetchOptions = {
-            ...options,
-            credentials: 'include' as RequestCredentials,
-        };
-
-        let response = await fetch(url, fetchOptions);
-
-        if (response.status === 401) {
-            try {
-                const refreshResponse = await fetch('/api/auth/refresh', {
-                    method: 'POST',
-                    credentials: 'include',
-                });
-                const data = await refreshResponse.json();
-
-                if (refreshResponse.ok) {
-                    // Retry original request
-                    response = await fetch(url, fetchOptions);
-                }
-                setBills(data);
-            } catch (err) {
-                console.error('Error refreshing token:', err);
-            }
-        }
-
-        return response;
-    }, []);
-
-    const fetchBills = useCallback(async () => {
-        setLoading('fetch', true);
-        try {
-            const response = await fetchWithAuth('/api/bills');
+    // Fetching bills with React Query
+    const {
+        data: billsData = [],
+        isLoading: isFetchingInitial,
+        error: queryError,
+        refetch
+    } = useQuery({
+        queryKey: BILLS_QUERY_KEY,
+        queryFn: async () => {
+            const response = await fetch('/api/bills');
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Error al obtener facturas');
             }
             const data = await response.json();
-            setBills(Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []));
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
-        } finally {
-            setLoading('fetch', false);
-        }
-    }, [fetchWithAuth, setLoading]);
+            // El API retorna { data: bills, meta: ... }
+            return Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutos de caché
+    });
 
-    const createBill = useCallback(async (billData: CreateBillInput) => {
-        setLoading('create', true);
-        try {
-            const response = await fetchWithAuth('/api/bills', {
+    const bills = useMemo(() => billsData as BillDetail[], [billsData]);
+
+    // Mutations
+    const createMutation = useMutation({
+        mutationFn: async (billData: CreateBillInput) => {
+            const response = await fetch('/api/bills', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(billData),
             });
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al crear factura');
             }
-            const newBill = await response.json();
-            setBills(prev => [...prev, newBill]);
-            return newBill;
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
-            return null;
-        } finally {
-            setLoading('create', false);
-        }
-    }, [fetchWithAuth, setLoading]);
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: BILLS_QUERY_KEY }),
+    });
 
-    const updateBill = useCallback(async (billData: UpdateBill) => {
-        setLoading('update', true);
-        try {
-            const response = await fetchWithAuth(`/api/bills/${billData.id}`, {
+    const updateMutation = useMutation({
+        mutationFn: async (billData: UpdateBill) => {
+            const response = await fetch(`/api/bills/${billData.id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(billData),
             });
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Error al actualizar factura');
             }
-            const updatedBill = await response.json();
-            setBills(prev => prev.map(bill =>
-                bill.id === updatedBill.id ? updatedBill : bill
-            ));
-            return updatedBill;
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
-            return null;
-        } finally {
-            setLoading('update', false);
-        }
-    }, [fetchWithAuth, setLoading]);
+            return response.json();
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: BILLS_QUERY_KEY }),
+    });
 
-    const deleteBill = useCallback(async (billId: string) => {
-        setLoading('delete', true);
-        try {
-            const response = await fetchWithAuth(`/api/bills/${billId}`, {
+    const deleteMutation = useMutation({
+        mutationFn: async (billId: string) => {
+            const response = await fetch(`/api/bills/${billId}`, {
                 method: 'DELETE',
             });
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                throw new Error('Error al eliminar factura');
             }
-            setBills(prev => prev.filter(bill => bill.id !== billId));
             return true;
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
-            return false;
-        } finally {
-            setLoading('delete', false);
-        }
-    }, [fetchWithAuth, setLoading]);
+        },
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: BILLS_QUERY_KEY }),
+    });
 
-    const getBill = useCallback(async (billId: string) => {
-        setLoading('view', true);
-        try {
-            const response = await fetchWithAuth(`/api/bills/${billId}`);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const bill = await response.json();
-            return bill;
-        } catch (error) {
-            setError(error instanceof Error ? error.message : 'Unknown error');
-            return null;
-        } finally {
-            setLoading('view', false);
+    const getBill = async (billId: string) => {
+        const response = await fetch(`/api/bills/${billId}`);
+        if (!response.ok) {
+            throw new Error('Error al obtener el detalle de la factura');
         }
-    }, [fetchWithAuth, setLoading]);
+        return response.json();
+    };
+
+    const isLoading = useMemo(() => ({
+        fetch: isFetchingInitial,
+        create: createMutation.isPending,
+        update: updateMutation.isPending,
+        delete: deleteMutation.isPending,
+        export: false,
+        view: false,
+        rowId: null,
+    }), [isFetchingInitial, createMutation.isPending, updateMutation.isPending, deleteMutation.isPending]);
+
+    const error = queryError ? (queryError as Error).message : null;
 
     return {
         bills,
         isLoading,
         error,
         getBill,
-        createBill,
-        updateBill,
-        deleteBill,
-        refetch: fetchBills,
+        createBill: (data: CreateBillInput) => createMutation.mutateAsync(data),
+        updateBill: (data: UpdateBill) => updateMutation.mutateAsync(data),
+        deleteBill: (id: string) => deleteMutation.mutateAsync(id),
+        refetch,
     };
 };

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
+import { BillStatus } from '@prisma/client';
+import { createNotification } from '@/lib/notify';
 
 /**
  * GET /api/bills/[id]
@@ -166,6 +168,30 @@ export async function PUT(
       updatedNumber = (lastBill?.number ?? 0) + 1;
     }
 
+    // 🧑‍🏫 MENTOR FIX: Lógica de negocio para actualizaciones (PUT)
+    let finalStatus = (billData.status || existingBill.status) as BillStatus;
+    const finalPaymentMethod = billData.paymentMethod || existingBill.paymentMethod || 'CASH';
+    
+    let finalBalance = billData.balance !== undefined 
+      ? Number(billData.balance) 
+      : Number(billData.total || existingBill.total || 0);
+
+    if (finalStatus !== 'DRAFT') {
+      if (finalPaymentMethod === 'CREDIT') {
+        finalStatus = 'TO_PAY';
+        finalBalance = Number(billData.total || existingBill.total || 0);
+      } else if (finalStatus === 'PAID') {
+        finalBalance = 0;
+      } else if (finalStatus === 'ISSUED' && finalBalance === 0) {
+        finalStatus = 'PAID';
+      }
+    }
+
+    // Actualizamos los campos evaluados
+    billData.status = finalStatus;
+    billData.paymentMethod = finalPaymentMethod;
+    billData.balance = String(finalBalance); // 🧑‍🏫 Siempre aplicarlo, incluso si el front no lo envió explícito en PUT
+
     const cleanItems = items?.filter((item: any) => item.productId).map((item: any) => ({
       productId: item.productId,
       quantity: Number(item.quantity) || 1,
@@ -202,6 +228,24 @@ export async function PUT(
 
       return updatedBill;
     });
+
+    // 🔔 Notificación de factura actualizada
+    const clientName = data.clientName || existingBill.clientName || 'el cliente';
+    if (existingBill.status === 'DRAFT' && result.status !== 'DRAFT') {
+      const statusLabels: Record<string, string> = {
+        ISSUED: 'emitida', TO_PAY: 'por pagar', PAID: 'pagada', PARTIALLY_PAID: 'pago parcial',
+      };
+      const label = statusLabels[result.status] ?? result.status.toLowerCase();
+      void createNotification({
+        userId: payload.id,
+        companyId: user.companies[0].company.id,
+        title: 'Factura creada exitosamente',
+        message: `Se creó la factura (${label}) para ${clientName}.`,
+        type: 'SUCCESS',
+        link: 'Sales/Bills',
+      });
+    }
+    // (Spam eliminado: ya no notificamos los auto-guardados de DRAFT en cascada)
 
     return NextResponse.json(result);
   } catch (error) {

@@ -1,7 +1,7 @@
 "use client";
 
-import { ModernTable, useClientTable, ModernTableSkeleton, Button } from "@simplapp/ui";
-import { UserPlus } from "lucide-react";
+import { ModernTable, useClientTable, ModernTableSkeleton } from "@simplapp/ui";
+import { Users } from "lucide-react";
 import { useState } from "react";
 import { Client, OrganizationType } from "@domain/entities/Client.entity";
 import { useClients } from "@interfaces/src/hooks/features/Clients/useClient";
@@ -13,7 +13,7 @@ export default function ClientesPage({
 
   const { clients, isLoading, error, refetch } = useClients();
   const [tableversion, setTableversion] = useState(0);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'natural' | 'juridical' | 'suppliers' | 'branches'>('all');
+  const [activeFilter, _setActiveFilter] = useState<'all' | 'natural' | 'juridical' | 'suppliers' | 'branches'>('all');
 
   const refetchTable = () => {
     refetch();
@@ -29,6 +29,7 @@ export default function ClientesPage({
 
   const validClients = Array.isArray(clients) ? clients : [];
 
+  // Filtrado lógico (se mantiene simple)
   const filteredClients = validClients.filter(client => {
     switch (activeFilter) {
       case 'natural': return client.organizationType === OrganizationType.NATURAL_PERSON;
@@ -39,28 +40,49 @@ export default function ClientesPage({
     }
   });
 
-  if (isLoading.fetch && validClients.length === 0) {
-    return <div className="max-w-6xl mx-auto px-2 py-8"><ModernTableSkeleton rowCount={5} columnCount={6} /></div>;
+  // LOGICA CLEAN: Solo esqueleto si no hay datos previos
+  const isInitialLoading = isLoading.fetch && validClients.length === 0;
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto px-2 py-8 text-center text-red-500">
+        Error al cargar clientes. Por favor reintente.
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-2 py-8">
-      {/* <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Clientes</h1>
-        <Button onClick={handleAddCustomer} variant="default">
-          <UserPlus className="w-4 h-4" /> Nuevo Cliente
-        </Button>
-      </div> */}
-      <ModernTable
-        data={filteredClients}
-        columns={columns}
-        title="Clientes"
-        description="Gestiona tus clientes"
-        onAdd={handleAddCustomer}
-        addActionLabel="Nuevo Cliente"
-        onExport={handleExportCustomers}
-        onDeleteMany={handleDeleteManyCustomers}
-      />
+    <div className="max-w-6xl mx-auto px-2 py-8 animate-in fade-in duration-500">
+      {isInitialLoading ? (
+        <div className="animate-in fade-in duration-200">
+          <ModernTableSkeleton rowCount={5} columnCount={6} />
+        </div>
+      ) : (
+        <ModernTable
+          key={`clients-table-v-${tableversion}`}
+          data={filteredClients}
+          columns={columns}
+          title="Clientes"
+          description="Gestiona tus clientes y proveedores desde un solo lugar."
+          onAdd={handleAddCustomer}
+          addActionLabel="Nuevo Cliente"
+          onExport={handleExportCustomers}
+          onDeleteMany={handleDeleteManyCustomers}
+          emptyIcon={Users}
+          emptyTitle="No hay clientes registrados"
+          emptyDescription="Crea tu primer cliente para empezar a registrar transacciones."
+          isLoading={{
+            fetch: isLoading.fetch,
+            create: isLoading.create,
+            update: isLoading.update,
+            deleteId: null,
+            deleteMany: false,
+            export: false,
+            view: false,
+            rowId: null,
+          }}
+        />
+      )}
     </div>
   );
 }

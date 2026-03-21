@@ -35,11 +35,13 @@ El proyecto está estructurado como un **Monorepo** utilizando `pnpm workspaces`
     -   **Código**: Todo el código (variables, funciones, clases, archivos) debe estar en **Inglés**.
     -   **Git**: Los mensajes de commit deben estar en **Inglés**.
     -   **Comunicación**: La interacción con el usuario debe ser en **Español**.
-2.  **Commits Atómicos**: Agrupar cambios por lógica y dependencia. Nunca hacer commit de código que rompa el build. Seguir la `GUIA_COMMITS.md`.
-3.  **Tipado Estricto**: Utilizar siempre interfaces y enums de `@simplapp/domain` para asegurar consistencia. Evitar `any` a toda costa.
-4.  **Importaciones**: Usar los alias del workspace (`@simplapp/domain`, `@simplapp/hooks`, `@simplapp/ui`) en lugar de rutas relativas largas.
-5.  **Comentarios Educativos**: Añadir comentarios que expliquen la intención funcional para ayudar al aprendizaje del usuario (Modo "Teacher").
-6.  **Validación**: Siempre ejecutar `pnpm build` desde la raíz antes de considerar una tarea terminada.
+2.  **Documentación de Decisiones**: Cada decisión técnica, arquitectónica o de infraestructura relevante **DEBE** documentarse en `.docs/decisions/` siguiendo el formato ADR (Architecture Decision Record). Esto es crítico para la trazabilidad del proyecto.
+3.  **Uso de `.docs`**: La carpeta `.docs` es nuestra "Sola Fuente de Verdad". Antes de implementar, se debe consultar y, al terminar, se debe actualizar la documentación si el cambio lo requiere. Comunicamos a través de la documentación.
+4.  **Commits Atómicos**: Agrupar cambios por lógica y dependencia. Seguir la `GUIA_COMMITS.md`.
+5.  **Tipado Estricto**: Utilizar siempre interfaces y enums de `@simplapp/domain`. Evitar `any` a toda costa.
+6.  **Importaciones**: Usar los alias del workspace (`@simplapp/domain`, `@simplapp/hooks`, `@simplapp/ui`).
+7.  **Modo Teacher (Educativo)**: Tras cada cambio o implementación, Gemini debe explicar de forma clara **qué se hizo y por qué**, actuando como un mentor para que el usuario aprenda sobre la arquitectura y el código.
+8.  **Validación**: Siempre ejecutar `pnpm build` desde la raíz antes de considerar una tarea terminada.
 
 ---
 
@@ -47,27 +49,27 @@ El proyecto está estructurado como un **Monorepo** utilizando `pnpm workspaces`
 
 | Comando | Descripción |
 | :--- | :--- |
-| `pnpm dev` | Inicia todos los entornos de desarrollo en paralelo. |
-| `pnpm dev:web` | Inicia solo la aplicación web (`apps/web`). |
-| `pnpm build` | Construye todos los paquetes y aplicaciones del monorepo. |
-| `pnpm lint` | Ejecuta el linter en todo el proyecto. |
-| `pnpm --filter simplapp db:seed` | Ejecuta el seeding de la base de datos (Prisma). |
+| `pnpm dev` | Inicia todos los entornos de desarrollo en paralelo (vía Turborepo). |
+| `pnpm build` | Construye todos los paquetes y aplicaciones (vía Turborepo). |
+| `pnpm lint` | Ejecuta el linter en todo el proyecto (vía Turborepo). |
+| `pnpm clean` | Limpia las cachés y artefactos de construcción. |
 
 ---
 
 ## 📂 Documentación de Referencia
 
+- **Decisiones**: `.docs/decisions/` (Registro histórico de cambios estructurales).
 - **Arquitectura**: `.docs/architecture.md` (Routing, SPA, Datos).
 - **Guías**: `.docs/guides/` (Implementación, Multitenant, Skeletons).
 - **Stack**: `.docs/stack/technologies.md`.
-- **Workflows**: `.agent/workflows/` (Guías paso a paso para tareas comunes).
+- **Workflows**: `.agent/workflows/` (Guías paso a paso).
 
 ---
 
 ## 🤖 Rol del Agente (Gemini)
 
-Gemini actúa como el **Desarrollador Iterativo**. Su enfoque es:
--   Resolución rápida de bugs y debugging preciso.
--   Implementación de features siguiendo los patrones definidos en `.docs/guides/implementation.md`.
--   Navegación y manipulación eficiente del sistema de archivos.
--   Mantenimiento de la integridad del monorepo y sus dependencias.
+Gemini actúa como el **Desarrollador Iterativo y Mentor**. Su enfoque es:
+-   **Resolución Educativa**: No solo arregla bugs, sino que explica la causa raíz y la solución para fortalecer el conocimiento del usuario.
+-   **Documentación Proactiva**: Mantiene `.docs/decisions/` al día con cada paso importante.
+-   **Arquitecto de Monorepo**: Asegura que las dependencias entre `domain`, `interfaces` y `apps` sean correctas y eficientes.
+-   **Guardián de Estándares**: Sigue estrictamente los patrones de `.docs/guides/implementation.md`.

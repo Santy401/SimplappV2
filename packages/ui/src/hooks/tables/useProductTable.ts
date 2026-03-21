@@ -15,7 +15,7 @@ export const useProductTable = ({ onSelect, onSelectProduct, onDeleteSuccess }: 
     } = useProductCustomers({ onSelect, onSelectProduct, onDeleteSuccess });
 
     const columns = useMemo(() =>
-        createColumns(handleEditCustomer, handleDeleteCustomer, handleViewCustomer),
+        createColumns(handleViewCustomer, handleEditCustomer, handleDeleteCustomer),
         [handleEditCustomer, handleDeleteCustomer, handleViewCustomer]
     );
 

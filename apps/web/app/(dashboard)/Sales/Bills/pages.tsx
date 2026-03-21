@@ -1,8 +1,8 @@
 "use client";
 
-import { ModernTable, useBillTable, ModernTableSkeleton, Skeleton, PaymentModal, Button } from "@simplapp/ui";
+import { ModernTable, useBillTable, ModernTableSkeleton, PaymentModal } from "@simplapp/ui";
 import { ReceiptText } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
 import { BillPreview } from "@ui/molecules/BillPreview";
@@ -35,10 +35,11 @@ export default function BillsPage({
     get: false,
   });
 
-
   const validBills: BillDetail[] = (bills as BillDetail[]) ?? [];
 
   const refetchTable = () => {
+    // Con React Query ya no necesitamos forzar refetch con useEffect, 
+    // pero incrementamos tableversion para forzar el re-renderizado de la tabla si es necesario
     setTableversion((prev) => prev + 1);
   };
 
@@ -59,8 +60,6 @@ export default function BillsPage({
     }
   });
 
-  const columns = originalColumns;
-
   const handlePaymentSubmit = async (paymentData: { value: string | number; date: string; bankAccount: string; paymentMethod: string; billId: string }) => {
     const targetBill = selectedBill || selectedBillForPayment;
     if (!targetBill) return;
@@ -74,7 +73,7 @@ export default function BillsPage({
 
       if (response.ok) {
         toast.success("Pago registrado correctamente");
-        refetchTable();
+        refetch(); // Usamos el refetch de React Query directamente
         
         if (showPreview && selectedBill) {
           const freshBill = await getBill(selectedBill.id);
@@ -94,9 +93,8 @@ export default function BillsPage({
     setShowPreview(true);
   };
 
-  useEffect(() => {
-    refetch();
-  }, [tableversion]);
+  // CLEAN: Eliminamos el useEffect que disparaba refetch() innecesarios al montar el componente
+  // React Query se encarga de servir el caché instantáneamente.
 
   const preparePreviewData = (bill: BillDetail & { 
     items?: any[]; 
@@ -168,31 +166,13 @@ export default function BillsPage({
     };
   };
 
-  if (isLoading.fetch && bills.length === 0) {
-    return (
-      <div className="min-h-fit w-full animate-in fade-in duration-200">
-        <div className="max-w-6xl mx-auto px-2 py-8">
-          <ModernTableSkeleton rowCount={5} columnCount={6} />
-        </div>
-      </div>
-    );
-  }
+  // Lógica de Skeleton Inteligente
+  const isInitialLoading = isLoading.fetch && validBills.length === 0;
 
   if (error) {
     return (
-      <div className="h-[70vh] flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 text-red-700 px-6 py-8 rounded-xl max-w-md text-center">
-          <h3 className="text-lg font-semibold mb-2">
-            Error al cargar facturas
-          </h3>
-          <p className="mb-4">{error}</p>
-          <Button
-            onClick={() => window.location.reload()}
-            className="bg-red-600 hover:bg-red-700 text-white h-10 px-6"
-          >
-            Reintentar
-          </Button>
-        </div>
+      <div className="max-w-6xl mx-auto px-2 py-8 text-center text-red-500">
+        Error al cargar facturas. Por favor reintente.
       </div>
     );
   }
@@ -215,43 +195,46 @@ export default function BillsPage({
   return (
     <div className="min-h-fit animate-in fade-in duration-500">
       <div className="max-w-6xl mx-auto px-2 py-8">
-        <ModernTable
-          key={`bills-table-version-${tableversion}`}
-          data={validBills}
-          isBillView={true}
-          actions={true}
-          columns={columns}
-          title="Facturas de Venta"
-          description="Gestiona y emite tus documentos electrónicos."
-          onAdd={handleAddCustomer}
-          addActionLabel="Nueva Factura"
-          searchable={true}
-          pagination={true}
-          itemsPerPage={10}
-          onView={handleViewBill}
-          onDelete={handleDeleteCustomer}
-          onDeleteMany={handleDeleteManyCustomers}
-          onEdit={handleEditCustomer}
-          onExport={handleExportCustomers}
-          className="bg-transparent"
-          
-          // --- Empty State Config ---
-          emptyIcon={ReceiptText}
-          emptyTitle="No hay facturas registradas"
-          emptyDescription="Comienza agregando tu primera factura para llevar el control de tus ventas."
-          emptyActionLabel="Crear mi primera factura"
-          
-          isLoading={{
-            fetch: isLoading.fetch,
-            create: isLoading.create,
-            update: isLoading.update,
-            deleteId: deletingId,
-            deleteMany: false,
-            export: localLoading.export,
-            view: false,
-            rowId: deletingId,
-          }}
-        />
+        {isInitialLoading ? (
+          <div className="animate-in fade-in duration-200">
+            <ModernTableSkeleton rowCount={5} columnCount={6} />
+          </div>
+        ) : (
+          <ModernTable
+            key={`bills-table-v-${tableversion}`}
+            data={validBills}
+            isBillView={true}
+            actions={true}
+            columns={originalColumns}
+            title="Facturas de Venta"
+            description="Gestiona y emite tus documentos electrónicos."
+            onAdd={handleAddCustomer}
+            addActionLabel="Nueva Factura"
+            searchable={true}
+            pagination={true}
+            itemsPerPage={10}
+            onView={handleViewBill}
+            onDelete={handleDeleteCustomer}
+            onDeleteMany={handleDeleteManyCustomers}
+            onEdit={handleEditCustomer}
+            onExport={handleExportCustomers}
+            className="bg-transparent"
+            emptyIcon={ReceiptText}
+            emptyTitle="No hay facturas registradas"
+            emptyDescription="Comienza agregando tu primera factura para llevar el control de tus ventas."
+            emptyActionLabel="Crear mi primera factura"
+            isLoading={{
+              fetch: isLoading.fetch,
+              create: isLoading.create,
+              update: isLoading.update,
+              deleteId: deletingId,
+              deleteMany: false,
+              export: localLoading.export,
+              view: false,
+              rowId: deletingId,
+            }}
+          />
+        )}
       </div>
 
       {selectedBillForPayment && (

@@ -12,6 +12,7 @@ import { toast } from "react-toastify";
 import { BillPreview } from "@ui/molecules/BillPreview";
 import { useState, useEffect } from 'react';
 import { useSession } from "@hooks/features/auth/use-session";
+import { useComponentLoading } from "@hooks/useComponentLoading";
 
 interface BillsCreatePageProps {
     onSaveDraft?: (data: CreateBillInput) => Promise<void>;
@@ -41,6 +42,10 @@ export default function BillsCreatePage({
     const { sellers, isLoading: _sellersLoading } = useSeller();
     const { createBill, updateBill, isLoading: _billLoading, getBill } = useBill();
     const { user } = useSession();
+
+    // Registrar carga en el sistema global
+    const isInitialLoading = _clientsLoading || _productsLoading || !!_storesLoading || !!_listPricesLoading || !!_sellersLoading;
+    useComponentLoading('Cargando datos de factura', !!isInitialLoading);
 
     const [currentBillId, setCurrentBillId] = useState<string | undefined>(initialData?.id);
 
@@ -262,7 +267,7 @@ export default function BillsCreatePage({
         return (
             <BillPreview
                 {...previewData}
-                onClose={() => onSelect?.('ventas-facturacion')}
+                onClose={() => { onSelect?.('ventas-facturacion'); }}
             />
         );
     }

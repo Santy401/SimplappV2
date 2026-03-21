@@ -73,7 +73,7 @@ export function TextareaField({ label, required = false, error, helpText, placeh
   return (
     <div className={`space-y-2 ${className}`}>
       <Label htmlFor={label}>{label}{required && <span className="text-destructive ml-1">*</span>}</Label>
-      <Textarea id={label} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={`resize-none ${error ? 'border-destructive' : ''}`} rows={rows} disabled={disabled} readOnly={readOnly} />
+      <Textarea id={label} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} className={`resize-none border border-slate-200 ${error ? 'border-destructive' : ''}`} rows={rows} disabled={disabled} readOnly={readOnly} />
       {error && <p className="text-sm text-destructive">{error}</p>}
       {helpText && !error && <p className="text-sm text-muted-foreground">{helpText}</p>}
     </div>

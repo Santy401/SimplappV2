@@ -44,11 +44,6 @@ html.lenis, html.lenis body {
   scroll-behavior: auto !important;
 }
 
-/* Ocultar scrollbar globalmente pero mantener funcionalidad */
-/* ::-webkit-scrollbar {
-  display: none;
-} */
-
 * {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -61,8 +56,57 @@ html.lenis, html.lenis body {
     min-height: 100vh;
   }
 }
-/* 
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar { display: none; }
-  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-} */
+
+/* ── Simplapp Premium Toasts ────────────────────────────────────────────── */
+.simplapp-toast {
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  padding: 12px 16px !important;
+  font-family: inherit !important;
+  min-height: auto !important;
+}
+
+.dark .simplapp-toast {
+  background: rgba(20, 20, 20, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+.simplapp-toast-success {
+  border-left: 4px solid #10b981 !important;
+}
+
+.simplapp-toast-error {
+  border-left: 4px solid #ef4444 !important;
+}
+
+.simplapp-toast-info {
+  border-left: #3b82f6 solid 4px !important;
+}
+
+.simplapp-toast-warn {
+  border-left: 4px solid #f59e0b !important;
+}
+
+.simplapp-toast-loading {
+  border-left: 4px solid #6C47FF !important;
+}
+
+.Toastify__toast-body {
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.Toastify__toast-icon {
+  width: 18px !important;
+}
+
+.Toastify__close-button {
+  color: #999 !important;
+  opacity: 0.5 !important;
+}

@@ -145,18 +145,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Client not found' }, { status: 404 });
     }
 
+    // 🧑‍🏫 MENTOR FIX: Lógica de negocio comercial firme para el estado y balance
+    let finalStatus = status as BillStatus;
+    const finalPaymentMethod = paymentMethod || 'CASH';
+    
+    // Fix: Si envían un 0 real para balance, que no lo sobreescriba a truthy (total)
+    const rawBalance = balance !== undefined ? Number(balance) : Number(total || 0);
+    let finalBalance = rawBalance;
+
+    if (finalStatus !== 'DRAFT') {
+      if (finalPaymentMethod === 'CREDIT') {
+        // Toda factura a crédito comercialmente es por pagar al 100% al inicio
+        finalStatus = 'TO_PAY';
+        finalBalance = Number(total);
+      } else if (finalStatus === 'PAID') {
+        // En pago completo, saldo cobrable es 0
+        finalBalance = 0;
+      } else if (finalStatus === 'ISSUED' && finalBalance === 0) {
+         // Si la emiten con saldo cero a contado, automáticamente es pagada
+         finalStatus = 'PAID';
+      }
+    }
+
     const billData: Record<string, unknown> = {
       number: nextNumber,
       date: new Date(date),
       dueDate: dueDate ? new Date(dueDate) : new Date(date),
-      status: status as BillStatus,
-      paymentMethod: paymentMethod || 'CASH',
+      status: finalStatus,
+      paymentMethod: finalPaymentMethod,
 
-      subtotal: String(subtotal || 0),
-      taxTotal: String(taxTotal || 0),
-      discountTotal: String(discountTotal || 0),
-      total: String(total || 0),
-      balance: String(balance || total || 0),
+      subtotal: String(subtotal ?? 0),
+      taxTotal: String(taxTotal ?? 0),
+      discountTotal: String(discountTotal ?? 0),
+      total: String(total ?? 0),
+      balance: String(finalBalance),
 
       notes: notes || "",
 
@@ -225,14 +247,15 @@ export async function POST(request: NextRequest) {
 
     // 🔔 Notificación de factura creada — usamos bill.status real, no el del body
     if (bill.status === 'DRAFT') {
-      void createNotification({
+      // 🧑‍🏫 Spam eliminado: No notificamos borradores creados.
+      /* void createNotification({
         userId: user.id,
         companyId,
         title: 'Borrador de factura guardado',
         message: `Se guardó un borrador de factura para ${client.firstName} ${client.firstLastName}.`,
         type: 'INFO',
         link: 'Sales/Bills',
-      });
+      }); */
     } else {
       const statusLabels: Record<string, string> = {
         ISSUED: 'emitida',
