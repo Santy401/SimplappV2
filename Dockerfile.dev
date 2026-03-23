@@ -1,0 +1,14 @@
+FROM node:20-alpine
+
+# Activar pnpm en el contenedor
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+
+# Añadir dependencias de sistema necesarias para Turborepo y Next.js en Alpine
+RUN apk add --no-cache libc6-compat gettext bash
+
+# Establecer el directorio de trabajo
+WORKDIR /app
+
+# (Nota: El montaje de archivos se hace mediante volúmenes en el docker-compose.dev.yml)
