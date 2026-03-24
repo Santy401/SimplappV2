@@ -39,7 +39,7 @@ COPY --from=builder /app/tsconfig.json ./
 # Generate prisma client before building packages that might depend on it (like @simplapp/domain)
 RUN pnpm --filter simplapp exec prisma generate
 
-RUN pnpm turbo build --filter=simplapp
+RUN USE_STANDALONE=true pnpm turbo build --filter=simplapp
 
 FROM base AS runner
 WORKDIR /app
