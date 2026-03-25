@@ -81,7 +81,7 @@ export default function Dashboard() {
                     Resumen General
                 </div>
                 <h1 className="text-3xl font-bold tracking-tight text-slate-800 mb-1">
-                    Hola de nuevo, {userName.split(" ")[0]} 👋
+                    xd de nuevo, {userName.split(" ")[0]} 👋
                 </h1>
                 <p className="text-slate-500 text-sm">
                     Aquí está el resumen de cómo va tu negocio hoy.

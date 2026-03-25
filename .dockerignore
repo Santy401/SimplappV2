@@ -1,0 +1,51 @@
+# Dependencies
+**/node_modules/
+.pnpm-store/
+npm-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+
+# Turborepo
+.turbo/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Dev/docs (no necesarios en producción)
+.agents/
+.docs/
+*.md
+!README.md
+
+# Tests
+coverage/
+*.test.ts
+*.spec.ts
+__tests__/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore

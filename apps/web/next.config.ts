@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@simplapp/ui", "@simplapp/domain"],
+  output: process.env.USE_STANDALONE === "true" ? "standalone" : undefined,
+  transpilePackages: ["@simplapp/ui", "@simplapp/domain", "@simplapp/interfaces"],
   trailingSlash: true,
 
   async headers() {

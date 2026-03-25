@@ -2,12 +2,13 @@
 
 ## Overview
 
-This document contains the core rules and preferences for the Simplapp V2 project. Both AI agents (Claude and Gemini) must adhere to these foundational principles.
+This document contains the core rules and preferences for the Simplapp V2 project. **All AI agents** (Claude, Gemini, OpenCode, etc.) must adhere to these foundational principles.
 
 For agent-specific operating instructions, refer to:
 
-- `.agent/CLAUDE/instructions.md`: Guidelines for deep Architectural planning and complex logic refactoring.
-- `.agent/GEMINI/instructions.md`: Guidelines for iterative development, precise debugging, and tool usage.
+- `.agents/CLAUDE/instructions.md`: Deep architectural planning and complex logic refactoring.
+- `.agents/GEMINI/instructions.md`: Iterative development, precise debugging, and tool usage.
+- `.agents/REFACTOR/instructions.md`: Code refactoring specialist with proposal-first approach.
 
 ---
 
@@ -37,7 +38,7 @@ We maintain professional, structured documentation in the `.docs/` directory.
 - **Guides**: `.docs/guides/` (commits, deployment, multitenant, skeletons)
 - **API**: `.docs/api/endpoints.md`
 - **Tech Stack**: `.docs/stack/technologies.md`
-- **Workflows**: `.agent/CLAUDE/workflows/` and `.agent/GEMINI/workflows/`
+- **Workflows**: `.agents/CLAUDE/workflows/` and `.agents/GEMINI/workflows/`
 
 ## Mentorship & Learning Rules (The "Teacher" Mode)
 
