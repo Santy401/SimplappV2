@@ -47,6 +47,10 @@ export async function GET(request: NextRequest) {
       user: true,
       items: { include: { product: true } },
       payments: { include: { account: true } },
+      creditNotes: {
+        where: { status: { in: ['APPLIED', 'ISSUED'] } },
+        select: { id: true, number: true, total: true, status: true, type: true, date: true }
+      },
     };
 
     const [bills, total] = await prisma.$transaction([

@@ -88,6 +88,7 @@ export async function POST(
         where: { id: bill.id },
         data: {
           balance: newBalance,
+          paidTotal: { increment: paymentValue },
           status: newStatus,
           updatedAt: new Date()
         }

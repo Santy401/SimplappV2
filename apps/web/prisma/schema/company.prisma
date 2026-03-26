@@ -86,6 +86,7 @@ model Company {
   sellers            Seller[]
   products           Product[]
   bills              Bill[]
+  creditNotes        CreditNote[]
   bankAccounts       BankAccount[]
   categories         CategoryProduct[]
   productAccountings ProductAccounting[]

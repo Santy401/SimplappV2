@@ -42,6 +42,7 @@ model User {
   // Relations
   companies               UserCompany[]
   bills                   Bill[]
+  creditNotes             CreditNote[]
   refreshTokens           RefreshToken[]
   activityLogs            ActivityLog[]
   passwordResetTokens     PasswordResetToken[]
