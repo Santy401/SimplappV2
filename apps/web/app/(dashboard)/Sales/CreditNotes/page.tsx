@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from 'react';
-import { Receipt, FileText, Plus, CreditCard, RotateCcw, Percent, DollarSign } from 'lucide-react';
+import { Receipt, FileText, Plus, CreditCard, RotateCcw, Percent, DollarSign, ArrowLeft, Printer, Download, Share2, Hash, User, Calendar, Ban, CheckCircle2, AlertCircle } from 'lucide-react';
 import { ModernTable, ModernTableSkeleton } from '@simplapp/ui';
 import type { TableColumn } from '@simplapp/ui/src/types/table.entity';
 import { useCreditNote } from '@interfaces/src/hooks/features/CreditNotes';
@@ -43,6 +43,23 @@ interface CreditNoteDetailProps {
     isCancelling: boolean;
 }
 
+function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 py-2.5 border-b border-slate-100 dark:border-slate-800 last:border-0">
+      <span className="text-xs font-medium uppercase tracking-wide text-slate-400 shrink-0">{label}</span>
+      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 text-right">{value}</span>
+    </div>
+  );
+}
+
 function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: CreditNoteDetailProps) {
     const typeLabels: Record<CreditNoteType, string> = {
         RETURN: 'Devolución',
@@ -59,156 +76,229 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
         OTRO: 'Otro'
     };
 
-    const statusLabels: Record<CreditNoteStatus, string> = {
-        DRAFT: 'Borrador',
-        ISSUED: 'Emitida',
-        APPLIED: 'Aplicada',
-        REJECTED: 'Rechazada',
-        CANCELLED: 'Cancelada'
+    const statusConfig: Record<CreditNoteStatus, { label: string; badge: string; ribbon: string; icon: React.ElementType }> = {
+        DRAFT:     { label: "Borrador",  badge: "bg-slate-100 text-slate-600", ribbon: "bg-slate-400",  icon: FileText },
+        ISSUED:    { label: "Emitida",   badge: "bg-blue-50 text-blue-600",    ribbon: "bg-blue-500",   icon: FileText },
+        APPLIED:   { label: "Aplicada",  badge: "bg-green-50 text-green-600", ribbon: "bg-emerald-500", icon: CheckCircle2 },
+        REJECTED:  { label: "Rechazada", badge: "bg-red-50 text-red-600",     ribbon: "bg-red-500",    icon: AlertCircle },
+        CANCELLED: { label: "Cancelada", badge: "bg-red-50 text-red-600",     ribbon: "bg-red-500",    icon: Ban }
     };
 
-    const statusColors: Record<CreditNoteStatus, string> = {
-        DRAFT: 'bg-gray-100 text-gray-700',
-        ISSUED: 'bg-blue-100 text-blue-700',
-        APPLIED: 'bg-green-100 text-green-700',
-        REJECTED: 'bg-red-200 text-red-800',
-        CANCELLED: 'bg-red-100 text-red-700'
-    };
+    const statusObj = statusConfig[creditNote.status];
+    const StatusIcon = statusObj.icon;
 
-    const typeColors: Record<CreditNoteType, string> = {
-        RETURN: 'bg-blue-100 text-blue-700',
-        DISCOUNT: 'bg-purple-100 text-purple-700',
-        PRICE_ADJUSTMENT: 'bg-orange-100 text-orange-700'
-    };
+    const fmt = (n: number | string) => Number(n).toLocaleString("es-CO", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     return (
-        <div className="min-h-fit animate-in fade-in duration-300">
-            <div className="max-w-4xl mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-6">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 print:bg-white animate-in fade-in duration-300">
+            {/* ── Sticky navbar ── */}
+            <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 print:hidden">
+                <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
+                    {/* Left */}
                     <div className="flex items-center gap-3">
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                            className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
                         >
-                            <RotateCcw className="w-5 h-5 rotate-180" />
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Volver</span>
                         </button>
-                        <div>
-                            <h1 className="text-2xl font-semibold">
+                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
+                        <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-[#6C47FF]" />
+                            <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                                 Nota de Crédito {creditNote.prefix || 'NC'}-{creditNote.number}
-                            </h1>
-                            <p className="text-sm text-muted-foreground">
-                                Fecha: {new Date(creditNote.date).toLocaleDateString('es-CO')}
-                            </p>
+                            </span>
+                            <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${statusObj.badge}`}>
+                                <StatusIcon className="w-3 h-3" />
+                                {statusObj.label}
+                            </span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                        <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${statusColors[creditNote.status]}`}>
-                            {statusLabels[creditNote.status]}
-                        </span>
-                        {creditNote.status === CreditNoteStatus.DRAFT && (
+
+                    {/* Right: actions */}
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => window.print()}
+                            className="h-8 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5"
+                        >
+                            <Printer className="w-3.5 h-3.5" />
+                            Imprimir
+                        </button>
+                        <button className="h-8 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+                            <Download className="w-3.5 h-3.5" />
+                            PDF
+                        </button>
+                        {(creditNote.status === CreditNoteStatus.DRAFT || creditNote.status === CreditNoteStatus.APPLIED) && (
                             <button
                                 onClick={() => onCancel(creditNote)}
                                 disabled={isCancelling}
-                                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
+                                className="h-8 px-4 rounded-lg text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors flex items-center gap-1.5 disabled:opacity-50"
                             >
-                                {isCancelling ? 'Cancelando...' : 'Cancelar'}
+                                <Ban className="w-3.5 h-3.5" />
+                                {isCancelling ? 'Cancelando...' : 'Cancelar NC'}
                             </button>
                         )}
                     </div>
                 </div>
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-card rounded-xl border p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Tipo</p>
-                        <div className="flex items-center gap-2">
-                            {creditNote.type === CreditNoteType.RETURN ? (
-                                <RotateCcw className="w-4 h-4 text-blue-600" />
-                            ) : creditNote.type === CreditNoteType.DISCOUNT ? (
-                                <Percent className="w-4 h-4 text-purple-600" />
-                            ) : (
-                                <DollarSign className="w-4 h-4 text-orange-600" />
-                            )}
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${typeColors[creditNote.type]}`}>
-                                {typeLabels[creditNote.type]}
-                            </span>
-                        </div>
-                    </div>
-                    <div className="bg-card rounded-xl border p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Motivo</p>
-                        <p className="font-medium">{reasonLabels[creditNote.reason]}</p>
-                    </div>
-                    <div className="bg-card rounded-xl border p-4">
-                        <p className="text-sm text-muted-foreground mb-1">Factura Afectada</p>
-                        <p className="font-medium">
-                            #{creditNote.bill?.prefix || ''}{creditNote.bill?.number || creditNote.billId?.substring(0, 8)}
+            <div className="max-w-6xl mx-auto px-4 py-8 space-y-5 print:p-0 print:space-y-4">
+                {/* ── Summary cards ── */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
+                    <SectionCard className="px-5 py-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Total</p>
+                        <p className="text-2xl font-bold text-red-500">-$ {fmt(creditNote.total)}</p>
+                    </SectionCard>
+                    <SectionCard className="px-5 py-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Subtotal</p>
+                        <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">$ {fmt(creditNote.subtotal)}</p>
+                    </SectionCard>
+                    <SectionCard className="px-5 py-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Impuestos</p>
+                        <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">$ {fmt(creditNote.taxTotal)}</p>
+                    </SectionCard>
+                    <SectionCard className="px-5 py-4">
+                        <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Tipo</p>
+                        <p className="text-xl font-bold text-blue-600 flex items-center gap-2 mt-1">
+                            {creditNote.type === CreditNoteType.RETURN ? <RotateCcw className="w-5 h-5" /> : 
+                             creditNote.type === CreditNoteType.DISCOUNT ? <Percent className="w-5 h-5" /> : <DollarSign className="w-5 h-5" />}
+                            {typeLabels[creditNote.type]}
                         </p>
-                    </div>
+                    </SectionCard>
                 </div>
 
-                <div className="bg-card rounded-xl border p-6 mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Items de la Nota de Crédito</h2>
+                <SectionCard className="overflow-hidden print:border-none print:shadow-none print:rounded-none">
+                    {/* Status ribbon (print only) */}
+                    <div className="hidden print:block">
+                        <div className={`${statusObj.ribbon} text-white text-xs font-bold tracking-widest py-1 text-center`}>
+                            {statusObj.label.toUpperCase()}
+                        </div>
+                    </div>
+
+                    {/* Document header */}
+                    <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-6 relative">
+                        {/* Status ribbon diagonal (screen only) */}
+                        <div className={`absolute top-6 -left-12 transform -rotate-45 ${statusObj.ribbon} text-white py-1 px-16 text-xs font-bold tracking-widest shadow-md print:hidden`}>
+                            {statusObj.label.toUpperCase()}
+                        </div>
+
+                        <div className="w-36 h-20 shrink-0 flex items-center justify-start">
+                            <div className="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
+                                <span className="text-white font-bold text-3xl tracking-tighter">Simplapp</span>
+                            </div>
+                        </div>
+
+                        {/* Center */}
+                        <div className="flex-1 text-center">
+                            <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Simplapp S.A.S</p>
+                            <p className="text-xs text-slate-400 mt-1">NIT: 900.000.000-1</p>
+                            <p className="text-xs font-medium uppercase tracking-wide bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 py-1 px-3 rounded-full inline-block mt-3">
+                                Nota de Crédito
+                            </p>
+                        </div>
+
+                        {/* Number */}
+                        <div className="text-right shrink-0">
+                            <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Comprobante No.</p>
+                            <div className="inline-flex items-center gap-1.5 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-3 py-1.5">
+                                <Hash className="w-3.5 h-3.5 text-[#6C47FF]" />
+                                <span className="text-lg font-bold text-[#6C47FF]">{creditNote.prefix || 'NC'}-{creditNote.number}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Client + dates info */}
+                    <div className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 dark:border-slate-800">
+                        {/* Client */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <User className="w-4 h-4 text-[#6C47FF]" />
+                                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</span>
+                            </div>
+                            <InfoRow label="Nombre" value={<span className="font-semibold">{creditNote.bill?.clientName || "Consumidor Final"}</span>} />
+                            <InfoRow label="Identificación" value={creditNote.bill?.clientIdentification || "-"} />
+                        </div>
+
+                        {/* Dates */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <Calendar className="w-4 h-4 text-[#6C47FF]" />
+                                <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Referencias</span>
+                            </div>
+                            <InfoRow label="Fecha Generación" value={new Date(creditNote.date).toLocaleDateString("es-CO")} />
+                            <InfoRow label="Motivo de Nota" value={<span className="font-semibold text-slate-600">{reasonLabels[creditNote.reason]}</span>} />
+                            <InfoRow label="Factura Afectada" value={
+                                <span className="text-[#6C47FF] font-medium">#{creditNote.bill?.prefix || ''}{creditNote.bill?.number || creditNote.billId?.substring(0, 8)}</span>
+                            } />
+                        </div>
+                    </div>
+
+                    {/* Items table */}
                     <div className="overflow-x-auto">
-                        <table className="w-full">
+                        <table className="w-full min-w-[640px]">
                             <thead>
-                                <tr className="border-b">
-                                    <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Producto</th>
-                                    <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Cantidad</th>
-                                    <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Precio</th>
-                                    <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Descuento</th>
-                                    <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Impuesto</th>
-                                    <th className="text-right py-3 px-4 text-sm font-medium text-muted-foreground">Total</th>
+                                <tr className="bg-slate-50/80 dark:bg-slate-800/40">
+                                    {["Descripción", "Cant.", "V. Unit", "Desc %", "Valor Total"].map((h, i) => (
+                                        <th key={i} className={`px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 ${i === 0 ? "text-left" : "text-right"}`}>
+                                            {h}
+                                        </th>
+                                    ))}
                                 </tr>
                             </thead>
-                            <tbody>
-                                {(creditNote.items || []).map((item: any, index: number) => (
-                                    <tr key={item.id || index} className="border-b last:border-0">
-                                        <td className="py-3 px-4">
-                                            <p className="font-medium">{item.productName || 'Producto'}</p>
-                                            {item.productCode && <p className="text-xs text-muted-foreground">{item.productCode}</p>}
+                            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                                {(creditNote.items || []).map((item: any, i: number) => (
+                                    <tr key={item.id || i} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors">
+                                        <td className="px-6 py-4">
+                                            <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{item.productName || 'Producto'}</p>
+                                            {item.productCode && <p className="text-xs text-slate-400 mt-0.5">{item.productCode}</p>}
                                         </td>
-                                        <td className="py-3 px-4 text-right">{item.quantity}</td>
-                                        <td className="py-3 px-4 text-right">${Number(item.price || 0).toLocaleString('es-CO')}</td>
-                                        <td className="py-3 px-4 text-right">${Number(item.discount || 0).toLocaleString('es-CO')}</td>
-                                        <td className="py-3 px-4 text-right">{item.taxRate || 0}%</td>
-                                        <td className="py-3 px-4 text-right font-medium">
-                                            ${Number(item.total || 0).toLocaleString('es-CO')}
-                                        </td>
+                                        <td className="px-6 py-4 text-right text-sm font-medium text-slate-700 dark:text-slate-300">{item.quantity}</td>
+                                        <td className="px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-400">$ {fmt(item.price)}</td>
+                                        <td className="px-6 py-4 text-right text-sm text-slate-600 dark:text-slate-400">{item.discount || 0}%</td>
+                                        <td className="px-6 py-4 text-right text-sm font-bold text-slate-800 dark:text-slate-200">$ {fmt(item.total)}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
-                </div>
 
-                <div className="flex justify-end">
-                    <div className="bg-slate-50 rounded-xl border p-6 w-full md:w-80">
-                        <div className="space-y-3">
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Subtotal</span>
-                                <span>${Number(creditNote.subtotal || 0).toLocaleString('es-CO')}</span>
+                    {/* Totals */}
+                    <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+                        <div className="w-full max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                            <div className="px-5 py-4 space-y-3">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-slate-500">Subtotal</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(creditNote.subtotal)}</span>
+                                </div>
+                                {Number(creditNote.discountTotal || 0) > 0 && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-slate-500">Descuentos</span>
+                                        <span className="font-medium text-red-500">− $ {fmt(creditNote.discountTotal)}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-slate-500">Impuestos</span>
+                                    <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(creditNote.taxTotal)}</span>
+                                </div>
                             </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Descuento</span>
-                                <span>-${Number(creditNote.discountTotal || 0).toLocaleString('es-CO')}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-muted-foreground">Impuesto</span>
-                                <span>${Number(creditNote.taxTotal || 0).toLocaleString('es-CO')}</span>
-                            </div>
-                            <div className="border-t pt-3 flex justify-between text-lg font-semibold">
-                                <span>Total</span>
-                                <span className="text-red-600">-${Number(creditNote.total || 0).toLocaleString('es-CO')}</span>
+                            <div className="px-5 py-4 bg-red-50 dark:bg-red-900/10 border-t border-red-100 dark:border-red-900/20 flex items-center justify-between">
+                                <span className="text-sm font-semibold text-red-700 dark:text-red-400">Total a Reintegrar</span>
+                                <span className="text-2xl font-bold text-red-600">-$ {fmt(creditNote.total)}</span>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {creditNote.notes && (
-                    <div className="mt-6 p-4 bg-slate-50 rounded-lg border">
-                        <p className="text-sm font-medium mb-1">Observaciones</p>
-                        <p className="text-sm text-muted-foreground">{creditNote.notes}</p>
+                    {/* Notes & Terms */}
+                    <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Observaciones</p>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+                                {creditNote.notes || "Sin observaciones."}
+                            </p>
+                        </div>
                     </div>
-                )}
+                </SectionCard>
             </div>
         </div>
     );
@@ -232,6 +322,18 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
     const [selectedItems, setSelectedItems] = useState<Record<string, { quantity: number; maxQuantity: number }>>({});
 
     const selectedBill = bills.find(b => b.id === selectedBillId);
+
+    const getAvailableReturnQty = (billItemId: string): number => {
+        if (!selectedBill) return 0;
+        const originalItem = selectedBill.items?.find((i: any) => i.id === billItemId);
+        if (!originalItem) return 0;
+        const returnedQty = (selectedBill.creditNotes || [])
+            .filter((cn: any) => cn.type === 'RETURN' && cn.status !== 'CANCELLED')
+            .flatMap((cn: any) => cn.items || [])
+            .filter((ci: any) => ci.billItemId === billItemId)
+            .reduce((sum: number, ci: any) => sum + ci.quantity, 0);
+        return Math.max(0, originalItem.quantity - returnedQty);
+    };
 
     const handleItemToggle = (itemId: string, maxQuantity: number) => {
         setSelectedItems(prev => {
@@ -398,34 +500,39 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                             <div>
                                 <label className="block text-sm font-medium mb-2">Seleccionar Items</label>
                                 <div className="space-y-2 max-h-60 overflow-y-auto">
-                                    {(selectedBill.items || []).map((item: any) => (
-                                        <div key={item.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                            <div className="flex items-center gap-3">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={!!selectedItems[item.id]}
-                                                    onChange={() => handleItemToggle(item.id, item.quantity)}
-                                                    className="w-4 h-4 rounded border-gray-300"
-                                                />
-                                                <div>
-                                                    <p className="font-medium">{item.productName || 'Producto'}</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        Disp: {item.quantity} | ${Number(item.total || 0).toLocaleString('es-CO')}
-                                                    </p>
+                                    {(selectedBill.items || []).map((item: any) => {
+                                        const isReturn = selectedType === CreditNoteType.RETURN;
+                                        const availableQty = isReturn ? getAvailableReturnQty(item.id) : item.quantity;
+                                        return (
+                                            <div key={item.id} className={`flex items-center justify-between p-3 border rounded-lg ${isReturn && availableQty <= 0 ? 'opacity-40' : ''}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={!!selectedItems[item.id]}
+                                                        onChange={() => handleItemToggle(item.id, availableQty)}
+                                                        disabled={isReturn && availableQty <= 0}
+                                                        className="w-4 h-4 rounded border-gray-300"
+                                                    />
+                                                    <div>
+                                                        <p className="font-medium">{item.productName || 'Producto'}</p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            {isReturn ? `Disp. devolución: ${availableQty}` : `Cant: ${item.quantity}`} | ${Number(item.total || 0).toLocaleString('es-CO')}
+                                                        </p>
+                                                    </div>
                                                 </div>
+                                                {selectedItems[item.id] && (
+                                                    <input
+                                                        type="number"
+                                                        min={1}
+                                                        max={availableQty}
+                                                        value={selectedItems[item.id].quantity}
+                                                        onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
+                                                        className="w-20 p-2 border rounded-lg text-center"
+                                                    />
+                                                )}
                                             </div>
-                                            {selectedItems[item.id] && (
-                                                <input
-                                                    type="number"
-                                                    min={1}
-                                                    max={item.quantity}
-                                                    value={selectedItems[item.id].quantity}
-                                                    onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                                                    className="w-20 p-2 border rounded-lg text-center"
-                                                />
-                                            )}
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
 
@@ -503,7 +610,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
 
 export default function CreditNotesPage() {
     const { creditNotes, isLoading, error, createCreditNote, cancelCreditNote, refetch, getCreditNote } = useCreditNote();
-    const { bills, isLoading: isLoadingBills } = useBill();
+    const { bills, isLoading: isLoadingBills, refetch: refetchBills } = useBill();
     
     const [showDetail, setShowDetail] = useState(false);
     const [selectedCreditNote, setSelectedCreditNote] = useState<CreditNoteWithRelations | null>(null);
@@ -609,6 +716,7 @@ export default function CreditNotesPage() {
         try {
             const loadingToast = toast.loading('Cancelando nota de crédito...');
             await cancelCreditNote(creditNote.id);
+            refetchBills();
             toast.update(loadingToast, { 
                 render: 'Nota de crédito cancelada correctamente', 
                 type: 'success', 
@@ -638,6 +746,7 @@ export default function CreditNotesPage() {
             });
             setIsCreateModalOpen(false);
             refetch();
+            refetchBills();
         } catch (error: any) {
             toast.error(error.message || 'Error al crear la nota de crédito');
             throw error;

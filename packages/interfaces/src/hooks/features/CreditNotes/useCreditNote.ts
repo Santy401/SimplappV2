@@ -57,7 +57,10 @@ export const useCreditNote = () => {
             }
             return response.json();
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: CREDIT_NOTES_QUERY_KEY }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: CREDIT_NOTES_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
+        },
     });
 
     const deleteMutation = useMutation({
@@ -71,7 +74,10 @@ export const useCreditNote = () => {
             }
             return response.json();
         },
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: CREDIT_NOTES_QUERY_KEY }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: CREDIT_NOTES_QUERY_KEY });
+            queryClient.invalidateQueries({ queryKey: ['bills'] });
+        },
     });
 
     const getCreditNote = async (id: string) => {

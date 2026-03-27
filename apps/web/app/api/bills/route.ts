@@ -48,8 +48,8 @@ export async function GET(request: NextRequest) {
       items: { include: { product: true } },
       payments: { include: { account: true } },
       creditNotes: {
-        where: { status: { in: ['APPLIED', 'ISSUED'] } },
-        select: { id: true, number: true, total: true, status: true, type: true, date: true }
+        where: { status: { in: ['APPLIED', 'ISSUED', 'DRAFT'] } },
+        select: { id: true, number: true, total: true, status: true, type: true, date: true, items: { select: { billItemId: true, quantity: true } } }
       },
     };
 

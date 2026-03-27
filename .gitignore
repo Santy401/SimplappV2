@@ -41,7 +41,9 @@ yarn-error.log*
 
 # Local task list (personal, not for repo)
 LISTA_DE_TAREAS.md
+SimplappUpGrade.md
 MANIFESTO_EXITO.md
+TODO.md
 
 # Prisma generated DB clients
 apps/web/prisma/src/generated/

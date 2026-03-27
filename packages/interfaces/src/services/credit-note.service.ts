@@ -34,20 +34,32 @@ export class CreditNoteService {
             }
 
             const existingCreditNotes = await prisma.creditNoteItem.findMany({
-                where: { billItemId: item.billItemId },
+                where: { 
+                    billItemId: item.billItemId,
+                    creditNote: {
+                        status: { not: CreditNoteStatus.CANCELLED }
+                    }
+                },
                 include: { creditNote: true }
             });
 
-            const totalApplied = existingCreditNotes.reduce(
-                (sum: number, ci: { quantity: number }) => sum + ci.quantity,
-                0
-            );
+            const totalReturned = existingCreditNotes
+                .filter(cn => cn.creditNote.type === CreditNoteType.RETURN)
+                .reduce((sum: number, ci: any) => sum + ci.quantity, 0);
 
-            if (item.quantity > billItem.quantity - totalApplied) {
-                throw new Error(
-                    `Cantidad excede lo disponible para ${billItem.productName || 'producto'}. ` +
-                    `Disponible: ${billItem.quantity - totalApplied}, Solicitado: ${item.quantity}`
-                );
+            if (input.type === CreditNoteType.RETURN) {
+                if (item.quantity > billItem.quantity - totalReturned) {
+                    throw new Error(
+                        `Cantidad a devolver excede lo disponible para ${billItem.productName || 'producto'}. ` +
+                        `Comprado: ${billItem.quantity}, Ya devuelto: ${totalReturned}, Solicitado: ${item.quantity}`
+                    );
+                }
+            } else {
+                if (item.quantity > billItem.quantity) {
+                    throw new Error(
+                        `La cantidad seleccionada para ${billItem.productName || 'producto'} no puede superar la cantidad original facturada (${billItem.quantity}).`
+                    );
+                }
             }
         }
 
@@ -59,18 +71,20 @@ export class CreditNoteService {
         const existingTotal = await prisma.creditNote.aggregate({
             where: {
                 billId: input.billId,
-                status: { in: [CreditNoteStatus.APPLIED, CreditNoteStatus.ISSUED] }
+                status: { in: [CreditNoteStatus.APPLIED, CreditNoteStatus.ISSUED, CreditNoteStatus.DRAFT] }
             },
             _sum: { total: true }
         });
 
         const totalAlreadyApplied = Number(existingTotal._sum.total || 0);
 
-        if (totalNC > Number(bill.total) - totalAlreadyApplied) {
-            throw new Error(
-                `El total de la nota de crédito excede el saldo disponible de la factura. ` +
-                `Saldo disponible: ${Number(bill.total) - totalAlreadyApplied}`
-            );
+        if (input.type === CreditNoteType.RETURN) {
+            if (totalNC > Number(bill.total) - totalAlreadyApplied) {
+                throw new Error(
+                    `El total de la nota de crédito excede el saldo disponible de la factura. ` +
+                    `Saldo disponible: ${Number(bill.total) - totalAlreadyApplied}`
+                );
+            }
         }
 
         return { bill };
@@ -114,7 +128,7 @@ export class CreditNoteService {
                     userId,
                     companyId,
                     number: nextNumber,
-                    status: input.status || CreditNoteStatus.DRAFT,
+                    status: input.status || CreditNoteStatus.APPLIED,
                     type: input.type,
                     reason: input.reason,
                     date: input.date || new Date(),
@@ -254,8 +268,8 @@ export class CreditNoteService {
             throw new Error('No autorizado');
         }
 
-        if (creditNote.status !== CreditNoteStatus.DRAFT) {
-            throw new Error('Solo se pueden cancelar notas de crédito en estado DRAFT');
+        if (creditNote.status !== CreditNoteStatus.DRAFT && creditNote.status !== CreditNoteStatus.APPLIED) {
+            throw new Error('Solo se pueden cancelar notas de crédito en estado DRAFT o APPLICADA');
         }
 
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {

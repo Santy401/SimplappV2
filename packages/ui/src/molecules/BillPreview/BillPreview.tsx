@@ -7,7 +7,7 @@ import {
   XCircle, Terminal, Info, Printer, Download, Share2,
   Edit2, Plus, ChevronDown, ArrowLeft, Hash, FileText,
   User, Calendar, CreditCard, CheckCircle2, Clock, Ban,
-  AlertCircle, ReceiptText
+  AlertCircle, ReceiptText, FileWarning
 } from 'lucide-react';
 import { PaymentBillModal, PaymentBillFormData } from '../PaymentBillModal/PaymentBillModal';
 import { PaymentModal } from '../PaymentModal/PaymentModal';
@@ -21,6 +21,16 @@ export interface PaymentPreview {
   method: string;
   account?: { name: string } | null;
   amount: number | string;
+}
+
+export interface CreditNotePreview {
+  id: string;
+  number: number;
+  prefix?: string | null;
+  date: string | Date;
+  type: string;
+  status: string;
+  total: number | string;
 }
 
 export interface BillPreviewProps {
@@ -48,6 +58,7 @@ export interface BillPreviewProps {
   taxTotal: number;
   total: number;
   payments?: PaymentPreview[];
+  creditNotes?: CreditNotePreview[];
   onClose: () => void;
   // Para el modal de pagos
   bankAccounts?: { id: string; name: string }[];
@@ -128,6 +139,7 @@ export function BillPreview({
   taxTotal,
   total,
   payments,
+  creditNotes,
   onClose,
   bankAccounts = [],
   onAddPayment,
@@ -139,7 +151,8 @@ export function BillPreview({
   const status = getStatus(formData.status as string);
   const StatusIcon = status.icon;
 
-  const currentBalance = total - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
+  const creditNoteTotal = creditNotes?.reduce((acc, cn) => acc + Number(cn.total), 0) || 0;
+  const currentBalance = total - creditNoteTotal - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
 
   const billForPayment = {
     id: formData.id || '',
@@ -213,12 +226,13 @@ export function BillPreview({
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-5 print:p-0 print:space-y-4">
 
         {/* ── Summary cards ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 print:hidden">
           {[
             { label: "Valor total",  value: fmt(total),       color: "text-slate-800 dark:text-slate-100" },
+            { label: "Notas Crédito", value: creditNoteTotal > 0 ? fmt(creditNoteTotal) : "0.00", color: creditNoteTotal > 0 ? "text-red-500" : "text-slate-400" },
             { label: "Retenido",     value: "0.00",           color: "text-amber-500" },
-            { label: "Cobrado",      value: fmt(total - currentBalance), color: "text-emerald-500" },
-            { label: "Por cobrar",   value: fmt(currentBalance), color: "text-violet-500" },
+            { label: "Cobrado",      value: fmt(total - creditNoteTotal - Math.max(0, currentBalance)), color: "text-emerald-500" },
+            { label: "Por cobrar",   value: fmt(Math.max(0, currentBalance)), color: "text-violet-500" },
           ].map(({ label, value, color }) => (
             <SectionCard key={label} className="px-5 py-4">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">{label}</p>
@@ -386,10 +400,19 @@ export function BillPreview({
                   <span className="text-slate-500">Impuestos</span>
                   <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(taxTotal)}</span>
                 </div>
+                {creditNoteTotal > 0 && (
+                  <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-50 dark:border-slate-800">
+                    <span className="text-slate-500 font-medium italic">(-) Notas Crédito</span>
+                    <span className="font-medium text-red-600">− $ {fmt(creditNoteTotal)}</span>
+                  </div>
+                )}
               </div>
               <div className="px-5 py-4 bg-[#6C47FF]/5 border-t border-[#6C47FF]/15 flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total General</span>
-                <span className="text-2xl font-bold text-[#6C47FF]">$ {fmt(total)}</span>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Neto</span>
+                  <span className="text-[10px] text-slate-400 font-medium mt-0.5">Saldo final ajustado</span>
+                </div>
+                <span className="text-2xl font-black text-[#6C47FF]">$ {fmt(total - creditNoteTotal)}</span>
               </div>
             </div>
           </div>
@@ -486,6 +509,81 @@ export function BillPreview({
             </div>
           )}
         </SectionCard>
+
+        {/* ── Credit Notes ── */}
+        {creditNotes && creditNotes.length > 0 && (
+          <SectionCard className="print:hidden">
+            <SectionHeader
+              icon={FileWarning}
+              title="Notas de Crédito Asociadas"
+              badge={
+                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full ml-1">
+                  {creditNotes.length}
+                </span>
+              }
+            />
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px]">
+                <thead>
+                  <tr className="bg-slate-50/80 dark:bg-slate-800/40">
+                    {["Número", "Fecha", "Tipo", "Estado", "Total"].map((h, i) => (
+                      <th
+                        key={i}
+                        className={`px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 ${i === 4 ? "text-right" : "text-left"}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {creditNotes.map((cn) => (
+                    <tr key={cn.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-[#6C47FF]">
+                        {cn.prefix || 'NC'}-{cn.number}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
+                        {new Date(cn.date).toLocaleDateString("es-CO")}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          cn.type === 'RETURN' ? 'bg-blue-100 text-blue-700' :
+                          cn.type === 'DISCOUNT' ? 'bg-purple-100 text-purple-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {cn.type === 'RETURN' ? 'Devolución' : cn.type === 'DISCOUNT' ? 'Descuento' : 'Ajuste'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          cn.status === 'APPLIED' ? 'bg-green-100 text-green-700' :
+                          cn.status === 'DRAFT' ? 'bg-slate-100 text-slate-600' :
+                          cn.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {cn.status === 'APPLIED' ? 'Aplicada' : cn.status === 'DRAFT' ? 'Borrador' : cn.status === 'CANCELLED' ? 'Cancelada' : cn.status === 'ISSUED' ? 'Emitida' : cn.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-sm font-bold text-red-600">
+                        -$ {fmt(Number(cn.total))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-red-50/50 dark:bg-red-900/10">
+                    <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-red-700 dark:text-red-400">
+                      Total Notas de Crédito
+                    </td>
+                    <td className="px-6 py-3 text-right text-sm font-bold text-red-600">
+                      -$ {fmt(creditNoteTotal)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </SectionCard>
+        )}
 
       </div>
 
