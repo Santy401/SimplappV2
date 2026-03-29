@@ -346,23 +346,28 @@ export * from './utils/animations/use-reduced-motion';
 
 ## Checklist de Implementación
 
-- [ ] Fase 1.1: Instalar dependencias
-- [ ] Fase 1.2: Crear constants.ts
-- [ ] Fase 1.3: Crear variants.ts
-- [ ] Fase 1.4: Crear use-reduced-motion.ts
-- [ ] Fase 1.5: Crear gsap-presets.ts
-- [ ] Fase 1.6: Crear gsap.ts
-- [ ] Fase 1.7: Extraer CSS keyframes
-- [ ] Fase 2.1: Migrar LandingHero
-- [ ] Fase 2.2: Migrar not-found.tsx
-- [ ] Fase 3.1: Migrar AuthForm
-- [ ] Fase 3.2: Migrar Onboarding steps
-- [ ] Fase 4.1: Migrar SettingsModal
-- [ ] Fase 4.2: Migrar NotificationDropdown
-- [ ] Fase 4.3: Migrar Button
-- [ ] Fase 5.1: Verificar imports
-- [ ] Fase 5.2: Actualizar package.json
-- [ ] Fase 5.3: Actualizar exports
+- [x] Fase 1.1: Instalar dependencias
+- [x] Fase 1.2: Crear constants.ts
+- [x] Fase 1.3: Crear variants.ts
+- [x] Fase 1.4: Crear use-reduced-motion.ts
+- [x] Fase 1.5: Crear gsap-presets.ts
+- [x] Fase 1.6: Crear gsap.ts
+- [x] Fase 1.7: Extraer CSS keyframes
+- [x] Fase 2.1: Migrar LandingHero
+- [x] Fase 2.2: Migrar not-found.tsx
+- [x] Fase 3.1: Migrar AuthForm
+- [x] Fase 3.2: Migrar Onboarding steps
+- [x] Fase 4.1: Migrar SettingsModal
+- [x] Fase 4.2: Migrar NotificationDropdown
+- [x] Fase 4.3: Migrar Button
+- [x] Fase 5.1: Verificar imports
+- [x] Fase 5.2: Actualizar package.json
+- [x] Fase 5.3: Actualizar exports
+- [x] Fase 6.1: Instalar next-view-transitions ✅
+- [x] Fase 6.2: Crear ViewTransitionProvider ✅
+- [x] Fase 6.3: Agregar estilos globals.css ✅
+- [x] Fase 6.4: Crear use-view-transition hook ✅
+- [x] Fase 6.5: Crear PageViewTransition components ✅
 
 ---
 
@@ -383,3 +388,144 @@ export * from './utils/animations/use-reduced-motion';
 2. Siempre usar `useReducedMotion` para accesibilidad
 3. Consolidar durations y easings con constants
 4. Preferir `transform` sobre `top/left` para movimiento
+
+---
+
+## Fase 6 - View Transitions (Shared Element Transitions)
+
+### Concepto
+View Transitions API permite transiciones fluidas entre páginas. Los **shared element transitions** permiten que elementos específicos (cards, headers, logos) mantengan su posición/tamaño mientras el resto cambia.
+
+### Stack
+| Paquete | Descripción | Estado |
+|---------|-------------|--------|
+| **`next-view-transitions`** | Wrapper oficial para Next.js App Router | ✅ Instalado |
+| **CSS View Transitions** | API nativa del navegador | ✅ Implementada |
+
+### Archivos Creados
+
+```
+apps/web/
+├── components/
+│   ├── ViewTransitionProvider.tsx    # Provider global
+│   └── view-transitions/
+│       └── index.tsx                 # Componentes PageViewTransition, SharedElement
+├── hooks/
+│   └── use-view-transition.ts        # Hook para animaciones
+└── app/
+    └── globals.css                    # Estilos vt-* agregados
+```
+
+### Uso
+
+#### 1. ViewTransitionProvider (ya configurado en layout.tsx)
+
+```tsx
+import { ViewTransitionProvider } from '@/components/ViewTransitionProvider';
+
+// En layout.tsx
+<ViewTransitionProvider>
+  {children}
+</ViewTransitionProvider>
+```
+
+#### 2. Shared Element Transitions
+
+```tsx
+// En la lista de productos
+<div style={{ viewTransitionName: `product-card-${product.id}` }}>
+  <ProductCard product={product} />
+</div>
+
+// En la página de detalle (mismo viewTransitionName)
+<div style={{ viewTransitionName: `product-card-${product.id}` }}>
+  <ProductHeader product={product} />
+</div>
+```
+
+#### 3. Usar el hook `use-view-transition`
+
+```tsx
+import { useViewTransition, getSharedTransitionName } from '@/hooks/use-view-transition';
+
+function ProductCard({ product }) {
+  const { getViewTransitionStyle } = useViewTransition({ name: 'slide-up' });
+  
+  return (
+    <div style={getViewTransitionStyle()}>
+      {/* contenido */}
+    </div>
+  );
+}
+
+// Para elementos compartidos
+const cardName = getSharedTransitionName('product', product.id);
+// viewTransitionName={cardName}
+```
+
+#### 4. PageViewTransition para páginas
+
+```tsx
+import { PageViewTransition } from '@/components/view-transitions';
+
+export default function DashboardPage() {
+  return (
+    <PageViewTransition type="slide-up">
+      {/* contenido de la página */}
+    </PageViewTransition>
+  );
+}
+```
+
+### Dónde aplicar en SimplappV2
+
+| Ubicación | Shared Elements | Tipo de Transición |
+|-----------|-----------------|-------------------|
+| Dashboard Cards → Detalle | Card completa | scale + fade |
+| Header Logo | Logo Simplapp | slide |
+| Product Image | Imagen principal | crossfade |
+| Invoice Status Badge | Badge de estado | fade |
+| Settings Modal | Header del modal | slide-up |
+
+### Ejemplo: Transición de Card a Detalle
+
+```tsx
+// apps/web/app/(dashboard)/products/page.tsx
+<ProductCard 
+  style={{ viewTransitionName: `product-${product.id}` }}
+/>
+
+// apps/web/app/(dashboard)/products/[id]/page.tsx
+<ProductHeader 
+  style={{ viewTransitionName: `product-${id}` }}
+/>
+```
+
+### Estilos CSS Disponibles
+
+| Clase | Animación |
+|-------|-----------|
+| `.vt-fade` | Fade in/out |
+| `.vt-slide-right` | Slide desde la derecha |
+| `.vt-slide-up` | Slide desde abajo |
+| `::view-transition-old/new(root)` | Transición de página completa |
+
+### Checklist View Transitions
+
+- [x] Instalar `next-view-transitions`
+- [x] Crear `ViewTransitionProvider`
+- [x] Agregar estilos base en globals.css
+- [x] Crear hook `use-view-transition`
+- [x] Crear componentes `PageViewTransition`, `SharedElement`
+- [ ] Documentar uso en Storybook
+- [ ] Agregar ejemplos en Storybook stories
+
+### Notas
+- View Transitions requieren soporte del navegador (Chrome/Edge✅, Safari Preview, Firefox en desarrollo)
+- Usar feature detection para fallback:
+  ```css
+  @supports not (view-transition-name: none) {
+    /* Fallback styles */
+  }
+  ```
+- Para elementos compartidos, el `viewTransitionName` debe coincidir exactamente en ambas páginas

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
 import { ThemeProvider } from "@simplapp/ui";
+import { ViewTransitionProvider } from "@/components/ViewTransitionProvider";
 
 export const metadata: Metadata = {
   title: "Simplapp - Factura en segundos",
@@ -27,7 +28,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
-            {children}
+            <ViewTransitionProvider>
+              {children}
+            </ViewTransitionProvider>
           </Providers>
         </ThemeProvider>
       </body>

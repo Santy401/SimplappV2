@@ -234,3 +234,100 @@ html.lenis, html.lenis body {
   page-break-inside: avoid;
   break-inside: avoid;
 }
+
+/* ── View Transitions ────────────────────────────────────────────────────────── */
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vt-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes vt-slide-in-from-right {
+  from { transform: translateX(30px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes vt-slide-out-to-left {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-30px); opacity: 0; }
+}
+
+@keyframes vt-slide-in-from-bottom {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes vt-slide-out-to-top {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-20px); opacity: 0; }
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out 200ms ease-out;
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 300ms ease-out;
+}
+
+::view-transition-old(slide-right) {
+  animation: vt-slide-out-to-left 250ms ease-in-out;
+}
+
+::view-transition-new(slide-right) {
+  animation: vt-slide-in-from-right 300ms ease-out;
+}
+
+::view-transition-old(slide-up) {
+  animation: vt-slide-out-to-top 250ms ease-in-out;
+}
+
+::view-transition-new(slide-up) {
+  animation: vt-slide-in-from-bottom 300ms ease-out;
+}
+
+/* Shared element transitions - fallback for browsers without support */
+@supports not (view-transition-name: none) {
+  .view-transition-shared {
+    transition: opacity 300ms ease-out, transform 300ms ease-out;
+  }
+}
+
+/* ── Page View Transitions ─────────────────────────────────────────────────── */
+.vt-page {
+  contain: layout;
+}
+
+.vt-enter {
+  animation: vt-page-enter 300ms ease-out forwards;
+}
+
+.vt-fade {
+  --vt-enter: vt-fade-in;
+  --vt-exit: vt-fade-out;
+}
+
+.vt-slide-right {
+  --vt-enter: vt-slide-in-from-right;
+  --vt-exit: vt-slide-out-to-left;
+}
+
+.vt-slide-up {
+  --vt-enter: vt-slide-in-from-bottom;
+  --vt-exit: vt-slide-out-to-top;
+}
+
+@keyframes vt-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
