@@ -82,8 +82,11 @@ export default function Payments({
                 total: parseFloat(b.total || '0')
             }));
 
+        const nextReceiptNumber = payments.length + 1;
+
         return (
             <PaymentBillModal
+                receiptNumber={nextReceiptNumber}
                 companyName="Simplapp"
                 bankAccounts={mappedBankAccounts}
                 clients={mappedClients}

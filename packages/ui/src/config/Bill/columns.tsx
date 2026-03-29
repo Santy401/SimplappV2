@@ -53,11 +53,33 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
         {
             key: "balance",
             header: "Por cobrar",
-            cell: (bill: Bill) => (
-                <span className="text-red-500 font-medium">
-                    ${Number(bill.balance).toLocaleString('es-CO')}
-                </span>
-            ),
+            cell: (bill: Bill) => {
+                const balance = Math.abs(Number(bill.balance || 0));
+                return (
+                    <span className={`font-medium ${balance === 0 ? 'text-green-600' : 'text-red-500'}`}>
+                        ${balance.toLocaleString('es-CO')}
+                    </span>
+                );
+            },
+        },
+        {
+            key: "creditNotes",
+            header: "NC",
+            cell: (bill: Bill) => {
+                const creditNotes = (bill as any).creditNotes;
+                if (!creditNotes || creditNotes.length === 0) return <span className="text-muted-foreground">-</span>;
+                const totalNC = creditNotes.reduce((sum: number, cn: any) => sum + Number(cn.total || 0), 0);
+                return (
+                    <div className="flex flex-col">
+                        <span className="text-purple-600 font-medium">
+                            ${Number(totalNC).toLocaleString('es-CO')}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                            {creditNotes.length} nota{creditNotes.length > 1 ? 's' : ''}
+                        </span>
+                    </div>
+                );
+            },
         },
         {
             key: "status",

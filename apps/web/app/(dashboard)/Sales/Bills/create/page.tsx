@@ -262,6 +262,7 @@ export default function BillsCreatePage({
             taxTotal: parseFloat(billToShow.taxTotal || '0'),
             total: parseFloat(billToShow.total || '0'),
             payments: (billToShow as any).payments || [],
+            creditNotes: (billToShow as any).creditNotes || [],
         };
 
         return (

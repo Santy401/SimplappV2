@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { InputCurrency } from "@ui/atoms/InputCurrency";
 import { ArrowUpRight, X, CreditCard, ChevronDown, Loader2 } from "lucide-react";
 
 // ─── Props ────────────────────────────────────────────────────────────────────
@@ -79,7 +80,7 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit, onAdvanced }: Pa
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split("T")[0],
     bankAccount: "caja_general",
-    value: "",
+    value: 0,
     paymentMethod: "CASH",
   });
 
@@ -108,16 +109,16 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit, onAdvanced }: Pa
   // Actualizar valor por defecto cuando cambia el bill
   useEffect(() => {
     if (bill?.balance) {
-      setFormData(prev => ({ ...prev, value: String(bill.balance) }));
+      setFormData(prev => ({ ...prev, value: Number(bill.balance) }));
     }
   }, [bill]);
 
   // Foco automático
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => firstInputRef.current?.focus(), 100);
-    }
-  }, [isOpen]);
+  //useEffect(() => {
+    //if (isOpen) {
+      //setTimeout(() => firstInputRef.current?.focus(), 100);
+    //}
+  //}, [isOpen]);
 
   if (!isOpen || !bill) return null;
 
@@ -199,18 +200,14 @@ export function PaymentModal({ isOpen, onClose, bill, onSubmit, onAdvanced }: Pa
                 </div>
                 <div className="col-span-1">
                   <FieldLabel required>Monto</FieldLabel>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">$</span>
-                    <StyledInput 
-                      ref={firstInputRef}
-                      type="number" 
-                      className="pl-6"
-                      value={formData.value}
-                      onChange={(e) => setFormData({ ...formData, value: e.target.value })}
-                      disabled={isSubmitting}
-                      required
-                    />
-                  </div>
+                  <InputCurrency 
+                    ref={firstInputRef}
+                    className="w-full"
+                    value={formData.value}
+                    onChange={(val) => setFormData({ ...formData, value: val })}
+                    disabled={isSubmitting}
+                    required
+                  />
                 </div>
               </div>
 

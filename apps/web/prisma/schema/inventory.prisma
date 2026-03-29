@@ -109,6 +109,8 @@ model Product {
   basePrice  Decimal?
   finalPrice Decimal?
 
+  stock      Int      @default(0)
+
   trackStock         Boolean @default(true)
   allowNegativeStock Boolean @default(false)
   active             Boolean @default(true)

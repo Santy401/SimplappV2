@@ -45,6 +45,32 @@ enum BankAccountType {
   OTHER       // Otros medios (Pasarelas, etc.)
 }
 
+/// Estado de nota de crédito
+enum CreditNoteStatus {
+  DRAFT
+  ISSUED
+  APPLIED
+  REJECTED
+  CANCELLED
+}
+
+/// Tipo de nota de crédito
+enum CreditNoteType {
+  RETURN           // Devolución - reintegra stock
+  DISCOUNT        // Descuento comercial
+  PRICE_ADJUSTMENT // Ajuste de precio
+}
+
+/// Motivo de nota de crédito (códigos DIAN UBL)
+enum CreditNoteReason {
+  DEVOLUCION_PARCIAL   // 01
+  DEVOLUCION_TOTAL     // 02
+  ANULACION            // 03
+  DESCUENTO_COMERCIAL  // 04
+  DESCUENTO_CONDICIONAL // 05
+  OTRO                 // 06
+}
+
 // --- MODELS ---
 
 /// Factura de venta. Conecta transacción financiera, inventario y DIAN.
@@ -76,11 +102,13 @@ model Bill {
   dueDate DateTime
 
   // --- 3. Totales (Cálculos guardados para snapshot) ---
-  subtotal      Decimal @default(0)
-  taxTotal      Decimal @default(0)
-  discountTotal Decimal @default(0)
-  total         Decimal @default(0)
-  balance       Decimal @default(0)
+  subtotal               Decimal @default(0)
+  taxTotal               Decimal @default(0)
+  discountTotal          Decimal @default(0)
+  total                  Decimal @default(0)
+  balance                Decimal @default(0)
+  appliedCreditNoteTotal Decimal @default(0) // Suma de NCs aplicadas
+  paidTotal              Decimal @default(0) // Suma de pagos realizados
 
   // --- 4. Snapshot (Datos inmutables al momento de facturar) ---
   clientName           String?
@@ -100,8 +128,9 @@ model Bill {
   acceptedAt     DateTime?
   rejectedReason String?
 
-  items    BillItem[]
-  payments Payment[]
+  items          BillItem[]
+  payments       Payment[]
+  creditNotes    CreditNote[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -133,8 +162,9 @@ model BillItem {
   productName String?
   productCode String?
 
-  bill    Bill    @relation(fields: [billId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  bill              Bill                @relation(fields: [billId], references: [id], onDelete: Cascade)
+  product           Product            @relation(fields: [productId], references: [id])
+  creditNoteItems   CreditNoteItem[]
 }
 
 /// Recibo de pago asociado a una factura en específico.
@@ -177,4 +207,75 @@ model BankAccount {
 
   @@index([companyId])
   @@index([deletedAt])
+}
+
+/// Nota de crédito vinculada a una factura
+model CreditNote {
+  id          String           @id @default(uuid())
+  billId      String
+  userId      String
+  companyId   String
+
+  bill        Bill             @relation(fields: [billId], references: [id])
+  user        User             @relation(fields: [userId], references: [id])
+  company     Company          @relation(fields: [companyId], references: [id])
+
+  prefix      String?          @default("")
+  number      Int
+  legalNumber String?
+
+  status      CreditNoteStatus @default(DRAFT)
+  type        CreditNoteType   @default(DISCOUNT)
+  reason      CreditNoteReason @default(OTRO)
+
+  date        DateTime         @default(now())
+
+  subtotal      Decimal @default(0)
+  taxTotal      Decimal @default(0)
+  discountTotal Decimal @default(0)
+  total         Decimal @default(0)
+
+  notes        String?
+
+  // DIAN
+  cufe         String?
+  dianStatus   DianStatus?
+  xml          String?
+  pdfUrl       String?
+  dianResponse String?
+  sentAt       DateTime?
+  acceptedAt   DateTime?
+
+  items        CreditNoteItem[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@unique([companyId, prefix, number])
+  @@index([companyId])
+  @@index([billId])
+  @@index([status])
+}
+
+/// Ítem de nota de crédito (línea de producto)
+model CreditNoteItem {
+  id              String      @id @default(uuid())
+  creditNoteId    String
+  billItemId      String
+
+  creditNote      CreditNote  @relation(fields: [creditNoteId], references: [id], onDelete: Cascade)
+  billItem        BillItem    @relation(fields: [billItemId], references: [id])
+
+  quantity        Int
+  price           Decimal
+  subtotal        Decimal
+
+  taxRate         Decimal @default(0)
+  taxAmount       Decimal @default(0)
+  discount        Decimal @default(0)
+  total           Decimal @default(0)
+
+  productName     String?
+  productCode    String?
 }

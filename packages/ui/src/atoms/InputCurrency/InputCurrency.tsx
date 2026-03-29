@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Input } from "../Input/Input";
+import { Input } from "../Input";
 
 interface InputCurrencyProps extends Omit<React.ComponentProps<typeof Input>, 'onChange' | 'value'> {
     value: number;

@@ -7,7 +7,7 @@ import {
   XCircle, Terminal, Info, Printer, Download, Share2,
   Edit2, Plus, ChevronDown, ArrowLeft, Hash, FileText,
   User, Calendar, CreditCard, CheckCircle2, Clock, Ban,
-  AlertCircle, ReceiptText
+  AlertCircle, ReceiptText, FileWarning
 } from 'lucide-react';
 import { PaymentBillModal, PaymentBillFormData } from '../PaymentBillModal/PaymentBillModal';
 import { PaymentModal } from '../PaymentModal/PaymentModal';
@@ -23,10 +23,21 @@ export interface PaymentPreview {
   amount: number | string;
 }
 
+export interface CreditNotePreview {
+  id: string;
+  number: number;
+  prefix?: string | null;
+  date: string | Date;
+  type: string;
+  status: string;
+  total: number | string;
+}
+
 export interface BillPreviewProps {
   formData: {
     id?: string;
     number?: number;
+    prefix?: string;
     date: string;
     dueDate: string;
     clientName: string;
@@ -48,6 +59,7 @@ export interface BillPreviewProps {
   taxTotal: number;
   total: number;
   payments?: PaymentPreview[];
+  creditNotes?: CreditNotePreview[];
   onClose: () => void;
   // Para el modal de pagos
   bankAccounts?: { id: string; name: string }[];
@@ -128,6 +140,7 @@ export function BillPreview({
   taxTotal,
   total,
   payments,
+  creditNotes,
   onClose,
   bankAccounts = [],
   onAddPayment,
@@ -139,7 +152,8 @@ export function BillPreview({
   const status = getStatus(formData.status as string);
   const StatusIcon = status.icon;
 
-  const currentBalance = total - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
+  const creditNoteTotal = creditNotes?.reduce((acc, cn) => acc + Number(cn.total), 0) || 0;
+  const currentBalance = total - creditNoteTotal - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
 
   const billForPayment = {
     id: formData.id || '',
@@ -152,7 +166,7 @@ export function BillPreview({
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 print:bg-white">
 
       {/* ── Sticky navbar ── */}
-      <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 print:hidden">
+      <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 no-print">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
           {/* Left */}
           <div className="flex items-center gap-3">
@@ -167,7 +181,7 @@ export function BillPreview({
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-[#6C47FF]" />
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                Factura {formData.number ? `#${formData.number}` : ""}
+                Factura {formData.number ? `${formData.prefix || ''}${formData.number}` : "Borrador"}
               </span>
               <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${status.badge}`}>
                 <StatusIcon className="w-3 h-3" />
@@ -210,15 +224,17 @@ export function BillPreview({
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-8 space-y-5 print:p-0 print:space-y-4">
+      {/* Print Invoice Container - Only this section prints */}
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-5 print:p-0 print:space-y-0 print-invoice-container">
 
         {/* ── Summary cards ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
           {[
             { label: "Valor total",  value: fmt(total),       color: "text-slate-800 dark:text-slate-100" },
-            { label: "Retenido",     value: "0.00",           color: "text-amber-500" },
-            { label: "Cobrado",      value: fmt(total - currentBalance), color: "text-emerald-500" },
-            { label: "Por cobrar",   value: fmt(currentBalance), color: "text-violet-500" },
+            { label: "Notas Crédito", value: creditNoteTotal > 0 ? fmt(creditNoteTotal) : "0.00", color: creditNoteTotal > 0 ? "text-red-500" : "text-slate-400" },
+            //{ label: "Retenido",     value: "0.00",           color: "text-amber-500" },
+            { label: "Cobrado",      value: fmt(total - creditNoteTotal - Math.max(0, currentBalance)), color: "text-emerald-500" },
+            { label: "Por cobrar",   value: fmt(Math.max(0, currentBalance)), color: "text-violet-500" },
           ].map(({ label, value, color }) => (
             <SectionCard key={label} className="px-5 py-4">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">{label}</p>
@@ -229,7 +245,7 @@ export function BillPreview({
 
         {/* ── DIAN rejection banner ── */}
         {formData.dianStatus === 'REJECTED' && (
-          <div className="flex items-start gap-4 p-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl print:hidden">
+          <div className="flex items-start gap-4 p-5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl no-print">
             <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
               <XCircle className="w-4 h-4 text-red-600" />
             </div>
@@ -252,24 +268,24 @@ export function BillPreview({
         )}
 
         {/* ── Document paper ── */}
-        <SectionCard className="overflow-hidden print:border-none print:shadow-none print:rounded-none">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden print:border-none print:shadow-none print:rounded-none print-break-avoid invoice-document">
 
           {/* Status ribbon (print only) */}
-          <div className="hidden print:block">
-            <div className={`${status.ribbon} text-white text-xs font-bold tracking-widest py-1 text-center`}>
+          <div className="no-print">
+            <div className={`${status.ribbon} text-white text-xs font-bold tracking-widest py-1 text-center invoice-status-ribbon`}>
               {status.label.toUpperCase()}
             </div>
           </div>
 
           {/* Document header: logo + brand + number */}
-          <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-6 relative">
+          <div className="px-8 py-6 border-b-2 border-slate-200 dark:border-slate-700 flex items-start justify-between gap-6 relative invoice-header">
             {/* Status ribbon diagonal (screen only) */}
-            <div className={`absolute top-6 -left-12 transform -rotate-45 ${status.ribbon} text-white py-1 px-16 text-xs font-bold tracking-widest shadow-md print:hidden`}>
+            <div className={`absolute top-6 -left-12 transform -rotate-45 ${status.ribbon} text-white py-1 px-16 text-xs font-bold tracking-widest shadow-md no-print`}>
               {status.label.toUpperCase()}
             </div>
 
             {/* Logo */}
-            <div className="w-36 h-20 shrink-0 flex items-center justify-start">
+            <div className="w-36 h-20 shrink-0 flex items-center justify-start invoice-logo">
               {formData.logo ? (
                 <img src={formData.logo} alt="Logo empresa" className="w-full h-full object-contain" />
               ) : (
@@ -281,22 +297,24 @@ export function BillPreview({
 
             {/* Center */}
             <div className="flex-1 text-center">
-              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Simplapp S.A.S</p>
-              <p className="text-xs text-slate-400 mt-1">NIT: 900.000.000-1</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight invoice-title">Simplapp S.A.S</p>
+              <p className="text-xs text-slate-500 mt-1">NIT: 900.000.000-1</p>
             </div>
 
             {/* Number */}
             <div className="text-right shrink-0">
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Número</p>
-              <div className="inline-flex items-center gap-1.5 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-3 py-1.5">
+              <div className="inline-flex items-center gap-1.5 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-3 py-1.5 invoice-number">
                 <Hash className="w-3.5 h-3.5 text-[#6C47FF]" />
-                <span className="text-lg font-bold text-[#6C47FF]">{formData.number || "Auto"}</span>
+                <span className="text-lg font-bold text-[#6C47FF]">
+                  {formData.number ? `${formData.prefix || ''}${formData.number}` : "Sin número"}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Client + dates info */}
-          <div className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 dark:border-slate-800">
+          <div className="px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-100 dark:border-slate-800 invoice-client">
             {/* Client */}
             <div>
               <div className="flex items-center gap-2 mb-3">
@@ -328,8 +346,8 @@ export function BillPreview({
           </div>
 
           {/* Items table */}
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px]">
+          <div className="overflow-x-auto invoice-items">
+            <table className="w-full min-w-[640px] invoice-table">
               <thead>
                 <tr className="bg-slate-50/80 dark:bg-slate-800/40">
                   {["Ítem / Referencia", "Cant.", "Precio", "Desc %", "Imp %", "Total"].map((h, i) => (
@@ -369,8 +387,8 @@ export function BillPreview({
           </div>
 
           {/* Totals */}
-          <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-            <div className="w-full max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+          <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex justify-end invoice-totals">
+            <div className="w-full max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden print-break-avoid">
               <div className="px-5 py-4 space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-500">Subtotal</span>
@@ -386,25 +404,34 @@ export function BillPreview({
                   <span className="text-slate-500">Impuestos</span>
                   <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(taxTotal)}</span>
                 </div>
+                {creditNoteTotal > 0 && (
+                  <div className="flex items-center justify-between text-sm pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-slate-500 font-medium italic">(-) Notas Crédito</span>
+                    <span className="font-medium text-red-600">− $ {fmt(creditNoteTotal)}</span>
+                  </div>
+                )}
               </div>
               <div className="px-5 py-4 bg-[#6C47FF]/5 border-t border-[#6C47FF]/15 flex items-center justify-between">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Total General</span>
-                <span className="text-2xl font-bold text-[#6C47FF]">$ {fmt(total)}</span>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Neto</span>
+                  <span className="text-[10px] text-slate-400 font-medium mt-0.5">Saldo final ajustado</span>
+                </div>
+                <span className="text-2xl font-black text-[#6C47FF] invoice-grand-total">$ {fmt(total - creditNoteTotal)}</span>
               </div>
             </div>
           </div>
 
           {/* Notes & Terms */}
-          <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-8 invoice-footer">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Notas adicionales</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-pre-wrap leading-relaxed invoice-notes">
                 {formData.notes || "Sin notas."}
               </p>
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Términos y condiciones</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">
+              <p className="text-sm text-slate-500 dark:text-slate-400 whitespace-pre-wrap leading-relaxed invoice-notes">
                 {formData.terms || "Esta factura se rige bajo los términos convencionales de pago."}
               </p>
             </div>
@@ -416,10 +443,10 @@ export function BillPreview({
               <p className="text-xs text-slate-400 font-medium">{formData.footerNote}</p>
             </div>
           )}
-        </SectionCard>
+        </div>
 
         {/* ── Payments history ── */}
-        <SectionCard className="print:hidden">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm no-print">
           <SectionHeader
             icon={CreditCard}
             title="Historial de pagos"
@@ -485,7 +512,82 @@ export function BillPreview({
               </table>
             </div>
           )}
-        </SectionCard>
+        </div>
+
+        {/* ── Credit Notes ── */}
+        {creditNotes && creditNotes.length > 0 && (
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm no-print">
+            <SectionHeader
+              icon={FileWarning}
+              title="Notas de Crédito Asociadas"
+              badge={
+                <span className="text-xs font-semibold text-red-600 bg-red-50 px-2 py-0.5 rounded-full ml-1">
+                  {creditNotes.length}
+                </span>
+              }
+            />
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[560px]">
+                <thead>
+                  <tr className="bg-slate-50/80 dark:bg-slate-800/40">
+                    {["Número", "Fecha", "Tipo", "Estado", "Total"].map((h, i) => (
+                      <th
+                        key={i}
+                        className={`px-6 py-3 text-xs font-medium text-slate-500 dark:text-slate-400 ${i === 4 ? "text-right" : "text-left"}`}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                  {creditNotes.map((cn) => (
+                    <tr key={cn.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/30 transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-[#6C47FF]">
+                        {cn.prefix || 'NC'}-{cn.number}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-700 dark:text-slate-300">
+                        {new Date(cn.date).toLocaleDateString("es-CO")}
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          cn.type === 'RETURN' ? 'bg-blue-100 text-blue-700' :
+                          cn.type === 'DISCOUNT' ? 'bg-purple-100 text-purple-700' :
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {cn.type === 'RETURN' ? 'Devolución' : cn.type === 'DISCOUNT' ? 'Descuento' : 'Ajuste'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          cn.status === 'APPLIED' ? 'bg-green-100 text-green-700' :
+                          cn.status === 'DRAFT' ? 'bg-slate-100 text-slate-600' :
+                          cn.status === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                          {cn.status === 'APPLIED' ? 'Aplicada' : cn.status === 'DRAFT' ? 'Borrador' : cn.status === 'CANCELLED' ? 'Cancelada' : cn.status === 'ISSUED' ? 'Emitida' : cn.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right text-sm font-bold text-red-600">
+                        $ {fmt(Number(cn.total))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="bg-red-50/50 dark:bg-red-900/10">
+                    <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-red-700 dark:text-red-400">
+                      Total Notas de Crédito
+                    </td>
+                    <td className="px-6 py-3 text-right text-lg font-black text-red-600 invoice-grand-total">
+                      $ {fmt(creditNoteTotal)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        )}
 
       </div>
 
