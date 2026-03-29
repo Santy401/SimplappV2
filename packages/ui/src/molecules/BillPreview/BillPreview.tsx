@@ -579,7 +579,7 @@ export function BillPreview({
                     <td colSpan={4} className="px-6 py-3 text-sm font-semibold text-red-700 dark:text-red-400">
                       Total Notas de Crédito
                     </td>
-                    <td className="px-6 py-3 text-right text-sm font-bold text-red-600">
+                    <td className="px-6 py-3 text-right text-lg font-black text-red-600 invoice-grand-total">
                       -$ {fmt(creditNoteTotal)}
                     </td>
                   </tr>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from 'react';
-import { Receipt, FileText, Plus, CreditCard, RotateCcw, Percent, DollarSign, ArrowLeft, Printer, Download, Share2, Hash, User, Calendar, Ban, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Receipt, FileText, Plus, CreditCard, RotateCcw, Percent, DollarSign, ArrowLeft, Printer, Download, Share2, Hash, User, Calendar, Ban, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { ModernTable, ModernTableSkeleton } from '@simplapp/ui';
 import type { TableColumn } from '@simplapp/ui/src/types/table.entity';
 import { useCreditNote } from '@interfaces/src/hooks/features/CreditNotes';
@@ -266,27 +266,27 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                     </div>
 
                     {/* Totals */}
-                    <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-                        <div className="w-full max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden">
+                    <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex justify-end print-break-avoid">
+                        <div className="w-full max-w-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden invoice-total-section">
                             <div className="px-5 py-4 space-y-3">
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-slate-500">Subtotal</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(creditNote.subtotal)}</span>
+                                    <span className="text-base font-semibold text-slate-700 dark:text-slate-300">$ {fmt(creditNote.subtotal)}</span>
                                 </div>
                                 {Number(creditNote.discountTotal || 0) > 0 && (
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="text-slate-500">Descuentos</span>
-                                        <span className="font-medium text-red-500">− $ {fmt(creditNote.discountTotal)}</span>
+                                        <span className="text-base font-semibold text-red-600">− $ {fmt(creditNote.discountTotal)}</span>
                                     </div>
                                 )}
                                 <div className="flex items-center justify-between text-sm">
                                     <span className="text-slate-500">Impuestos</span>
-                                    <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(creditNote.taxTotal)}</span>
+                                    <span className="text-base font-semibold text-slate-700 dark:text-slate-300">$ {fmt(creditNote.taxTotal)}</span>
                                 </div>
                             </div>
                             <div className="px-5 py-4 bg-red-50 dark:bg-red-900/10 border-t border-red-100 dark:border-red-900/20 flex items-center justify-between">
                                 <span className="text-sm font-semibold text-red-700 dark:text-red-400">Total a Reintegrar</span>
-                                <span className="text-2xl font-bold text-red-600">-$ {fmt(creditNote.total)}</span>
+                                <span className="text-2xl font-black text-red-600 invoice-grand-total">-$ {fmt(creditNote.total)}</span>
                             </div>
                         </div>
                     </div>
@@ -403,11 +403,11 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
     return (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-999 p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
-                <div className="p-6 border-b">
+                <div className="p-6 border-b border-slate-200 flex flex-col">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-semibold">Nueva Nota de Crédito</h2>
                         <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg">
-                            <RotateCcw className="w-5 h-5" />
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                     <div className="flex items-center gap-2 mt-4">
@@ -435,7 +435,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                         <button
                                             key={bill.id}
                                             onClick={() => setSelectedBillId(bill.id)}
-                                            className={`w-full p-4 rounded-lg border text-left transition-all
+                                            className={`w-full p-4 rounded-lg border border-slate-300 text-left transition-all
                                                 ${selectedBillId === bill.id 
                                                     ? 'border-[#6C47FF] bg-purple-50' 
                                                     : 'hover:border-slate-300 hover:bg-slate-50'}`}
@@ -471,7 +471,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                             <button
                                                 key={t.value}
                                                 onClick={() => setSelectedType(t.value)}
-                                                className={`p-3 rounded-lg border text-center transition-all
+                                                className={`p-3 rounded-lg border border-slate-300 text-center transition-all
                                                     ${selectedType === t.value 
                                                         ? `border-${t.color}-500 bg-${t.color}-50` 
                                                         : 'hover:bg-slate-50'}`}
@@ -487,7 +487,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                     <select
                                         value={selectedReason}
                                         onChange={e => setSelectedReason(e.target.value as CreditNoteReason)}
-                                        className="w-full p-2 rounded-lg border"
+                                        className="w-full p-2 rounded-lg border border-slate-300"
                                     >
                                         <option value={CreditNoteReason.DEVOLUCION_PARCIAL}>Devolución Parcial</option>
                                         <option value={CreditNoteReason.DEVOLUCION_TOTAL}>Devolución Total</option>
@@ -506,7 +506,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                         const isReturn = selectedType === CreditNoteType.RETURN;
                                         const availableQty = isReturn ? getAvailableReturnQty(item.id) : item.quantity;
                                         return (
-                                            <div key={item.id} className={`flex items-center justify-between p-3 border rounded-lg ${isReturn && availableQty <= 0 ? 'opacity-40' : ''}`}>
+                                            <div key={item.id} className={`flex items-center justify-between p-3 border border-slate-300 rounded-lg ${isReturn && availableQty <= 0 ? 'opacity-40' : ''}`}>
                                                 <div className="flex items-center gap-3">
                                                     <input
                                                         type="checkbox"
@@ -529,7 +529,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                                         max={availableQty}
                                                         value={selectedItems[item.id].quantity}
                                                         onChange={e => handleQuantityChange(item.id, parseInt(e.target.value) || 1)}
-                                                        className="w-20 p-2 border rounded-lg text-center"
+                                                        className="w-20 p-2 border border-slate-300 rounded-lg text-center"
                                                     />
                                                 )}
                                             </div>
@@ -544,7 +544,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                                     value={notes}
                                     onChange={e => setNotes(e.target.value)}
                                     placeholder="Observaciones adicionales..."
-                                    className="w-full p-3 border rounded-lg"
+                                    className="w-full p-3 border border-slate-300 rounded-lg"
                                     rows={3}
                                 />
                             </div>
@@ -580,10 +580,10 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                     )}
                 </div>
 
-                <div className="p-6 border-t flex justify-between">
+                <div className="p-6 border-t border-slate-200 flex justify-between">
                     <button
                         onClick={() => step > 1 ? setStep(step - 1) : onClose()}
-                        className="px-4 py-2 border rounded-lg hover:bg-slate-50"
+                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
                     >
                         {step > 1 ? 'Atrás' : 'Cancelar'}
                     </button>
