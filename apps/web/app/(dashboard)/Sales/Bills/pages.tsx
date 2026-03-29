@@ -99,6 +99,7 @@ export default function BillsPage({
   const preparePreviewData = (bill: BillDetail & { 
     items?: any[]; 
     dianStatus?: string | null;
+    creditNotes?: any[];
     rejectedReason?: string | null;
     dianResponse?: string | null;
     payments?: any[]; 
@@ -137,6 +138,8 @@ export default function BillsPage({
     return {
       formData: {
         id: bill.id,
+        number: bill.number,
+        prefix: bill.prefix || "",
         date: bill.date
           ? new Date(bill.date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
@@ -163,6 +166,15 @@ export default function BillsPage({
       discountTotal: parseFloat(bill.discountTotal || "0"),
       taxTotal: parseFloat(bill.taxTotal || "0"),
       total: parseFloat(bill.total || "0"),
+      creditNotes: (bill.creditNotes || []).map((cn: any) => ({
+        id: cn.id,
+        number: cn.number,
+        prefix: cn.prefix,
+        date: cn.date,
+        type: cn.type,
+        status: cn.status,
+        total: Number(cn.total || 0),
+      })),
     };
   };
 

@@ -130,7 +130,7 @@ const fmt = (n: number) =>
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function PaymentBillModal({
-  receiptNumber = 3,
+  receiptNumber = 0,
   companyName = "Simplapp",
   bankAccounts = [],
   clients = [],
@@ -199,7 +199,7 @@ export function PaymentBillModal({
               {/* Receipt number badge */}
               <div className="inline-flex items-center gap-1 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-2 py-0.5">
                 <Hash className="w-3 h-3 text-[#6C47FF]" />
-                <span className="text-xs font-bold text-[#6C47FF]">{receiptNumber}</span>
+                <span className="text-xs font-bold text-[#6C47FF]">{String(receiptNumber).padStart(4, "0")}</span>
               </div>
             </div>
           </div>
@@ -249,7 +249,7 @@ export function PaymentBillModal({
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Número</p>
               <div className="inline-flex items-center gap-1.5 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-3 py-1.5">
                 <Hash className="w-3.5 h-3.5 text-[#6C47FF]" />
-                <span className="text-lg font-bold text-[#6C47FF]">{receiptNumber}</span>
+                <span className="text-lg font-bold text-[#6C47FF]">{String(receiptNumber).padStart(4, "0")}</span>
               </div>
             </div>
           </div>

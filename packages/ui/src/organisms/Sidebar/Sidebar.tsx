@@ -50,6 +50,7 @@ export function Sidebar({ onSelect, currentView, isMobileOpen, onCloseMobile }: 
             submenu: [
                 { id: "ventas-facturacion", label: "Facturación", icon: null },
                 { id: "ventas-pagos", label: "Pagos Recibidos", icon: null },
+                { id: "ventas-notas-credito", label: "Notas de Crédito", icon: null },
                 { id: "ventas-clientes", label: "Clientes", icon: null },
                 { id: "ventas-productos", label: "Productos de Venta", icon: null },
                 { id: "ventas-vendedor", label: "Vendedores", icon: null },

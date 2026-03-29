@@ -62,6 +62,10 @@ export async function GET(
           include: {
             account: true
           }
+        },
+        creditNotes: {
+          where: { status: { in: ['APPLIED', 'ISSUED', 'DRAFT'] } },
+          select: { id: true, number: true, total: true, status: true, type: true, date: true }
         }
       },
     });
