@@ -37,6 +37,7 @@ export interface BillPreviewProps {
   formData: {
     id?: string;
     number?: number;
+    prefix?: string;
     date: string;
     dueDate: string;
     clientName: string;
@@ -180,7 +181,7 @@ export function BillPreview({
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-[#6C47FF]" />
               <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                Factura {formData.number ? `#${formData.number}` : ""}
+                Factura {formData.number ? `${formData.prefix || ''}${formData.number}` : "Borrador"}
               </span>
               <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${status.badge}`}>
                 <StatusIcon className="w-3 h-3" />
@@ -305,7 +306,9 @@ export function BillPreview({
               <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Número</p>
               <div className="inline-flex items-center gap-1.5 bg-[#6C47FF]/8 border border-[#6C47FF]/20 rounded-lg px-3 py-1.5 invoice-number">
                 <Hash className="w-3.5 h-3.5 text-[#6C47FF]" />
-                <span className="text-lg font-bold text-[#6C47FF]">{formData.number || "Auto"}</span>
+                <span className="text-lg font-bold text-[#6C47FF]">
+                  {formData.number ? `${formData.prefix || ''}${formData.number}` : "Sin número"}
+                </span>
               </div>
             </div>
           </div>

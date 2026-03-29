@@ -138,6 +138,8 @@ export default function BillsPage({
     return {
       formData: {
         id: bill.id,
+        number: bill.number,
+        prefix: bill.prefix || "",
         date: bill.date
           ? new Date(bill.date).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
