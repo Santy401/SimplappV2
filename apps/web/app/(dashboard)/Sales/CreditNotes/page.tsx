@@ -149,7 +149,7 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
                     <SectionCard className="px-5 py-4">
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Total</p>
-                        <p className="text-2xl font-bold text-red-500">-$ {fmt(creditNote.total)}</p>
+                        <p className="text-2xl font-bold text-red-500">$ {fmt(creditNote.total)}</p>
                     </SectionCard>
                     <SectionCard className="px-5 py-4">
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Subtotal</p>
@@ -286,7 +286,7 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                             </div>
                             <div className="px-5 py-4 bg-red-50 dark:bg-red-900/10 border-t border-red-100 dark:border-red-900/20 flex items-center justify-between">
                                 <span className="text-sm font-semibold text-red-700 dark:text-red-400">Total a Reintegrar</span>
-                                <span className="text-2xl font-black text-red-600 invoice-grand-total">-$ {fmt(creditNote.total)}</span>
+                                <span className="text-2xl font-black text-red-600 invoice-grand-total">$ {fmt(creditNote.total)}</span>
                             </div>
                         </div>
                     </div>
@@ -672,7 +672,7 @@ export default function CreditNotesPage() {
             header: 'Total', 
             cell: (item) => (
                 <span className="font-medium text-red-600">
-                    -${Number(item.total).toLocaleString('es-CO')}
+                    ${Number(item.total).toLocaleString('es-CO')}
                 </span>
             ) 
         },

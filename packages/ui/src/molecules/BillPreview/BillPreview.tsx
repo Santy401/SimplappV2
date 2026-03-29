@@ -569,7 +569,7 @@ export function BillPreview({
                         </span>
                       </td>
                       <td className="px-6 py-4 text-right text-sm font-bold text-red-600">
-                        -$ {fmt(Number(cn.total))}
+                        $ {fmt(Number(cn.total))}
                       </td>
                     </tr>
                   ))}
@@ -580,7 +580,7 @@ export function BillPreview({
                       Total Notas de Crédito
                     </td>
                     <td className="px-6 py-3 text-right text-lg font-black text-red-600 invoice-grand-total">
-                      -$ {fmt(creditNoteTotal)}
+                      $ {fmt(creditNoteTotal)}
                     </td>
                   </tr>
                 </tfoot>

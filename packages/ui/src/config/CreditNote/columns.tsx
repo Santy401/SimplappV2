@@ -79,7 +79,7 @@ export const createColumns = (
             header: "Total",
             cell: (creditNote: CreditNoteWithRelations) => (
                 <span className="font-medium text-red-600">
-                    -${Number(creditNote.total).toLocaleString('es-CO')}
+                    ${Number(creditNote.total).toLocaleString('es-CO')}
                 </span>
             ),
         },
