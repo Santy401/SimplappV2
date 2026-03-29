@@ -44,7 +44,7 @@ export class CreditNoteService {
             });
 
             const totalReturned = existingCreditNotes
-                .filter(cn => cn.creditNote.type === CreditNoteType.RETURN)
+                .filter((cn: { creditNote: { type: CreditNoteType; }; }) => cn.creditNote.type === CreditNoteType.RETURN)
                 .reduce((sum: number, ci: any) => sum + ci.quantity, 0);
 
             if (input.type === CreditNoteType.RETURN) {

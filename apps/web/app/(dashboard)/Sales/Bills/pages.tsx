@@ -99,6 +99,7 @@ export default function BillsPage({
   const preparePreviewData = (bill: BillDetail & { 
     items?: any[]; 
     dianStatus?: string | null;
+    creditNotes?: any[];
     rejectedReason?: string | null;
     dianResponse?: string | null;
     payments?: any[]; 

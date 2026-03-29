@@ -92,7 +92,7 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 print:bg-white animate-in fade-in duration-300">
             {/* ── Sticky navbar ── */}
-            <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 print:hidden">
+            <div className="sticky top-0 z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 no-print">
                 <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-4">
                     {/* Left */}
                     <div className="flex items-center gap-3">
@@ -143,9 +143,10 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                 </div>
             </div>
 
-            <div className="max-w-6xl mx-auto px-4 py-8 space-y-5 print:p-0 print:space-y-4">
+            {/* Print Container - Only this section prints */}
+            <div className="max-w-6xl mx-auto px-4 py-8 space-y-5 print:p-0 print:space-y-0 print-invoice-container">
                 {/* ── Summary cards ── */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 print:hidden">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 no-print">
                     <SectionCard className="px-5 py-4">
                         <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">Total</p>
                         <p className="text-2xl font-bold text-red-500">-$ {fmt(creditNote.total)}</p>
@@ -168,22 +169,23 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                     </SectionCard>
                 </div>
 
-                <SectionCard className="overflow-hidden print:border-none print:shadow-none print:rounded-none">
+                {/* Document Card */}
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden print:border-none print:shadow-none print:rounded-none print-break-avoid">
                     {/* Status ribbon (print only) */}
-                    <div className="hidden print:block">
+                    <div className="no-print">
                         <div className={`${statusObj.ribbon} text-white text-xs font-bold tracking-widest py-1 text-center`}>
                             {statusObj.label.toUpperCase()}
                         </div>
                     </div>
 
                     {/* Document header */}
-                    <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-6 relative">
+                    <div className="px-8 py-6 border-b-2 border-slate-200 dark:border-slate-700 flex items-start justify-between gap-6 relative invoice-header">
                         {/* Status ribbon diagonal (screen only) */}
-                        <div className={`absolute top-6 -left-12 transform -rotate-45 ${statusObj.ribbon} text-white py-1 px-16 text-xs font-bold tracking-widest shadow-md print:hidden`}>
+                        <div className={`absolute top-6 -left-12 transform -rotate-45 ${statusObj.ribbon} text-white py-1 px-16 text-xs font-bold tracking-widest shadow-md no-print`}>
                             {statusObj.label.toUpperCase()}
                         </div>
 
-                        <div className="w-36 h-20 shrink-0 flex items-center justify-start">
+                        <div className="w-36 h-20 shrink-0 flex items-center justify-start invoice-logo">
                             <div className="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
                                 <span className="text-white font-bold text-3xl tracking-tighter">Simplapp</span>
                             </div>
@@ -298,7 +300,7 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                             </p>
                         </div>
                     </div>
-                </SectionCard>
+                </div>
             </div>
         </div>
     );
@@ -399,7 +401,7 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-999 p-4">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
                 <div className="p-6 border-b">
                     <div className="flex items-center justify-between">

@@ -74,6 +74,15 @@ export async function POST(
 
     const newStatus = (newBalance <= 0) ? BillStatus.PAID : BillStatus.PARTIALLY_PAID;
 
+    if (data.bankAccount) {
+      const accountExists = await prisma.account.findUnique({
+        where: { id: data.bankAccount }
+      });
+      if (!accountExists) {
+        return NextResponse.json({ error: 'La cuenta bancaria no existe' }, { status: 400 });
+      }
+    }
+
     const transaction = await prisma.$transaction([
       prisma.payment.create({
         data: {

@@ -110,3 +110,113 @@ html.lenis, html.lenis body {
   color: #999 !important;
   opacity: 0.5 !important;
 }
+
+/* ── Print Styles for Bills/Invoices ─────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .print-invoice-container,
+  .print-invoice-container * {
+    visibility: visible;
+  }
+
+  .print-invoice-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+  }
+
+  .print-only,
+  .print-only * {
+    visibility: visible;
+    display: block !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .invoice-header,
+  .invoice-client,
+  .invoice-items,
+  .invoice-totals,
+  .invoice-footer {
+    background: white !important;
+    color: #1e293b !important;
+  }
+
+  .invoice-logo img {
+    max-height: 70px;
+    object-fit: contain;
+  }
+
+  .invoice-title {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+  }
+
+  .invoice-number {
+    font-size: 16px !important;
+  }
+
+  .invoice-table {
+    page-break-inside: avoid;
+  }
+
+  .invoice-table th {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 600 !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+  }
+
+  .invoice-table td {
+    font-size: 11px !important;
+    color: #334155 !important;
+  }
+
+  .invoice-total-section {
+    page-break-inside: avoid;
+  }
+
+  .invoice-grand-total {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+  }
+
+  .invoice-status-ribbon {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.1em !important;
+  }
+
+  .invoice-notes {
+    font-size: 9px !important;
+    color: #64748b !important;
+  }
+}
+
+.print-break-avoid {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
