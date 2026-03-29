@@ -115,15 +115,19 @@ html.lenis, html.lenis body {
 @media print {
   @page {
     size: A4;
-    margin: 15mm;
+    margin: 8mm;
   }
 
   html, body {
+    margin: 0 !important;
+    padding: 0 !important;
     height: auto !important;
     overflow: visible !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+
+  /* Nota: el encabezado "título / URL" es del browser print header/footer, se desactiva desde la configuración de impresión */
 
   body * {
     visibility: hidden;
@@ -193,6 +197,16 @@ html.lenis, html.lenis body {
   .invoice-table td {
     font-size: 11px !important;
     color: #334155 !important;
+  }
+
+  .invoice-document,
+  .invoice-header,
+  .invoice-client,
+  .invoice-items,
+  .invoice-totals,
+  .invoice-footer {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 
   .invoice-total-section {

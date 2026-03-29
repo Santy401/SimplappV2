@@ -284,9 +284,9 @@ function CreditNoteDetail({ creditNote, onClose, onCancel, isCancelling }: Credi
                                     <span className="font-medium text-slate-700 dark:text-slate-300">$ {fmt(creditNote.taxTotal)}</span>
                                 </div>
                             </div>
-                            <div className="px-5 py-4 bg-red-50 dark:bg-red-900/10 border-t border-red-100 dark:border-red-900/20 flex items-center justify-between">
+                            <div className="px-2 py-7 bg-red-50 dark:bg-red-900/10 border-t border-red-100 dark:border-red-900/20 flex items-center justify-between">
                                 <span className="text-sm font-semibold text-red-700 dark:text-red-400">Total a Reintegrar</span>
-                                <span className="text-2xl font-bold text-red-600">-$ {fmt(creditNote.total)}</span>
+                                <span className="text-2xl font-bold text-red-600">$ {fmt(creditNote.total)}</span>
                             </div>
                         </div>
                     </div>
