@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
+let dashboardMetricsCache: DashboardMetrics | null = null;
+let isFirstLoad = true;
 import { useSession } from "@interfaces/src/hooks/features/auth/use-session";
 import { useRouter } from "next/navigation";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -108,26 +111,137 @@ function QuickAction({ label, icon: Icon, href, variant = 'primary' }: QuickActi
     );
 }
 
+function DashboardSkeleton() {
+    return (
+        <div className="w-full pb-10 bg-slate-50 min-h-screen">
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                <header className="mb-8">
+                    <div className="h-8 w-48 bg-slate-200 rounded animate-pulse mb-2" />
+                    <div className="h-4 w-36 bg-slate-200 rounded animate-pulse" />
+                </header>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-slate-100 animate-pulse" />
+                                <div className="h-3 w-20 bg-slate-100 rounded animate-pulse" />
+                            </div>
+                            <div className="h-8 w-32 bg-slate-100 rounded animate-pulse mb-2" />
+                            <div className="h-3 w-24 bg-slate-100 rounded animate-pulse" />
+                        </div>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                    <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 animate-pulse" />
+                            <div>
+                                <div className="h-4 w-16 bg-slate-100 rounded animate-pulse mb-1" />
+                                <div className="h-3 w-24 bg-slate-100 rounded animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="h-[280px] w-full bg-slate-50 rounded-xl animate-pulse" />
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-6 h-6 rounded-md bg-slate-100 animate-pulse" />
+                                <div className="h-4 w-24 bg-slate-100 rounded animate-pulse" />
+                            </div>
+                            <div className="space-y-2">
+                                <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
+                                <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
+                                <div className="h-10 w-full bg-slate-100 rounded-xl animate-pulse" />
+                            </div>
+                        </div>
+
+                        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-6 h-6 rounded-md bg-slate-100 animate-pulse" />
+                                <div className="h-4 w-20 bg-slate-100 rounded animate-pulse" />
+                            </div>
+                            <div className="h-16 w-full bg-slate-100 rounded-xl animate-pulse" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="w-6 h-6 rounded-md bg-slate-100 animate-pulse" />
+                        <div className="h-4 w-28 bg-slate-100 rounded animate-pulse" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                        {[...Array(8)].map((_, i) => (
+                            <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-100">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-lg bg-slate-100 animate-pulse" />
+                                    <div>
+                                        <div className="h-4 w-24 bg-slate-100 rounded animate-pulse mb-1" />
+                                        <div className="h-3 w-16 bg-slate-100 rounded animate-pulse" />
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <div className="h-4 w-20 bg-slate-100 rounded animate-pulse mb-1" />
+                                    <div className="h-5 w-16 bg-slate-100 rounded-full animate-pulse ml-auto" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function Dashboard() {
     const { user } = useSession();
     const userName = user?.name || "Administrador";
     const router = useRouter();
+    const hasFetched = useRef(false);
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const [metrics, setMetrics] = useState<DashboardMetrics | null>(dashboardMetricsCache);
+    const [isLoading, setIsLoading] = useState(!dashboardMetricsCache);
+
+    const refreshMetrics = () => {
+        setIsRefreshing(true);
+        dashboardMetricsCache = null;
+        fetch('/api/metrics/dashboard')
+            .then(res => res.json())
+            .then(data => {
+                if (!data.error) {
+                    dashboardMetricsCache = data;
+                    setMetrics(data);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => setIsRefreshing(false));
+    };
 
     useEffect(() => {
+        if (dashboardMetricsCache) {
+            hasFetched.current = true;
+            return;
+        }
+
         let mounted = true;
         fetch('/api/metrics/dashboard')
             .then(res => res.json())
             .then(data => {
                 if (mounted && !data.error) {
+                    dashboardMetricsCache = data;
                     setMetrics(data);
                 }
             })
             .catch(err => console.error(err))
             .finally(() => {
-                if (mounted) setIsLoading(false);
+                if (mounted) {
+                    hasFetched.current = true;
+                    setIsLoading(false);
+                }
             });
         return () => { mounted = false };
     }, []);
@@ -139,11 +253,7 @@ export default function Dashboard() {
     });
 
     if (isLoading || !metrics) {
-        return (
-            <div className="flex w-full h-[60vh] items-center justify-center bg-slate-50">
-                <Loader2 className="w-8 h-8 text-[#6C47FF] animate-spin" />
-            </div>
-        );
+        return <DashboardSkeleton />;
     }
 
     const formatShortName = (name: string) => {
@@ -180,13 +290,23 @@ export default function Dashboard() {
     return (
         <div className="w-full pb-10 bg-slate-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <header className="mb-8">
-                    <h1 className="text-2xl font-semibold text-slate-800 mb-1">
-                        Hola, {userName.split(" ")[0]}
-                    </h1>
-                    <p className="text-sm text-slate-500">
-                        Resumen de tu negocio hoy.
-                    </p>
+                <header className="mb-8 flex items-start justify-between">
+                    <div>
+                        <h1 className="text-2xl font-semibold text-slate-800 mb-1">
+                            Hola, {userName.split(" ")[0]}
+                        </h1>
+                        <p className="text-sm text-slate-500">
+                            Resumen de tu negocio hoy.
+                        </p>
+                    </div>
+                    <button
+                        onClick={refreshMetrics}
+                        disabled={isRefreshing}
+                        className="p-2 rounded-lg border border-slate-200 bg-white hover:border-[#6C47FF]/30 hover:text-[#6C47FF] transition-colors disabled:opacity-50"
+                        title="Actualizar datos"
+                    >
+                        <Loader2 size={18} className={isRefreshing ? "animate-spin" : ""} />
+                    </button>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
