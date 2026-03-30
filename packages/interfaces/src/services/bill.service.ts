@@ -6,17 +6,30 @@ export class BillService {
     /**
      * Lista facturas con paginación y filtros.
      */
-    static async listBills(companyId: string, options: { 
-        page?: number, 
-        limit?: number, 
+    static async listBills(companyId: string, options: {
+        page?: number,
+        clientId?:string,
+        limit?: number,
         search?: string,
-        status?: string
+        status?: string,
+        startDate?: string,
+        endDate?: string
     } = {}) {
-        const { page = 1, limit = 10, search, status } = options;
+        const { page = 1, limit = 10, search, status, startDate, endDate, clientId } = options;
         const skip = (page - 1) * limit;
+
+        const where: any = { companyId, deletedAt: null };
+
+        if (clientId) where.clientId = clientId;
+
+        if (startDate || endDate) {
+            where.date = {};
+            if (startDate) where.date.gte = new Date(startDate);
+            if (endDate) where.date.lte = new Date(endDate)
+        }
         
-        const where: any = { companyId };
         if (status) where.status = status;
+        
         if (search) {
             where.OR = [
                 { number: { contains: search, mode: 'insensitive' } },
@@ -52,7 +65,7 @@ export class BillService {
     static async createBill(data: any, companyId: string) {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const nextNumber = await this.getNextNumber(companyId, data.prefix);
-            
+
             return BillRepository.create({
                 ...data,
                 companyId,
@@ -68,7 +81,7 @@ export class BillService {
     static async updateStatus(billId: string, status: string, companyId: string) {
         const bill = await BillRepository.findById(billId, companyId);
         if (!bill) throw new Error('Factura no encontrada.');
-        
+
         // Lógica de negocio: No se puede cancelar una factura ya pagada (ejemplo)
         if (status === 'CANCELLED' && bill.status === 'PAID') {
             throw new Error('No se puede cancelar una factura que ya ha sido pagada.');

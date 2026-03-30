@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
-import { cookies } from 'next/headers';
-import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { BillStatus } from '@prisma/client';
-import { getPaginationParams, buildMeta } from '@/lib/pagination';
+import { getPaginationParams } from '@/lib/pagination';
 import { createNotification } from '@/lib/notify';
+import { BillService } from '@interfaces/src/services/bill.service'
 
 import { getAuthContext } from '@interfaces/lib/auth/session';
 
@@ -12,53 +11,32 @@ import { getAuthContext } from '@interfaces/lib/auth/session';
  * GET /api/bills
  * Obtiene el listado de facturas con filtros opcionales
  */
+
 export async function GET(request: NextRequest) {
   try {
     const auth = await getAuthContext();
+    
     if (!auth) {
       return NextResponse.json({ error: 'No autorizado o empresa no encontrada' }, { status: 401 });
     }
 
     const { companyId } = auth;
     const { searchParams } = new URL(request.url);
-    const { page, take, skip } = getPaginationParams(request);
+    const { page } = getPaginationParams(request);
     const clientId = searchParams.get('clientId');
     const status = searchParams.get('status');
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    const whereClause: any = {
-      companyId,
-      deletedAt: null,
-    };
+    const result = await BillService.listBills (companyId, {
+      clientId: clientId ?? undefined,
+      startDate: startDate ?? undefined,
+      endDate: endDate ?? undefined,
+      page: page ?? undefined,
+      status: status ?? undefined
+    })
 
-    if (clientId) whereClause.clientId = clientId;
-    if (status) whereClause.status = status as BillStatus;
-
-    if (startDate || endDate) {
-      whereClause.date = {};
-      if (startDate) whereClause.date.gte = new Date(startDate);
-      if (endDate) whereClause.date.lte = new Date(endDate);
-    }
-
-    const include = {
-      client: true,
-      store: true,
-      user: true,
-      items: { include: { product: true } },
-      payments: { include: { account: true } },
-      creditNotes: {
-        where: { status: { in: ['APPLIED', 'ISSUED', 'DRAFT'] } },
-        select: { id: true, number: true, total: true, status: true, type: true, date: true, items: { select: { billItemId: true, quantity: true } } }
-      },
-    };
-
-    const [bills, total] = await prisma.$transaction([
-      prisma.bill.findMany({ where: whereClause, include, skip, take, orderBy: { createdAt: 'desc' } }),
-      prisma.bill.count({ where: whereClause }),
-    ]);
-
-    return NextResponse.json({ data: bills, meta: buildMeta(page, take, total) });
+    return NextResponse.json(result);
   } catch (error) {
     console.error('Error fetching bills:', error);
     return NextResponse.json(
