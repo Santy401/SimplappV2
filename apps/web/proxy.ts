@@ -128,13 +128,13 @@ export async function proxy(request: NextRequest) {
   // ═══════════════════════════════════════════════════════════════════════════
 
   // Login/Register en el dominio app
-  if (isAuthPageRoute(pathname)) {
-    if (isTokenValid) {
-      const redirectTo = request.nextUrl.searchParams.get('redirect');
-      const safePath = redirectTo?.startsWith('/') ? redirectTo : '/';
-      return NextResponse.redirect(new URL(safePath, request.url));
-    }
-  }
+   if (isAuthPageRoute(pathname)) {
+     if (isTokenValid) {
+       const redirectTo = request.nextUrl.searchParams.get('redirect');
+       const safePath = redirectTo?.startsWith('/') ? redirectTo : '/';
+       return NextResponse.redirect(new URL(safePath, request.url));
+     }
+   }
 
   // Rutas de marketing en app domain → redirigir al marketing domain
   if (
@@ -170,11 +170,11 @@ export async function proxy(request: NextRequest) {
 
   // ─── TODAS las demás rutas en el dominio app ─────────────────────────────
   // Rutas reales de Next.js (ej: /ventas/facturacion, /inventario/bodega)
-  if (!isTokenValid) {
-    // Sin sesión → ir a login
-    const loginPath = `/colombia/Login/?redirect=${encodeURIComponent(pathname)}`;
-    return NextResponse.redirect(marketingUrl(loginPath, request));
-  }
+   if (!isTokenValid) {
+     // Sin sesión → ir a login
+     const loginPath = `/colombia/`;
+     return NextResponse.redirect(marketingUrl(loginPath, request));
+   }
 
   // Autenticado → dejar que Next App Router maneje las subrutas profundas
   return NextResponse.next();
