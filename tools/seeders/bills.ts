@@ -68,7 +68,7 @@ async function main() {
                 taxTotal: 0,
                 total: 0,
                 balance: 0,
-                clientName: `${client.firstName} ${client.firstLastName}`,
+                clientName: `${client.firstName} ${client.firstLastName} ${client.commercialName}`,
                 clientIdentification: client.identificationNumber,
             }
         });

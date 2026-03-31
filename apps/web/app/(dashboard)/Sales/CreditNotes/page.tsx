@@ -29,6 +29,7 @@ interface CreditNoteWithRelations {
         number: number;
         prefix?: string | null;
         clientName?: string | null;
+        commercialName?: string | null;
         clientIdentification?: string | null;
         items?: any[];
     };

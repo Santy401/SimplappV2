@@ -59,6 +59,8 @@ export interface Bill {
     total: string;
     balance: string;
 
+    commercialName: string | null;
+
     clientName?: string | null;
     clientIdentification?: string | null;
     clientAddress?: string | null;

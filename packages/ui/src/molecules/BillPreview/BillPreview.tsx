@@ -41,6 +41,7 @@ export interface BillPreviewProps {
     date: string;
     dueDate: string;
     clientName: string;
+    commercialName: string;
     clientId: string;
     email: string;
     paymentMethod: PaymentMethod;
@@ -321,7 +322,7 @@ export function BillPreview({
                 <User className="w-4 h-4 text-[#6C47FF]" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">Cliente</span>
               </div>
-              <InfoRow label="Nombre" value={<span className="font-semibold">{formData.clientName || "Consumidor Final"}</span>} />
+              <InfoRow label="Nombre" value={<span className="font-semibold">{formData.clientName || formData.commercialName || "Consumidor Final"}</span>} />
               <InfoRow label="Identificación" value={formData.clientId} />
               <InfoRow label="Correo" value={formData.email} />
             </div>

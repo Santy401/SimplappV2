@@ -9,7 +9,7 @@
     "./services/*": "./src/services/*.ts"
   },
   "scripts": {
-    "prebuild": "npx prisma generate --schema=../../apps/web/prisma/schema",
+    "prebuild": "pnpm prisma generate --schema=../../apps/web/prisma/schema",
     "build": "tsc",
     "check-types": "tsc --noEmit"
   },

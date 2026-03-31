@@ -246,7 +246,8 @@ export default function BillsCreatePage({
             formData: {
                 date: billToShow.date ? new Date(billToShow.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
                 dueDate: billToShow.dueDate ? new Date(billToShow.dueDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-                clientName: billToShow.clientName || 'Cliente',
+                clientName: (billToShow.clientName?.trim() || billToShow.commercialName?.trim() || billToShow.commercialName || 'Cliente').trim(),
+                commercialName: billToShow.commercialName || billToShow.commercialName || '',
                 clientId: billToShow.clientIdentification || '',
                 email: billToShow.clientEmail || '',
                 paymentMethod: billToShow.paymentMethod!,
