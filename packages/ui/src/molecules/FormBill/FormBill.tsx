@@ -52,6 +52,7 @@ interface FormBillData {
   clientType: string;
   clientId: string;
   clientName: string;
+  commercialName: string;
   selectedClientId?: string;
   email: string;
   date: string;
@@ -121,6 +122,7 @@ export function FormBill({
     clientType: "CC",
     clientId: "",
     clientName: "",
+    commercialName:"",
     selectedClientId: undefined,
     email: "",
     date: new Date().toISOString().split("T")[0],

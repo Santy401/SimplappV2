@@ -149,6 +149,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const computedClientName = client.commercialName?.trim()
+      ? client.commercialName
+      : `${client.firstName || ""} ${client.firstLastName || ""}`.trim() || 'Cliente';
+
+    const computedCommercialName = client.commercialName?.trim() || null;
+
     const billData: Record<string, unknown> = {
       number: nextNumber,
       date: new Date(date),
@@ -164,7 +170,8 @@ export async function POST(request: NextRequest) {
 
       notes: notes || "",
 
-      clientName: `${client.firstName} ${client.firstLastName}`,
+      clientName: computedClientName,
+      commercialName: computedCommercialName,
       clientIdentification: client.identificationNumber,
       clientAddress: client.address,
       clientPhone: client.phone,

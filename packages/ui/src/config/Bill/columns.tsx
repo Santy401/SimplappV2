@@ -19,9 +19,10 @@ export const createColumns = (handleEditCustomer: (bill: Bill) => void,
         {
             key: "client",
             header: "Cliente",
-            cell: (bill: Bill) => (
-                <span>{bill.clientName}</span>
-            ),
+            cell: (bill: Bill) => {
+                const clientName = (bill.clientName?.trim() || bill.commercialName?.trim() || (bill as any).client?.commercialName || (bill as any).client?.firstName || (bill as any).client?.firstLastName || "Cliente").trim();
+                return <span>{clientName}</span>;
+            },
         },
         {
             key: "date",

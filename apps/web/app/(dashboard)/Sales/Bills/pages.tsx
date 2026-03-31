@@ -146,7 +146,8 @@ export default function BillsPage({
         dueDate: bill.dueDate
           ? new Date(bill.dueDate).toISOString().split("T")[0]
           : new Date().toISOString().split("T")[0],
-        clientName: bill.clientName || "Cliente",
+        clientName: (bill.clientName?.trim() || bill.commercialName?.trim() || bill.client?.commercialName || bill.client?.firstName || bill.client?.firstLastName || "Cliente").trim(),
+        commercialName: bill.commercialName || bill.client?.commercialName || "",
         clientId: bill.clientIdentification || "",
         email: bill.clientEmail || "",
         paymentMethod: bill.paymentMethod || "CASH",
