@@ -7,6 +7,7 @@ export class BillService {
      * Lista facturas con paginación y filtros.
      */
     static async listBills(companyId: string, options: {
+        includeItems?: boolean,
         page?: number,
         clientId?:string,
         limit?: number,
@@ -41,7 +42,10 @@ export class BillService {
         }
 
         const [data, total] = await Promise.all([
-            BillRepository.findAll(where, skip, limit),
+            BillRepository.findAll(where, skip, limit, {
+                client: true,
+                items: options.includeItems
+            }),
             BillRepository.count(where)
         ]);
 

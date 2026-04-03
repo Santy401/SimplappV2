@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get('endDate');
 
     const result = await BillService.listBills (companyId, {
+      includeItems: true,
       clientId: clientId ?? undefined,
       startDate: startDate ?? undefined,
       endDate: endDate ?? undefined,
@@ -153,8 +154,6 @@ export async function POST(request: NextRequest) {
       ? client.commercialName
       : `${client.firstName || ""} ${client.firstLastName || ""}`.trim() || 'Cliente';
 
-    const computedCommercialName = client.commercialName?.trim() || null;
-
     const billData: Record<string, unknown> = {
       number: nextNumber,
       date: new Date(date),
@@ -171,7 +170,6 @@ export async function POST(request: NextRequest) {
       notes: notes || "",
 
       clientName: computedClientName,
-      commercialName: computedCommercialName,
       clientIdentification: client.identificationNumber,
       clientAddress: client.address,
       clientPhone: client.phone,
