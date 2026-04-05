@@ -60,7 +60,9 @@ export class BillService {
      */
     static async getNextNumber(companyId: string, prefix?: string) {
         const lastBill = await BillRepository.findLastBill(companyId, prefix);
-        return lastBill ? parseInt(lastBill.number) + 1 : 1;
+        if (!lastBill) return 1;
+        const num: number = lastBill.number;
+        return num + 1;
     }
 
     /**

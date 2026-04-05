@@ -4,6 +4,7 @@ import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { BillStatus } from '@prisma/client';
 
 export async function GET(_request: NextRequest) {
     try {
@@ -30,15 +31,13 @@ export async function GET(_request: NextRequest) {
         const startPreviousMonth = startOfMonth(subMonths(now, 1));
         const endPreviousMonth = endOfMonth(subMonths(now, 1));
 
-        // Obtener facturas en estado validado
-        const validStatuses = ['ISSUED', 'PAID', 'PARTIALLY_PAID'];
+        const validStatuses: BillStatus[] = [BillStatus.ISSUED, BillStatus.PAID, BillStatus.PARTIALLY_PAID];
 
-        // 1. Total Ventas mes actual (Suma de subtotal, o total?) Usaremos `total`
         const currentMonthBills = await prisma.bill.aggregate({
             _sum: { total: true },
             where: {
                 companyId,
-                status: { in: validStatuses as string[] },
+                status: { in: validStatuses },
                 deletedAt: null,
                 date: { gte: startCurrentMonth, lte: endCurrentMonth }
             }
@@ -48,14 +47,14 @@ export async function GET(_request: NextRequest) {
             _sum: { total: true },
             where: {
                 companyId,
-                status: { in: validStatuses as any },
+                status: { in: validStatuses },
                 deletedAt: null,
                 date: { gte: startPreviousMonth, lte: endPreviousMonth }
             }
         });
 
-        const currentSales = Number(currentMonthBills._sum.total || 0);
-        const previousSales = Number(previousMonthBills._sum.total || 0);
+        const currentSales = Number(currentMonthBills._sum.total ?? 0);
+        const previousSales = Number(previousMonthBills._sum.total ?? 0);
         const salesGrowth = previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : 100;
 
         // 2. Facturas Pendientes de Pago (Balance > 0)
@@ -107,7 +106,7 @@ export async function GET(_request: NextRequest) {
         const all6MonthsBills = await prisma.bill.findMany({
             where: {
                 companyId,
-                status: { in: validStatuses as string[] },
+                status: { in: validStatuses },
                 deletedAt: null,
                 date: { gte: sixMonthsAgo }
             },
@@ -117,11 +116,11 @@ export async function GET(_request: NextRequest) {
         const monthlySalesMap: Record<string, number> = {};
         for (let i = 5; i >= 0; i--) {
             const mDate = subMonths(now, i);
-            const mKey = format(mDate, "MMM", { locale: es }).toUpperCase(); // "ENE", "FEB"
+            const mKey = format(mDate, "MMM", { locale: es }).toUpperCase();
             monthlySalesMap[mKey] = 0;
         }
 
-        all6MonthsBills.forEach((b: { date: Date, total: string | number }) => {
+        all6MonthsBills.forEach((b) => {
             const label = format(b.date, "MMM", { locale: es }).toUpperCase();
             if (monthlySalesMap[label] !== undefined) {
                 monthlySalesMap[label] += Number(b.total);

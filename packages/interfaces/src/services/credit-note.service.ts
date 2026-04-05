@@ -1,5 +1,5 @@
 import { prisma } from '../../lib/prisma';
-import { Prisma, BillStatus as PrismaBillStatus } from '../../../../apps/web/prisma/src/generated/prisma';
+import { Prisma, BillStatus as PrismaBillStatus, CreditNoteType as PrismaCreditNoteType } from '../../../../apps/web/prisma/src/generated/prisma';
 import { CreditNoteRepository } from '../repositories/credit-note.repository';
 import {
     CreateCreditNoteInput,
@@ -44,7 +44,7 @@ export class CreditNoteService {
             });
 
             const totalReturned = existingCreditNotes
-                .filter((cn: { creditNote: { type: CreditNoteType; }; }) => cn.creditNote.type === CreditNoteType.RETURN)
+                .filter((cn: { creditNote: { type: PrismaCreditNoteType; }; }) => cn.creditNote.type === PrismaCreditNoteType.RETURN)
                 .reduce((sum: number, ci: any) => sum + ci.quantity, 0);
 
             if (input.type === CreditNoteType.RETURN) {

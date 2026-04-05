@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@interfaces/lib/prisma';
-import { BillStatus } from '@prisma/client';
+import { BillStatus, Prisma } from '@prisma/client';
 import { getPaginationParams } from '@/lib/pagination';
 import { createNotification } from '@/lib/notify';
 import { BillService } from '@interfaces/src/services/bill.service'
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       ? client.commercialName
       : `${client.firstName || ""} ${client.firstLastName || ""}`.trim() || 'Cliente';
 
-    const billData: Record<string, unknown> = {
+    const billData: Record<string, any> = {
       number: nextNumber,
       date: new Date(date),
       dueDate: dueDate ? new Date(dueDate) : new Date(date),
@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
     }
 
     const bill = await prisma.bill.create({
-      data: billData,
+      data: billData as any,
       include: {
         items: true,
         client: true,

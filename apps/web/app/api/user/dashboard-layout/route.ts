@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.user.update({
       where: { id: payload.id },
-      data: { dashboardLayout: layout },
+      data: { dashboardLayout: layout } as any,
     });
 
     return NextResponse.json({ success: true });
