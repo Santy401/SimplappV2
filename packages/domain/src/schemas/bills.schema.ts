@@ -16,15 +16,15 @@ const paymentMethodEnum = z.enum([
 
 export const billItemSchema = z.object({
     productId: z.string().min(1, 'El producto es requerido'),
-    quantity: z.number().int().positive('La cantidad debe ser mayor a 0'),
-    price: z.number().min(0, 'El precio no puede ser negativo'),
-    taxRate: z.number().min(0, 'El impuesto no puede ser negativo').default(0).optional(),
-    discount: z.number().min(0, 'El descuento no puede ser negativo').default(0).optional(),
+    quantity: z.coerce.number().int().positive('La cantidad debe ser mayor a 0'),
+    price: z.coerce.number().min(0, 'El precio no puede ser negativo'),
+    taxRate: z.coerce.number().min(0, 'El impuesto no puede ser negativo').default(0).optional(),
+    discount: z.coerce.number().min(0, 'El descuento no puede ser negativo').default(0).optional(),
 });
 
 export const billsApiSchema = z.object({
     clientId: z.string().min(1, 'El cliente es requerido'),
-    storeId: z.string().min(1, 'La tienda es requerida'),
+    //storeId: z.string().min(1, 'La tienda es requerida'),
     listPriceId: z.string().optional().nullable(),
     sellerId: z.string().optional().nullable(),
     

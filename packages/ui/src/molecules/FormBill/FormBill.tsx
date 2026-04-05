@@ -348,6 +348,8 @@ export function FormBill({
 
   useEffect(() => {
     if (mode === "view" || !formLoaded.current || !onAutoSave) return;
+    if (formData.status !== "DRAFT") return; // No auto-guardar si no es borrador
+    
     const timer = setTimeout(() => {
       const data = prepareBillData(formData.status);
       if (data) onAutoSave(data);
@@ -360,7 +362,8 @@ export function FormBill({
   const validateBillData = (data: CreateBillInput) => {
     const result = billsApiSchema.safeParse(data);
     if (!result.success) {
-      const errorMsg = result.error.errors.map(e => `• ${e.message}`).join("\n");
+      const issues = result.error.issues || [];
+      const errorMsg = issues.map((e: any) => `• ${e.message}`).join("\n");
       toast.warning(`Corrige los siguientes errores:\n${errorMsg}`, {
         style: { whiteSpace: 'pre-line' }
       });
@@ -375,7 +378,7 @@ export function FormBill({
       toast.warning("Debe agregar al menos un producto con cantidad mayor a 0");
       return;
     }
-    if (!formData.selectedClientId) {
+    if (!formData.selectedClientId) { 
       toast.warning("Debe seleccionar un cliente");
       return;
     }
@@ -439,7 +442,7 @@ export function FormBill({
     );
   }
 
-  const isEditable = mode === "create" || mode === "edit";
+  const isEditable = mode === "create" || (mode === "edit" && formData.status === "DRAFT");
 
   // ─── Render ───────────────────────────────────────────────────────────────────
 
