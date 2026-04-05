@@ -4,8 +4,7 @@ import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { PaymentMethod, BillStatus, PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
-type Pool = import('pg').Pool;
-const { Pool } = require('pg');
+const { Pool } = require('pg') as { Pool: new (config: { connectionString: string }) => any };
 
 declare global {
   // eslint-disable-next-line no-var
@@ -13,7 +12,7 @@ declare global {
 }
 
 const createPrismaClient = () => {
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL! });
   return new PrismaClient({ adapter: new PrismaPg(pool) });
 };
 
