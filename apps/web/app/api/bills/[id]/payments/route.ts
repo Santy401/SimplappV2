@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@interfaces/lib/prisma';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
-import { PaymentMethod, BillStatus } from '@prisma/client';
+import { PaymentMethod, BillStatus, PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __prismaPayments: PrismaClient | undefined;
+}
+
+const createPrismaClient = () => {
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  return new PrismaClient({ adapter: new PrismaPg(pool) });
+};
+
+const prisma = global.__prismaPayments ?? (global.__prismaPayments = createPrismaClient());
 
 export async function POST(
   request: NextRequest,
@@ -75,7 +88,7 @@ export async function POST(
     const newStatus = (newBalance <= 0) ? BillStatus.PAID : BillStatus.PARTIALLY_PAID;
 
     if (data.bankAccount) {
-      const accountExists = await prisma.account.findUnique({
+      const accountExists = await prisma.bankAccount.findUnique({
         where: { id: data.bankAccount }
       });
       if (!accountExists) {

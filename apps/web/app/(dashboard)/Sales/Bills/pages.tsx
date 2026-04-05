@@ -80,8 +80,13 @@ export default function BillsPage({
           if (freshBill) setSelectedBill(freshBill);
         }
       } else {
-        const errorData = await response.json();
-        toast.error(errorData.error || "Error al registrar el pago");
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const errorData = await response.json();
+          toast.error(errorData.error || "Error al registrar el pago");
+        } else {
+          toast.error(`Error ${response.status}: Error al registrar el pago`);
+        }
       }
     } catch (_err) {
       toast.error("Error al registrar el pago");
