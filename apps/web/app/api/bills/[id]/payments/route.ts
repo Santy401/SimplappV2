@@ -3,7 +3,9 @@ import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { PaymentMethod, BillStatus, PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { Pool } from 'pg';
+
+type Pool = import('pg').Pool;
+const { Pool } = require('pg');
 
 declare global {
   // eslint-disable-next-line no-var
