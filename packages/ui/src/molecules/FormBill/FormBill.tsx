@@ -16,6 +16,8 @@ import { Store } from "@domain/entities/Store.entity";
 import { Seller } from "@domain/entities/Seller.entity";
 import { ListPrice } from "@domain/entities/ListPrice.entity";
 import { calculateItemTotals, calculateBillTotals } from "@domain/utils/billing";
+import { billsApiSchema } from "@domain/schemas/bills.schema";
+import { toast } from "react-toastify";
 
 // ─── Refactored Components ───────────────────────────────────────────────────
 import { FormBillHeader } from "./components/FormBillHeader";
@@ -355,18 +357,33 @@ export function FormBill({
 
   // ─── Submit actions ───────────────────────────────────────────────────────────
 
+  const validateBillData = (data: CreateBillInput) => {
+    const result = billsApiSchema.safeParse(data);
+    if (!result.success) {
+      const errorMsg = result.error.errors.map(e => `• ${e.message}`).join("\n");
+      toast.warning(`Corrige los siguientes errores:\n${errorMsg}`, {
+        style: { whiteSpace: 'pre-line' }
+      });
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = () => {
     const validItems = items.filter((item) => item.productId && item.quantity > 0);
     if (validItems.length === 0) {
-      alert("Debe agregar al menos un producto con cantidad mayor a 0");
+      toast.warning("Debe agregar al menos un producto con cantidad mayor a 0");
       return;
     }
     if (!formData.selectedClientId) {
-      alert("Debe seleccionar un cliente");
+      toast.warning("Debe seleccionar un cliente");
       return;
     }
     const billData = prepareBillData();
-    if (billData) onSubmit?.(billData);
+    if (billData) {
+      if (!validateBillData(billData)) return;
+      onSubmit?.(billData);
+    }
   };
 
   const handleBack = () => {
@@ -380,22 +397,28 @@ export function FormBill({
   const handleSaveDraft = () => {
     setFormData((prev) => ({ ...prev, status: "DRAFT" as BillStatus }));
     if (!formData.selectedClientId) {
-      alert("Debe seleccionar un cliente para guardar el borrador");
+      toast.warning("Debe seleccionar un cliente para guardar el borrador");
       return;
     }
     const data = prepareBillData("DRAFT" as BillStatus);
-    if (data) onSaveDraft?.(data);
+    if (data) {
+      if (!validateBillData(data)) return;
+      onSaveDraft?.(data);
+    }
   };
 
   const handleEmitBill = () => {
     setFormData((prev) => ({ ...prev, status: "TO_PAY" as BillStatus }));
     const validItems = items.filter((item) => item.productId && item.quantity > 0);
     if (validItems.length === 0) {
-      alert("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
+      toast.warning("Debe agregar al menos un producto con cantidad mayor a 0 para emitir");
       return;
     }
     const data = prepareBillData("TO_PAY" as BillStatus);
-    if (data) onEmitBill?.(data);
+    if (data) {
+      if (!validateBillData(data)) return;
+      onEmitBill?.(data);
+    }
   };
 
   // ─── Preview shortcut ─────────────────────────────────────────────────────────
