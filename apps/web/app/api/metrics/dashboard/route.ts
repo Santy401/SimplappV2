@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyAccessToken } from '@interfaces/lib/auth/token';
 import { prisma } from '@interfaces/lib/prisma';
-import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns';
+import { startOfMonth, endOfMonth, subMonths, format, startOfYear, endOfYear } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { BillStatus } from '@prisma/client';
 
@@ -24,38 +24,41 @@ export async function GET(_request: NextRequest) {
         const companyId = user?.companies[0]?.company?.id;
         if (!companyId) return NextResponse.json({ error: 'No se encontró empresa' }, { status: 404 });
 
-        const now = new Date();
-        const startCurrentMonth = startOfMonth(now);
-        const endCurrentMonth = endOfMonth(now);
+        const url = new URL(_request.url);
+        const yearParam = url.searchParams.get('year');
+        const selectedYear = yearParam ? parseInt(yearParam, 10) : new Date().getFullYear();
 
-        const startPreviousMonth = startOfMonth(subMonths(now, 1));
-        const endPreviousMonth = endOfMonth(subMonths(now, 1));
+        const startCurrentYear = startOfYear(new Date(selectedYear, 0, 1));
+        const endCurrentYear = endOfYear(new Date(selectedYear, 0, 1));
+
+        const startPreviousYear = startOfYear(new Date(selectedYear - 1, 0, 1));
+        const endPreviousYear = endOfYear(new Date(selectedYear - 1, 0, 1));
 
         const validStatuses: BillStatus[] = [BillStatus.ISSUED, BillStatus.PAID, BillStatus.PARTIALLY_PAID];
 
-        const currentMonthBills = await prisma.bill.aggregate({
+        const currentYearBills = await prisma.bill.aggregate({
             _sum: { total: true },
             where: {
                 companyId,
                 status: { in: validStatuses },
                 deletedAt: null,
-                date: { gte: startCurrentMonth, lte: endCurrentMonth }
+                date: { gte: startCurrentYear, lte: endCurrentYear }
             }
         });
 
-        const previousMonthBills = await prisma.bill.aggregate({
+        const previousYearBills = await prisma.bill.aggregate({
             _sum: { total: true },
             where: {
                 companyId,
                 status: { in: validStatuses },
                 deletedAt: null,
-                date: { gte: startPreviousMonth, lte: endPreviousMonth }
+                date: { gte: startPreviousYear, lte: endPreviousYear }
             }
         });
 
-        const currentSales = Number(currentMonthBills._sum.total ?? 0);
-        const previousSales = Number(previousMonthBills._sum.total ?? 0);
-        const salesGrowth = previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : 100;
+        const currentSales = Number(currentYearBills._sum.total ?? 0);
+        const previousSales = Number(previousYearBills._sum.total ?? 0);
+        const salesGrowth = previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : (currentSales > 0 ? 100 : 0);
 
         // 2. Facturas Pendientes de Pago (Balance > 0)
         const pendingBillsCount = await prisma.bill.count({
@@ -101,26 +104,25 @@ export async function GET(_request: NextRequest) {
             }
         });
 
-        // 5. Histórico general de últimos 6 meses para gráfico
-        const sixMonthsAgo = startOfMonth(subMonths(now, 5)); // 5 en vez de 6 para incluir mes actual como 6to
-        const all6MonthsBills = await prisma.bill.findMany({
+        // 5. Histórico general de los 12 meses del año seleccionado para gráfico
+        const allYearBills = await prisma.bill.findMany({
             where: {
                 companyId,
                 status: { in: validStatuses },
                 deletedAt: null,
-                date: { gte: sixMonthsAgo }
+                date: { gte: startCurrentYear, lte: endCurrentYear }
             },
             select: { total: true, date: true }
         });
 
         const monthlySalesMap: Record<string, number> = {};
-        for (let i = 5; i >= 0; i--) {
-            const mDate = subMonths(now, i);
+        for (let i = 0; i < 12; i++) {
+            const mDate = new Date(selectedYear, i, 1);
             const mKey = format(mDate, "MMM", { locale: es }).toUpperCase();
             monthlySalesMap[mKey] = 0;
         }
 
-        all6MonthsBills.forEach((b) => {
+        allYearBills.forEach((b) => {
             const label = format(b.date, "MMM", { locale: es }).toUpperCase();
             if (monthlySalesMap[label] !== undefined) {
                 monthlySalesMap[label] += Number(b.total);

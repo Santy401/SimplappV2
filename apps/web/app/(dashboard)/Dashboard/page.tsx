@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useRef } from "react";
 
-let dashboardMetricsCache: DashboardMetrics | null = null;
-let isFirstLoad = true;
+const dashboardMetricsCache: Record<number, DashboardMetrics> = {};
+const isFirstLoad = true;
 import { useSession } from "@interfaces/src/hooks/features/auth/use-session";
 import { useRouter } from "next/navigation";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { 
     TrendingUp, Users, Receipt, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, 
     Loader2, FileText, CheckCircle2, AlertCircle, Ban, Clock, 
@@ -203,17 +203,20 @@ export default function Dashboard() {
     const hasFetched = useRef(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    const [metrics, setMetrics] = useState<DashboardMetrics | null>(dashboardMetricsCache);
-    const [isLoading, setIsLoading] = useState(!dashboardMetricsCache);
+    const currentYear = new Date().getFullYear();
+    const availableYears = Array.from({ length: 5 }, (_, i) => currentYear - i);
+    const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+
+    const [metrics, setMetrics] = useState<DashboardMetrics | null>(dashboardMetricsCache[selectedYear] || null);
+    const [isLoading, setIsLoading] = useState(!dashboardMetricsCache[selectedYear]);
 
     const refreshMetrics = () => {
         setIsRefreshing(true);
-        dashboardMetricsCache = null;
-        fetch('/api/metrics/dashboard')
+        fetch(`/api/metrics/dashboard?year=${selectedYear}`)
             .then(res => res.json())
             .then(data => {
                 if (!data.error) {
-                    dashboardMetricsCache = data;
+                    dashboardMetricsCache[selectedYear] = data;
                     setMetrics(data);
                 }
             })
@@ -222,29 +225,30 @@ export default function Dashboard() {
     };
 
     useEffect(() => {
-        if (dashboardMetricsCache) {
-            hasFetched.current = true;
+        if (dashboardMetricsCache[selectedYear]) {
+            setMetrics(dashboardMetricsCache[selectedYear]);
+            setIsLoading(false);
             return;
         }
 
         let mounted = true;
-        fetch('/api/metrics/dashboard')
+        setIsLoading(true);
+        fetch(`/api/metrics/dashboard?year=${selectedYear}`)
             .then(res => res.json())
             .then(data => {
                 if (mounted && !data.error) {
-                    dashboardMetricsCache = data;
+                    dashboardMetricsCache[selectedYear] = data;
                     setMetrics(data);
                 }
             })
             .catch(err => console.error(err))
             .finally(() => {
                 if (mounted) {
-                    hasFetched.current = true;
                     setIsLoading(false);
                 }
             });
         return () => { mounted = false };
-    }, []);
+    }, [selectedYear]);
 
     const currencyFormat = new Intl.NumberFormat('es-CO', {
         style: 'currency',
@@ -290,7 +294,7 @@ export default function Dashboard() {
     return (
         <div className="w-full pb-10 bg-slate-50 min-h-screen">
             <div className="max-w-7xl mx-auto px-6 py-8">
-                <header className="mb-8 flex items-start justify-between">
+                <header className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
                         <h1 className="text-2xl font-semibold text-slate-800 mb-1">
                             Hola, {userName.split(" ")[0]}
@@ -299,23 +303,34 @@ export default function Dashboard() {
                             Resumen de tu negocio hoy.
                         </p>
                     </div>
-                    <button
-                        onClick={refreshMetrics}
-                        disabled={isRefreshing}
-                        className="p-2 rounded-lg border border-slate-200 bg-white hover:border-[#6C47FF]/30 hover:text-[#6C47FF] transition-colors disabled:opacity-50"
-                        title="Actualizar datos"
-                    >
-                        <Loader2 size={18} className={isRefreshing ? "animate-spin" : ""} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="bg-white border border-slate-200 text-slate-700 text-sm font-medium rounded-xl focus:ring-[#6C47FF] focus:border-[#6C47FF] block px-3 py-2 outline-none cursor-pointer hover:border-[#6C47FF]/30 transition-colors shadow-sm"
+                        >
+                            {availableYears.map(year => (
+                                <option key={year} value={year}>{year}</option>
+                            ))}
+                        </select>
+                        <button
+                            onClick={refreshMetrics}
+                            disabled={isRefreshing}
+                            className="p-2 rounded-xl border border-slate-200 bg-white hover:border-[#6C47FF]/30 hover:text-[#6C47FF] transition-colors disabled:opacity-50 shadow-sm"
+                            title="Actualizar datos"
+                        >
+                            <Loader2 size={18} className={isRefreshing ? "animate-spin" : ""} />
+                        </button>
+                    </div>
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <MetricCard 
-                        label="Ventas del Mes" 
+                        label="Ventas del Año" 
                         value={currencyFormat.format(totals.currentSales)} 
                         icon={DollarSign}
                         trend={{ value: totals.salesGrowth, positive: isGrowthPositive }}
-                        subtitle="vs mes anterior"
+                        subtitle="vs año anterior"
                     />
                     <MetricCard 
                         label="Por Cobrar" 
@@ -346,20 +361,14 @@ export default function Dashboard() {
                                 </div>
                                 <div>
                                     <h3 className="text-sm font-semibold text-slate-700">Ventas</h3>
-                                    <p className="text-xs text-slate-400">Últimos 6 meses</p>
+                                    <p className="text-xs text-slate-400">Año {selectedYear}</p>
                                 </div>
                             </div>
                         </div>
 
                         <div className="h-[280px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={monthlySales} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#6C47FF" stopOpacity={0.15} />
-                                            <stop offset="95%" stopColor="#6C47FF" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
+                                <BarChart data={monthlySales} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                     <XAxis
                                         dataKey="name"
                                         axisLine={false}
@@ -384,16 +393,15 @@ export default function Dashboard() {
                                         itemStyle={{ color: '#6C47FF', fontWeight: 600 }}
                                         formatter={(value: number | undefined) => value ? currencyFormat.format(value) : ''}
                                         labelStyle={{ color: '#64748b', fontSize: 12 }}
+                                        cursor={{ fill: '#f8fafc' }}
                                     />
-                                    <Area
-                                        type="monotone"
+                                    <Bar
                                         dataKey="total"
-                                        stroke="#6C47FF"
-                                        strokeWidth={2}
-                                        fillOpacity={1}
-                                        fill="url(#colorSales)"
+                                        fill="#6C47FF"
+                                        radius={[4, 4, 0, 0]}
+                                        maxBarSize={48}
                                     />
-                                </AreaChart>
+                                </BarChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
