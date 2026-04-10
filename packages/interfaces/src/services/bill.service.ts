@@ -44,7 +44,9 @@ export class BillService {
         const [data, total] = await Promise.all([
             BillRepository.findAll(where, skip, limit, {
                 client: true,
-                items: options.includeItems
+                items: options.includeItems,
+                payments: true,
+                creditNotes: true
             }),
             BillRepository.count(where)
         ]);

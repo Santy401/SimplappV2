@@ -11,7 +11,8 @@ export class BillRepository {
             include: {
                 client: true,
                 items: true,
-                payments: true
+                payments: true,
+                creditNotes: true
             }
         });
     }
