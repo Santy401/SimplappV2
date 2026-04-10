@@ -34,30 +34,30 @@ export async function GET(_request: NextRequest) {
         const startPreviousYear = startOfYear(new Date(selectedYear - 1, 0, 1));
         const endPreviousYear = endOfYear(new Date(selectedYear - 1, 0, 1));
 
-        const validStatuses: BillStatus[] = [BillStatus.ISSUED, BillStatus.PAID, BillStatus.PARTIALLY_PAID];
+        const validStatuses: BillStatus[] = [BillStatus.ISSUED, BillStatus.PAID, BillStatus.PARTIALLY_PAID, BillStatus.TO_PAY];
 
-        const currentYearBills = await prisma.bill.aggregate({
-            _sum: { total: true },
+        const currentYearBills = await prisma.bill.findMany({
             where: {
                 companyId,
                 status: { in: validStatuses },
                 deletedAt: null,
                 date: { gte: startCurrentYear, lte: endCurrentYear }
-            }
+            },
+            select: { total: true, appliedCreditNoteTotal: true }
         });
 
-        const previousYearBills = await prisma.bill.aggregate({
-            _sum: { total: true },
+        const previousYearBills = await prisma.bill.findMany({
             where: {
                 companyId,
                 status: { in: validStatuses },
                 deletedAt: null,
                 date: { gte: startPreviousYear, lte: endPreviousYear }
-            }
+            },
+            select: { total: true, appliedCreditNoteTotal: true }
         });
 
-        const currentSales = Number(currentYearBills._sum.total ?? 0);
-        const previousSales = Number(previousYearBills._sum.total ?? 0);
+        const currentSales = currentYearBills.reduce((sum, b) => sum + (Number(b.total) - Number(b.appliedCreditNoteTotal || 0)), 0);
+        const previousSales = previousYearBills.reduce((sum, b) => sum + (Number(b.total) - Number(b.appliedCreditNoteTotal || 0)), 0);
         const salesGrowth = previousSales > 0 ? ((currentSales - previousSales) / previousSales) * 100 : (currentSales > 0 ? 100 : 0);
 
         // 2. Facturas Pendientes de Pago (Balance > 0)
@@ -112,7 +112,7 @@ export async function GET(_request: NextRequest) {
                 deletedAt: null,
                 date: { gte: startCurrentYear, lte: endCurrentYear }
             },
-            select: { total: true, date: true }
+            select: { total: true, appliedCreditNoteTotal: true, date: true }
         });
 
         const monthlySalesMap: Record<string, number> = {};
@@ -125,7 +125,7 @@ export async function GET(_request: NextRequest) {
         allYearBills.forEach((b) => {
             const label = format(b.date, "MMM", { locale: es }).toUpperCase();
             if (monthlySalesMap[label] !== undefined) {
-                monthlySalesMap[label] += Number(b.total);
+                monthlySalesMap[label] += Number(b.total) - Number(b.appliedCreditNoteTotal || 0);
             }
         });
 

@@ -138,3 +138,111 @@ export async function POST(
     );
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('access-token')?.value;
+
+    if (!accessToken) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const payload = await verifyAccessToken(accessToken) as { id: string };
+    if (!payload || !payload.id) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.id },
+      include: { companies: { include: { company: true } } },
+    });
+
+    if (!user || !user.companies?.[0]?.company) {
+      return NextResponse.json({ error: 'User or company not found' }, { status: 404 });
+    }
+
+    const { id: billId } = await params;
+    const { searchParams } = new URL(request.url);
+    const paymentId = searchParams.get('paymentId');
+
+    if (!paymentId) {
+      return NextResponse.json({ error: 'paymentId es requerido' }, { status: 400 });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: paymentId,
+        billId: billId
+      }
+    });
+
+    if (!payment) {
+      return NextResponse.json({ error: 'Pago no encontrado' }, { status: 404 });
+    }
+
+    const bill = await prisma.bill.findFirst({
+      where: {
+        id: billId,
+        companyId: user.companies[0].company.id,
+      }
+    });
+
+    if (!bill) {
+      return NextResponse.json({ error: 'Factura no encontrada' }, { status: 404 });
+    }
+
+    const currentBalance = Number(bill.balance);
+    const newBalance = currentBalance + Number(payment.amount);
+
+    let newStatus: BillStatus;
+    if (newBalance >= Number(bill.total) - Number(bill.appliedCreditNoteTotal || 0)) {
+      newStatus = BillStatus.TO_PAY;
+    } else if (newBalance > 0) {
+      newStatus = BillStatus.PARTIALLY_PAID;
+    } else {
+      newStatus = BillStatus.PAID;
+    }
+
+    await prisma.$transaction([
+      prisma.payment.delete({
+        where: { id: paymentId }
+      }),
+      prisma.bill.update({
+        where: { id: billId },
+        data: {
+          balance: newBalance,
+          paidTotal: { decrement: Number(payment.amount) },
+          status: newStatus,
+          updatedAt: new Date()
+        }
+      }),
+      prisma.activityLog.create({
+        data: {
+          companyId: user.companies[0].company.id,
+          userId: user.id,
+          action: 'PAYMENT_DELETED',
+          entityType: 'Bill',
+          entityId: billId,
+          metadata: { amount: Number(payment.amount), method: payment.method },
+          changes: { oldBalance: currentBalance, newBalance }
+        }
+      })
+    ]);
+
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Pago eliminado correctamente',
+      newBalance 
+    });
+  } catch (error) {
+    console.error('[Payment Delete Error]:', error);
+    return NextResponse.json(
+      { error: 'Error interno eliminando el pago' },
+      { status: 500 }
+    );
+  }
+}

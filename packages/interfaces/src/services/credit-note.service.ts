@@ -27,6 +27,14 @@ export class CreditNoteService {
             throw new Error('No se puede crear NC sobre una factura anulada');
         }
 
+        const paymentsCount = await prisma.payment.count({
+            where: { billId: input.billId }
+        });
+
+        if (paymentsCount > 0) {
+            throw new Error('Para crear una nota de crédito primero debes eliminar todos los pagos registrados en esta factura');
+        }
+
         for (const item of input.items) {
             const billItem = bill.items.find((bi: { id: string }) => bi.id === item.billItemId);
             if (!billItem) {
@@ -174,24 +182,10 @@ export class CreditNoteService {
                 }
             }
 
-            const billBefore = await tx.bill.findUnique({
-                where: { id: input.billId },
-                select: {
-                    total: true,
-                    appliedCreditNoteTotal: true,
-                    paidTotal: true,
-                    balance: true,
-                    status: true
-                }
-            });
-
-            const hasPayments = billBefore && Number(billBefore.paidTotal || 0) > 0;
-            
             const updatedBill = await tx.bill.update({
                 where: { id: input.billId },
                 data: { 
-                    appliedCreditNoteTotal: { increment: total },
-                    ...(hasPayments ? { paidTotal: { decrement: total } } : {})
+                    appliedCreditNoteTotal: { increment: total }
                 },
                 select: {
                     total: true,
@@ -209,7 +203,7 @@ export class CreditNoteService {
             let newStatus: PrismaBillStatus;
             if (newBalance.lte(0)) {
                 newStatus = PrismaBillStatus.PAID;
-            } else if ((updatedBill.appliedCreditNoteTotal.gt(0)) || (updatedBill.paidTotal && updatedBill.paidTotal.gt(0))) {
+            } else if (updatedBill.appliedCreditNoteTotal.gt(0)) {
                 newStatus = PrismaBillStatus.PARTIALLY_PAID;
             } else {
                 newStatus = updatedBill.status;
@@ -285,26 +279,12 @@ export class CreditNoteService {
                 }
             }
 
-            const billBefore = await tx.bill.findUnique({
-                where: { id: creditNote.billId },
-                select: {
-                    total: true,
-                    appliedCreditNoteTotal: true,
-                    paidTotal: true,
-                    balance: true,
-                    status: true
-                }
-            });
-
-            const hadPayments = billBefore && Number(billBefore.paidTotal || 0) > 0;
-
             const bill = await tx.bill.update({
                 where: { id: creditNote.billId },
                 data: {
                     appliedCreditNoteTotal: {
                         decrement: Number(creditNote.total)
-                    },
-                    ...(hadPayments ? { paidTotal: { increment: Number(creditNote.total) } } : {})
+                    }
                 },
                 select: {
                     total: true,
@@ -322,7 +302,7 @@ export class CreditNoteService {
             let newStatus: PrismaBillStatus;
             if (newBalance.lte(0)) {
                 newStatus = PrismaBillStatus.PAID;
-            } else if (bill.appliedCreditNoteTotal.gt(0) || (bill.paidTotal && bill.paidTotal.gt(0))) {
+            } else if (bill.appliedCreditNoteTotal.gt(0)) {
                 newStatus = PrismaBillStatus.PARTIALLY_PAID;
             } else {
                 newStatus = PrismaBillStatus.TO_PAY;

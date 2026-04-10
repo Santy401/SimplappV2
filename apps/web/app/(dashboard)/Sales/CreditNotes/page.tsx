@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useMemo, useCallback } from 'react';
-import { Receipt, FileText, Plus, CreditCard, RotateCcw, Percent, DollarSign, ArrowLeft, Printer, Download, Share2, Hash, User, Calendar, Ban, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Receipt, FileText, RotateCcw, Percent, DollarSign, ArrowLeft, Printer, Download, Hash, User, Calendar, Ban, CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { ModernTable, ModernTableSkeleton } from '@simplapp/ui';
 import type { TableColumn } from '@simplapp/ui/src/types/table.entity';
 import { useCreditNote } from '@interfaces/src/hooks/features/CreditNotes';
 import { useBill } from '@interfaces/src/hooks/features/Bills/useBill';
 import { toast } from 'react-toastify';
-import { CreditNoteStatus, CreditNoteType, CreditNoteReason, CreateCreditNoteInput } from '@domain/entities/CreditNote.entity';
+import { CreditNoteStatus, CreditNoteType, CreditNoteReason } from '@domain/entities/CreditNote.entity';
 
 interface CreditNoteWithRelations {
     id: string;
@@ -325,6 +326,8 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
     const [selectedItems, setSelectedItems] = useState<Record<string, { quantity: number; maxQuantity: number }>>({});
 
     const selectedBill = bills.find(b => b.id === selectedBillId);
+    const hasPayments = selectedBill?.payments && selectedBill.payments.length > 0;
+    const paymentsCount = selectedBill?.payments?.length || 0;
 
     const getAvailableReturnQty = (billItemId: string): number => {
         if (!selectedBill) return 0;
@@ -428,6 +431,22 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                     {step === 1 && (
                         <div className="space-y-4">
                             <h3 className="font-medium">Seleccionar Factura</h3>
+                            {selectedBillId && hasPayments && (
+                                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                                    <div className="flex items-start gap-3">
+                                        <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-sm font-medium text-amber-800">
+                                                Esta factura tiene {paymentsCount} pago(s) registrado(s)
+                                            </p>
+                                            <p className="text-xs text-amber-700 mt-1">
+                                                Antes de crear una nota de crédito debes eliminar los pagos desde la factura. 
+                                                Ve a la factura y elimina los pagos primero.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {isLoadingBills ? (
                                 <p className="text-muted-foreground">Cargando facturas...</p>
                             ) : (
@@ -591,10 +610,10 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
                     {step < 3 ? (
                         <button
                             onClick={() => setStep(step + 1)}
-                            disabled={(step === 1 && !selectedBillId) || (step === 2 && Object.keys(selectedItems).length === 0)}
+                            disabled={(step === 1 && !selectedBillId) || hasPayments || (step === 2 && Object.keys(selectedItems).length === 0)}
                             className="px-4 py-2 bg-[#6C47FF] text-white rounded-lg hover:bg-[#5a3ae0] disabled:opacity-50"
                         >
-                            Siguiente
+                            {hasPayments ? 'Primero elimina los pagos' : 'Siguiente'}
                         </button>
                     ) : (
                         <button
@@ -612,13 +631,12 @@ function CreateCreditNoteModal({ isOpen, onClose, onSubmit, isSubmitting, bills,
 }
 
 export default function CreditNotesPage() {
+    const router = useRouter();
     const { creditNotes, isLoading, error, createCreditNote, cancelCreditNote, refetch, getCreditNote } = useCreditNote();
     const { bills, isLoading: isLoadingBills, refetch: refetchBills } = useBill();
     
     const [showDetail, setShowDetail] = useState(false);
     const [selectedCreditNote, setSelectedCreditNote] = useState<CreditNoteWithRelations | null>(null);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
     
     const columns: TableColumn<any>[] = useMemo(() => [
@@ -736,28 +754,6 @@ export default function CreditNotesPage() {
         }
     };
 
-    const handleCreate = async (data: any) => {
-        setIsSubmitting(true);
-        try {
-            const loadingToast = toast.loading('Creando nota de crédito...');
-            await createCreditNote(data);
-            toast.update(loadingToast, { 
-                render: 'Nota de crédito creada correctamente', 
-                type: 'success', 
-                isLoading: false, 
-                autoClose: 3000 
-            });
-            setIsCreateModalOpen(false);
-            refetch();
-            refetchBills();
-        } catch (error: any) {
-            toast.error(error.message || 'Error al crear la nota de crédito');
-            throw error;
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
     const isInitialLoading = isLoading.fetch && creditNotes.length === 0;
 
     if (error) {
@@ -805,7 +801,7 @@ export default function CreditNotesPage() {
                         title="Notas de Crédito"
                         description="Gestiona las notas de crédito de tus facturas."
                         addActionLabel="Nueva nota de crédito"
-                        onAdd={() => setIsCreateModalOpen(true)}
+                        onAdd={() => router.push('/ventas/notas-credito/create')}
                         emptyIcon={Receipt}
                         emptyTitle="No hay notas de crédito"
                         emptyDescription="Crea notas de crédito para devoluciones, descuentos o ajustes."
@@ -825,15 +821,6 @@ export default function CreditNotesPage() {
                     />
                 )}
             </div>
-
-            <CreateCreditNoteModal
-                isOpen={isCreateModalOpen}
-                onClose={() => setIsCreateModalOpen(false)}
-                onSubmit={handleCreate}
-                isSubmitting={isSubmitting}
-                bills={bills || []}
-                isLoadingBills={isLoadingBills.fetch}
-            />
         </div>
     );
 }

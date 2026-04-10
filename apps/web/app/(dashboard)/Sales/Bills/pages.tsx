@@ -3,6 +3,7 @@
 import { ModernTable, useBillTable, ModernTableSkeleton, PaymentModal } from "@simplapp/ui";
 import { ReceiptText } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
 import { BillPreview } from "@ui/molecules/BillPreview";
@@ -17,6 +18,7 @@ export default function BillsPage({
   onSelect = () => { },
   onSelectBill = () => { },
 }: BillsPageProps) {
+  const router = useRouter();
   const { bills, isLoading, error, refetch, getBill } = useBill();
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
@@ -38,8 +40,6 @@ export default function BillsPage({
   const validBills: BillDetail[] = (bills as BillDetail[]) ?? [];
 
   const refetchTable = () => {
-    // Con React Query ya no necesitamos forzar refetch con useEffect, 
-    // pero incrementamos tableversion para forzar el re-renderizado de la tabla si es necesario
     setTableversion((prev) => prev + 1);
   };
 
@@ -73,7 +73,7 @@ export default function BillsPage({
 
       if (response.ok) {
         toast.success("Pago registrado correctamente");
-        refetch(); // Usamos el refetch de React Query directamente
+        refetch();
         
         if (showPreview && selectedBill) {
           const freshBill = await getBill(selectedBill.id);
@@ -91,6 +91,38 @@ export default function BillsPage({
     } catch (_err) {
       toast.error("Error al registrar el pago");
     }
+  };
+
+  const handleDeletePayment = async (paymentId: string, billId: string) => {
+    try {
+      const response = await fetch(`/api/bills/${billId}/payments?paymentId=${paymentId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        toast.success("Pago eliminado correctamente");
+        refetch();
+        
+        if (selectedBill) {
+          const freshBill = await getBill(selectedBill.id);
+          if (freshBill) setSelectedBill(freshBill);
+        }
+      } else {
+        const contentType = response.headers.get("content-type");
+        if (contentType?.includes("application/json")) {
+          const errorData = await response.json();
+          toast.error(errorData.error || "Error al eliminar el pago");
+        } else {
+          toast.error(`Error ${response.status}: Error al eliminar el pago`);
+        }
+      }
+    } catch (_err) {
+      toast.error("Error al eliminar el pago");
+    }
+  };
+
+  const handleCreateCreditNote = (billId: string) => {
+    router.push(`/ventas/notas-credito/create?billId=${billId}`);
   };
 
   const handleViewBill = (bill: BillDetail) => {
@@ -205,6 +237,8 @@ export default function BillsPage({
             setSelectedBill(null);
           }}
           onAddPayment={handlePaymentSubmit}
+          onCreateCreditNote={handleCreateCreditNote}
+          onDeletePayment={handleDeletePayment}
         />
       </div>
     );

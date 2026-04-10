@@ -62,9 +62,10 @@ export interface BillPreviewProps {
   payments?: PaymentPreview[];
   creditNotes?: CreditNotePreview[];
   onClose: () => void;
-  // Para el modal de pagos
   bankAccounts?: { id: string; name: string }[];
   onAddPayment?: (data: any) => void;
+  onCreateCreditNote?: (billId: string) => void;
+  onDeletePayment?: (paymentId: string, billId: string) => void;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
@@ -145,10 +146,13 @@ export function BillPreview({
   onClose,
   bankAccounts = [],
   onAddPayment,
+  onCreateCreditNote,
+  onDeletePayment,
 }: BillPreviewProps) {
   const [showDianModal, setShowDianModal] = useState(false);
   const [showQuickPayment, setShowQuickPayment] = useState(false);
   const [showAdvancedPayment, setShowAdvancedPayment] = useState(false);
+  const [deletingPaymentId, setDeletingPaymentId] = useState<string | null | 'all'>(null);
   
   const status = getStatus(formData.status as string);
   const StatusIcon = status.icon;
@@ -221,6 +225,31 @@ export function BillPreview({
                 Agregar pago
               </button>
             )}
+            <button 
+              onClick={async () => {
+                if (payments && payments.length > 0) {
+                  const confirmed = confirm(
+                    `Esta factura tiene ${payments.length} pago(s) registrado(s).\n\n` +
+                    `¿Eliminar todos los pagos para crear la nota de crédito?\n\n` +
+                    `Los pagos serán removidos y podrás crear la NC.`
+                  );
+                  if (!confirmed) return;
+                  
+                  setDeletingPaymentId('all');
+                  for (const payment of payments) {
+                    await onDeletePayment?.(payment.id, formData.id || '');
+                  }
+                  setDeletingPaymentId(null);
+                  onCreateCreditNote?.(formData.id || '');
+                } else {
+                  onCreateCreditNote?.(formData.id || '');
+                }
+              }}
+              className="h-8 px-4 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors flex items-center gap-1.5"
+            >
+              <FileWarning className="w-3.5 h-3.5" />
+              {(deletingPaymentId === 'all') ? 'Eliminando...' : 'Nota de Crédito'}
+            </button>
           </div>
         </div>
       </div>
