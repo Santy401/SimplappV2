@@ -150,7 +150,7 @@ function CreateCreditNoteContent({ initialBillId }: CreateCreditNotePageProps) {
         items
       });
       toast.success('Nota de crédito creada correctamente');
-      router.push('/ventas/notas-credito');
+      navigateTo('/ventas/notas-credito');
     } catch (error: any) {
       toast.error(error.message || 'Error al crear la nota de crédito');
     }
@@ -164,7 +164,7 @@ function CreateCreditNoteContent({ initialBillId }: CreateCreditNotePageProps) {
         title="Nueva Nota de Crédito"
         icon={FileWarning}
         onSubmit={handleSubmit}
-        onCancel={() => router.back()}
+        onCancel={() => goBack()}
         submitLabel={isCreating ? 'Creando...' : 'Crear Nota de Crédito'}
         isLoading={!!isCreating}
         maxWidth="6xl"
