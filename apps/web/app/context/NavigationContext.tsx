@@ -61,17 +61,28 @@ export const NavigationProvider = ({ children }: NavigationProviderProps) => {
         }
     }, [pathname]);
 
-    // Actualizar la URL cuando cambia la vista
     const navigateTo = (view: string, preserveState: boolean = true) => {
-        setCurrentView(view);
+        // Separar path de query params: "ventas/facturacion/view?id=123" -> ["ventas/facturacion/view", "id=123"]
+        const [pathPart, queryPart] = view.split('?');
+        const cleanPathPart = pathPart.replace(/^\//, '');
+        
+        setCurrentView(cleanPathPart);
 
         // Agregar a historial
         if (preserveState) {
             setNavigationHistory((prev) => [...prev, currentView]);
         }
 
-        // Actualizar la URL: inicio/dashboard viven en '/', el resto reemplaza guiones por barras '/ventas/facturacion'
-        const path = (view === 'inicio' || view === 'dashboard' || view === 'i') ? '/' : `/${view.replace(/-/g, '/')}`;
+        // Actualizar la URL: inicio/dashboard viven en '/', el resto reemplaza guiones por barras
+        let path = (cleanPathPart === 'inicio' || cleanPathPart === 'dashboard' || cleanPathPart === 'i') 
+            ? '/' 
+            : `/${cleanPathPart.replace(/-/g, '/')}`;
+        
+        // Agregar query params si existen
+        if (queryPart) {
+            path += `?${queryPart}`;
+        }
+        
         router.push(path, { scroll: false });
     };
 

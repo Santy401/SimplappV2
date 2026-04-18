@@ -1,6 +1,6 @@
 'use client';
 
-import { Bill, BillDetail, BillStatus, CreateBillInput, UpdateBill } from "@domain/entities/Bill.entity";
+import { Bill, BillDetail, BillStatus, CreateBillInput, UpdateBill, PaymentMethod } from "@domain/entities/Bill.entity";
 import { FormBill } from "@ui/molecules/FormBill";
 import { useClients } from "@hooks/features/Clients/useClient";
 import { useProduct } from "@hooks/features/Products/useProduct";
@@ -250,8 +250,8 @@ export default function BillsCreatePage({
                 commercialName: billToShow.commercialName || billToShow.commercialName || '',
                 clientId: billToShow.clientIdentification || '',
                 email: billToShow.clientEmail || '',
-                paymentMethod: billToShow.paymentMethod!,
-                status: billToShow.status!,
+                paymentMethod: (billToShow.paymentMethod as PaymentMethod) || 'CASH',
+                status: billToShow.status || 'DRAFT',
                 notes: billToShow.notes || '',
                 terms: '',
                 footerNote: '',

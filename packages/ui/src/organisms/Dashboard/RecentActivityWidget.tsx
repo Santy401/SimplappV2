@@ -5,6 +5,15 @@ import { Receipt, ArrowUpRight } from 'lucide-react';
 import { DashboardCard, currencyFormat } from './DashboardAtoms';
 import { cn } from '../../utils/utils';
 
+const paymentMethodLabel: Record<string, string> = {
+  CASH: "Contado",
+  CREDIT: "Crédito",
+  TRANSFER: "Transferencia",
+  CREDIT_CARD: "Tarjeta",
+  DEBIT_CARD: "Débito",
+  CHECK: "Cheque",
+};
+
 export function RecentActivityWidget({ title, items, onViewAll }: any) {
   const formatShortName = (name: string) => {
     if (!name) return "Consumidor Final";
@@ -37,7 +46,14 @@ export function RecentActivityWidget({ title, items, onViewAll }: any) {
             </div>
             <div className="text-right">
               <div className="text-sm font-black text-emerald-600 dark:text-emerald-400">{currencyFormat(item.total)}</div>
-              <div className={cn("text-[9px] uppercase font-black px-2 py-0.5 rounded-full inline-block mt-1", item.status === 'PAID' ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600")}>{item.status}</div>
+              <div className="flex items-center justify-end gap-1.5 mt-1">
+                {item.paymentMethod && (
+                  <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                    {paymentMethodLabel[item.paymentMethod] || item.paymentMethod}
+                  </span>
+                )}
+                <span className={cn("text-[9px] uppercase font-black px-2 py-0.5 rounded-full", item.status === 'PAID' ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600")}>{item.status}</span>
+              </div>
             </div>
           </div>
         ))}

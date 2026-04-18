@@ -6,6 +6,7 @@ const dashboardMetricsCache: Record<number, DashboardMetrics> = {};
 const isFirstLoad = true;
 import { useSession } from "@interfaces/src/hooks/features/auth/use-session";
 import { useRouter } from "next/navigation";
+import { useNavigation } from "@/app/context/NavigationContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { 
     TrendingUp, Users, Receipt, DollarSign, Wallet, ArrowUpRight, ArrowDownRight, 
@@ -92,7 +93,7 @@ interface QuickActionProps {
 }
 
 function QuickAction({ label, icon: Icon, href, variant = 'primary' }: QuickActionProps) {
-    const router = useRouter();
+    const { navigateTo } = useNavigation();
     const baseClasses = "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200";
     
     const variants = {
@@ -102,7 +103,7 @@ function QuickAction({ label, icon: Icon, href, variant = 'primary' }: QuickActi
 
     return (
         <button 
-            onClick={() => router.push(href)}
+            onClick={() => navigateTo(href)}
             className={`${baseClasses} ${variants[variant]} w-full justify-center`}
         >
             <Icon size={16} />
@@ -200,6 +201,7 @@ export default function Dashboard() {
     const { user } = useSession();
     const userName = user?.name || "Administrador";
     const router = useRouter();
+    const { navigateTo } = useNavigation();
     const hasFetched = useRef(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -465,7 +467,7 @@ export default function Dashboard() {
                         </div>
                         {recentBills.length > 0 && (
                             <button 
-                                onClick={() => router.push('/ventas/facturacion')}
+                                onClick={() => navigateTo('/ventas/facturacion')}
                                 className="text-xs font-medium text-[#6C47FF] hover:text-[#5835E8] transition-colors"
                             >
                                 Ver todas →
@@ -478,7 +480,7 @@ export default function Dashboard() {
                             <Receipt size={32} className="text-slate-300 mb-2" />
                             <p className="text-sm text-slate-500">Sin facturas aún</p>
                             <button 
-                                onClick={() => router.push('/ventas/facturacion/create')}
+                                onClick={() => navigateTo('/ventas/facturacion/create')}
                                 className="mt-3 text-xs font-medium text-[#6C47FF] hover:text-[#5835E8] flex items-center gap-1"
                             >
                                 <Plus size={14} />
@@ -490,7 +492,7 @@ export default function Dashboard() {
                             {recentBills.slice(0, 8).map((bill) => (
                                 <div 
                                     key={bill.id} 
-                                    onClick={() => router.push(`/ventas/facturacion/view?id=${bill.id}`)}
+                                    onClick={() => navigateTo(`/ventas/facturacion/view?id=${bill.id}`)}
                                     className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-[#6C47FF]/20 hover:bg-[#6C47FF]/5 transition-all cursor-pointer group"
                                 >
                                     <div className="flex items-center gap-3 min-w-0">

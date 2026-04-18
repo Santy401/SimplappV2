@@ -100,7 +100,8 @@ export async function GET(_request: NextRequest) {
                 clientName: true,
                 total: true,
                 status: true,
-                date: true
+                date: true,
+                paymentMethod: true
             }
         });
 
