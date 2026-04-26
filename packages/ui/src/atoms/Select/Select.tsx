@@ -5,6 +5,12 @@ import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
 
 import { cn } from "../../utils/utils"
+import { Input } from "../Input/Input"
+
+interface SelectContentProps extends React.ComponentProps<typeof SelectPrimitive.Content> {
+  searchable?: boolean
+  searchPlaceholder?: string
+}
 
 function Select({
   ...props
@@ -55,8 +61,37 @@ function SelectContent({
   children,
   position = "popper",
   align = "center",
+  searchable = false,
+  searchPlaceholder = "Buscar...",
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Content>) {
+}: SelectContentProps) {
+  const [searchQuery, setSearchQuery] = React.useState("")
+  const searchInputRef = React.useRef<HTMLInputElement>(null)
+  
+  const filteredChildren = React.useMemo(() => {
+    if (!searchQuery.trim() || !searchable) return children
+    
+    const query = searchQuery.toLowerCase()
+    const flatChildren: React.ReactNode[] = []
+    React.Children.toArray(children).forEach((child) => {
+      if (!React.isValidElement(child)) {
+        flatChildren.push(child)
+        return
+      }
+      
+      const childEl = child as React.ReactElement<{children?: React.ReactNode}>
+      const childText = typeof childEl.props.children === "string" 
+        ? childEl.props.children 
+        : String(childEl.props.children || "")
+      
+      if (childText.toLowerCase().includes(query)) {
+        flatChildren.push(child)
+      }
+    })
+    
+    return flatChildren.length > 0 ? flatChildren : null
+  }, [children, searchQuery, searchable])
+
   return (
     <SelectPrimitive.Portal>
       <SelectPrimitive.Content
@@ -71,6 +106,18 @@ function SelectContent({
         align={align}
         {...props}
       >
+        {searchable && (
+          <div className="p-2 border-b border-slate-200">
+            <Input
+              ref={searchInputRef}
+              placeholder={searchPlaceholder}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-8 text-sm"
+              autoFocus
+            />
+          </div>
+        )}
         <SelectScrollUpButton />
         <SelectPrimitive.Viewport
           className={cn(
@@ -79,7 +126,7 @@ function SelectContent({
               "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)] scroll-my-1"
           )}
         >
-          {children}
+          {filteredChildren}
         </SelectPrimitive.Viewport>
         <SelectScrollDownButton />
       </SelectPrimitive.Content>
