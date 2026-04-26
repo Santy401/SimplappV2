@@ -17,6 +17,13 @@ interface BillDetailsSectionProps {
   onFormDataChange: (updates: any) => void;
 }
 
+function getBillTypeLabel(paymentMethod: string): string {
+  if (paymentMethod === "CREDIT") {
+    return "Factura de Venta - Crédito";
+  }
+  return "Factura de Venta";
+}
+
 export function BillDetailsSection({
   formData,
   isEditable,
@@ -67,7 +74,7 @@ export function BillDetailsSection({
 
         <div className="flex-1 text-center">
           <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Simplapp</p>
-          <p className="text-xs text-slate-400 mt-0.5">Factura de Venta</p>
+          <p className="text-xs text-slate-400 mt-0.5">{getBillTypeLabel(formData.paymentMethod)}</p>
         </div>
 
         <div className="text-right shrink-0">

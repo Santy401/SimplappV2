@@ -78,6 +78,13 @@ const paymentMethodLabel: Record<string, string> = {
   CREDIT_CARD: "Tarjeta de Crédito", DEBIT_CARD: "Tarjeta Débito", CHECK: "Cheque",
 };
 
+const getBillTypeLabel = (paymentMethod: string): string => {
+  if (paymentMethod === "CREDIT") {
+    return "Factura de Venta - Crédito";
+  }
+  return "Factura de Venta";
+};
+
 const paymentMethodIconLabel: Record<string, string> = {
   CASH: "Efectivo", TRANSFER: "Transferencia", CREDIT_CARD: "Tarjeta", CHECK: "Cheque",
 };
@@ -329,6 +336,7 @@ export function BillPreview({
             <div className="flex-1 text-center">
               <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight invoice-title">Simplapp S.A.S</p>
               <p className="text-xs text-slate-500 mt-1">NIT: 900.000.000-1</p>
+              <p className="text-xs text-slate-400 mt-2 font-medium">{getBillTypeLabel(formData.paymentMethod)}</p>
             </div>
 
             {/* Number */}
