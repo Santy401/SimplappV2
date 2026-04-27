@@ -91,10 +91,7 @@ export async function GET(_request: NextRequest) {
       country: user.country,
       companyId: currentCompany?.id,
       companyName: currentCompany?.companyName,
-      // ⚠️ companyLogo se omite intencionalmente: puede ser un Base64 de cientos de KB.
-      // Cargarlo en cada query de sesión degrada el rendimiento del dashboard.
-      // TODO: Migrar logos a Supabase Storage y devolver solo la URL.
-      companyLogo: null,
+      companyLogo: currentCompany?.logoUrl || null,
       userType: currentCompanyEntry?.role === 'OWNER' ? 'owner' : currentCompanyEntry?.role,
       onboardingCompleted: user.onboardingCompleted,
       profileLogo: user.profileLogo,
@@ -125,6 +122,7 @@ export async function GET(_request: NextRequest) {
     };
 
     return NextResponse.json(userData);
+
   } catch (error) {
     console.error('Session error:', error);
     return NextResponse.json(

@@ -43,6 +43,8 @@ export interface Company {
   phone?: string | null;
   email?: string | null;
 
+  logoUrl?: string | null;
+
   createdAt: Date;
   updatedAt: Date;
 }

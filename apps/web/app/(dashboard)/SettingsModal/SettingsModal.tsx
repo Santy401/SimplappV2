@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSettings } from '@/app/context/SettingsContext';
 import { useSession } from '@hooks/features/auth/use-session';
 import { 
@@ -10,7 +10,7 @@ import {
   SettingsView
 } from '@simplapp/ui';
 
-// Importamos los componentes locales que aún no hemos movido a UI si existen
+// Importamos los componentes locales
 import { BillingSettings } from './BillingSettings';
 import { SubscriptionSettings } from './SubscriptionSettings';
 import { BankAccountsSettings } from './BankAccountsSettings';
@@ -18,25 +18,72 @@ import { BankAccountsSettings } from './BankAccountsSettings';
 export function SettingsModal() {
     const { isOpen, currentView, setCurrentView, closeSettings } = useSettings();
     const { user } = useSession();
+    const [saving, setSaving] = useState(false);
+    const [key, setKey] = useState(0); // Force re-render
+
+    // Refresh session when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setKey(k => k + 1);
+        }
+    }, [isOpen]);
 
     const handleSaveProfile = async (data: any) => {
         console.log("Saving profile in Web:", data);
     };
 
     const handleSaveCompany = async (data: any) => {
-        console.log("Saving company in Web:", data);
+        setSaving(true);
+        try {
+            const companyId = user?.companyId;
+            
+            if (!companyId) {
+                console.error("No company ID found");
+                return;
+            }
+
+            const response = await fetch('/api/auth/profile', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    companyName: data.companyName,
+                    taxIdentification: data.identificationNumber,
+                    companyLogo: data.logoUrl,
+                    address: data.address,
+                    phone: data.phone
+                })
+            });
+
+            if (response.ok) {
+                console.log("Company saved successfully");
+                // Close modal - when reopened it will fetch fresh data
+                closeSettings();
+            } else {
+                const err = await response.json();
+                console.error("Error saving company:", err);
+            }
+        } catch (error) {
+            console.error("Error saving company:", error);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const renderContent = () => {
-        // Extraemos la empresa del primer registro de UserCompany
-        const firstUserCompany = user?.companies && user.companies.length > 0 ? user.companies[0] : null;
-        const company = (firstUserCompany as any)?.company || null;
+        // Extraemos los datos de la empresa desde la sesión
+        const companyData = {
+          companyName: user?.companyName || '',
+          identificationNumber: user?.taxIdentification || '',
+          address: user?.address || '',
+          phone: user?.phone || '',
+          logoUrl: user?.companyLogo || null
+        };
 
         switch (currentView) {
             case 'perfil':
                 return <ProfileSettings user={user} onSave={handleSaveProfile} />;
             case 'empresa':
-                return <CompanySettings company={company} onSave={handleSaveCompany} />;
+                return <CompanySettings company={companyData} onSave={handleSaveCompany} />;
             case 'facturacion':
                 return <BillingSettings />;
             case 'suscripcion':

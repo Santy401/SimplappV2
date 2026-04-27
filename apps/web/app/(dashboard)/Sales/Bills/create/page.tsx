@@ -253,9 +253,12 @@ export default function BillsCreatePage({
                 paymentMethod: (billToShow.paymentMethod as PaymentMethod) || 'CASH',
                 status: billToShow.status || 'DRAFT',
                 notes: billToShow.notes || '',
-                terms: '',
-                footerNote: '',
-                logo: undefined,
+                logo: (billToShow as any).logo || undefined,
+            },
+            companyData: {
+                companyName: user?.companyName || undefined,
+                companyNit: user?.companyId ? user.companyId.split('-')[0] : undefined,
+                companyLogo: user?.companyLogo || undefined,
             },
             items: (billToShow as any).items || [],
             subtotal: parseFloat(billToShow.subtotal || '0'),
@@ -291,6 +294,8 @@ export default function BillsCreatePage({
             listPrices={listPrices}
             sellers={sellers}
             companyId={user?.companyId || ''}
+            companyName={user?.companyName || ''}
+            companyLogo={user?.companyLogo || undefined}
         />
     );
 }

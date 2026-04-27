@@ -115,7 +115,7 @@ html.lenis, html.lenis body {
 @media print {
   @page {
     size: A4;
-    margin: 15mm;
+    margin: 5mm;
   }
 
   html, body {

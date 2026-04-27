@@ -12,6 +12,7 @@ export function CompanySettings() {
 
     // Empresa
     const [companyLogo, setCompanyLogo] = useState(user?.companyLogo || "");
+    const [companyName, setCompanyName] = useState(user?.companyName || "");
     const [legalName, setLegalName] = useState(user?.legalName || "");
     const [businessType, setBusinessType] = useState(user?.businessType || "");
     const [industry, setIndustry] = useState(user?.industry || "");
@@ -38,6 +39,7 @@ export function CompanySettings() {
 
     const hasChanges =
         companyLogo !== (user?.companyLogo || "") ||
+        companyName !== (user?.companyName || "") ||
         legalName !== (user?.legalName || "") ||
         businessType !== (user?.businessType || "") ||
         industry !== (user?.industry || "") ||
@@ -76,10 +78,9 @@ export function CompanySettings() {
                 invoicePrefix: user.invoicePrefix,
                 invoiceInitialNumber: user.invoiceInitialNumber,
                 defaultTax: user.defaultTax,
-                companyName: user.companyName,
 
                 // Current updates
-                companyLogo, legalName, businessType, industry,
+                companyLogo, companyName, legalName, businessType, industry,
                 taxIdentification, taxRegime, taxResponsibilities,
                 country, state: stateRegion, city, address, zipCode,
                 billingEmail, website
@@ -120,7 +121,7 @@ export function CompanySettings() {
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Nombre Comercial</label>
-                        <Input value={user.companyName || ""} disabled title="Manejado en perfil principal" className="bg-slate-50 dark:bg-slate-900/50 opacity-60" />
+                        <Input value={companyName} onChange={e => setCompanyName(e.target.value)} className="bg-slate-50 dark:bg-slate-900/50" placeholder="Ej. Mi Tienda Express" />
                     </div>
                     <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Tipo de Negocio</label>

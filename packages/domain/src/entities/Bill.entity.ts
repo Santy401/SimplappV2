@@ -69,6 +69,9 @@ export interface Bill {
 
     notes?: string | null;
 
+    logo?: string | null;
+    signature?: string | null;
+
     // --- Facturación Electrónica DIAN ---
     cufe?: string | null;
     dianStatus?: DianStatus | null;
@@ -151,6 +154,9 @@ export interface CreateBillInput {
     dueDate: Date;
 
     notes?: string | null;
+
+    logo?: string | null;
+    signature?: string | null;
 
     items: CreateBillItemInput[];
 }

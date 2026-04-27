@@ -15,6 +15,8 @@ interface BillDetailsSectionProps {
   onLogoChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onClientSelect: (clientId: string) => void;
   onFormDataChange: (updates: any) => void;
+  companyName?: string;
+  companyLogo?: string;
 }
 
 function getBillTypeLabel(paymentMethod: string): string {
@@ -33,7 +35,12 @@ export function BillDetailsSection({
   onLogoChange,
   onClientSelect,
   onFormDataChange,
+  companyName = "Simplapp",
+  companyLogo,
 }: BillDetailsSectionProps) {
+  // Use company logo if provided, otherwise use form logo
+  const displayLogo = companyLogo || formData.logo;
+  
   return (
     <SectionCard>
       {/* ── Document Header (Logo + Number) ── */}
@@ -52,11 +59,11 @@ export function BillDetailsSection({
             border-slate-200 dark:border-slate-700 rounded-xl transition-colors overflow-hidden
             w-36 h-20 shrink-0
             ${isEditable ? "hover:border-[#6C47FF]/50 cursor-pointer" : "cursor-default"}
-            ${formData.logo ? "border-none" : ""}`}
+            ${displayLogo ? "border-none" : ""}`}
         >
-          {formData.logo ? (
+          {displayLogo ? (
             <>
-              <img src={formData.logo} alt="Logo empresa" className="w-full h-full object-contain" />
+              <img src={displayLogo} alt="Logo empresa" className="w-full h-full object-contain" />
               {isEditable && (
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-xl">
                   <Upload className="w-4 h-4 text-white" />
@@ -73,7 +80,7 @@ export function BillDetailsSection({
         </button>
 
         <div className="flex-1 text-center">
-          <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Simplapp</p>
+          <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{companyName}</p>
           <p className="text-xs text-slate-400 mt-0.5">{getBillTypeLabel(formData.paymentMethod)}</p>
         </div>
 

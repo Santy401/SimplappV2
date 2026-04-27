@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Building2, UploadCloud, MapPin, Phone, Hash } from 'lucide-react';
 import { SettingsSection, SettingsGroup, SettingsField, SettingsAction } from './SettingsAtoms';
 import { Input } from '../../atoms/Input/Input';
@@ -19,6 +19,18 @@ export function CompanySettings({ company, onSave }: CompanySettingsProps) {
     logoUrl: company?.logoUrl || null
   });
   const [isLoading, setIsLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, logoUrl: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = async () => {
     setIsLoading(true);
@@ -49,10 +61,23 @@ export function CompanySettings({ company, onSave }: CompanySettingsProps) {
               <h4 className="text-sm font-bold text-slate-700 dark:text-slate-200">Logo de la empresa</h4>
               <p className="text-xs text-slate-400 font-medium mt-1">Este logo aparecerá en todas tus facturas y reportes.</p>
             </div>
-            <button className="h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2">
-              <UploadCloud size={14} />
-              Cambiar Imagen
-            </button>
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                className="hidden"
+                onChange={handleLogoChange}
+              />
+              <button 
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="h-10 px-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2"
+              >
+                <UploadCloud size={14} />
+                Cambiar Imagen
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">

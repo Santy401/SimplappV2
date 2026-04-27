@@ -34,6 +34,7 @@ export default function ProfileConfig() {
 
     // Empresa
     const [companyLogo, setCompanyLogo] = useState(user?.companyLogo || "");
+    const [companyName, setCompanyName] = useState(user?.companyName || "");
     const [legalName, setLegalName] = useState(user?.legalName || "");
     const [businessType, setBusinessType] = useState(user?.businessType || "");
     const [industry, setIndustry] = useState(user?.industry || "");
@@ -77,6 +78,7 @@ export default function ProfileConfig() {
         country !== (user?.country || "Colombia") ||
         profileLogo !== (user?.profileLogo || "") ||
         companyLogo !== (user?.companyLogo || "") ||
+        companyName !== (user?.companyName || "") ||
         legalName !== (user?.legalName || "") ||
         businessType !== (user?.businessType || "") ||
         industry !== (user?.industry || "") ||
@@ -111,8 +113,7 @@ export default function ProfileConfig() {
         try {
             await apiClient.put("/api/auth/profile", {
                 name, language, timezone, country, profileLogo,
-                companyLogo, legalName, businessType, industry,
-                companyName: user.companyName, // Keep untouched values
+                companyLogo, companyName, legalName, businessType, industry,
                 taxIdentification, taxRegime, taxResponsibilities,
                 state: stateRegion, city, address, zipCode,
                 currency, invoicePrefix, invoiceInitialNumber: Number(invoiceInitialNumber), defaultTax,
@@ -282,7 +283,7 @@ export default function ProfileConfig() {
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-foreground/70 uppercase">Nombre Comercial</label>
-                                            <Input value={user.companyName || ""} disabled title="Manejado en perfil principal" className="bg-background/50 opacity-60" />
+                                            <Input value={companyName} onChange={e => setCompanyName(e.target.value)} className="bg-background/50" placeholder="Ej. Mi Tienda Express" />
                                         </div>
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-foreground/70 uppercase">Tipo de Negocio</label>

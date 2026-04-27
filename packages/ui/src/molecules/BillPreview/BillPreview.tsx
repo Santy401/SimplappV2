@@ -54,6 +54,11 @@ export interface BillPreviewProps {
     rejectedReason?: string;
     dianResponse?: string;
   };
+  companyData?: {
+    companyName?: string;
+    companyNit?: string;
+    companyLogo?: string;
+  };
   items: FormBillItem[];
   subtotal: number;
   discountTotal: number;
@@ -155,14 +160,21 @@ export function BillPreview({
   onAddPayment,
   onCreateCreditNote,
   onDeletePayment,
+companyData,
 }: BillPreviewProps) {
   const [showDianModal, setShowDianModal] = useState(false);
   const [showQuickPayment, setShowQuickPayment] = useState(false);
   const [showAdvancedPayment, setShowAdvancedPayment] = useState(false);
   const [deletingPaymentId, setDeletingPaymentId] = useState<string | null | 'all'>(null);
-  
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const status = getStatus(formData.status as string);
   const StatusIcon = status.icon;
+
+  // Company data fallback
+  const displayCompanyName = companyData?.companyName || "Simplapp";
+  const displayCompanyNit = companyData?.companyNit || "900.000.000-1";
+  const displayLogo = formData.logo || companyData?.companyLogo;
 
   const creditNoteTotal = creditNotes?.reduce((acc, cn) => acc + Number(cn.total), 0) || 0;
   const currentBalance = total - creditNoteTotal - (payments?.reduce((acc, p) => acc + Number(p.amount), 0) || 0);
@@ -172,6 +184,15 @@ export function BillPreview({
     clientName: formData.clientName,
     number: formData.number || 0,
     balance: currentBalance
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsDownloading(true);
+    try {
+      window.print();
+    } finally {
+      setTimeout(() => setIsDownloading(false), 1000);
+    }
   };
 
   return (
@@ -211,9 +232,13 @@ export function BillPreview({
               <Printer className="w-3.5 h-3.5" />
               Imprimir
             </button>
-            <button className="h-8 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5">
+            <button 
+              onClick={handleDownloadPDF}
+              disabled={isDownloading}
+              className="h-8 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5 disabled:opacity-50"
+            >
               <Download className="w-3.5 h-3.5" />
-              PDF
+              {isDownloading ? "Generando..." : "PDF"}
             </button>
             <button className="h-8 px-3 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-1.5">
               <Share2 className="w-3.5 h-3.5" />
@@ -323,19 +348,21 @@ export function BillPreview({
 
             {/* Logo */}
             <div className="w-36 h-20 shrink-0 flex items-center justify-start invoice-logo">
-              {formData.logo ? (
-                <img src={formData.logo} alt="Logo empresa" className="w-full h-full object-contain" />
+              {displayLogo ? (
+                <img src={displayLogo} alt="Logo empresa" className="w-full h-full object-contain" />
               ) : (
                 <div className="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-4xl tracking-tighter">N.</span>
+                  <span className="text-white font-bold text-4xl tracking-tighter">
+                    {displayCompanyName.substring(0, 1).toUpperCase()}
+                  </span>
                 </div>
               )}
             </div>
 
             {/* Center */}
             <div className="flex-1 text-center">
-              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight invoice-title">Simplapp S.A.S</p>
-              <p className="text-xs text-slate-500 mt-1">NIT: 900.000.000-1</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight invoice-title">{displayCompanyName}</p>
+              <p className="text-xs text-slate-500 mt-1">NIT: {displayCompanyNit}</p>
               <p className="text-xs text-slate-400 mt-2 font-medium">{getBillTypeLabel(formData.paymentMethod)}</p>
             </div>
 

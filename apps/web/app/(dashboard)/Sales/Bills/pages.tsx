@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bill, BillDetail } from "@domain/entities/Bill.entity";
 import { useBill } from "@interfaces/src/hooks/features/Bills/useBill";
+import { useSession } from "@hooks/features/auth/use-session";
 import { BillPreview } from "@ui/molecules/BillPreview";
 import { toast } from "react-toastify";
 
@@ -20,6 +21,7 @@ export default function BillsPage({
 }: BillsPageProps) {
   const router = useRouter();
   const { bills, isLoading, error, refetch, getBill } = useBill();
+  const { user } = useSession(); // Get session for company logo
   const [tableversion, setTableversion] = useState(0);
   const [showPreview, setShowPreview] = useState(false);
   const [selectedBill, setSelectedBill] = useState<BillDetail | null>(null);
@@ -35,6 +37,27 @@ export default function BillsPage({
     create: false,
     update: false,
     get: false,
+  });
+
+  // Fetch company logo for preview
+  const [companyLogo, setCompanyLogo] = useState<string | undefined>(undefined);
+
+  const fetchCompanyLogo = async () => {
+    try {
+      const response = await fetch('/api/auth/profile');
+      if (!response.ok) return;
+      const data = await response.json();
+      if (data.companyLogo) {
+        setCompanyLogo(data.companyLogo);
+      }
+    } catch (e) {
+      console.error('Error fetching company logo:', e);
+    }
+  };
+
+  // Fetch logo on mount
+  useState(() => {
+    fetchCompanyLogo();
   });
 
   const validBills: BillDetail[] = (bills as BillDetail[]) ?? [];
@@ -126,6 +149,8 @@ export default function BillsPage({
   };
 
   const handleViewBill = (bill: BillDetail) => {
+    // Fetch fresh data with logo
+    fetchCompanyLogo();
     setSelectedBill(bill);
     setShowPreview(true);
   };
@@ -193,10 +218,15 @@ export default function BillsPage({
         billItems: bill.items || [],
         footerNote: "",
         terms: "",
-        logo: undefined,
+        logo: bill.logo || undefined,
         dianStatus: bill.dianStatus || undefined,
         rejectedReason: bill.rejectedReason || undefined,
         dianResponse: bill.dianResponse || undefined,
+      },
+      companyData: {
+        companyName: (bill.company as any)?.companyName || user?.companyName || "Mi Empresa",
+        companyNit: (bill.company as any)?.identificationNumber || user?.taxIdentification || undefined,
+        companyLogo: user?.companyLogo || (bill.company as any)?.logoUrl || undefined,
       },
       items: formattedItems,
       payments: formattedPayments,

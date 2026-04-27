@@ -118,6 +118,9 @@ model Bill {
   clientEmail          String?
   notes                String?
 
+  logo                 String? // Logo de empresa en base64 o URL
+  signature            String? // Firma digital en base64 o URL
+
   // --- 5. Facturación Electrónica DIAN ---
   cufe           String?   // Código único de factura electrónica
   dianStatus     DianStatus?

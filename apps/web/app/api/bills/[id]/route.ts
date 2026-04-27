@@ -58,6 +58,7 @@ export async function GET(
             email: true
           }
         },
+        company: true,
         payments: {
           include: {
             account: true

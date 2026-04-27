@@ -87,6 +87,8 @@ interface FormBillProps {
   userId?: string;
   storeId?: string;
   companyId: string;
+  companyName?: string;
+  companyLogo?: string;
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
@@ -106,6 +108,8 @@ export function FormBill({
   userId = "",
   storeId = "",
   companyId = "",
+  companyName = "",
+  companyLogo = "",
   stores = [],
   sellers = [],
   listPrices = [],
@@ -325,6 +329,7 @@ export function FormBill({
       date: new Date(formData.date),
       dueDate: new Date(formData.dueDate),
       notes: formData.notes || null,
+      logo: formData.logo || null,
       subtotal: subtotal.toString(),
       taxTotal: taxTotal.toString(),
       discountTotal: discountTotal.toString(),
@@ -482,6 +487,8 @@ export function FormBill({
           onLogoChange={handleLogoChange}
           onClientSelect={handleClientSelect}
           onFormDataChange={(updates) => setFormData((prev) => ({ ...prev, ...updates }))}
+          companyName={companyName}
+          companyLogo={companyLogo}
         />
 
         <ItemsTable

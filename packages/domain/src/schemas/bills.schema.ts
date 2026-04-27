@@ -36,6 +36,9 @@ export const billsApiSchema = z.object({
     
     notes: z.string().max(1000, 'Las notas no pueden superar los 1000 caracteres').optional().nullable(),
     
+    logo: z.string().optional().nullable(),
+    signature: z.string().optional().nullable(),
+    
     items: z.array(billItemSchema).min(1, 'Debe incluir al menos un producto en la factura'),
 });
 

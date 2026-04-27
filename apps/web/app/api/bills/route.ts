@@ -74,7 +74,9 @@ export async function POST(request: NextRequest) {
       discountTotal,
       total,
       balance,
-      notes
+      notes,
+      logo,
+      signature
     } = data;
 
     // Si el usuario nos pasa items, pero son un array vacio de Drafts o sin validar cantdades, los limpia.
@@ -169,6 +171,9 @@ export async function POST(request: NextRequest) {
 
       notes: notes || "",
 
+      logo: logo || null,
+      signature: signature || null,
+
       clientName: computedClientName,
       clientIdentification: client.identificationNumber,
       clientAddress: client.address,
@@ -230,6 +235,9 @@ export async function POST(request: NextRequest) {
         client: true,
         store: true,
       }
+    }).catch((err) => {
+      console.error('Prisma bill.create error:', err);
+      throw err;
     });
 
     // 🔔 Notificación de factura creada — usamos bill.status real, no el del body
@@ -262,10 +270,11 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json(bill, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating bill:', error);
+    const errorMessage = error?.message || error?.cause || String(error);
     return NextResponse.json(
-      { error: 'Error al crear factura' },
+      { error: 'Error al crear factura', details: errorMessage },
       { status: 500 }
     );
   }
